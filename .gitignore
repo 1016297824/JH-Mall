@@ -28,3 +28,7 @@ Thumbs.db
 # 运行时进程
 *.pid
 *.hprof
+
+# 本地库文件
+jzmq.dll
+libzmq-mt*
