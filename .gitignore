@@ -32,3 +32,6 @@ Thumbs.db
 # 本地库文件
 jzmq.dll
 libzmq-mt*
+
+# Agent 指令（本地开发用，不上仓库）
+/AGENTS.md
