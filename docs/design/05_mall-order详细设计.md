@@ -13,7 +13,7 @@
 | 购物车 | `mall_cart` | 用户临时存放待购商品，登录态持久化 |
 | 订单 | `mall_order` + `mall_order_item` + `mall_order_amount` | 核心编排，含价格快照和状态机 |
 | 售后 | `mall_after_sale` | 退款/退货申请与审核 |
-| MQ | 消费 `mall:payment:paid` 等、生产 `mall:order:created` 等 | 异步推进订单、发布事件 |
+| RocketMQ | 消费 `mall:payment:paid` 等、生产 `mall:order:created` 等 | 异步推进订单、发布事件 |
 
 ### 1.2 依赖关系
 
@@ -21,11 +21,12 @@
 mall-order
   → mall-product (Feign)：锁定/释放库存、查询商品状态
   → mall-marketing (Feign)：锁定/释放优惠券、优惠试算
-  → mall-payment (Feign)：查询支付单状态
+  → mall-payment (Feign)：查询支付单状态、发起退款
+  → mall-user (Feign)：校验地址归属
   → mall-auth (Feign)：解密手机号
   → MySQL：自有表（见表系统设计第 1.3 节）
   → Outbox：生产 mall:order:created/paid/cancelled/delivered/completed/refunded
-  → MQ Consumer：消费 mall:payment:paid、mall:refund:succeeded
+  → RocketMQ Consumer：消费 mall:payment:paid、mall:refund:succeeded
   → Redis：幂等键去重
 ```
 
@@ -64,7 +65,7 @@ mall-order/src/main/java/com/jhstore/mall/order/
 │  └─ OrderEventEnum.java
 ├─ infrastructure/    # 外部适配
 │  ├─ mq/             → OrderEventProducer, PaymentPaidConsumer, RefundSucceededConsumer
-│  ├─ feign/          → RemoteProductAdapter, RemoteMarketingAdapter, RemotePaymentAdapter, RemoteAuthAdapter
+  │  ├─ feign/          → RemoteProductAdapter, RemoteMarketingAdapter, RemotePaymentAdapter, RemoteUserAdapter, RemoteAuthAdapter
 │  └─ outbox/         → OutboxMessage.java, OutboxMapper.java, OutboxScheduler.java
 ├─ convert/           # 纯转换器（Entity↔DTO↔VO 字段映射）
 │  ├─ CartConvert.java
@@ -122,7 +123,7 @@ mall-order/src/main/java/com/jhstore/mall/order/
 ### 3.2 OrderServiceImpl
 
 - 职责：下单编排、状态推进、取消、确认收货
-- 依赖：`OrderStateMachine`、`MallOrderMapper`、`MallOrderItemMapper`、`MallOrderAmountMapper`、`OutboxMapper`、`RemoteProductAdapter`、`RemoteMarketingAdapter`、`Redis`（幂等键）
+- 依赖：`OrderStateMachine`、`MallOrderMapper`、`MallOrderItemMapper`、`MallOrderAmountMapper`、`OutboxMapper`、`RemoteProductAdapter`、`RemoteMarketingAdapter`、`RemotePaymentAdapter`、`RemoteUserAdapter`、`Redis`（幂等键）
 - `createOrder(req)`：幂等校验 → 参数校验 → 锁库存 → 锁优惠 → 创建订单+写 Outbox（同一事务）
 - `payCallback(orderNo)`：调 `stateMachine.transition()`，WAIT_PAY → PAID
 - `cancelOrder(orderNo)`：调 `stateMachine.transition()` → 写 `mall:order:cancelled` Outbox
@@ -220,7 +221,7 @@ mall-order/src/main/java/com/jhstore/mall/order/
 | 校验项 | 方式 | 失败返回 |
 |--------|------|---------|
 | 购物车非空 | 查 `mall_cart WHERE user_id=? AND selected=1` | A0710 |
-| 地址存在且归属 | 查用户地址表 | A0501 |
+| 地址存在且归属 | 调 `RemoteUserService.validateAddress(userId, addressId)` | A0501 |
 | 商品上架+库存 | 调 `RemoteProductService.batchGetSku(skuIds)`，校验 `isOnSale` + `availableQty` | A0520 |
 | 不超限购 | 校验购买数量 ≤ 单品限购上限 | A0711 |
 | 优惠券可用 | 若传了 couponId，调 `RemoteMarketingService.validateCoupon(couponId, userId)` | A0610/A0612 |
@@ -402,7 +403,7 @@ OrderServiceImpl.payCallback(orderNo):
 
 ---
 
-## 7 MQ 消费
+## 7 RocketMQ 消费
 
 ### 7.1 生产（Outbox 投递）
 
