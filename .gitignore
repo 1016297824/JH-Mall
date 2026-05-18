@@ -35,3 +35,6 @@ libzmq-mt*
 
 # Agent 指令（本地开发用，不上仓库）
 /AGENTS.md
+
+# Vite 自动导入类型声明
+client/ruoyi-ui/auto-imports.d.ts

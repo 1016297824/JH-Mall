@@ -508,7 +508,83 @@ Outbox 投递失败后的指数退避：
 
 ---
 
-## 9 关键配置
+## 9 Nacos 配置
+
+### 9.1 DataId: `mall-order-dev.yml`
+
+```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  datasource:
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+          username: root
+          password: 138992
+
+mybatis:
+  typeAliasesPackage: com.mall.order.**.domain
+  mapperLocations: classpath:mapper/**/*.xml
+
+springdoc:
+  gatewayUrl: http://localhost:8080/${spring.application.name}
+  api-docs:
+    enabled: true
+  info:
+    title: '订单模块接口文档'
+    description: '订单模块接口描述'
+    contact:
+      name: RuoYi
+      url: https://ruoyi.vip
+
+mall:
+  order:
+    pay-expire-minutes: 30
+    timeout-scan-interval: 30
+    timeout-batch-size: 500
+    refund-days: 7
+    auto-receive-days: 15
+    cart-max-items: 99
+    auto-approve-threshold: 10000
+```
+
+> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
+
+### 9.2 本地配置文件 `bootstrap.yml`
+
+```yaml
+# mall-order 订单服务
+server:
+  port: 9303
+
+spring:
+  application:
+    name: mall-order
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  config:
+    file-extension: yml
+    import:
+      - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+```
+
+> 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
+
+### 9.3 配置项说明
 
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|:---:|------|------|
@@ -519,8 +595,6 @@ Outbox 投递失败后的指数退避：
 | `mall.order.auto-receive-days` | 15 | 天 | 发货后自动确认收货 |
 | `mall.order.cart-max-items` | 99 | 个 | 购物车最多商品数 |
 | `mall.order.auto-approve-threshold` | 10000 | 分（¥100） | 售后自动审核金额阈值 |
-
-> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
 
 ---
 

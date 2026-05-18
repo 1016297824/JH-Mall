@@ -386,7 +386,83 @@ mall-auth 作为密钥持有方，向其他服务暴露解密接口（定义在 
 
 ---
 
-## 11 关键配置
+## 11 Nacos 配置
+
+### 11.1 DataId: `mall-auth-dev.yml`
+
+```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+springdoc:
+  gatewayUrl: http://localhost:8080/${spring.application.name}
+  api-docs:
+    enabled: true
+  info:
+    title: '认证模块接口文档'
+    description: '认证模块接口描述'
+    contact:
+      name: RuoYi
+      url: https://ruoyi.vip
+
+mall:
+  auth:
+    access-token-ttl: 1800
+    refresh-token-ttl: 604800
+    sms:
+      code-length: 6
+      code-ttl: 300
+      cooldown: 60
+      daily-limit: 5
+      ip-daily-limit: 10
+    pwd-err-limit: 5
+    pwd-err-ttl: 1800
+    pwd-bcrypt-cost: 12
+    wechat:
+      app-id:
+      app-secret:
+    decrypt:
+      cache-ttl: 60
+      batch-limit: 50
+  security:
+    jwt-secret:
+    aes-key:
+```
+
+> 以上配置通过 Nacos 下发，标 * 的需重启生效。
+
+### 11.2 本地配置文件 `bootstrap.yml`
+
+```yaml
+# mall-auth 认证服务
+server:
+  port: 9210
+
+spring:
+  application:
+    name: mall-auth
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  config:
+    file-extension: yml
+    import:
+      - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+```
+
+> 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
+
+### 11.3 配置项说明
 
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|--------|:---:|------|
@@ -406,8 +482,6 @@ mall-auth 作为密钥持有方，向其他服务暴露解密接口（定义在 
 | `mall.auth.wechat.app-secret` | — | — | 微信小程序 AppSecret（Nacos 加密，*） |
 | `mall.auth.decrypt.cache-ttl` | 60 | 秒 | 解密结果缓存时间 |
 | `mall.auth.decrypt.batch-limit` | 50 | 条 | 批量解密上限 |
-
-> 以上配置通过 Nacos 下发，标 * 的需重启生效。
 
 ---
 

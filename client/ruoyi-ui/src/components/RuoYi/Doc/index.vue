@@ -4,18 +4,10 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'RuoYiDoc',
-  data() {
-    return {
-      url: 'http://doc.ruoyi.vip/ruoyi-cloud'
-    }
-  },
-  methods: {
-    goto() {
-      window.open(this.url)
-    }
-  }
+<script setup lang="ts">
+const url = ref<string>('http://doc.ruoyi.vip/ruoyi-cloud')
+
+function goto(): void {
+  window.open(url.value)
 }
 </script>

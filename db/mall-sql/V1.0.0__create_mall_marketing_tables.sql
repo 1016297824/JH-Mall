@@ -10,7 +10,7 @@
 CREATE TABLE IF NOT EXISTS `mall_marketing_coupon` (
     `id`               bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
     `coupon_name`      varchar(100)    NOT NULL                        COMMENT '优惠券名称',
-    `coupon_type`      tinyint unsigned NOT NULL                       COMMENT '优惠券类型：1=满减券 2=折扣券 3=无门槛券',
+    `coupon_type`      tinyint unsigned NOT NULL                       COMMENT '优惠券类型',
     `face_value`       bigint unsigned NOT NULL                        COMMENT '优惠面值（单位：分），满减/无门槛时 = 减免金额，折扣券 = 0',
     `discount_rate`    tinyint unsigned DEFAULT NULL                   COMMENT '折扣率（百分比），折扣券专用，80=8折',
     `discount_limit`   bigint unsigned DEFAULT NULL                    COMMENT '折扣上限（单位：分），折扣券专用',
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `mall_marketing_coupon` (
     `per_user_limit`   int unsigned    DEFAULT 1                       COMMENT '每人限领数量',
     `use_start_time`   datetime        NOT NULL                        COMMENT '有效期开始时间',
     `use_end_time`     datetime        NOT NULL                        COMMENT '有效期截止时间',
-    `coupon_status`    tinyint unsigned NOT NULL DEFAULT 0             COMMENT '优惠券状态：0=未发布 1=已发布 2=已结束 3=已废弃',
+    `coupon_status`    tinyint unsigned NOT NULL DEFAULT 0             COMMENT '优惠券状态',
     `is_deleted`       tinyint unsigned DEFAULT 0                      COMMENT '逻辑删除标志',
     `create_by`        varchar(64)     DEFAULT NULL                    COMMENT '创建人',
     `update_by`        varchar(64)     DEFAULT NULL                    COMMENT '修改人',
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `mall_marketing_coupon_record` (
     `coupon_id`     bigint unsigned NOT NULL                        COMMENT '关联优惠券定义 ID',
     `user_id`       bigint unsigned NOT NULL                        COMMENT '领取用户 ID',
     `coupon_code`   varchar(64)     NOT NULL                        COMMENT '优惠券编码（全局唯一），格式 CPN + 时间戳 + 随机数',
-    `record_status` tinyint unsigned NOT NULL DEFAULT 1             COMMENT '记录状态：1=AVAILABLE 可用 2=LOCKED 已锁定 3=USED 已使用 4=RELEASED 已释放 5=EXPIRED 已过期',
+    `record_status` tinyint unsigned NOT NULL DEFAULT 1             COMMENT '记录状态',
     `order_no`      varchar(32)     DEFAULT NULL                    COMMENT '使用/锁定的订单号',
     `face_value`    bigint unsigned NOT NULL                        COMMENT '领取时的券面值快照（单位：分）',
     `lock_time`     datetime        DEFAULT NULL                    COMMENT '锁定时间',
@@ -65,10 +65,10 @@ CREATE TABLE IF NOT EXISTS `mall_marketing_coupon_record` (
 CREATE TABLE IF NOT EXISTS `mall_marketing_promotion` (
     `id`               bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
     `promotion_name`   varchar(100)    NOT NULL                        COMMENT '活动名称',
-    `promotion_type`   tinyint unsigned NOT NULL                       COMMENT '活动类型：1=满减 2=满折 3=包邮 4=秒杀',
+    `promotion_type`   tinyint unsigned NOT NULL                       COMMENT '活动类型',
     `start_time`       datetime        NOT NULL                        COMMENT '活动开始时间',
     `end_time`         datetime        NOT NULL                        COMMENT '活动结束时间',
-    `promotion_status` tinyint unsigned NOT NULL DEFAULT 0             COMMENT '活动状态：0=未开始 1=进行中 2=已结束 3=已关闭',
+    `promotion_status` tinyint unsigned NOT NULL DEFAULT 0             COMMENT '活动状态',
     `description`      varchar(500)    DEFAULT NULL                    COMMENT '活动描述',
     `banner_image`     varchar(500)    DEFAULT NULL                    COMMENT '活动 Banner 图 URL',
     `sort_order`       int unsigned    DEFAULT 0                       COMMENT '排序值',
@@ -88,11 +88,11 @@ CREATE TABLE IF NOT EXISTS `mall_marketing_promotion` (
 CREATE TABLE IF NOT EXISTS `mall_marketing_promotion_rule` (
     `id`               bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
     `promotion_id`     bigint unsigned NOT NULL                        COMMENT '关联活动 ID',
-    `rule_type`        tinyint unsigned NOT NULL                       COMMENT '规则类型：1=满减 2=满折 3=包邮',
+    `rule_type`        tinyint unsigned NOT NULL                       COMMENT '规则类型',
     `threshold_amount` bigint unsigned NOT NULL                        COMMENT '门槛金额（单位：分）',
     `benefit_amount`   bigint unsigned DEFAULT NULL                    COMMENT '优惠金额（单位：分），满减专用',
     `benefit_rate`     tinyint unsigned DEFAULT NULL                   COMMENT '折扣率，满折专用，80=8折',
-    `is_exclusive`     tinyint unsigned DEFAULT 0                      COMMENT '是否互斥：1=互斥 0=可叠加',
+    `is_exclusive`     tinyint unsigned DEFAULT 0                      COMMENT '是否互斥',
     `sort_order`       int unsigned    DEFAULT 0                       COMMENT '优先级，越小越优先匹配',
     `is_deleted`       tinyint unsigned DEFAULT 0                      COMMENT '逻辑删除标志',
     `create_time`      datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -108,12 +108,12 @@ CREATE TABLE IF NOT EXISTS `mall_marketing_promotion_rule` (
 CREATE TABLE IF NOT EXISTS `mall_outbox` (
     `id`              bigint       NOT NULL                            COMMENT '主键，雪花 ID',
     `message_id`      varchar(64)  NOT NULL                            COMMENT '消息全局唯一 ID（雪花），消费方幂等去重',
-    `topic`           varchar(128) NOT NULL                            COMMENT '消息主题，如 mall:coupon:used',
+    `topic`           varchar(128) NOT NULL                            COMMENT '消息主题',
     `event_type`      varchar(64)  NOT NULL                            COMMENT '事件类型',
     `aggregate_type`  varchar(64)  NOT NULL                            COMMENT '聚合类型',
     `aggregate_id`    varchar(64)  NOT NULL                            COMMENT '聚合 ID',
     `payload`         text         NOT NULL                            COMMENT '消息体 JSON',
-    `status`          varchar(16)  NOT NULL DEFAULT 'NEW'              COMMENT '投递状态：NEW / PENDING / SENT / FAILED',
+    `status`          varchar(16)  NOT NULL DEFAULT 'NEW'              COMMENT '投递状态',
     `retry_count`     int          DEFAULT 0                           COMMENT '已重试次数',
     `next_retry_time` datetime     DEFAULT NULL                        COMMENT '下次重试时间',
     `create_time`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT '创建时间',
@@ -124,3 +124,11 @@ CREATE TABLE IF NOT EXISTS `mall_outbox` (
     KEY `idx_aggregate` (`aggregate_type`, `aggregate_id`),
     KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Outbox 消息表';
+
+-- ----------------------------
+-- 种子数据：测试优惠券
+-- ----------------------------
+INSERT INTO `mall_marketing_coupon` (`id`, `coupon_name`, `coupon_type`, `face_value`, `min_order_amount`, `total_count`, `remain_count`, `per_user_limit`, `use_start_time`, `use_end_time`, `coupon_status`) VALUES
+(1, '满 100 减 10',      1, 1000,  10000, 1000, 1000, 1,  '2026-01-01 00:00:00', '2026-12-31 23:59:59', 1),
+(2, '满 200 享 8.5 折',  2, 0,     20000, 500,  500,  1,  '2026-01-01 00:00:00', '2026-12-31 23:59:59', 1),
+(3, '无门槛减 5 元',      3, 500,   0,     2000, 2000, 1,  '2026-01-01 00:00:00', '2026-12-31 23:59:59', 1);

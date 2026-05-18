@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.user.mapper.MallUserAddressMapper">
+    
+    <resultMap type="MallUserAddress" id="MallUserAddressResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="receiverName"    column="receiver_name"    />
+        <result property="receiverPhone"    column="receiver_phone"    />
+        <result property="province"    column="province"    />
+        <result property="city"    column="city"    />
+        <result property="district"    column="district"    />
+        <result property="detailAddress"    column="detail_address"    />
+        <result property="zipCode"    column="zip_code"    />
+        <result property="isDefault"    column="is_default"    />
+        <result property="label"    column="label"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallUserAddressVo">
+        select id, user_id, receiver_name, receiver_phone, province, city, district, detail_address, zip_code, is_default, label, is_deleted, create_time, update_time from mall_user_address
+    </sql>
+
+    <select id="selectMallUserAddressList" parameterType="MallUserAddress" resultMap="MallUserAddressResult">
+        <include refid="selectMallUserAddressVo"/>
+        <where>  
+            <if test="userId != null  and userId != ''"> and user_id = #{userId}</if>
+            <if test="receiverName != null  and receiverName != ''"> and receiver_name like concat('%', #{receiverName}, '%')</if>
+            <if test="receiverPhone != null  and receiverPhone != ''"> and receiver_phone = #{receiverPhone}</if>
+            <if test="province != null  and province != ''"> and province = #{province}</if>
+            <if test="city != null  and city != ''"> and city = #{city}</if>
+            <if test="district != null  and district != ''"> and district = #{district}</if>
+            <if test="detailAddress != null  and detailAddress != ''"> and detail_address = #{detailAddress}</if>
+            <if test="zipCode != null  and zipCode != ''"> and zip_code = #{zipCode}</if>
+            <if test="isDefault != null  and isDefault != ''"> and is_default = #{isDefault}</if>
+            <if test="label != null  and label != ''"> and label = #{label}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallUserAddressById" parameterType="String" resultMap="MallUserAddressResult">
+        <include refid="selectMallUserAddressVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallUserAddress" parameterType="MallUserAddress" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_user_address
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null and userId != ''">user_id,</if>
+            <if test="receiverName != null and receiverName != ''">receiver_name,</if>
+            <if test="receiverPhone != null and receiverPhone != ''">receiver_phone,</if>
+            <if test="province != null">province,</if>
+            <if test="city != null">city,</if>
+            <if test="district != null">district,</if>
+            <if test="detailAddress != null">detail_address,</if>
+            <if test="zipCode != null">zip_code,</if>
+            <if test="isDefault != null">is_default,</if>
+            <if test="label != null">label,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="receiverName != null and receiverName != ''">#{receiverName},</if>
+            <if test="receiverPhone != null and receiverPhone != ''">#{receiverPhone},</if>
+            <if test="province != null">#{province},</if>
+            <if test="city != null">#{city},</if>
+            <if test="district != null">#{district},</if>
+            <if test="detailAddress != null">#{detailAddress},</if>
+            <if test="zipCode != null">#{zipCode},</if>
+            <if test="isDefault != null">#{isDefault},</if>
+            <if test="label != null">#{label},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallUserAddress" parameterType="MallUserAddress">
+        update mall_user_address
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="receiverName != null and receiverName != ''">receiver_name = #{receiverName},</if>
+            <if test="receiverPhone != null and receiverPhone != ''">receiver_phone = #{receiverPhone},</if>
+            <if test="province != null">province = #{province},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="district != null">district = #{district},</if>
+            <if test="detailAddress != null">detail_address = #{detailAddress},</if>
+            <if test="zipCode != null">zip_code = #{zipCode},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            <if test="label != null">label = #{label},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallUserAddressById" parameterType="String">
+        delete from mall_user_address where id = #{id}
+    </delete>
+
+    <delete id="deleteMallUserAddressByIds" parameterType="String">
+        delete from mall_user_address where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

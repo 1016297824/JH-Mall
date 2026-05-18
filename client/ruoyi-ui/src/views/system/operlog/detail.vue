@@ -1,9 +1,9 @@
 <template>
-  <el-dialog title="操作日志详细" :visible.sync="visible" width="780px" append-to-body @close="$emit('update:visible', false)">
+  <el-dialog title="操作日志详细" v-model="dialogVisible" width="780px" append-to-body @close="$emit('update:visible', false)">
     <div class="detail-wrap">
       <!-- 基本信息 -->
       <div class="detail-card">
-        <div class="detail-card-title"><i class="el-icon-info"></i> 基本信息</div>
+        <div class="detail-card-title"><el-icon><InfoFilled /></el-icon> 基本信息</div>
         <el-row class="detail-row">
           <el-col :span="12">
             <div class="detail-item"><span class="detail-label">操作模块</span><span class="detail-value">{{ form.title }}</span></div>
@@ -19,8 +19,8 @@
           <el-col :span="12">
             <div class="detail-item">
               <span class="detail-label">执行状态</span>
-              <el-tag v-if="form.status === 0" type="success" size="small"><i class="el-icon-check"></i> 正常</el-tag>
-              <el-tag v-else type="danger" size="small"><i class="el-icon-close"></i> 异常</el-tag>
+              <el-tag v-if="form.status === 0" type="success" size="small">正常</el-tag>
+              <el-tag v-else type="danger" size="small">异常</el-tag>
             </div>
           </el-col>
         </el-row>
@@ -28,7 +28,7 @@
 
       <!-- 操作人员 -->
       <div class="detail-card">
-        <div class="detail-card-title"><i class="el-icon-user"></i> 操作人员</div>
+        <div class="detail-card-title"><el-icon><User /></el-icon> 操作人员</div>
         <el-row class="detail-row">
           <el-col :span="12">
             <div class="detail-item"><span class="detail-label">操作人员</span><span class="detail-value">{{ form.operName }}</span></div>
@@ -49,7 +49,7 @@
 
       <!-- 请求信息 -->
       <div class="detail-card">
-        <div class="detail-card-title"><i class="el-icon-sort"></i> 请求信息</div>
+        <div class="detail-card-title"><el-icon><Sort /></el-icon> 请求信息</div>
         <el-row class="detail-row">
           <el-col :span="24">
             <div class="detail-item">
@@ -75,11 +75,11 @@
 
       <!-- 请求参数 -->
       <div class="detail-card">
-        <div class="detail-card-title"><i class="el-icon-upload2"></i> 请求参数</div>
+        <div class="detail-card-title"><el-icon><Upload /></el-icon> 请求参数</div>
         <div class="code-body">
           <div class="code-wrap">
             <div class="code-action">
-              <el-button size="mini" icon="el-icon-copy-document" @click="copyText(form.operParam)">复制</el-button>
+              <el-button size="small" :icon="CopyDocument" @click="copyText(form.operParam)">复制</el-button>
             </div>
             <pre class="code-pre">{{ formatJson(form.operParam) }}</pre>
           </div>
@@ -88,11 +88,11 @@
 
       <!-- 返回参数 -->
       <div class="detail-card">
-        <div class="detail-card-title"><i class="el-icon-download"></i> 返回参数</div>
+        <div class="detail-card-title"><el-icon><Download /></el-icon> 返回参数</div>
         <div class="code-body">
           <div class="code-wrap">
             <div class="code-action">
-              <el-button size="mini" icon="el-icon-copy-document" @click="copyText(form.jsonResult)">复制</el-button>
+              <el-button size="small" :icon="CopyDocument" @click="copyText(form.jsonResult)">复制</el-button>
             </div>
             <pre class="code-pre">{{ formatJson(form.jsonResult) }}</pre>
           </div>
@@ -101,7 +101,7 @@
 
       <!-- 异常信息 -->
       <div class="detail-card" v-if="form.status !== 0">
-        <div class="detail-card-title error-title"><i class="el-icon-warning"></i> 异常信息</div>
+        <div class="detail-card-title error-title"><el-icon><Warning /></el-icon> 异常信息</div>
         <div class="error-body">
           <div class="error-msg">{{ form.errorMsg }}</div>
         </div>
@@ -111,37 +111,44 @@
   </el-dialog>
 </template>
 
-<script>
-export default {
-  name: 'OperlogDetail',
-  dicts: ['sys_oper_type'],
-  props: {
-    visible: { type: Boolean, default: false },
-    row: { type: Object, default: () => ({}) }
-  },
-  computed: {
-    form() { return this.row || {} },
-    typeLabel() { return this.selectDictLabel(this.dict.type.sys_oper_type, this.form.businessType) || '-' }
-  },
-  methods: {
-    formatJson(str) {
-      if (!str) return '（无数据）'
-      try { return JSON.stringify(JSON.parse(str), null, 2) } catch { return str }
-    },
-    copyText(str) {
-      const text = this.formatJson(str)
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => this.$message({ message: '已复制', type: 'success', duration: 1500 }))
-      } else {
-        const ta = document.createElement('textarea')
-        ta.value = text
-        document.body.appendChild(ta)
-        ta.select()
-        document.execCommand('copy')
-        document.body.removeChild(ta)
-        this.$message({ message: '已复制', type: 'success', duration: 1500 })
-      }
-    }
+<script setup lang="ts">
+const { proxy } = getCurrentInstance()
+import type { SysOperLog } from '@/types/api/monitor/operlog'
+
+const props = defineProps<{
+  visible: boolean
+  row: SysOperLog
+}>()
+
+const emit = defineEmits<{(e: 'update:visible', val: boolean): void}>()
+
+const dialogVisible = computed({
+  get: () => props.visible,
+  set: (val: boolean) => emit('update:visible', val)
+})
+
+const { sys_oper_type } = useDict('sys_oper_type')
+
+const form = computed<SysOperLog>(() => props.row || {})
+const typeLabel = computed<string>(() => selectDictLabel(sys_oper_type.value, form.value.businessType) || '-')
+
+function formatJson(str?: string): string {
+  if (!str) return '（无数据）'
+  try { return JSON.stringify(JSON.parse(str), null, 2) } catch { return str }
+}
+
+function copyText(str?: string): void {
+  const text = formatJson(str)
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => proxy.$modal.msgSuccess({ message: '已复制', type: 'success', duration: 1500 }))
+  } else {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    proxy.$modal.msgSuccess({ message: '已复制', type: 'success', duration: 1500 })
   }
 }
 </script>

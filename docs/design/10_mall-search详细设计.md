@@ -245,7 +245,82 @@ POST /_aliases
 
 ---
 
-## 6 关键配置
+## 6 Nacos 配置
+
+### 6.1 DataId: `mall-search-dev.yml`
+
+```yaml
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+    connection-timeout: 5s
+    socket-timeout: 30s
+
+springdoc:
+  gatewayUrl: http://localhost:8080/${spring.application.name}
+  api-docs:
+    enabled: true
+  info:
+    title: '搜索模块接口文档'
+    description: '搜索模块接口描述'
+    contact:
+      name: RuoYi
+      url: https://ruoyi.vip
+
+mall:
+  search:
+    es:
+      hosts: localhost:9200
+      shards: 3
+      replicas: 1
+    query:
+      timeout: 2000
+    page:
+      max-size: 60
+      max-depth: 10000
+    suggest:
+      cache-ttl: 300
+    result:
+      cache-ttl: 60
+    rebuild:
+      batch-size: 500
+      timestamp-format: yyyyMMddHHmmss
+    index:
+      keep-versions: 2
+    disk:
+      warning-threshold: 20
+```
+
+> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新（标 * 的需重启生效）。
+
+### 6.2 本地配置文件 `bootstrap.yml`
+
+```yaml
+# mall-search 搜索服务
+server:
+  port: 9306
+
+spring:
+  application:
+    name: mall-search
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  config:
+    file-extension: yml
+    import:
+      - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+```
+
+> 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
+
+### 6.3 配置项说明
 
 | 配置项 | 默认值 | 说明 |
 |--------|--------|------|
@@ -261,8 +336,6 @@ POST /_aliases
 | `mall.search.rebuild.timestamp-format` | `yyyyMMddHHmmss` | 索引版本号格式 |
 | `mall.search.index.keep-versions` | 2 | 保留索引版本数 |
 | `mall.search.disk.warning-threshold` | 20% | 磁盘告警阈值 |
-
-> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新（标 * 的需重启生效）。
 
 ---
 

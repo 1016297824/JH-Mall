@@ -496,9 +496,93 @@ RefundService
 
 ---
 
-## 11 关键配置
+## 11 Nacos 配置
 
-以下配置项全部通过 Nacos 下发，支持 `@RefreshScope` 热更新（标 * 的需重启生效）：
+### 11.1 DataId: `mall-payment-dev.yml`
+
+```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  datasource:
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+          username: root
+          password: 138992
+
+mybatis:
+  typeAliasesPackage: com.mall.payment.**.domain
+  mapperLocations: classpath:mapper/**/*.xml
+
+springdoc:
+  gatewayUrl: http://localhost:8080/${spring.application.name}
+  api-docs:
+    enabled: true
+  info:
+    title: '支付模块接口文档'
+    description: '支付模块接口描述'
+    contact:
+      name: RuoYi
+      url: https://ruoyi.vip
+
+mall:
+  payment:
+    callback:
+      timeout: 30
+      nonce-ttl: 86400
+    channels: wechat,alipay
+    channel:
+      cache-ttl: 300
+      wechat:
+        app-id:
+        mch-id:
+        api-v3-key:
+        private-key:
+        serial-no:
+      alipay:
+        app-id:
+        private-key:
+        public-key:
+    active-query-delay: 1800
+```
+
+> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 热更新（标 * 的需重启生效）。
+
+### 11.2 本地配置文件 `bootstrap.yml`
+
+```yaml
+# mall-payment 支付服务
+server:
+  port: 9304
+
+spring:
+  application:
+    name: mall-payment
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  config:
+    file-extension: yml
+    import:
+      - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+```
+
+> 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
+
+### 11.3 配置项说明
 
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|--------|:---:|------|
@@ -515,8 +599,6 @@ RefundService
 | `mall.payment.channel.alipay.app-id` | — | — | 支付宝 AppId（*） |
 | `mall.payment.channel.alipay.private-key` | — | — | 支付宝应用私钥（加密存储） |
 | `mall.payment.channel.alipay.public-key` | — | — | 支付宝公钥（*） |
-
-> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
 
 ---
 

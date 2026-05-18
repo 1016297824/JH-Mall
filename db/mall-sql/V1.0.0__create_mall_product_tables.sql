@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS `mall_product_category` (
     `id`          bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
     `parent_id`   bigint unsigned NOT NULL DEFAULT 0              COMMENT '父类目 ID，0 表示顶级类目',
     `name`        varchar(50)     NOT NULL                        COMMENT '类目名称',
-    `level`       tinyint unsigned NOT NULL                       COMMENT '类目层级：1=一级 2=二级 3=三级',
+    `level`       tinyint unsigned NOT NULL                       COMMENT '类目层级',
     `icon`        varchar(500)    DEFAULT NULL                    COMMENT '类目标识图标 URL',
     `sort_order`  int unsigned    DEFAULT 0                       COMMENT '排序值，越小越靠前',
-    `is_visible`  tinyint unsigned DEFAULT 1                      COMMENT '是否前端可见：1=可见 0=隐藏',
+    `is_visible`  tinyint unsigned DEFAULT 1                      COMMENT '是否前端可见',
     `path`        varchar(255)    DEFAULT NULL                    COMMENT '类目路径，如 /1/10/100',
     `is_deleted`  tinyint unsigned DEFAULT 0                      COMMENT '逻辑删除标志',
     `create_time` datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -51,13 +51,13 @@ CREATE TABLE IF NOT EXISTS `mall_product_spu` (
     `spu_name`        varchar(200)    NOT NULL                        COMMENT 'SPU 名称（商品标题）',
     `spu_description` text            DEFAULT NULL                    COMMENT '商品详情描述（富文本 HTML）',
     `main_image`      varchar(500)    DEFAULT NULL                    COMMENT '商品主图 URL',
-    `images_json`     text            DEFAULT NULL                    COMMENT '轮播图 JSON 数组：["url1","url2"]',
+    `images_json`     text            DEFAULT NULL                    COMMENT '轮播图 JSON 数组',
     `price_min`       bigint unsigned DEFAULT 0                       COMMENT '最低销售价（单位：分）',
     `price_max`       bigint unsigned DEFAULT 0                       COMMENT '最高销售价（单位：分）',
     `sales_count`     int unsigned    DEFAULT 0                       COMMENT '累计销量',
     `review_count`    int unsigned    DEFAULT 0                       COMMENT '评价条数',
-    `publish_status`  tinyint unsigned DEFAULT 0                      COMMENT '上下架状态：0=下架 1=上架',
-    `verify_status`   tinyint unsigned DEFAULT 0                      COMMENT '审核状态：0=待审核 1=审核通过 2=审核驳回',
+    `publish_status`  tinyint unsigned DEFAULT 0                      COMMENT '上下架状态',
+    `verify_status`   tinyint unsigned DEFAULT 0                      COMMENT '审核状态',
     `is_deleted`      tinyint unsigned DEFAULT 0                      COMMENT '逻辑删除标志',
     `create_by`       varchar(64)     DEFAULT NULL                    COMMENT '创建人',
     `update_by`       varchar(64)     DEFAULT NULL                    COMMENT '修改人',
@@ -102,10 +102,10 @@ CREATE TABLE IF NOT EXISTS `mall_product_sku_stock` (
     `id`              bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
     `sku_id`          bigint unsigned NOT NULL                        COMMENT 'SKU ID，与 SKU 一对一',
     `total_stock`     int unsigned    DEFAULT 0                       COMMENT '总库存 = 可用 + 锁定 + 已售 + 冻结',
-    `available_stock` int unsigned    DEFAULT 0                       COMMENT '可用库存：当前可下单购买的数量',
-    `locked_stock`    int unsigned    DEFAULT 0                       COMMENT '锁定库存：下单未支付时锁定',
-    `sold_stock`      int unsigned    DEFAULT 0                       COMMENT '已售库存：已支付完成的累计销量',
-    `frozen_stock`    int unsigned    DEFAULT 0                       COMMENT '冻结库存：售后申请中暂冻',
+    `available_stock` int unsigned    DEFAULT 0                       COMMENT '可用库存',
+    `locked_stock`    int unsigned    DEFAULT 0                       COMMENT '锁定库存',
+    `sold_stock`      int unsigned    DEFAULT 0                       COMMENT '已售库存',
+    `frozen_stock`    int unsigned    DEFAULT 0                       COMMENT '冻结库存',
     `is_deleted`      tinyint unsigned DEFAULT 0                      COMMENT '逻辑删除标志',
     `create_time`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -129,3 +129,17 @@ INSERT INTO `mall_product_brand` (`id`, `name`, `sort_order`) VALUES
 (1, 'Apple',  1),
 (2, '华为',   2),
 (3, 'Nike',   3);
+
+-- ----------------------------
+-- 种子数据：示例 SPU + SKU + 库存
+-- ----------------------------
+INSERT INTO `mall_product_spu` (`id`, `category_id`, `brand_id`, `spu_name`, `main_image`, `price_min`, `price_max`, `publish_status`, `verify_status`) VALUES
+(1001, 3, 1, 'iPhone 15 Pro Max', 'https://cdn.example.com/spu/1001/main.jpg', 899900, 1099900, 1, 1);
+
+INSERT INTO `mall_product_sku` (`id`, `spu_id`, `sku_code`, `sku_name`, `attrs_json`, `price`, `market_price`, `image`, `weight`) VALUES
+(100101, 1001, 'IP15PM-256-BLUE',  'iPhone 15 Pro Max 256GB 蓝色', '[{"k":"颜色","v":"蓝色"},{"k":"存储","v":"256GB"}]', 899900, 999900, 'https://cdn.example.com/sku/100101.jpg', 221),
+(100102, 1001, 'IP15PM-512-BLACK', 'iPhone 15 Pro Max 512GB 黑色', '[{"k":"颜色","v":"黑色"},{"k":"存储","v":"512GB"}]', 1099900, 1199900, 'https://cdn.example.com/sku/100102.jpg', 221);
+
+INSERT INTO `mall_product_sku_stock` (`sku_id`, `total_stock`, `available_stock`) VALUES
+(100101, 500, 500),
+(100102, 300, 300);

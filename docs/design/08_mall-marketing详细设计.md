@@ -337,7 +337,83 @@ CouponClaimServiceImpl.lockCoupon(couponClaimId, orderNo):
 
 ---
 
-## 9 关键配置
+## 9 Nacos 配置
+
+### 9.1 DataId: `mall-marketing-dev.yml`
+
+```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  datasource:
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+          username: root
+          password: 138992
+
+mybatis:
+  typeAliasesPackage: com.mall.marketing.**.domain
+  mapperLocations: classpath:mapper/**/*.xml
+
+springdoc:
+  gatewayUrl: http://localhost:8080/${spring.application.name}
+  api-docs:
+    enabled: true
+  info:
+    title: '营销模块接口文档'
+    description: '营销模块接口描述'
+    contact:
+      name: RuoYi
+      url: https://ruoyi.vip
+
+mall:
+  marketing:
+    coupon:
+      expire-scan-interval: 3600
+      expire-batch-size: 500
+    calculation:
+      timeout: 500
+      max-candidates: 20
+      rule-cache-ttl: 60
+```
+
+> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
+
+### 9.2 本地配置文件 `bootstrap.yml`
+
+```yaml
+# mall-marketing 营销服务
+server:
+  port: 9305
+
+spring:
+  application:
+    name: mall-marketing
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  config:
+    file-extension: yml
+    import:
+      - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+```
+
+> 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
+
+### 9.3 配置项说明
 
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|--------|:---:|------|
@@ -346,8 +422,6 @@ CouponClaimServiceImpl.lockCoupon(couponClaimId, orderNo):
 | `mall.marketing.calculation.timeout` | 500 | ms | 优惠试算超时时间 |
 | `mall.marketing.calculation.max-candidates` | 20 | 张 | 过滤后参与全组合搜索的最大候选券数 |
 | `mall.marketing.calculation.rule-cache-ttl` | 60 | 秒 | 促销规则匹配结果本地缓存 TTL |
-
-> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
 
 ---
 

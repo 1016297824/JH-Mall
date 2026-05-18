@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.ruoyi</groupId>
+        <artifactId>ruoyi</artifactId>
+        <version>3.6.8</version>
+        <relativePath>../ruoyi/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mall</groupId>
+    <artifactId>mall</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>mall</name>
+    <description>JH-Store 商城业务模块</description>
+
+    <modules>
+        <module>mall-api</module>
+        <module>mall-auth</module>
+        <module>mall-user</module>
+        <module>mall-product</module>
+        <module>mall-order</module>
+        <module>mall-payment</module>
+        <module>mall-marketing</module>
+        <module>mall-search</module>
+    </modules>
+
+</project>

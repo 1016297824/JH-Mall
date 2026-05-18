@@ -355,7 +355,88 @@ ES 不可用时，mall-search 自动降级到 mall-product 的 DB 查询：
 
 ---
 
-## 8 关键配置
+## 8 Nacos 配置
+
+### 8.1 DataId: `mall-product-dev.yml`
+
+```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  datasource:
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+          username: root
+          password: 138992
+
+mybatis:
+  typeAliasesPackage: com.mall.product.**.domain
+  mapperLocations: classpath:mapper/**/*.xml
+
+springdoc:
+  gatewayUrl: http://localhost:8080/${spring.application.name}
+  api-docs:
+    enabled: true
+  info:
+    title: '商品模块接口文档'
+    description: '商品模块接口描述'
+    contact:
+      name: RuoYi
+      url: https://ruoyi.vip
+
+mall:
+  product:
+    sku:
+      cache-ttl: 600
+    category:
+      cache-ttl: 1800
+    search:
+      sync-batch-size: 100
+      fallback:
+        timeout: 3000
+        max-size: 100
+    stock:
+      compensate:
+        ttl: 86400
+```
+
+> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
+
+### 8.2 本地配置文件 `bootstrap.yml`
+
+```yaml
+# mall-product 商品服务
+server:
+  port: 9302
+
+spring:
+  application:
+    name: mall-product
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  config:
+    file-extension: yml
+    import:
+      - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+```
+
+> 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
+
+### 8.3 配置项说明
 
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|--------|:---:|------|
@@ -365,8 +446,6 @@ ES 不可用时，mall-search 自动降级到 mall-product 的 DB 查询：
 | `mall.product.search.fallback.timeout` | 3000 | ms | 降级搜索超时 |
 | `mall.product.search.fallback.max-size` | 100 | 条 | 降级搜索单页上限 |
 | `mall.product.stock.compensate.ttl` | 86400 | 秒 | 库存释放幂等键 TTL（24h） |
-
-> 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
 
 ---
 
