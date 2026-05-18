@@ -1,6 +1,6 @@
-files,language,blank,comment,code,"github.com/AlDanial/cloc v 2.08  T=1.84 s (244.5 files/s 31240.0 lines/s)"
-269,Java,3364,9434,19152
-95,Vuejs Component,724,891,17796
-75,JavaScript,421,625,4721
-10,TypeScript,31,72,131
-449,SUM,4540,11022,41800
+﻿语言,文件数,空行,注释,代码
+Vuejs Component,91,1444,1475,16901
+TypeScript,83,431,917,3870
+JavaScript,6,61,123,1208
+Java,269,3364,9434,19152
+合计,449,5300,11949,41131
