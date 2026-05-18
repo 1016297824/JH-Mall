@@ -11,12 +11,12 @@
 | 子领域 | 实体 | 说明 |
 |--------|------|------|
 | 用户账号 | `mall_user` | 基本信息（加密手机号/密码哈希/昵称/头像/状态） |
-| 会员等级 | `mall_member_level` | 等级定义（成长值区间/折扣率/包邮/积分倍数） |
+| 会员等级 | `mall_user_member_level` | 等级定义（成长值区间/折扣率/包邮/积分倍数） |
 | 用户会员 | `mall_user_member` | 用户当前等级+成长值，与用户 1:1 |
 | 地址簿 | `mall_user_address` | 收货地址（最多 20 条），手机号加密存储 |
-| 积分账户 | `mall_points_account` | 积分余额+累计，与用户 1:1 |
-| 积分流水 | `mall_points_log` | 积分变动记录（获取/消耗/过期/调整） |
-| 成长值流水 | `mall_growth_log` | 成长值变动记录（获取/消耗） |
+| 积分账户 | `mall_user_points_account` | 积分余额+累计，与用户 1:1 |
+| 积分流水 | `mall_user_points_log` | 积分变动记录（获取/消耗/过期/调整） |
+| 成长值流水 | `mall_user_growth_log` | 成长值变动记录（获取/消耗） |
 
 ### 1.2 依赖关系
 
@@ -64,12 +64,12 @@ server/mall/mall-user/
     │   └── UserAdminVO.java               # 管理端用户详情（全字段）
     ├── domain/
     │   ├── MallUserDO.java                 # 对应 mall_user 表
-    │   ├── MallMemberLevelDO.java          # 对应 mall_member_level 表
+    │   ├── MallMemberLevelDO.java          # 对应 mall_user_member_level 表
     │   ├── MallUserMemberDO.java           # 对应 mall_user_member 表
     │   ├── MallUserAddressDO.java          # 对应 mall_user_address 表
-    │   ├── MallPointsAccountDO.java        # 对应 mall_points_account 表
-    │   ├── MallPointsLogDO.java            # 对应 mall_points_log 表
-    │   └── MallGrowthLogDO.java            # 对应 mall_growth_log 表
+    │   ├── MallPointsAccountDO.java        # 对应 mall_user_points_account 表
+    │   ├── MallPointsLogDO.java            # 对应 mall_user_points_log 表
+    │   └── MallGrowthLogDO.java            # 对应 mall_user_growth_log 表
     ├── service/
     │   ├── user/
     │   │   ├── UserService.java
@@ -139,7 +139,7 @@ server/mall/mall-user/
 位于 `service/user/impl/UserServiceImpl.java`，用户账号管理。
 
 **getProfile(userId)**：
-- 查 `mall_user` + `mall_user_member` + `mall_points_account` LEFT JOIN
+- 查 `mall_user` + `mall_user_member` + `mall_user_points_account` LEFT JOIN
 - 手机号/邮箱脱敏后返回（通过 Jackson `@Sensitive` 注解）
 - 组合为 `UserProfileVO` 返回
 
@@ -152,7 +152,7 @@ server/mall/mall-user/
 - 返回 `MallUserDO`（含密码哈希、状态），用于登录校验
 
 **register(phoneEncrypted, phoneHash, passwordHash)**（Feign 接口，供 mall-auth 调用）：
-- 插入 `mall_user` + 初始化 `mall_user_member` + `mall_points_account`
+- 插入 `mall_user` + 初始化 `mall_user_member` + `mall_user_points_account`
 - 手机号唯一约束：`uk_phone_hash`
 
 **Deactivate(userId)**：更新 `user_status=2`（注销），不物理删除
@@ -171,12 +171,12 @@ server/mall/mall-user/
 
 位于 `service/member/impl/MemberServiceImpl.java`，会员成长值。
 
-**getMembership(userId)**：查 `mall_user_member` + `mall_member_level`，返回当前等级、权益、到下一级的进度
+**getMembership(userId)**：查 `mall_user_member` + `mall_user_member_level`，返回当前等级、权益、到下一级的进度
 
 **addGrowth(userId, growth, bizType, bizNo)**（Feign 接口，消费 `mall:user:registered` 事件时调用）：
 - `UPDATE mall_user_member SET growth=growth+#{growth}, total_growth=total_growth+#{growth}`
 - 判断是否升级：查当前等级 `max_growth`，超则升到下一级
-- 记录 `mall_growth_log`
+- 记录 `mall_user_growth_log`
 
 **expireGrowth()**（定时任务）：每年 1 月 1 日扣除上上年的成长值（预留，初期不做）
 
@@ -185,9 +185,9 @@ server/mall/mall-user/
 位于 `service/points/impl/PointsServiceImpl.java`，积分管理。
 
 **addPoints(userId, points, bizType, bizNo)**：
-- `UPDATE mall_points_account SET available_points=available_points+#{points}, total_points=total_points+#{points} WHERE user_id=? AND version=?`
+- `UPDATE mall_user_points_account SET available_points=available_points+#{points}, total_points=total_points+#{points} WHERE user_id=? AND version=?`
 - 乐观锁防并发
-- 记录 `mall_points_log`（change_type=1）
+- 记录 `mall_user_points_log`（change_type=1）
 
 **consumePoints(userId, points, bizNo)**：
 - 校验 `available_points >= points`
@@ -226,7 +226,7 @@ server/mall/mall-user/
 | 金卡会员 | 95% | 包邮 | 1.2x |
 | 钻石会员 | 90% | 包邮 | 1.5x |
 
-> 会员权益在 `mall_member_level.benefits_json` 中以 JSON 存储，前端根据此字段展示权益明细。
+> 会员权益在 `mall_user_member_level.benefits_json` 中以 JSON 存储，前端根据此字段展示权益明细。
 
 ---
 

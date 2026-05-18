@@ -10,11 +10,11 @@
 
 | 子领域 | 实体 | 说明 |
 |--------|------|------|
-| 类目管理 | `mall_category` | 三级树形类目（A→B→C），支持 path 快速遍历 |
-| 品牌管理 | `mall_brand` | 品牌 CRUD，关联类目 |
+| 类目管理 | `mall_product_category` | 三级树形类目（A→B→C），支持 path 快速遍历 |
+| 品牌管理 | `mall_product_brand` | 品牌 CRUD，关联类目 |
 | SPU 管理 | `mall_product_spu` | 商品主体信息，含上下架和审核状态 |
 | SKU 管理 | `mall_product_sku` | 销售规格，含售价/市场价/成本价/重量 |
-| 库存管理 | `mall_sku_stock` | 四段库存（可用/锁定/已售/冻结），乐观锁防超卖 |
+| 库存管理 | `mall_product_sku_stock` | 四段库存（可用/锁定/已售/冻结），乐观锁防超卖 |
 | 搜索同步 | Outbox | 商品变更后实时+异步双通道同步到 ES |
 | RocketMQ 事件 | Outbox | 生产 `mall:search:sync`，消费 `mall:order:cancelled` |
 
@@ -61,11 +61,11 @@ server/mall/mall-product/
     │   │                                       UpdateSpuStatusReq, AdjustStockReq ...
     │   └── response/                        → CategoryResp, BrandResp, SpuResp, SkuResp, StockResp
     ├── domain/
-    │   ├── MallCategoryDO.java              # 对应 mall_category 表
-    │   ├── MallBrandDO.java                 # 对应 mall_brand 表
+    │   ├── MallCategoryDO.java              # 对应 mall_product_category 表
+    │   ├── MallBrandDO.java                 # 对应 mall_product_brand 表
     │   ├── MallProductSpuDO.java            # 对应 mall_product_spu 表
     │   ├── MallProductSkuDO.java            # 对应 mall_product_sku 表
-    │   └── MallSkuStockDO.java              # 对应 mall_sku_stock 表
+    │   └── MallSkuStockDO.java              # 对应 mall_product_sku_stock 表
     ├── service/
     │   ├── category/
     │   │   ├── CategoryService.java
@@ -180,7 +180,7 @@ server/mall/mall-product/
 **约束**：`available + locked + sold + frozen = total_stock`（恒等式）
 
 **reserveStock(skuId, qty, orderNo)**：下单锁库存（Feign 由 mall-order 调用）
-- `UPDATE mall_sku_stock SET available_stock=available_stock-#{qty}, locked_stock=locked_stock+#{qty}, version=version+1 WHERE sku_id=? AND version=? AND available_stock>=#{qty}`
+- `UPDATE mall_product_sku_stock SET available_stock=available_stock-#{qty}, locked_stock=locked_stock+#{qty}, version=version+1 WHERE sku_id=? AND version=? AND available_stock>=#{qty}`
 - 乐观锁防超卖：`available_stock>=qty` + `version` 双重保护
 - 影响 0 行 → 库存不足 `A0521`
 
@@ -235,7 +235,7 @@ server/mall/mall-product/
 
 ```sql
 -- 下单锁库存
-UPDATE mall_sku_stock
+UPDATE mall_product_sku_stock
 SET available_stock = available_stock - #{qty},
     locked_stock = locked_stock + #{qty},
     version = version + 1

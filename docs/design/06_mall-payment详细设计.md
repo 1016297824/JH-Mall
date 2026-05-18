@@ -11,7 +11,7 @@
 | 子领域 | 实体 | 说明 |
 |--------|------|------|
 | 支付单管理 | `mall_payment` | 创建支付单、调支付平台、状态推进、支付单查询 |
-| 退款单管理 | `mall_refund` | 创建退款单、调支付渠道退款、状态推进、退款单查询 |
+| 退款单管理 | `mall_payment_refund` | 创建退款单、调支付渠道退款、状态推进、退款单查询 |
 | 支付渠道配置 | `mall_payment_channel` | 多渠道（微信/支付宝）Enable/Disable、API Key 加密存储 |
 | 回调处理 | `mall_payment_callback_log` | 支付回调验签、退款回调验签、nonce 防重放、回调日志记录 |
 | RocketMQ 事件 | Outbox（无独立实体） | 生产 `mall:payment:paid` / `mall:refund:succeeded` / `mall:refund:failed` |
@@ -49,7 +49,7 @@ server/mall/mall-payment/
     │       └── PaymentCallbackController.java # /callback/payment/**
     ├── domain/
     │   ├── MallPaymentDO.java               # 对应 mall_payment 表
-    │   ├── MallRefundDO.java                # 对应 mall_refund 表
+    │   ├── MallRefundDO.java                # 对应 mall_payment_refund 表
     │   ├── MallPaymentChannelDO.java        # 对应 mall_payment_channel 表
     │   └── MallPaymentCallbackLogDO.java    # 对应 mall_payment_callback_log 表
     ├── service/

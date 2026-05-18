@@ -10,9 +10,9 @@
 
 | 子领域 | 实体 | 说明 |
 |--------|------|------|
-| 购物车 | `mall_cart` | 用户临时存放待购商品，登录态持久化 |
+| 购物车 | `mall_order_cart` | 用户临时存放待购商品，登录态持久化 |
 | 订单 | `mall_order` + `mall_order_item` + `mall_order_amount` | 核心编排，含价格快照和状态机 |
-| 售后 | `mall_after_sale` | 退款/退货申请与审核 |
+| 售后 | `mall_order_after_sale` | 退款/退货申请与审核 |
 | RocketMQ | 消费 `mall:payment:paid` 等、生产 `mall:order:created` 等 | 异步推进订单、发布事件 |
 
 ### 1.2 依赖关系
@@ -220,7 +220,7 @@ mall-order/src/main/java/com/jhstore/mall/order/
 
 | 校验项 | 方式 | 失败返回 |
 |--------|------|---------|
-| 购物车非空 | 查 `mall_cart WHERE user_id=? AND selected=1` | A0710 |
+| 购物车非空 | 查 `mall_order_cart WHERE user_id=? AND selected=1` | A0710 |
 | 地址存在且归属 | 调 `RemoteUserService.validateAddress(userId, addressId)` | A0501 |
 | 商品上架+库存 | 调 `RemoteProductService.batchGetSku(skuIds)`，校验 `isOnSale` + `availableQty` | A0520 |
 | 不超限购 | 校验购买数量 ≤ 单品限购上限 | A0711 |

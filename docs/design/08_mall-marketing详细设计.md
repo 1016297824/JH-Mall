@@ -10,10 +10,10 @@
 
 | 子领域 | 实体 | 说明 |
 |--------|------|------|
-| 优惠券定义 | `mall_coupon` | 管理端创建券模板（满减/折扣/无门槛），控制发行量+有效期+限领数 |
-| 优惠券记录 | `mall_coupon_record` | 用户领券→锁券→核销/释放的全生命周期 |
-| 活动管理 | `mall_promotion` | 满减/满折/包邮/秒杀活动，含时间段和 Banner 图 |
-| 促销规则 | `mall_promotion_rule` | 活动下多条规则（门槛+优惠+互斥/叠加+优先级） |
+| 优惠券定义 | `mall_marketing_coupon` | 管理端创建券模板（满减/折扣/无门槛），控制发行量+有效期+限领数 |
+| 优惠券记录 | `mall_marketing_coupon_record` | 用户领券→锁券→核销/释放的全生命周期 |
+| 活动管理 | `mall_marketing_promotion` | 满减/满折/包邮/秒杀活动，含时间段和 Banner 图 |
+| 促销规则 | `mall_marketing_promotion_rule` | 活动下多条规则（门槛+优惠+互斥/叠加+优先级） |
 | 优惠试算 | — | 下单前算最优优惠组合（不锁定），返回扣减明细 |
 | RocketMQ 事件 | Outbox | 生产 `mall:coupon:used`，消费 `mall:order:cancelled` |
 
@@ -54,10 +54,10 @@ server/mall/mall-marketing/
     │   │                                       CreateRuleReq, CalculationReq
     │   └── response/                        → CouponDefResp, CouponRecordResp, CalculationResp
     ├── domain/
-    │   ├── MallCouponDO.java                # 对应 mall_coupon 表
-    │   ├── MallCouponRecordDO.java          # 对应 mall_coupon_record 表
-    │   ├── MallPromotionDO.java             # 对应 mall_promotion 表
-    │   └── MallPromotionRuleDO.java         # 对应 mall_promotion_rule 表
+    │   ├── MallCouponDO.java                # 对应 mall_marketing_coupon 表
+    │   ├── MallCouponRecordDO.java          # 对应 mall_marketing_coupon_record 表
+    │   ├── MallPromotionDO.java             # 对应 mall_marketing_promotion 表
+    │   └── MallPromotionRuleDO.java         # 对应 mall_marketing_promotion_rule 表
     ├── service/
     │   ├── coupon/
     │   │   ├── CouponDefService.java        # 接口
@@ -135,9 +135,9 @@ server/mall/mall-marketing/
 位于 `service/coupon/impl/CouponClaimServiceImpl.java`，用户优惠券全生命周期。
 
 **claimCoupon(couponDefId, userId)**：领取优惠券
-- ①查 `mall_coupon` → coupon_status≠1 `A0610`，`use_end_time < NOW()` → `A0610`
-- ②查 `mall_coupon_record` 中该用户 `COUNT WHERE coupon_id=? AND user_id=?` → 超 `per_user_limit` 则 `A0502`
-- ③乐观锁扣库存：`UPDATE mall_coupon SET remain_count=remain_count-1, version=version+1 WHERE id=? AND version=? AND remain_count>0`
+- ①查 `mall_marketing_coupon` → coupon_status≠1 `A0610`，`use_end_time < NOW()` → `A0610`
+- ②查 `mall_marketing_coupon_record` 中该用户 `COUNT WHERE coupon_id=? AND user_id=?` → 超 `per_user_limit` 则 `A0502`
+- ③乐观锁扣库存：`UPDATE mall_marketing_coupon SET remain_count=remain_count-1, version=version+1 WHERE id=? AND version=? AND remain_count>0`
 - ④失败（影响 0 行或版本冲突）→ `A0611`（已被领完）
 - ⑤创建记录：`coupon_code` 雪花+CPN 前缀，`record_status=AVAILABLE`，`face_value` 快照，`expire_time`=use_end_time
 - ⑥返回 `claimId`
@@ -157,7 +157,7 @@ server/mall/mall-marketing/
 **releaseCoupon(orderNo)**：订单取消释放（消费 `mall:order:cancelled` 事件触发）
 - ①查 `WHERE order_no=? AND record_status=2` →
 - ②状态机：`LOCKED → RELEASED`，清除 `order_no`，记录 `release_time`
-- ③回补优惠券库存：`UPDATE mall_coupon SET remain_count=remain_count+1 WHERE id=?`
+- ③回补优惠券库存：`UPDATE mall_marketing_coupon SET remain_count=remain_count+1 WHERE id=?`
 - ④幂等去重：`orderNo + couponRecordId` 维度，防止重复释放
 
 **expireBatch()**：定时任务过期扫描
@@ -239,10 +239,10 @@ server/mall/mall-marketing/
       ① 查优惠券定义 → 状态≠已发布或已过期 → A0610
       ② 查用户已领数量 → 超 per_user_limit → A0502
       ③ 乐观锁扣库存 remain_count
-         UPDATE mall_coupon SET remain_count=remain_count-1, version=version+1
+         UPDATE mall_marketing_coupon SET remain_count=remain_count-1, version=version+1
          WHERE id=? AND version=? AND remain_count>0
          → 失败 A0611
-      ④ INSERT mall_coupon_record (record_status=AVAILABLE)
+      ④ INSERT mall_marketing_coupon_record (record_status=AVAILABLE)
       ⑤ 返回 claimId
 ```
 
@@ -279,7 +279,7 @@ CouponClaimServiceImpl.lockCoupon(couponClaimId, orderNo):
 消费 `mall:order:cancelled` → `CouponClaimServiceImpl.releaseCoupon(orderNo)`：
 - 查 `WHERE order_no=? AND record_status=2` → 逐条 `LOCKED → RELEASED`
 - 清除 `order_no`，记录 `release_time`
-- 回补 `remain_count`：`UPDATE mall_coupon SET remain_count=remain_count+1 WHERE id=?`
+- 回补 `remain_count`：`UPDATE mall_marketing_coupon SET remain_count=remain_count+1 WHERE id=?`
 - 幂等：已释放的不重复处理
 
 ---
