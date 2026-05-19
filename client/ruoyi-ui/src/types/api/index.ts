@@ -42,3 +42,9 @@ export * from "./mall-product/brand";
 export * from "./mall-product/category";
 export * from "./mall-product/stock";
 export * from "./mall-product/spu";
+
+// mall-order 模块
+export * from "./mall-order/order";
+export * from "./mall-order/after_sale";
+export * from "./mall-order/amount";
+export * from "./mall-order/cart";
