@@ -22,8 +22,8 @@ public class MallProductBrand extends BaseEntity
     @Excel(name = "品牌名称")
     private String name;
 
-    /** 品牌 Logo URL */
-    @Excel(name = "品牌 Logo URL")
+    /** 品牌 Logo */
+    @Excel(name = "品牌 Logo")
     private String logo;
 
     /** 品牌简介 */

@@ -15,14 +15,14 @@ public class MallProductSku extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** 主键 */
+    /** 主键，自增 */
     private String id;
 
     /** 所属 SPU ID */
     @Excel(name = "所属 SPU ID")
     private String spuId;
 
-    /** SKU 编码 */
+    /** SKU 编码（全局唯一） */
     @Excel(name = "SKU 编码", readConverterExp = "全=局唯一")
     private String skuCode;
 
@@ -30,7 +30,8 @@ public class MallProductSku extends BaseEntity
     @Excel(name = "SKU 销售名称")
     private String skuName;
 
-    /** 销售属性 JSON */
+    /** 销售属性 JSON：[{"k":"颜色","v":"蓝色"}] */
+    @Excel(name = "销售属性 JSON：[{"k":"颜色","v":"蓝色"}]")
     private String attrsJson;
 
     /** 销售价（单位：分） */
@@ -42,13 +43,14 @@ public class MallProductSku extends BaseEntity
     private String marketPrice;
 
     /** 成本价（单位：分） */
+    @Excel(name = "成本价", readConverterExp = "单=位：分")
     private String costPrice;
 
     /** SKU 级图片 */
     @Excel(name = "SKU 级图片")
     private String image;
 
-    /** 重量（单位：克） */
+    /** 重量（单位：克），用于运费计算 */
     @Excel(name = "重量", readConverterExp = "单=位：克")
     private String weight;
 
@@ -57,6 +59,7 @@ public class MallProductSku extends BaseEntity
     private String salesCount;
 
     /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
     public void setId(String id) 
@@ -68,7 +71,6 @@ public class MallProductSku extends BaseEntity
     {
         return id;
     }
-
     public void setSpuId(String spuId) 
     {
         this.spuId = spuId;
@@ -78,7 +80,6 @@ public class MallProductSku extends BaseEntity
     {
         return spuId;
     }
-
     public void setSkuCode(String skuCode) 
     {
         this.skuCode = skuCode;
@@ -88,7 +89,6 @@ public class MallProductSku extends BaseEntity
     {
         return skuCode;
     }
-
     public void setSkuName(String skuName) 
     {
         this.skuName = skuName;
@@ -98,7 +98,6 @@ public class MallProductSku extends BaseEntity
     {
         return skuName;
     }
-
     public void setAttrsJson(String attrsJson) 
     {
         this.attrsJson = attrsJson;
@@ -108,7 +107,6 @@ public class MallProductSku extends BaseEntity
     {
         return attrsJson;
     }
-
     public void setPrice(String price) 
     {
         this.price = price;
@@ -118,7 +116,6 @@ public class MallProductSku extends BaseEntity
     {
         return price;
     }
-
     public void setMarketPrice(String marketPrice) 
     {
         this.marketPrice = marketPrice;
@@ -128,7 +125,6 @@ public class MallProductSku extends BaseEntity
     {
         return marketPrice;
     }
-
     public void setCostPrice(String costPrice) 
     {
         this.costPrice = costPrice;
@@ -138,7 +134,6 @@ public class MallProductSku extends BaseEntity
     {
         return costPrice;
     }
-
     public void setImage(String image) 
     {
         this.image = image;
@@ -148,7 +143,6 @@ public class MallProductSku extends BaseEntity
     {
         return image;
     }
-
     public void setWeight(String weight) 
     {
         this.weight = weight;
@@ -158,7 +152,6 @@ public class MallProductSku extends BaseEntity
     {
         return weight;
     }
-
     public void setSalesCount(String salesCount) 
     {
         this.salesCount = salesCount;
@@ -168,7 +161,6 @@ public class MallProductSku extends BaseEntity
     {
         return salesCount;
     }
-
     public void setIsDeleted(String isDeleted) 
     {
         this.isDeleted = isDeleted;

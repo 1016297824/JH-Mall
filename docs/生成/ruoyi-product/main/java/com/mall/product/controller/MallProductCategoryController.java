@@ -19,7 +19,6 @@ import com.mall.product.service.IMallProductCategoryService;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.web.page.TableDataInfo;
 
 /**
  * 商品类目Controller
@@ -39,11 +38,10 @@ public class MallProductCategoryController extends BaseController
      */
     @RequiresPermissions("mall-product:category:list")
     @GetMapping("/list")
-    public TableDataInfo list(MallProductCategory mallProductCategory)
+    public AjaxResult list(MallProductCategory mallProductCategory)
     {
-        startPage();
         List<MallProductCategory> list = mallProductCategoryService.selectMallProductCategoryList(mallProductCategory);
-        return getDataTable(list);
+        return success(list);
     }
 
     /**
@@ -96,7 +94,7 @@ public class MallProductCategoryController extends BaseController
      */
     @RequiresPermissions("mall-product:category:remove")
     @Log(title = "商品类目", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallProductCategoryService.deleteMallProductCategoryByIds(ids));

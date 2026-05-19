@@ -96,7 +96,7 @@ public class MallProductSpuController extends BaseController
      */
     @RequiresPermissions("mall-product:spu:remove")
     @Log(title = "SPU 管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallProductSpuService.deleteMallProductSpuByIds(ids));

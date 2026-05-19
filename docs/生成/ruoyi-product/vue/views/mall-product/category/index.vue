@@ -35,40 +35,24 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
+          type="info"
           plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['mall-product:category:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['mall-product:category:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['mall-product:category:export']"
-        >导出</el-button>
+          icon="Sort"
+          @click="toggleExpandAll"
+        >展开/折叠</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="categoryList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键，自增" align="center" prop="id" />
-      <el-table-column label="父类目 ID，0 表示顶级类目" align="center" prop="parentId" />
+    <el-table
+      v-if="refreshTable"
+      v-loading="loading"
+      :data="categoryList"
+      row-key="id"
+      :default-expand-all="isExpandAll"
+      :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+    >
+      <el-table-column label="父类目 ID，0 表示顶级类目" prop="parentId" />
       <el-table-column label="类目名称" align="center" prop="name" />
       <el-table-column label="类目层级" align="center" prop="level" />
       <el-table-column label="类目标识图标 URL" align="center" prop="icon" />
@@ -79,23 +63,28 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:category:edit']">修改</el-button>
+          <el-button link type="primary" icon="Plus" @click="handleAdd(scope.row)" v-hasPermi="['mall-product:category:add']">新增</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-product:category:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
 
     <!-- 添加或修改商品类目对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="categoryRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
+          <el-col :span="24">
+            <el-form-item label="父类目 ID，0 表示顶级类目" prop="parentId">
+              <el-tree-select
+                v-model="form.parentId"
+                :data="categoryOptions"
+                :props="{ value: 'id', label: 'name', children: 'children' }"
+                value-key="id"
+                placeholder="请选择父类目 ID，0 表示顶级类目"
+                check-strictly
+              />
+            </el-form-item>
+          </el-col>
           <el-col :span="24">
             <el-form-item label="类目名称" prop="name">
               <el-input v-model="form.name" placeholder="请输入类目名称" />
@@ -124,26 +113,24 @@
 </template>
 
 <script setup lang="ts" name="Category">
-import type { MallProductCategory, CategoryQueryParams } from "@/types/api/mall-product/category"
 import { listCategory, getCategory, delCategory, addCategory, updateCategory } from "@/api/mall-product/category"
+import type { MallProductCategory, CategoryQueryParams } from "@/types/api/mall-product/category"
+import type { TreeSelect } from '@/types/api/common'
 
 const { proxy } = getCurrentInstance()
 
-const categoryList = ref<MallProductCategory[]>([])
+const categoryList = ref<any[]>([])
+const categoryOptions = ref<TreeSelect[]>([])
 const open = ref<boolean>(false)
 const loading = ref<boolean>(true)
 const showSearch = ref<boolean>(true)
-const ids = ref<number[]>([])
-const single = ref<boolean>(true)
-const multiple = ref<boolean>(true)
-const total = ref<number>(0)
 const title = ref<string>("")
+const isExpandAll = ref<boolean>(true)
+const refreshTable = ref<boolean>(true)
 
 const data = reactive({
   form: {} as MallProductCategory,
   queryParams: {
-    pageNum: 1,
-    pageSize: 10,
     parentId: undefined,
     name: undefined,
     level: undefined,
@@ -178,12 +165,21 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listCategory(queryParams.value).then(response => {
-    categoryList.value = response.rows
-    total.value = response.total
+    categoryList.value = proxy.handleTree(response.data, "id", "parentId")
     loading.value = false
   })
 }
 
+/** 查询商品类目下拉树结构 */
+function getTreeselect() {
+  listCategory().then(response => {
+    categoryOptions.value = []
+    const data = { id: 0, name: '顶级节点', children: [] }
+    data.children = proxy.handleTree(response.data, "id", "parentId")
+    categoryOptions.value.push(data)
+  })
+}
+	
 /** 取消按钮 */
 function cancel() {
   open.value = false
@@ -210,7 +206,6 @@ function reset() {
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  queryParams.value.pageNum = 1
   getList()
 }
 
@@ -220,25 +215,36 @@ function resetQuery() {
   handleQuery()
 }
 
-/** 多选框选中数据 */
-function handleSelectionChange(selection: MallProductCategory[]) {
-  ids.value = selection.map(item => item.id)
-  single.value = selection.length != 1
-  multiple.value = !selection.length
-}
-
 /** 新增按钮操作 */
-function handleAdd() {
+function handleAdd(row: MallProductCategory) {
   reset()
+  getTreeselect()
+  if (row != null && row.id) {
+    form.value.parentId = row.id
+  } else {
+    form.value.parentId = 0
+  }
   open.value = true
   title.value = "添加商品类目"
 }
 
+/** 展开/折叠操作 */
+function toggleExpandAll() {
+  refreshTable.value = false
+  isExpandAll.value = !isExpandAll.value
+  nextTick(() => {
+    refreshTable.value = true
+  })
+}
+
 /** 修改按钮操作 */
-function handleUpdate(row: MallProductCategory) {
+async function handleUpdate(row: MallProductCategory) {
   reset()
-  const _id = row.id || ids.value[0]
-  getCategory(_id).then(response => {
+  await getTreeselect()
+  if (row != null) {
+    form.value.parentId = row.parentId
+  }
+  getCategory(row.id!).then(response => {
     form.value = response.data
     open.value = true
     title.value = "修改商品类目"
@@ -268,20 +274,12 @@ function submitForm() {
 
 /** 删除按钮操作 */
 function handleDelete(row: MallProductCategory) {
-  const _ids = row.id || ids.value
-  proxy.$modal.confirm('是否确认删除商品类目编号为"' + _ids + '"的数据项？').then(function() {
-    return delCategory(_ids)
+  proxy.$modal.confirm('是否确认删除商品类目编号为"' + row.id + '"的数据项？').then(function() {
+    return delCategory(row.id!)
   }).then(() => {
     getList()
     proxy.$modal.msgSuccess("删除成功")
   }).catch(() => {})
-}
-
-/** 导出按钮操作 */
-function handleExport() {
-  proxy.download('mall-product/category/export', {
-    ...queryParams.value
-  }, `category_${new Date().getTime()}.xlsx`)
 }
 
 getList()

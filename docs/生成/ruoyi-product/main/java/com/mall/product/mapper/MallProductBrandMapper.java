@@ -17,7 +17,7 @@ public interface MallProductBrandMapper
      * @param id 品牌管理主键
      * @return 品牌管理
      */
-    MallProductBrand selectMallProductBrandById(String id);
+    public MallProductBrand selectMallProductBrandById(String id);
 
     /**
      * 查询品牌管理列表
@@ -25,7 +25,7 @@ public interface MallProductBrandMapper
      * @param mallProductBrand 品牌管理
      * @return 品牌管理集合
      */
-    List<MallProductBrand> selectMallProductBrandList(MallProductBrand mallProductBrand);
+    public List<MallProductBrand> selectMallProductBrandList(MallProductBrand mallProductBrand);
 
     /**
      * 新增品牌管理
@@ -33,7 +33,7 @@ public interface MallProductBrandMapper
      * @param mallProductBrand 品牌管理
      * @return 结果
      */
-    int insertMallProductBrand(MallProductBrand mallProductBrand);
+    public int insertMallProductBrand(MallProductBrand mallProductBrand);
 
     /**
      * 修改品牌管理
@@ -41,7 +41,7 @@ public interface MallProductBrandMapper
      * @param mallProductBrand 品牌管理
      * @return 结果
      */
-    int updateMallProductBrand(MallProductBrand mallProductBrand);
+    public int updateMallProductBrand(MallProductBrand mallProductBrand);
 
     /**
      * 删除品牌管理
@@ -49,7 +49,7 @@ public interface MallProductBrandMapper
      * @param id 品牌管理主键
      * @return 结果
      */
-    int deleteMallProductBrandById(String id);
+    public int deleteMallProductBrandById(String id);
 
     /**
      * 批量删除品牌管理
@@ -57,5 +57,5 @@ public interface MallProductBrandMapper
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    int deleteMallProductBrandByIds(String[] ids);
+    public int deleteMallProductBrandByIds(String[] ids);
 }

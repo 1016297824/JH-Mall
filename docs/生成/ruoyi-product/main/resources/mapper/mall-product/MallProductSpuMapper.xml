@@ -26,6 +26,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="version"    column="version"    />
     </resultMap>
 
+    <resultMap id="MallProductSpuMallProductSkuResult" type="MallProductSpu" extends="MallProductSpuResult">
+        <collection property="mallProductSkuList" ofType="MallProductSku" column="id" select="selectMallProductSkuList" />
+    </resultMap>
+
+    <resultMap type="MallProductSku" id="MallProductSkuResult">
+        <result property="id"    column="id"    />
+        <result property="spuId"    column="spu_id"    />
+        <result property="skuCode"    column="sku_code"    />
+        <result property="skuName"    column="sku_name"    />
+        <result property="attrsJson"    column="attrs_json"    />
+        <result property="price"    column="price"    />
+        <result property="marketPrice"    column="market_price"    />
+        <result property="costPrice"    column="cost_price"    />
+        <result property="image"    column="image"    />
+        <result property="weight"    column="weight"    />
+        <result property="salesCount"    column="sales_count"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
     <sql id="selectMallProductSpuVo">
         select id, category_id, brand_id, spu_name, spu_description, main_image, images_json, price_min, price_max, sales_count, review_count, publish_status, verify_status, is_deleted, create_by, update_by, create_time, update_time, version from mall_product_spu
     </sql>
@@ -50,9 +71,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
     
-    <select id="selectMallProductSpuById" parameterType="String" resultMap="MallProductSpuResult">
-        <include refid="selectMallProductSpuVo"/>
+    <select id="selectMallProductSpuById" parameterType="String" resultMap="MallProductSpuMallProductSkuResult">
+        select id, category_id, brand_id, spu_name, spu_description, main_image, images_json, price_min, price_max, sales_count, review_count, publish_status, verify_status, is_deleted, create_by, update_by, create_time, update_time, version
+        from mall_product_spu
         where id = #{id}
+    </select>
+
+    <select id="selectMallProductSkuList" resultMap="MallProductSkuResult">
+        select id, spu_id, sku_code, sku_name, attrs_json, price, market_price, cost_price, image, weight, sales_count, is_deleted, create_time, update_time
+        from mall_product_sku
+        where spu_id = #{spu_id}
     </select>
 
     <insert id="insertMallProductSpu" parameterType="MallProductSpu" useGeneratedKeys="true" keyProperty="id">
@@ -134,4 +162,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+    
+    <delete id="deleteMallProductSkuBySpuIds" parameterType="String">
+        delete from mall_product_sku where spu_id in 
+        <foreach item="spuId" collection="array" open="(" separator="," close=")">
+            #{spuId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMallProductSkuBySpuId" parameterType="String">
+        delete from mall_product_sku where spu_id = #{spuId}
+    </delete>
+
+    <insert id="batchMallProductSku">
+        insert into mall_product_sku( id, spu_id, sku_code, sku_name, attrs_json, price, market_price, cost_price, image, weight, sales_count, is_deleted, create_time, update_time) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.spuId}, #{item.skuCode}, #{item.skuName}, #{item.attrsJson}, #{item.price}, #{item.marketPrice}, #{item.costPrice}, #{item.image}, #{item.weight}, #{item.salesCount}, #{item.isDeleted}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
 </mapper>

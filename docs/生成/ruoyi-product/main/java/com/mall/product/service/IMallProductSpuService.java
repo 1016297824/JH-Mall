@@ -17,7 +17,7 @@ public interface IMallProductSpuService
      * @param id SPU 管理主键
      * @return SPU 管理
      */
-    MallProductSpu selectMallProductSpuById(String id);
+    public MallProductSpu selectMallProductSpuById(String id);
 
     /**
      * 查询SPU 管理列表
@@ -25,7 +25,7 @@ public interface IMallProductSpuService
      * @param mallProductSpu SPU 管理
      * @return SPU 管理集合
      */
-    List<MallProductSpu> selectMallProductSpuList(MallProductSpu mallProductSpu);
+    public List<MallProductSpu> selectMallProductSpuList(MallProductSpu mallProductSpu);
 
     /**
      * 新增SPU 管理
@@ -33,7 +33,7 @@ public interface IMallProductSpuService
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
-    int insertMallProductSpu(MallProductSpu mallProductSpu);
+    public int insertMallProductSpu(MallProductSpu mallProductSpu);
 
     /**
      * 修改SPU 管理
@@ -41,7 +41,7 @@ public interface IMallProductSpuService
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
-    int updateMallProductSpu(MallProductSpu mallProductSpu);
+    public int updateMallProductSpu(MallProductSpu mallProductSpu);
 
     /**
      * 批量删除SPU 管理
@@ -49,7 +49,7 @@ public interface IMallProductSpuService
      * @param ids 需要删除的SPU 管理主键集合
      * @return 结果
      */
-    int deleteMallProductSpuByIds(String[] ids);
+    public int deleteMallProductSpuByIds(String[] ids);
 
     /**
      * 删除SPU 管理信息
@@ -57,5 +57,5 @@ public interface IMallProductSpuService
      * @param id SPU 管理主键
      * @return 结果
      */
-    int deleteMallProductSpuById(String id);
+    public int deleteMallProductSpuById(String id);
 }

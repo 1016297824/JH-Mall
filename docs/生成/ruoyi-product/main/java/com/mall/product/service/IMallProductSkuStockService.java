@@ -17,7 +17,7 @@ public interface IMallProductSkuStockService
      * @param id 库存管理主键
      * @return 库存管理
      */
-    MallProductSkuStock selectMallProductSkuStockById(String id);
+    public MallProductSkuStock selectMallProductSkuStockById(String id);
 
     /**
      * 查询库存管理列表
@@ -25,7 +25,7 @@ public interface IMallProductSkuStockService
      * @param mallProductSkuStock 库存管理
      * @return 库存管理集合
      */
-    List<MallProductSkuStock> selectMallProductSkuStockList(MallProductSkuStock mallProductSkuStock);
+    public List<MallProductSkuStock> selectMallProductSkuStockList(MallProductSkuStock mallProductSkuStock);
 
     /**
      * 新增库存管理
@@ -33,7 +33,7 @@ public interface IMallProductSkuStockService
      * @param mallProductSkuStock 库存管理
      * @return 结果
      */
-    int insertMallProductSkuStock(MallProductSkuStock mallProductSkuStock);
+    public int insertMallProductSkuStock(MallProductSkuStock mallProductSkuStock);
 
     /**
      * 修改库存管理
@@ -41,7 +41,7 @@ public interface IMallProductSkuStockService
      * @param mallProductSkuStock 库存管理
      * @return 结果
      */
-    int updateMallProductSkuStock(MallProductSkuStock mallProductSkuStock);
+    public int updateMallProductSkuStock(MallProductSkuStock mallProductSkuStock);
 
     /**
      * 批量删除库存管理
@@ -49,7 +49,7 @@ public interface IMallProductSkuStockService
      * @param ids 需要删除的库存管理主键集合
      * @return 结果
      */
-    int deleteMallProductSkuStockByIds(String[] ids);
+    public int deleteMallProductSkuStockByIds(String[] ids);
 
     /**
      * 删除库存管理信息
@@ -57,5 +57,5 @@ public interface IMallProductSkuStockService
      * @param id 库存管理主键
      * @return 结果
      */
-    int deleteMallProductSkuStockById(String id);
+    public int deleteMallProductSkuStockById(String id);
 }

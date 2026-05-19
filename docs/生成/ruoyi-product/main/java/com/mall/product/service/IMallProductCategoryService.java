@@ -17,7 +17,7 @@ public interface IMallProductCategoryService
      * @param id 商品类目主键
      * @return 商品类目
      */
-    MallProductCategory selectMallProductCategoryById(String id);
+    public MallProductCategory selectMallProductCategoryById(String id);
 
     /**
      * 查询商品类目列表
@@ -25,7 +25,7 @@ public interface IMallProductCategoryService
      * @param mallProductCategory 商品类目
      * @return 商品类目集合
      */
-    List<MallProductCategory> selectMallProductCategoryList(MallProductCategory mallProductCategory);
+    public List<MallProductCategory> selectMallProductCategoryList(MallProductCategory mallProductCategory);
 
     /**
      * 新增商品类目
@@ -33,7 +33,7 @@ public interface IMallProductCategoryService
      * @param mallProductCategory 商品类目
      * @return 结果
      */
-    int insertMallProductCategory(MallProductCategory mallProductCategory);
+    public int insertMallProductCategory(MallProductCategory mallProductCategory);
 
     /**
      * 修改商品类目
@@ -41,7 +41,7 @@ public interface IMallProductCategoryService
      * @param mallProductCategory 商品类目
      * @return 结果
      */
-    int updateMallProductCategory(MallProductCategory mallProductCategory);
+    public int updateMallProductCategory(MallProductCategory mallProductCategory);
 
     /**
      * 批量删除商品类目
@@ -49,7 +49,7 @@ public interface IMallProductCategoryService
      * @param ids 需要删除的商品类目主键集合
      * @return 结果
      */
-    int deleteMallProductCategoryByIds(String[] ids);
+    public int deleteMallProductCategoryByIds(String[] ids);
 
     /**
      * 删除商品类目信息
@@ -57,5 +57,5 @@ public interface IMallProductCategoryService
      * @param id 商品类目主键
      * @return 结果
      */
-    int deleteMallProductCategoryById(String id);
+    public int deleteMallProductCategoryById(String id);
 }

@@ -59,12 +59,12 @@
 
     <el-table v-loading="loading" :data="brandList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键，自增" align="center" prop="id" />
+      <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="品牌名称" align="center" prop="name" />
-      <el-table-column label="品牌 Logo URL" align="center" prop="logo" />
+      <el-table-column label="品牌 Logo" align="center" prop="logo" />
       <el-table-column label="品牌简介" align="center" prop="description" />
       <el-table-column label="排序值" align="center" prop="sortOrder" />
-      <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
+      <el-table-column label="状态" align="center" prop="isDeleted" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:brand:edit']">修改</el-button>
@@ -91,7 +91,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="品牌 Logo URL" prop="logo">
+            <el-form-item label="品牌 Logo" prop="logo">
               <el-input v-model="form.logo" type="textarea" placeholder="请输入内容" />
             </el-form-item>
           </el-col>
@@ -263,3 +263,6 @@ function handleExport() {
 
 getList()
 </script>
+
+<style scoped lang="scss">
+</style>

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 import type { AjaxResult, TableDataInfo, CategoryQueryParams, MallProductCategory } from '@/types'
 
 // 查询商品类目列表
-export function listCategory(query: CategoryQueryParams): Promise<TableDataInfo<MallProductCategory[]>> {
+export function listCategory(query?: CategoryQueryParams): Promise<AjaxResult<MallProductCategory[]>> {
   return request({
     url: '/mall-product/category/list',
     method: 'get',

@@ -59,25 +59,25 @@
 
     <el-table v-loading="loading" :data="spuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键，自增" align="center" prop="id" />
-      <el-table-column label="所属三级类目 ID" align="center" prop="categoryId" />
-      <el-table-column label="所属品牌 ID" align="center" prop="brandId" />
+      <el-table-column label="ID" align="center" prop="id" />
+      <el-table-column label="所属三级类目" align="center" prop="categoryId" />
+      <el-table-column label="所属品牌" align="center" prop="brandId" />
       <el-table-column label="SPU 名称" align="center" prop="spuName" />
       <el-table-column label="商品详情描述" align="center" prop="spuDescription" />
-      <el-table-column label="商品主图 URL" align="center" prop="mainImage" width="100">
+      <el-table-column label="商品主图" align="center" prop="mainImage" width="100">
         <template #default="scope">
           <image-preview :src="scope.row.mainImage" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="轮播图 JSON 数组" align="center" prop="imagesJson" />
+      <el-table-column label="轮播图" align="center" prop="imagesJson" />
       <el-table-column label="最低销售价" align="center" prop="priceMin" />
       <el-table-column label="最高销售价" align="center" prop="priceMax" />
       <el-table-column label="累计销量" align="center" prop="salesCount" />
       <el-table-column label="评价条数" align="center" prop="reviewCount" />
       <el-table-column label="上下架状态" align="center" prop="publishStatus" />
       <el-table-column label="审核状态" align="center" prop="verifyStatus" />
-      <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
-      <el-table-column label="乐观锁版本号" align="center" prop="version" />
+      <el-table-column label="状态" align="center" prop="isDeleted" />
+      <el-table-column label="版本号" align="center" prop="version" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:spu:edit']">修改</el-button>
@@ -109,16 +109,43 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="商品主图 URL" prop="mainImage">
+            <el-form-item label="商品主图" prop="mainImage">
               <image-upload v-model="form.mainImage"/>
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="轮播图 JSON 数组" prop="imagesJson">
+            <el-form-item label="轮播图" prop="imagesJson">
               <el-input v-model="form.imagesJson" type="textarea" placeholder="请输入内容" />
             </el-form-item>
           </el-col>
         </el-row>
+        <el-divider content-position="center">SKU 管理信息</el-divider>
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button type="primary" icon="Plus" @click="handleAddMallProductSku">添加</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button type="danger" icon="Delete" @click="handleDeleteMallProductSku">删除</el-button>
+          </el-col>
+        </el-row>
+        <el-table :data="mallProductSkuList" @selection-change="handleMallProductSkuSelectionChange" ref="mallProductSku" row-key="_rowKey">
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column label="序号" width="60">
+            <template #default="{ $index }">
+              {{ $index + 1 }}
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU 编码" prop="skuCode" width="150">
+            <template #default="scope">
+              <el-input v-model="scope.row.skuCode" placeholder="请输入SKU 编码" />
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU 销售名称" prop="skuName" width="150">
+            <template #default="scope">
+              <el-input v-model="scope.row.skuName" placeholder="请输入SKU 销售名称" />
+            </template>
+          </el-table-column>
+        </el-table>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -131,16 +158,18 @@
 </template>
 
 <script setup lang="ts" name="Spu">
-import type { MallProductSpu, SpuQueryParams } from "@/types/api/mall-product/spu"
+import type { MallProductSpu, MallProductSku, SpuQueryParams } from "@/types/api/mall-product/spu"
 import { listSpu, getSpu, delSpu, addSpu, updateSpu } from "@/api/mall-product/spu"
 
 const { proxy } = getCurrentInstance()
 
 const spuList = ref<MallProductSpu[]>([])
+const mallProductSkuList = ref([])
 const open = ref<boolean>(false)
 const loading = ref<boolean>(true)
 const showSearch = ref<boolean>(true)
 const ids = ref<number[]>([])
+const checkedMallProductSku = ref([])
 const single = ref<boolean>(true)
 const multiple = ref<boolean>(true)
 const total = ref<number>(0)
@@ -168,7 +197,7 @@ const data = reactive({
   } as SpuQueryParams,
   rules: {
     categoryId: [
-      { required: true, message: "所属三级类目 ID不能为空", trigger: "blur" }
+      { required: true, message: "所属三级类目不能为空", trigger: "blur" }
     ],
     spuName: [
       { required: true, message: "SPU 名称不能为空", trigger: "blur" }
@@ -223,6 +252,7 @@ function reset() {
     updateTime: null,
     version: null
   }
+  mallProductSkuList.value = []
   proxy.resetForm("spuRef")
 }
 
@@ -258,6 +288,7 @@ function handleUpdate(row: MallProductSpu) {
   const _id = row.id || ids.value[0]
   getSpu(_id).then(response => {
     form.value = response.data
+    mallProductSkuList.value = response.data?.mallProductSkuList ?? []
     open.value = true
     title.value = "修改SPU 管理"
   })
@@ -267,6 +298,7 @@ function handleUpdate(row: MallProductSpu) {
 function submitForm() {
   proxy.$refs["spuRef"].validate((valid: boolean) => {
     if (valid) {
+      form.value.mallProductSkuList = mallProductSkuList.value
       if (form.value.id != null) {
         updateSpu(form.value).then(() => {
           proxy.$modal.msgSuccess("修改成功")
@@ -295,6 +327,39 @@ function handleDelete(row: MallProductSpu) {
   }).catch(() => {})
 }
 
+let _skuRowKey = 0
+
+/** SKU 管理添加按钮操作 */
+function handleAddMallProductSku() {
+  let obj = { _rowKey: ++_skuRowKey } as MallProductSku
+  obj.skuCode = undefined
+  obj.skuName = undefined
+  obj.attrsJson = undefined
+  obj.price = undefined
+  obj.marketPrice = undefined
+  obj.costPrice = undefined
+  obj.image = undefined
+  obj.weight = undefined
+  obj.salesCount = undefined
+  obj.isDeleted = undefined
+  mallProductSkuList.value.push(obj)
+}
+
+/** SKU 管理删除按钮操作 */
+function handleDeleteMallProductSku() {
+  if (checkedMallProductSku.value.length == 0) {
+    proxy.$modal.msgError("请先选择要删除的SKU 管理数据")
+  } else {
+    const checkedSet = new Set(checkedMallProductSku.value)
+    mallProductSkuList.value = mallProductSkuList.value.filter((item: any) => !checkedSet.has(item))
+  }
+}
+
+/** 复选框选中数据 */
+function handleMallProductSkuSelectionChange(selection: any[]) {
+  checkedMallProductSku.value = selection
+}
+
 /** 导出按钮操作 */
 function handleExport() {
   proxy.download('mall-product/spu/export', {
@@ -304,3 +369,6 @@ function handleExport() {
 
 getList()
 </script>
+
+<style scoped lang="scss">
+</style>

@@ -35,6 +35,7 @@ public class MallProductBrand extends BaseEntity
     private String sortOrder;
 
     /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
     public void setId(String id) 

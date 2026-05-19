@@ -3,7 +3,7 @@ package com.mall.product.domain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
-import com.ruoyi.common.core.web.domain.BaseEntity;
+import com.ruoyi.common.core.web.domain.TreeEntity;
 
 /**
  * 商品类目对象 mall_product_category
@@ -11,16 +11,12 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
  * @author ruoyi
  * @date 2026-05-19
  */
-public class MallProductCategory extends BaseEntity
+public class MallProductCategory extends TreeEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 主键，自增 */
     private String id;
-
-    /** 父类目 ID */
-    @Excel(name = "父类目 ID")
-    private String parentId;
 
     /** 类目名称 */
     @Excel(name = "类目名称")
@@ -30,8 +26,8 @@ public class MallProductCategory extends BaseEntity
     @Excel(name = "类目层级")
     private String level;
 
-    /** 类目标识图标 URL */
-    @Excel(name = "类目标识图标 URL")
+    /** 类目标识图标 */
+    @Excel(name = "类目标识图标")
     private String icon;
 
     /** 排序值 */
@@ -57,16 +53,6 @@ public class MallProductCategory extends BaseEntity
     public String getId() 
     {
         return id;
-    }
-
-    public void setParentId(String parentId) 
-    {
-        this.parentId = parentId;
-    }
-
-    public String getParentId() 
-    {
-        return parentId;
     }
 
     public void setName(String name) 

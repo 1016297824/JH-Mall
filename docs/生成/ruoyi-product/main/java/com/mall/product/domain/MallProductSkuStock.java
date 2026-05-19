@@ -18,12 +18,12 @@ public class MallProductSkuStock extends BaseEntity
     /** 主键，自增 */
     private String id;
 
-    /** SKU ID */
-    @Excel(name = "SKU ID")
+    /** SKU ID，与 SKU 一对一 */
+    @Excel(name = "SKU ID，与 SKU 一对一")
     private String skuId;
 
-    /** 总库存 */
-    @Excel(name = "总库存")
+    /** 总库存 = 可用 + 锁定 + 已售 + 冻结 */
+    @Excel(name = "总库存 = 可用 + 锁定 + 已售 + 冻结")
     private String totalStock;
 
     /** 可用库存 */
@@ -43,9 +43,11 @@ public class MallProductSkuStock extends BaseEntity
     private String frozenStock;
 
     /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    /** 乐观锁版本号 */
+    /** 乐观锁版本号，库存扣减防超卖 */
+    @Excel(name = "乐观锁版本号，库存扣减防超卖")
     private String version;
 
     public void setId(String id) 

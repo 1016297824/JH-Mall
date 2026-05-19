@@ -8,6 +8,5 @@
 // mall-product 模块
 export * from "./mall-product/brand";
 export * from "./mall-product/category";
-export * from "./mall-product/sku";
 export * from "./mall-product/stock";
 export * from "./mall-product/spu";

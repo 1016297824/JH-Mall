@@ -4,7 +4,7 @@ import type { PageDomain, BaseEntity } from "../common";
 export interface StockQueryParams extends PageDomain {
   /** SKU ID，与 SKU 一对一 */
   skuId?: string;
-  /** 总库存 */
+  /** 总库存 = 可用 + 锁定 + 已售 + 冻结 */
   totalStock?: string;
   /** 可用库存 */
   availableStock?: string;
@@ -26,7 +26,7 @@ export interface MallProductSkuStock extends BaseEntity {
   id?: string;
   /** SKU ID，与 SKU 一对一 */
   skuId?: string;
-  /** 总库存 */
+  /** 总库存 = 可用 + 锁定 + 已售 + 冻结 */
   totalStock?: string;
   /** 可用库存 */
   availableStock?: string;

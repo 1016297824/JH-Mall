@@ -4,6 +4,10 @@ import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import com.ruoyi.common.core.utils.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
+import com.mall.product.domain.MallProductSku;
 import com.mall.product.mapper.MallProductSpuMapper;
 import com.mall.product.domain.MallProductSpu;
 import com.mall.product.service.IMallProductSpuService;
@@ -50,11 +54,14 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
+    @Transactional
     @Override
     public int insertMallProductSpu(MallProductSpu mallProductSpu)
     {
         mallProductSpu.setCreateTime(DateUtils.getNowDate());
-        return mallProductSpuMapper.insertMallProductSpu(mallProductSpu);
+        int rows = mallProductSpuMapper.insertMallProductSpu(mallProductSpu);
+        insertMallProductSku(mallProductSpu);
+        return rows;
     }
 
     /**
@@ -63,10 +70,13 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
+    @Transactional
     @Override
     public int updateMallProductSpu(MallProductSpu mallProductSpu)
     {
         mallProductSpu.setUpdateTime(DateUtils.getNowDate());
+        mallProductSpuMapper.deleteMallProductSkuBySpuId(mallProductSpu.getId());
+        insertMallProductSku(mallProductSpu);
         return mallProductSpuMapper.updateMallProductSpu(mallProductSpu);
     }
 
@@ -76,9 +86,11 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
      * @param ids 需要删除的SPU 管理主键
      * @return 结果
      */
+    @Transactional
     @Override
     public int deleteMallProductSpuByIds(String[] ids)
     {
+        mallProductSpuMapper.deleteMallProductSkuBySpuIds(ids);
         return mallProductSpuMapper.deleteMallProductSpuByIds(ids);
     }
 
@@ -88,9 +100,35 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
      * @param id SPU 管理主键
      * @return 结果
      */
+    @Transactional
     @Override
     public int deleteMallProductSpuById(String id)
     {
+        mallProductSpuMapper.deleteMallProductSkuBySpuId(id);
         return mallProductSpuMapper.deleteMallProductSpuById(id);
+    }
+
+    /**
+     * 新增SKU 管理信息
+     * 
+     * @param mallProductSpu SPU 管理对象
+     */
+    public void insertMallProductSku(MallProductSpu mallProductSpu)
+    {
+        List<MallProductSku> mallProductSkuList = mallProductSpu.getMallProductSkuList();
+        String id = mallProductSpu.getId();
+        if (StringUtils.isNotNull(mallProductSkuList))
+        {
+            List<MallProductSku> list = new ArrayList<MallProductSku>();
+            for (MallProductSku mallProductSku : mallProductSkuList)
+            {
+                mallProductSku.setSpuId(id);
+                list.add(mallProductSku);
+            }
+            if (list.size() > 0)
+            {
+                mallProductSpuMapper.batchMallProductSku(list);
+            }
+        }
     }
 }

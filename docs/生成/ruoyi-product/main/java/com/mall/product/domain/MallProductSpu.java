@@ -1,5 +1,6 @@
 package com.mall.product.domain;
 
+import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
@@ -15,7 +16,7 @@ public class MallProductSpu extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** 主键 */
+    /** 主键，自增 */
     private String id;
 
     /** 所属三级类目 ID */
@@ -30,7 +31,7 @@ public class MallProductSpu extends BaseEntity
     @Excel(name = "SPU 名称", readConverterExp = "商=品标题")
     private String spuName;
 
-    /** 商品详情描述 */
+    /** 商品详情描述（富文本 HTML） */
     @Excel(name = "商品详情描述", readConverterExp = "富=文本,H=TML")
     private String spuDescription;
 
@@ -67,10 +68,15 @@ public class MallProductSpu extends BaseEntity
     private String verifyStatus;
 
     /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
     /** 乐观锁版本号 */
+    @Excel(name = "乐观锁版本号")
     private String version;
+
+    /** SKU 管理信息 */
+    private List<MallProductSku> mallProductSkuList;
 
     public void setId(String id) 
     {
@@ -222,6 +228,16 @@ public class MallProductSpu extends BaseEntity
         return version;
     }
 
+    public List<MallProductSku> getMallProductSkuList()
+    {
+        return mallProductSkuList;
+    }
+
+    public void setMallProductSkuList(List<MallProductSku> mallProductSkuList)
+    {
+        this.mallProductSkuList = mallProductSkuList;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -244,6 +260,7 @@ public class MallProductSpu extends BaseEntity
             .append("createTime", getCreateTime())
             .append("updateTime", getUpdateTime())
             .append("version", getVersion())
+            .append("mallProductSkuList", getMallProductSkuList())
             .toString();
     }
 }

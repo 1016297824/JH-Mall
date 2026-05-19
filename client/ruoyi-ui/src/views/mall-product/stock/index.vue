@@ -51,15 +51,15 @@
 
     <el-table v-loading="loading" :data="stockList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键，自增" align="center" prop="id" />
-      <el-table-column label="SKU ID，与 SKU 一对一" align="center" prop="skuId" />
+      <el-table-column label="ID" align="center" prop="id" />
+      <el-table-column label="所属 SKU" align="center" prop="skuId" />
       <el-table-column label="总库存" align="center" prop="totalStock" />
       <el-table-column label="可用库存" align="center" prop="availableStock" />
       <el-table-column label="锁定库存" align="center" prop="lockedStock" />
       <el-table-column label="已售库存" align="center" prop="soldStock" />
       <el-table-column label="冻结库存" align="center" prop="frozenStock" />
-      <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
-      <el-table-column label="乐观锁版本号，库存扣减防超卖" align="center" prop="version" />
+      <el-table-column label="状态" align="center" prop="isDeleted" />
+      <el-table-column label="版本号" align="center" prop="version" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:stock:edit']">修改</el-button>
@@ -124,7 +124,7 @@ const data = reactive({
   } as StockQueryParams,
   rules: {
     skuId: [
-      { required: true, message: "SKU ID，与 SKU 一对一不能为空", trigger: "blur" }
+      { required: true, message: "所属 SKU 不能为空", trigger: "blur" }
     ],
     createTime: [
       { required: true, message: "创建时间不能为空", trigger: "blur" }
@@ -249,3 +249,6 @@ function handleExport() {
 
 getList()
 </script>
+
+<style scoped lang="scss">
+</style>

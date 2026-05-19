@@ -53,7 +53,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键，自增" align="center" prop="id" />
       <el-table-column label="SKU ID，与 SKU 一对一" align="center" prop="skuId" />
-      <el-table-column label="总库存" align="center" prop="totalStock" />
+      <el-table-column label="总库存 = 可用 + 锁定 + 已售 + 冻结" align="center" prop="totalStock" />
       <el-table-column label="可用库存" align="center" prop="availableStock" />
       <el-table-column label="锁定库存" align="center" prop="lockedStock" />
       <el-table-column label="已售库存" align="center" prop="soldStock" />

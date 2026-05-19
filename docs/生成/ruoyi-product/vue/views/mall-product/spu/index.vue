@@ -119,6 +119,33 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-divider content-position="center">SKU 管理信息</el-divider>
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button type="primary" icon="Plus" @click="handleAddMallProductSku">添加</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button type="danger" icon="Delete" @click="handleDeleteMallProductSku">删除</el-button>
+          </el-col>
+        </el-row>
+        <el-table :data="mallProductSkuList" @selection-change="handleMallProductSkuSelectionChange" ref="mallProductSku">
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column label="序号" width="60">
+            <template #default="{ $index }">
+              {{ $index + 1 }}
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU 编码" prop="skuCode" width="150">
+            <template #default="scope">
+              <el-input v-model="scope.row.skuCode" placeholder="请输入SKU 编码" />
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU 销售名称" prop="skuName" width="150">
+            <template #default="scope">
+              <el-input v-model="scope.row.skuName" placeholder="请输入SKU 销售名称" />
+            </template>
+          </el-table-column>
+        </el-table>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -131,16 +158,18 @@
 </template>
 
 <script setup lang="ts" name="Spu">
-import type { MallProductSpu, SpuQueryParams } from "@/types/api/mall-product/spu"
+import type { MallProductSpu, MallProductSku, SpuQueryParams } from "@/types/api/mall-product/spu"
 import { listSpu, getSpu, delSpu, addSpu, updateSpu } from "@/api/mall-product/spu"
 
 const { proxy } = getCurrentInstance()
 
 const spuList = ref<MallProductSpu[]>([])
+const mallProductSkuList = ref([])
 const open = ref<boolean>(false)
 const loading = ref<boolean>(true)
 const showSearch = ref<boolean>(true)
 const ids = ref<number[]>([])
+const checkedMallProductSku = ref([])
 const single = ref<boolean>(true)
 const multiple = ref<boolean>(true)
 const total = ref<number>(0)
@@ -223,6 +252,7 @@ function reset() {
     updateTime: null,
     version: null
   }
+  mallProductSkuList.value = []
   proxy.resetForm("spuRef")
 }
 
@@ -258,6 +288,7 @@ function handleUpdate(row: MallProductSpu) {
   const _id = row.id || ids.value[0]
   getSpu(_id).then(response => {
     form.value = response.data
+    mallProductSkuList.value = response.data?.mallProductSkuList ?? []
     open.value = true
     title.value = "修改SPU 管理"
   })
@@ -267,6 +298,7 @@ function handleUpdate(row: MallProductSpu) {
 function submitForm() {
   proxy.$refs["spuRef"].validate((valid: boolean) => {
     if (valid) {
+      form.value.mallProductSkuList = mallProductSkuList.value
       if (form.value.id != null) {
         updateSpu(form.value).then(() => {
           proxy.$modal.msgSuccess("修改成功")
@@ -293,6 +325,40 @@ function handleDelete(row: MallProductSpu) {
     getList()
     proxy.$modal.msgSuccess("删除成功")
   }).catch(() => {})
+}
+
+/** SKU 管理添加按钮操作 */
+function handleAddMallProductSku() {
+  let obj: MallProductSku = {}
+  obj.skuCode = undefined
+  obj.skuName = undefined
+  obj.attrsJson = undefined
+  obj.price = undefined
+  obj.marketPrice = undefined
+  obj.costPrice = undefined
+  obj.image = undefined
+  obj.weight = undefined
+  obj.salesCount = undefined
+  obj.isDeleted = undefined
+  mallProductSkuList.value.push(obj)
+}
+
+/** SKU 管理删除按钮操作 */
+function handleDeleteMallProductSku() {
+  if (checkedMallProductSku.value.length == 0) {
+    proxy.$modal.msgError("请先选择要删除的SKU 管理数据")
+  } else {
+    const mallProductSkus = mallProductSkuList.value
+    const checkedMallProductSkus = checkedMallProductSku.value
+    mallProductSkuList.value = mallProductSkus.filter(function(item: any) {
+      return checkedMallProductSkus.indexOf(item.index) == -1
+    })
+  }
+}
+
+/** 复选框选中数据 */
+function handleMallProductSkuSelectionChange(selection: any[]) {
+  checkedMallProductSku.value = selection.map(item => item.index)
 }
 
 /** 导出按钮操作 */

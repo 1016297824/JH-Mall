@@ -96,7 +96,7 @@ public class MallProductSkuStockController extends BaseController
      */
     @RequiresPermissions("mall-product:stock:remove")
     @Log(title = "库存管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallProductSkuStockService.deleteMallProductSkuStockByIds(ids));

@@ -96,7 +96,7 @@ public class MallProductBrandController extends BaseController
      */
     @RequiresPermissions("mall-product:brand:remove")
     @Log(title = "品牌管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallProductBrandService.deleteMallProductBrandByIds(ids));
