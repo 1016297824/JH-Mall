@@ -1,4 +1,4 @@
-$tmp = "$env:TEMP\cloc_raw.csv"
+﻿$tmp = "$env:TEMP\cloc_raw.csv"
 & "G:\scoop\shims\cloc.exe" client/ruoyi-ui/ server/ruoyi/ server/mall/ `
   --exclude-dir=node_modules,target --csv --quiet --out=$tmp
 
