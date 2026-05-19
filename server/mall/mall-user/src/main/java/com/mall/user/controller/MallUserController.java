@@ -96,7 +96,7 @@ public class MallUserController extends BaseController
      */
     @RequiresPermissions("mall-user:user:remove")
     @Log(title = "用户账号", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallUserService.deleteMallUserByIds(ids));

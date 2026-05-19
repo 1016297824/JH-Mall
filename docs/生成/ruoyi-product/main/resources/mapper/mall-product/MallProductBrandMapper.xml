@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.product.mapper.MallProductBrandMapper">
+    
+    <resultMap type="MallProductBrand" id="MallProductBrandResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="logo"    column="logo"    />
+        <result property="description"    column="description"    />
+        <result property="sortOrder"    column="sort_order"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallProductBrandVo">
+        select id, name, logo, description, sort_order, is_deleted, create_time, update_time from mall_product_brand
+    </sql>
+
+    <select id="selectMallProductBrandList" parameterType="MallProductBrand" resultMap="MallProductBrandResult">
+        <include refid="selectMallProductBrandVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="logo != null  and logo != ''"> and logo = #{logo}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="sortOrder != null  and sortOrder != ''"> and sort_order = #{sortOrder}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallProductBrandById" parameterType="String" resultMap="MallProductBrandResult">
+        <include refid="selectMallProductBrandVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallProductBrand" parameterType="MallProductBrand" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_product_brand
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="logo != null">logo,</if>
+            <if test="description != null">description,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="logo != null">#{logo},</if>
+            <if test="description != null">#{description},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallProductBrand" parameterType="MallProductBrand">
+        update mall_product_brand
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallProductBrandById" parameterType="String">
+        delete from mall_product_brand where id = #{id}
+    </delete>
+
+    <delete id="deleteMallProductBrandByIds" parameterType="String">
+        delete from mall_product_brand where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -17,7 +17,7 @@ public interface MallUserPointsAccountMapper
      * @param id 积分账户主键
      * @return 积分账户
      */
-    public MallUserPointsAccount selectMallUserPointsAccountById(String id);
+    MallUserPointsAccount selectMallUserPointsAccountById(String id);
 
     /**
      * 查询积分账户列表
@@ -25,7 +25,7 @@ public interface MallUserPointsAccountMapper
      * @param mallUserPointsAccount 积分账户
      * @return 积分账户集合
      */
-    public List<MallUserPointsAccount> selectMallUserPointsAccountList(MallUserPointsAccount mallUserPointsAccount);
+    List<MallUserPointsAccount> selectMallUserPointsAccountList(MallUserPointsAccount mallUserPointsAccount);
 
     /**
      * 新增积分账户
@@ -33,7 +33,7 @@ public interface MallUserPointsAccountMapper
      * @param mallUserPointsAccount 积分账户
      * @return 结果
      */
-    public int insertMallUserPointsAccount(MallUserPointsAccount mallUserPointsAccount);
+    int insertMallUserPointsAccount(MallUserPointsAccount mallUserPointsAccount);
 
     /**
      * 修改积分账户
@@ -41,7 +41,7 @@ public interface MallUserPointsAccountMapper
      * @param mallUserPointsAccount 积分账户
      * @return 结果
      */
-    public int updateMallUserPointsAccount(MallUserPointsAccount mallUserPointsAccount);
+    int updateMallUserPointsAccount(MallUserPointsAccount mallUserPointsAccount);
 
     /**
      * 删除积分账户
@@ -49,7 +49,7 @@ public interface MallUserPointsAccountMapper
      * @param id 积分账户主键
      * @return 结果
      */
-    public int deleteMallUserPointsAccountById(String id);
+    int deleteMallUserPointsAccountById(String id);
 
     /**
      * 批量删除积分账户
@@ -57,5 +57,5 @@ public interface MallUserPointsAccountMapper
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteMallUserPointsAccountByIds(String[] ids);
+    int deleteMallUserPointsAccountByIds(String[] ids);
 }

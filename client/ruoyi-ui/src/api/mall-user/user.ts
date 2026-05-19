@@ -1,5 +1,7 @@
 import request from '@/utils/request'
-import type { AjaxResult, TableDataInfo, UserQueryParams, MallUser } from '@/types'
+// import type { AjaxResult, TableDataInfo, UserQueryParams, MallUser } from '@/types'
+import type { AjaxResult, TableDataInfo } from '@/types'
+import type { UserQueryParams, MallUser } from '@/types/api/mall-user/user'
 
 // 查询用户账号列表
 export function listUser(query: UserQueryParams): Promise<TableDataInfo<MallUser[]>> {

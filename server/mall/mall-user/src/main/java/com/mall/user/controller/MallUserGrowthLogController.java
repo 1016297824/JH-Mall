@@ -96,7 +96,7 @@ public class MallUserGrowthLogController extends BaseController
      */
     @RequiresPermissions("mall-user:growth_log:remove")
     @Log(title = "成长值流水", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallUserGrowthLogService.deleteMallUserGrowthLogByIds(ids));

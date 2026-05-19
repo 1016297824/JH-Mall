@@ -29,4 +29,11 @@
         <module>mall-search</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-swagger</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

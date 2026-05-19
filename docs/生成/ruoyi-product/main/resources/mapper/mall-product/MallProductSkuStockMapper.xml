@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.product.mapper.MallProductSkuStockMapper">
+    
+    <resultMap type="MallProductSkuStock" id="MallProductSkuStockResult">
+        <result property="id"    column="id"    />
+        <result property="skuId"    column="sku_id"    />
+        <result property="totalStock"    column="total_stock"    />
+        <result property="availableStock"    column="available_stock"    />
+        <result property="lockedStock"    column="locked_stock"    />
+        <result property="soldStock"    column="sold_stock"    />
+        <result property="frozenStock"    column="frozen_stock"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <sql id="selectMallProductSkuStockVo">
+        select id, sku_id, total_stock, available_stock, locked_stock, sold_stock, frozen_stock, is_deleted, create_time, update_time, version from mall_product_sku_stock
+    </sql>
+
+    <select id="selectMallProductSkuStockList" parameterType="MallProductSkuStock" resultMap="MallProductSkuStockResult">
+        <include refid="selectMallProductSkuStockVo"/>
+        <where>  
+            <if test="skuId != null  and skuId != ''"> and sku_id = #{skuId}</if>
+            <if test="totalStock != null  and totalStock != ''"> and total_stock = #{totalStock}</if>
+            <if test="availableStock != null  and availableStock != ''"> and available_stock = #{availableStock}</if>
+            <if test="lockedStock != null  and lockedStock != ''"> and locked_stock = #{lockedStock}</if>
+            <if test="soldStock != null  and soldStock != ''"> and sold_stock = #{soldStock}</if>
+            <if test="frozenStock != null  and frozenStock != ''"> and frozen_stock = #{frozenStock}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+            <if test="version != null  and version != ''"> and version = #{version}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallProductSkuStockById" parameterType="String" resultMap="MallProductSkuStockResult">
+        <include refid="selectMallProductSkuStockVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallProductSkuStock" parameterType="MallProductSkuStock" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_product_sku_stock
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="skuId != null and skuId != ''">sku_id,</if>
+            <if test="totalStock != null">total_stock,</if>
+            <if test="availableStock != null">available_stock,</if>
+            <if test="lockedStock != null">locked_stock,</if>
+            <if test="soldStock != null">sold_stock,</if>
+            <if test="frozenStock != null">frozen_stock,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="version != null">version,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="skuId != null and skuId != ''">#{skuId},</if>
+            <if test="totalStock != null">#{totalStock},</if>
+            <if test="availableStock != null">#{availableStock},</if>
+            <if test="lockedStock != null">#{lockedStock},</if>
+            <if test="soldStock != null">#{soldStock},</if>
+            <if test="frozenStock != null">#{frozenStock},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="version != null">#{version},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallProductSkuStock" parameterType="MallProductSkuStock">
+        update mall_product_sku_stock
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="skuId != null and skuId != ''">sku_id = #{skuId},</if>
+            <if test="totalStock != null">total_stock = #{totalStock},</if>
+            <if test="availableStock != null">available_stock = #{availableStock},</if>
+            <if test="lockedStock != null">locked_stock = #{lockedStock},</if>
+            <if test="soldStock != null">sold_stock = #{soldStock},</if>
+            <if test="frozenStock != null">frozen_stock = #{frozenStock},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="version != null">version = #{version},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallProductSkuStockById" parameterType="String">
+        delete from mall_product_sku_stock where id = #{id}
+    </delete>
+
+    <delete id="deleteMallProductSkuStockByIds" parameterType="String">
+        delete from mall_product_sku_stock where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

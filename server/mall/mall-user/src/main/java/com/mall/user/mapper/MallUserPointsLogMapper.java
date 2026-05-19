@@ -17,7 +17,7 @@ public interface MallUserPointsLogMapper
      * @param id 积分流水主键
      * @return 积分流水
      */
-    public MallUserPointsLog selectMallUserPointsLogById(String id);
+    MallUserPointsLog selectMallUserPointsLogById(String id);
 
     /**
      * 查询积分流水列表
@@ -25,7 +25,7 @@ public interface MallUserPointsLogMapper
      * @param mallUserPointsLog 积分流水
      * @return 积分流水集合
      */
-    public List<MallUserPointsLog> selectMallUserPointsLogList(MallUserPointsLog mallUserPointsLog);
+    List<MallUserPointsLog> selectMallUserPointsLogList(MallUserPointsLog mallUserPointsLog);
 
     /**
      * 新增积分流水
@@ -33,7 +33,7 @@ public interface MallUserPointsLogMapper
      * @param mallUserPointsLog 积分流水
      * @return 结果
      */
-    public int insertMallUserPointsLog(MallUserPointsLog mallUserPointsLog);
+    int insertMallUserPointsLog(MallUserPointsLog mallUserPointsLog);
 
     /**
      * 修改积分流水
@@ -41,7 +41,7 @@ public interface MallUserPointsLogMapper
      * @param mallUserPointsLog 积分流水
      * @return 结果
      */
-    public int updateMallUserPointsLog(MallUserPointsLog mallUserPointsLog);
+    int updateMallUserPointsLog(MallUserPointsLog mallUserPointsLog);
 
     /**
      * 删除积分流水
@@ -49,7 +49,7 @@ public interface MallUserPointsLogMapper
      * @param id 积分流水主键
      * @return 结果
      */
-    public int deleteMallUserPointsLogById(String id);
+    int deleteMallUserPointsLogById(String id);
 
     /**
      * 批量删除积分流水
@@ -57,5 +57,5 @@ public interface MallUserPointsLogMapper
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteMallUserPointsLogByIds(String[] ids);
+    int deleteMallUserPointsLogByIds(String[] ids);
 }

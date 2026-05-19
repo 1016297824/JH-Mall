@@ -17,7 +17,7 @@ public interface MallUserGrowthLogMapper
      * @param id 成长值流水主键
      * @return 成长值流水
      */
-    public MallUserGrowthLog selectMallUserGrowthLogById(String id);
+    MallUserGrowthLog selectMallUserGrowthLogById(String id);
 
     /**
      * 查询成长值流水列表
@@ -25,7 +25,7 @@ public interface MallUserGrowthLogMapper
      * @param mallUserGrowthLog 成长值流水
      * @return 成长值流水集合
      */
-    public List<MallUserGrowthLog> selectMallUserGrowthLogList(MallUserGrowthLog mallUserGrowthLog);
+    List<MallUserGrowthLog> selectMallUserGrowthLogList(MallUserGrowthLog mallUserGrowthLog);
 
     /**
      * 新增成长值流水
@@ -33,7 +33,7 @@ public interface MallUserGrowthLogMapper
      * @param mallUserGrowthLog 成长值流水
      * @return 结果
      */
-    public int insertMallUserGrowthLog(MallUserGrowthLog mallUserGrowthLog);
+    int insertMallUserGrowthLog(MallUserGrowthLog mallUserGrowthLog);
 
     /**
      * 修改成长值流水
@@ -41,7 +41,7 @@ public interface MallUserGrowthLogMapper
      * @param mallUserGrowthLog 成长值流水
      * @return 结果
      */
-    public int updateMallUserGrowthLog(MallUserGrowthLog mallUserGrowthLog);
+    int updateMallUserGrowthLog(MallUserGrowthLog mallUserGrowthLog);
 
     /**
      * 删除成长值流水
@@ -49,7 +49,7 @@ public interface MallUserGrowthLogMapper
      * @param id 成长值流水主键
      * @return 结果
      */
-    public int deleteMallUserGrowthLogById(String id);
+    int deleteMallUserGrowthLogById(String id);
 
     /**
      * 批量删除成长值流水
@@ -57,5 +57,5 @@ public interface MallUserGrowthLogMapper
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteMallUserGrowthLogByIds(String[] ids);
+    int deleteMallUserGrowthLogByIds(String[] ids);
 }

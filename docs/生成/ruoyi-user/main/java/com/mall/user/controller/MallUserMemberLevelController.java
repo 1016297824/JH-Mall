@@ -96,7 +96,7 @@ public class MallUserMemberLevelController extends BaseController
      */
     @RequiresPermissions("mall-user:level:remove")
     @Log(title = "会员等级定义", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallUserMemberLevelService.deleteMallUserMemberLevelByIds(ids));

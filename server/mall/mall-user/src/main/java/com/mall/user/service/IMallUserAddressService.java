@@ -17,7 +17,7 @@ public interface IMallUserAddressService
      * @param id 地址簿主键
      * @return 地址簿
      */
-    public MallUserAddress selectMallUserAddressById(String id);
+    MallUserAddress selectMallUserAddressById(String id);
 
     /**
      * 查询地址簿列表
@@ -25,7 +25,7 @@ public interface IMallUserAddressService
      * @param mallUserAddress 地址簿
      * @return 地址簿集合
      */
-    public List<MallUserAddress> selectMallUserAddressList(MallUserAddress mallUserAddress);
+    List<MallUserAddress> selectMallUserAddressList(MallUserAddress mallUserAddress);
 
     /**
      * 新增地址簿
@@ -33,7 +33,7 @@ public interface IMallUserAddressService
      * @param mallUserAddress 地址簿
      * @return 结果
      */
-    public int insertMallUserAddress(MallUserAddress mallUserAddress);
+    int insertMallUserAddress(MallUserAddress mallUserAddress);
 
     /**
      * 修改地址簿
@@ -41,7 +41,7 @@ public interface IMallUserAddressService
      * @param mallUserAddress 地址簿
      * @return 结果
      */
-    public int updateMallUserAddress(MallUserAddress mallUserAddress);
+    int updateMallUserAddress(MallUserAddress mallUserAddress);
 
     /**
      * 批量删除地址簿
@@ -49,7 +49,7 @@ public interface IMallUserAddressService
      * @param ids 需要删除的地址簿主键集合
      * @return 结果
      */
-    public int deleteMallUserAddressByIds(String[] ids);
+    int deleteMallUserAddressByIds(String[] ids);
 
     /**
      * 删除地址簿信息
@@ -57,5 +57,5 @@ public interface IMallUserAddressService
      * @param id 地址簿主键
      * @return 结果
      */
-    public int deleteMallUserAddressById(String id);
+    int deleteMallUserAddressById(String id);
 }

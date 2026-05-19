@@ -96,7 +96,7 @@ public class MallUserAddressController extends BaseController
      */
     @RequiresPermissions("mall-user:address:remove")
     @Log(title = "地址簿", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallUserAddressService.deleteMallUserAddressByIds(ids));

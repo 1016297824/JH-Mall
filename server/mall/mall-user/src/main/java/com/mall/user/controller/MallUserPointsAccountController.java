@@ -96,7 +96,7 @@ public class MallUserPointsAccountController extends BaseController
      */
     @RequiresPermissions("mall-user:account:remove")
     @Log(title = "积分账户", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallUserPointsAccountService.deleteMallUserPointsAccountByIds(ids));

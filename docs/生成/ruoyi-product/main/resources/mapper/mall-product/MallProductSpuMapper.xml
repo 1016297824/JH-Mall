@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.product.mapper.MallProductSpuMapper">
+    
+    <resultMap type="MallProductSpu" id="MallProductSpuResult">
+        <result property="id"    column="id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="brandId"    column="brand_id"    />
+        <result property="spuName"    column="spu_name"    />
+        <result property="spuDescription"    column="spu_description"    />
+        <result property="mainImage"    column="main_image"    />
+        <result property="imagesJson"    column="images_json"    />
+        <result property="priceMin"    column="price_min"    />
+        <result property="priceMax"    column="price_max"    />
+        <result property="salesCount"    column="sales_count"    />
+        <result property="reviewCount"    column="review_count"    />
+        <result property="publishStatus"    column="publish_status"    />
+        <result property="verifyStatus"    column="verify_status"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <sql id="selectMallProductSpuVo">
+        select id, category_id, brand_id, spu_name, spu_description, main_image, images_json, price_min, price_max, sales_count, review_count, publish_status, verify_status, is_deleted, create_by, update_by, create_time, update_time, version from mall_product_spu
+    </sql>
+
+    <select id="selectMallProductSpuList" parameterType="MallProductSpu" resultMap="MallProductSpuResult">
+        <include refid="selectMallProductSpuVo"/>
+        <where>  
+            <if test="categoryId != null  and categoryId != ''"> and category_id = #{categoryId}</if>
+            <if test="brandId != null  and brandId != ''"> and brand_id = #{brandId}</if>
+            <if test="spuName != null  and spuName != ''"> and spu_name like concat('%', #{spuName}, '%')</if>
+            <if test="spuDescription != null  and spuDescription != ''"> and spu_description = #{spuDescription}</if>
+            <if test="mainImage != null  and mainImage != ''"> and main_image = #{mainImage}</if>
+            <if test="imagesJson != null  and imagesJson != ''"> and images_json = #{imagesJson}</if>
+            <if test="priceMin != null  and priceMin != ''"> and price_min = #{priceMin}</if>
+            <if test="priceMax != null  and priceMax != ''"> and price_max = #{priceMax}</if>
+            <if test="salesCount != null  and salesCount != ''"> and sales_count = #{salesCount}</if>
+            <if test="reviewCount != null  and reviewCount != ''"> and review_count = #{reviewCount}</if>
+            <if test="publishStatus != null  and publishStatus != ''"> and publish_status = #{publishStatus}</if>
+            <if test="verifyStatus != null  and verifyStatus != ''"> and verify_status = #{verifyStatus}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+            <if test="version != null  and version != ''"> and version = #{version}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallProductSpuById" parameterType="String" resultMap="MallProductSpuResult">
+        <include refid="selectMallProductSpuVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallProductSpu" parameterType="MallProductSpu" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_product_spu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null and categoryId != ''">category_id,</if>
+            <if test="brandId != null">brand_id,</if>
+            <if test="spuName != null and spuName != ''">spu_name,</if>
+            <if test="spuDescription != null">spu_description,</if>
+            <if test="mainImage != null">main_image,</if>
+            <if test="imagesJson != null">images_json,</if>
+            <if test="priceMin != null">price_min,</if>
+            <if test="priceMax != null">price_max,</if>
+            <if test="salesCount != null">sales_count,</if>
+            <if test="reviewCount != null">review_count,</if>
+            <if test="publishStatus != null">publish_status,</if>
+            <if test="verifyStatus != null">verify_status,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="version != null">version,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null and categoryId != ''">#{categoryId},</if>
+            <if test="brandId != null">#{brandId},</if>
+            <if test="spuName != null and spuName != ''">#{spuName},</if>
+            <if test="spuDescription != null">#{spuDescription},</if>
+            <if test="mainImage != null">#{mainImage},</if>
+            <if test="imagesJson != null">#{imagesJson},</if>
+            <if test="priceMin != null">#{priceMin},</if>
+            <if test="priceMax != null">#{priceMax},</if>
+            <if test="salesCount != null">#{salesCount},</if>
+            <if test="reviewCount != null">#{reviewCount},</if>
+            <if test="publishStatus != null">#{publishStatus},</if>
+            <if test="verifyStatus != null">#{verifyStatus},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="version != null">#{version},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallProductSpu" parameterType="MallProductSpu">
+        update mall_product_spu
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="categoryId != null and categoryId != ''">category_id = #{categoryId},</if>
+            <if test="brandId != null">brand_id = #{brandId},</if>
+            <if test="spuName != null and spuName != ''">spu_name = #{spuName},</if>
+            <if test="spuDescription != null">spu_description = #{spuDescription},</if>
+            <if test="mainImage != null">main_image = #{mainImage},</if>
+            <if test="imagesJson != null">images_json = #{imagesJson},</if>
+            <if test="priceMin != null">price_min = #{priceMin},</if>
+            <if test="priceMax != null">price_max = #{priceMax},</if>
+            <if test="salesCount != null">sales_count = #{salesCount},</if>
+            <if test="reviewCount != null">review_count = #{reviewCount},</if>
+            <if test="publishStatus != null">publish_status = #{publishStatus},</if>
+            <if test="verifyStatus != null">verify_status = #{verifyStatus},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="version != null">version = #{version},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallProductSpuById" parameterType="String">
+        delete from mall_product_spu where id = #{id}
+    </delete>
+
+    <delete id="deleteMallProductSpuByIds" parameterType="String">
+        delete from mall_product_spu where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

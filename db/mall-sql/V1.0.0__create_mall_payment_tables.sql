@@ -9,12 +9,12 @@
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `mall_payment` (
     `id`                 bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
-    `payment_no`         varchar(32)     NOT NULL                        COMMENT '支付单号，格式 PAY + 时间戳 + 随机数',
+    `payment_no`         varchar(32)     NOT NULL                        COMMENT '支付单号',
     `order_no`           varchar(32)     NOT NULL                        COMMENT '关联订单号',
     `user_id`            bigint unsigned NOT NULL                        COMMENT '付款用户 ID',
     `pay_amount`         bigint unsigned NOT NULL                        COMMENT '支付金额（单位：分）',
     `channel_code`       varchar(20)     NOT NULL                        COMMENT '支付渠道编码',
-    `channel_payment_no` varchar(128)    DEFAULT NULL                    COMMENT '渠道侧支付单号，对账用',
+    `channel_payment_no` varchar(128)    DEFAULT NULL                    COMMENT '渠道侧支付单号',
     `channel_pay_status` varchar(20)     DEFAULT NULL                    COMMENT '渠道侧支付状态',
     `payment_status`     tinyint unsigned NOT NULL DEFAULT 0             COMMENT '支付单状态',
     `pay_success_time`   datetime        DEFAULT NULL                    COMMENT '支付成功时间',
@@ -41,15 +41,15 @@ CREATE TABLE IF NOT EXISTS `mall_payment` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `mall_payment_refund` (
     `id`                    bigint unsigned NOT NULL AUTO_INCREMENT         COMMENT '主键，自增',
-    `refund_no`             varchar(32)     NOT NULL                        COMMENT '退款单号，格式 REF + 时间戳 + 随机数',
+    `refund_no`             varchar(32)     NOT NULL                        COMMENT '退款单号',
     `payment_id`            bigint unsigned NOT NULL                        COMMENT '关联支付单 ID',
     `order_no`              varchar(32)     NOT NULL                        COMMENT '关联订单号',
     `after_sale_no`         varchar(32)     DEFAULT NULL                    COMMENT '关联售后单号',
     `user_id`               bigint unsigned NOT NULL                        COMMENT '退款用户 ID',
     `refund_amount`         bigint unsigned NOT NULL                        COMMENT '退款金额（单位：分）',
     `refund_reason`         varchar(200)    DEFAULT NULL                    COMMENT '退款原因',
-    `channel_code`          varchar(20)     NOT NULL                        COMMENT '退款渠道编码，必须与原始支付渠道一致',
-    `channel_refund_no`     varchar(128)    DEFAULT NULL                    COMMENT '渠道侧退款单号，对账用',
+    `channel_code`          varchar(20)     NOT NULL                        COMMENT '退款渠道编码',
+    `channel_refund_no`     varchar(128)    DEFAULT NULL                    COMMENT '渠道侧退款单号',
     `channel_refund_status` varchar(20)     DEFAULT NULL                    COMMENT '渠道侧退款状态',
     `refund_status`         tinyint unsigned NOT NULL DEFAULT 0             COMMENT '退款单状态',
     `refund_success_time`   datetime        DEFAULT NULL                    COMMENT '退款成功时间',
@@ -118,8 +118,8 @@ CREATE TABLE IF NOT EXISTS `mall_payment_callback_log` (
 -- 5. Outbox 消息表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `mall_outbox` (
-    `id`              bigint       NOT NULL                            COMMENT '主键，雪花 ID',
-    `message_id`      varchar(64)  NOT NULL                            COMMENT '消息全局唯一 ID（雪花），消费方幂等去重',
+    `id`              bigint       NOT NULL                            COMMENT '主键',
+    `message_id`      varchar(64)  NOT NULL                            COMMENT '消息全局唯一 ID',
     `topic`           varchar(128) NOT NULL                            COMMENT '消息主题',
     `event_type`      varchar(64)  NOT NULL                            COMMENT '事件类型',
     `aggregate_type`  varchar(64)  NOT NULL                            COMMENT '聚合类型',
