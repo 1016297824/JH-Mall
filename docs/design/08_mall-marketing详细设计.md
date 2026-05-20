@@ -20,7 +20,7 @@
 ### 1.2 依赖关系
 
 ```
-mall-marketing (9305端口)
+mall-marketing (9306端口)
   ├── MySQL：自有表（见表系统设计第 1.5 节）
   ├── Redis：领券防并发锁、秒杀活动库存缓存
   ├── RocketMQ (Producer)：写 Outbox → 投递 mall:coupon:used
@@ -391,7 +391,7 @@ mall:
 ```yaml
 # mall-marketing 营销服务
 server:
-  port: 9305
+  port: 9306
 
 spring:
   application:

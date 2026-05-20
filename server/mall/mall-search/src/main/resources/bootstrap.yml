@@ -1,6 +1,6 @@
 # mall-search 搜索服务
 server:
-  port: 9306
+  port: 9307
 
 spring:
   application:

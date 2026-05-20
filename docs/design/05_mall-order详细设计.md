@@ -562,7 +562,7 @@ mall:
 ```yaml
 # mall-order 订单服务
 server:
-  port: 9303
+  port: 9304
 
 spring:
   application:

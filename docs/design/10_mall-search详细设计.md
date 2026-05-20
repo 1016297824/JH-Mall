@@ -19,7 +19,7 @@
 ### 1.2 依赖关系
 
 ```
-mall-search (9306端口)
+mall-search (9307端口)
   ├── MySQL：无（不操作关系数据库）
   ├── Elasticsearch：索引 storage + 搜索查询
   ├── Redis：分布式锁（全量重建防并发）、搜索结果缓存（热点词 1min）
@@ -298,7 +298,7 @@ mall:
 ```yaml
 # mall-search 搜索服务
 server:
-  port: 9306
+  port: 9307
 
 spring:
   application:

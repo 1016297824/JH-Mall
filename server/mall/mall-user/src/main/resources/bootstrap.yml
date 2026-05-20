@@ -1,6 +1,6 @@
 # mall-user 用户服务
 server:
-  port: 9301
+  port: 9302
 
 spring:
   application:

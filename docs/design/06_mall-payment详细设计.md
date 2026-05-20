@@ -19,7 +19,7 @@
 ### 1.2 依赖关系
 
 ```
-mall-payment (9304端口)
+mall-payment (9305端口)
   ├── MySQL：自有表（见表系统设计第 1.4 节）
   ├── Redis：回调幂等去重 (mall:payment:callback:* / mall:payment:refund_callback:*)
   ├── RocketMQ (Producer)：写 Outbox → 投递 mall:payment:paid / mall:refund:succeeded / mall:refund:failed
@@ -560,7 +560,7 @@ mall:
 ```yaml
 # mall-payment 支付服务
 server:
-  port: 9304
+  port: 9305
 
 spring:
   application:

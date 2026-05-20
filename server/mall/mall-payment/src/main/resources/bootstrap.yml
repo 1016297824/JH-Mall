@@ -1,6 +1,6 @@
 # mall-payment 支付服务
 server:
-  port: 9304
+  port: 9305
 
 spring:
   application:

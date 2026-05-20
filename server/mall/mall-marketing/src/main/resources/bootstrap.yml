@@ -1,6 +1,6 @@
 # mall-marketing 营销服务
 server:
-  port: 9305
+  port: 9306
 
 spring:
   application:

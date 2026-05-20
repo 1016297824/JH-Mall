@@ -22,7 +22,7 @@
 ### 1.2 依赖关系
 
 ```
-mall-auth (9210端口)
+mall-auth (9301端口)
   ├── MySQL: 无自有表（用户数据通过 Feign 调用 mall-user 操作）
   ├── Redis: token/session/验证码/错误计数/黑名单
   ├── mall-api (Feign Client): RemoteUserService → mall-user
@@ -440,7 +440,7 @@ mall:
 ```yaml
 # mall-auth 认证服务
 server:
-  port: 9210
+  port: 9301
 
 spring:
   application:

@@ -21,7 +21,7 @@
 ### 1.2 依赖关系
 
 ```
-mall-product (9302端口)
+mall-product (9303端口)
   ├── MySQL：自有表（见表系统设计第 1.2 节）
   ├── Redis：SKU 缓存、类目树缓存、搜索降级锁
   ├── RocketMQ (Producer)：写 Outbox → 投递 mall:search:sync
@@ -414,7 +414,7 @@ mall:
 ```yaml
 # mall-product 商品服务
 server:
-  port: 9302
+  port: 9303
 
 spring:
   application:

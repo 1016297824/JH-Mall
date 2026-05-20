@@ -21,7 +21,7 @@
 ### 1.2 依赖关系
 
 ```
-mall-user (9301端口)
+mall-user (9302端口)
   ├── MySQL：自有表（见表系统设计第 1.1 节）
   ├── Redis：用户资料缓存
   ├── mall-auth (Feign Client)：调解密手机号
@@ -318,7 +318,7 @@ mall:
 ```yaml
 # mall-user 用户服务
 server:
-  port: 9301
+  port: 9302
 
 spring:
   application:

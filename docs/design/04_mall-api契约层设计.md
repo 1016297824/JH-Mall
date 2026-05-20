@@ -64,7 +64,7 @@ server/mall/mall-api/
 
 ### 3.1 RemoteUserService
 
-**提供方**：`mall-user`（9301）  
+**提供方**：`mall-user`（9302）  
 **调用方**：`mall-auth`（登录/注册）、`mall-order`（校验地址）
 
 | 方法 | 参数 | 返回 | 说明 |
@@ -80,7 +80,7 @@ server/mall/mall-api/
 
 ### 3.2 RemoteAuthService
 
-**提供方**：`mall-auth`（9210）  
+**提供方**：`mall-auth`（9301）  
 **调用方**：`mall-order`（解密手机号）、`mall-user`（管理端查手机号）
 
 | 方法 | 参数 | 返回 | 说明 |
@@ -90,7 +90,7 @@ server/mall/mall-api/
 
 ### 3.3 RemoteProductService
 
-**提供方**：`mall-product`（9302）  
+**提供方**：`mall-product`（9303）  
 **调用方**：`mall-order`（购物车/下单）、`mall-search`（全量重建）
 
 | 方法 | 参数 | 返回 | 说明 |
@@ -103,7 +103,7 @@ server/mall/mall-api/
 
 ### 3.4 RemoteOrderService
 
-**提供方**：`mall-order`（9303）  
+**提供方**：`mall-order`（9304）  
 **调用方**：`mall-payment`（发起支付校验）、`mall-marketing`（校验订单状态）
 
 | 方法 | 参数 | 返回 | 说明 |
@@ -112,7 +112,7 @@ server/mall/mall-api/
 
 ### 3.5 RemotePaymentService
 
-**提供方**：`mall-payment`（9304）  
+**提供方**：`mall-payment`（9305）  
 **调用方**：`mall-order`（售后发起退款）
 
 | 方法 | 参数 | 返回 | 说明 |
@@ -122,7 +122,7 @@ server/mall/mall-api/
 
 ### 3.6 RemoteMarketingService
 
-**提供方**：`mall-marketing`（9305）  
+**提供方**：`mall-marketing`（9306）  
 **调用方**：`mall-order`（下单锁券/试算）
 
 | 方法 | 参数 | 返回 | 说明 |
@@ -134,7 +134,7 @@ server/mall/mall-api/
 
 ### 3.7 RemoteSearchService
 
-**提供方**：`mall-search`（9306）  
+**提供方**：`mall-search`（9307）  
 **调用方**：`mall-product`（商品变更同步）
 
 | 方法 | 参数 | 返回 | 说明 |

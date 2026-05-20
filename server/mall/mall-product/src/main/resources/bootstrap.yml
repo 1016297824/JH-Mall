@@ -1,6 +1,6 @@
 # mall-product 商品服务
 server:
-  port: 9302
+  port: 9303
 
 spring:
   application:

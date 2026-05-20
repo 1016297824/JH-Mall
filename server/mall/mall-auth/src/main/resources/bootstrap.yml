@@ -1,6 +1,6 @@
 # mall-auth 认证服务
 server:
-  port: 9210
+  port: 9301
 
 spring:
   application:
