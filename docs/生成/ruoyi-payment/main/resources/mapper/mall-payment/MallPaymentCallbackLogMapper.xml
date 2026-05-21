@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.payment.mapper.MallPaymentCallbackLogMapper">
+    
+    <resultMap type="MallPaymentCallbackLog" id="MallPaymentCallbackLogResult">
+        <result property="id"    column="id"    />
+        <result property="paymentNo"    column="payment_no"    />
+        <result property="refundNo"    column="refund_no"    />
+        <result property="channelCode"    column="channel_code"    />
+        <result property="callbackType"    column="callback_type"    />
+        <result property="rawBody"    column="raw_body"    />
+        <result property="isVerified"    column="is_verified"    />
+        <result property="processStatus"    column="process_status"    />
+        <result property="processTime"    column="process_time"    />
+        <result property="processResult"    column="process_result"    />
+        <result property="nonce"    column="nonce"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallPaymentCallbackLogVo">
+        select id, payment_no, refund_no, channel_code, callback_type, raw_body, is_verified, process_status, process_time, process_result, nonce, is_deleted, create_time, update_time from mall_payment_callback_log
+    </sql>
+
+    <select id="selectMallPaymentCallbackLogList" parameterType="MallPaymentCallbackLog" resultMap="MallPaymentCallbackLogResult">
+        <include refid="selectMallPaymentCallbackLogVo"/>
+        <where>  
+            <if test="paymentNo != null  and paymentNo != ''"> and payment_no = #{paymentNo}</if>
+            <if test="refundNo != null  and refundNo != ''"> and refund_no = #{refundNo}</if>
+            <if test="channelCode != null  and channelCode != ''"> and channel_code = #{channelCode}</if>
+            <if test="callbackType != null  and callbackType != ''"> and callback_type = #{callbackType}</if>
+            <if test="rawBody != null  and rawBody != ''"> and raw_body = #{rawBody}</if>
+            <if test="isVerified != null  and isVerified != ''"> and is_verified = #{isVerified}</if>
+            <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
+            <if test="processTime != null "> and process_time = #{processTime}</if>
+            <if test="processResult != null  and processResult != ''"> and process_result = #{processResult}</if>
+            <if test="nonce != null  and nonce != ''"> and nonce = #{nonce}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallPaymentCallbackLogById" parameterType="String" resultMap="MallPaymentCallbackLogResult">
+        <include refid="selectMallPaymentCallbackLogVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallPaymentCallbackLog" parameterType="MallPaymentCallbackLog" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_payment_callback_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="paymentNo != null">payment_no,</if>
+            <if test="refundNo != null">refund_no,</if>
+            <if test="channelCode != null and channelCode != ''">channel_code,</if>
+            <if test="callbackType != null and callbackType != ''">callback_type,</if>
+            <if test="rawBody != null and rawBody != ''">raw_body,</if>
+            <if test="isVerified != null">is_verified,</if>
+            <if test="processStatus != null">process_status,</if>
+            <if test="processTime != null">process_time,</if>
+            <if test="processResult != null">process_result,</if>
+            <if test="nonce != null">nonce,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="paymentNo != null">#{paymentNo},</if>
+            <if test="refundNo != null">#{refundNo},</if>
+            <if test="channelCode != null and channelCode != ''">#{channelCode},</if>
+            <if test="callbackType != null and callbackType != ''">#{callbackType},</if>
+            <if test="rawBody != null and rawBody != ''">#{rawBody},</if>
+            <if test="isVerified != null">#{isVerified},</if>
+            <if test="processStatus != null">#{processStatus},</if>
+            <if test="processTime != null">#{processTime},</if>
+            <if test="processResult != null">#{processResult},</if>
+            <if test="nonce != null">#{nonce},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallPaymentCallbackLog" parameterType="MallPaymentCallbackLog">
+        update mall_payment_callback_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="paymentNo != null">payment_no = #{paymentNo},</if>
+            <if test="refundNo != null">refund_no = #{refundNo},</if>
+            <if test="channelCode != null and channelCode != ''">channel_code = #{channelCode},</if>
+            <if test="callbackType != null and callbackType != ''">callback_type = #{callbackType},</if>
+            <if test="rawBody != null and rawBody != ''">raw_body = #{rawBody},</if>
+            <if test="isVerified != null">is_verified = #{isVerified},</if>
+            <if test="processStatus != null">process_status = #{processStatus},</if>
+            <if test="processTime != null">process_time = #{processTime},</if>
+            <if test="processResult != null">process_result = #{processResult},</if>
+            <if test="nonce != null">nonce = #{nonce},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallPaymentCallbackLogById" parameterType="String">
+        delete from mall_payment_callback_log where id = #{id}
+    </delete>
+
+    <delete id="deleteMallPaymentCallbackLogByIds" parameterType="String">
+        delete from mall_payment_callback_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

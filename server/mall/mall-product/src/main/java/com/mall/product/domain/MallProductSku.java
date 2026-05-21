@@ -23,27 +23,26 @@ public class MallProductSku extends BaseEntity
     private String spuId;
 
     /** SKU 编码 */
-    @Excel(name = "SKU 编码", readConverterExp = "全=局唯一")
+    @Excel(name = "SKU 编码")
     private String skuCode;
 
     /** SKU 销售名称 */
     @Excel(name = "SKU 销售名称")
     private String skuName;
 
-    /** 销售属性 JSON */
-    @Excel(name = "销售属性 JSON")
+    /** 销售属性 */
+    @Excel(name = "销售属性")
     private String attrsJson;
 
     /** 销售价（单位：分） */
-    @Excel(name = "销售价", readConverterExp = "单=位：分")
+    @Excel(name = "销售价（单位：分）")
     private String price;
 
     /** 市场价/划线价（单位：分） */
-    @Excel(name = "市场价/划线价", readConverterExp = "单=位：分")
+    @Excel(name = "市场价/划线价（单位：分）")
     private String marketPrice;
 
     /** 成本价（单位：分） */
-    @Excel(name = "成本价", readConverterExp = "单=位：分")
     private String costPrice;
 
     /** SKU 级图片 */
@@ -51,11 +50,11 @@ public class MallProductSku extends BaseEntity
     private String image;
 
     /** 重量（单位：克） */
-    @Excel(name = "重量", readConverterExp = "单=位：克")
+    @Excel(name = "重量（单位：克）")
     private String weight;
 
-    /** 该 SKU 累计销量 */
-    @Excel(name = "该 SKU 累计销量")
+    /** 累计销量 */
+    @Excel(name = "累计销量")
     private String salesCount;
 
     /** 逻辑删除标志 */

@@ -21,8 +21,8 @@ public class MallPayment extends BaseEntity
     /** 主键，自增 */
     private String id;
 
-    /** 支付单号 */
-    @Excel(name = "支付单号")
+    /** 支付单号，格式 PAY + 时间戳 + 随机数 */
+    @Excel(name = "支付单号，格式 PAY + 时间戳 + 随机数")
     private String paymentNo;
 
     /** 关联订单号 */
@@ -34,15 +34,15 @@ public class MallPayment extends BaseEntity
     private String userId;
 
     /** 支付金额（单位：分） */
-    @Excel(name = "支付金额（单位：分）")
+    @Excel(name = "支付金额", readConverterExp = "单=位：分")
     private String payAmount;
 
     /** 支付渠道编码 */
     @Excel(name = "支付渠道编码")
     private String channelCode;
 
-    /** 渠道侧支付单号 */
-    @Excel(name = "渠道侧支付单号")
+    /** 渠道侧支付单号，对账用 */
+    @Excel(name = "渠道侧支付单号，对账用")
     private String channelPaymentNo;
 
     /** 渠道侧支付状态 */
@@ -71,8 +71,12 @@ public class MallPayment extends BaseEntity
     @Excel(name = "幂等键")
     private String idempotentKey;
 
+    /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
+    /** 乐观锁版本号 */
+    @Excel(name = "乐观锁版本号")
     private String version;
 
     /** 退款单信息 */

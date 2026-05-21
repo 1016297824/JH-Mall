@@ -135,14 +135,39 @@
               {{ $index + 1 }}
             </template>
           </el-table-column>
-          <el-table-column label="SKU 编码" prop="skuCode" width="150">
-            <template #default="scope">
-              <el-input v-model="scope.row.skuCode" placeholder="请输入SKU 编码" />
-            </template>
-          </el-table-column>
           <el-table-column label="SKU 销售名称" prop="skuName" width="150">
             <template #default="scope">
               <el-input v-model="scope.row.skuName" placeholder="请输入SKU 销售名称" />
+            </template>
+          </el-table-column>
+          <el-table-column label="销售属性" prop="attrsJson" width="180">
+            <template #default="scope">
+              <el-input v-model="scope.row.attrsJson" placeholder="请输入销售属性 JSON" />
+            </template>
+          </el-table-column>
+          <el-table-column label="销售价（单位：分）" prop="price" width="120">
+            <template #default="scope">
+              <el-input v-model.number="scope.row.price" placeholder="销售价" />
+            </template>
+          </el-table-column>
+          <el-table-column label="市场价（单位：分）" prop="marketPrice" width="120">
+            <template #default="scope">
+              <el-input v-model.number="scope.row.marketPrice" placeholder="市场价" />
+            </template>
+          </el-table-column>
+          <el-table-column label="成本价（单位：分）" prop="costPrice" width="120">
+            <template #default="scope">
+              <el-input v-model.number="scope.row.costPrice" placeholder="成本价" />
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU 图片" prop="image" width="180">
+            <template #default="scope">
+              <el-input v-model="scope.row.image" placeholder="请输入图片 URL" />
+            </template>
+          </el-table-column>
+          <el-table-column label="重量（单位：克）" prop="weight" width="100">
+            <template #default="scope">
+              <el-input v-model.number="scope.row.weight" placeholder="重量" />
             </template>
           </el-table-column>
         </el-table>
@@ -332,7 +357,6 @@ let _skuRowKey = 0
 /** SKU 管理添加按钮操作 */
 function handleAddMallProductSku() {
   let obj = { _rowKey: ++_skuRowKey } as MallProductSku
-  obj.skuCode = undefined
   obj.skuName = undefined
   obj.attrsJson = undefined
   obj.price = undefined

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.payment.mapper.MallPaymentChannelMapper">
+    
+    <resultMap type="MallPaymentChannel" id="MallPaymentChannelResult">
+        <result property="id"    column="id"    />
+        <result property="channelCode"    column="channel_code"    />
+        <result property="channelName"    column="channel_name"    />
+        <result property="channelType"    column="channel_type"    />
+        <result property="configJson"    column="config_json"    />
+        <result property="isEnabled"    column="is_enabled"    />
+        <result property="sortOrder"    column="sort_order"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallPaymentChannelVo">
+        select id, channel_code, channel_name, channel_type, config_json, is_enabled, sort_order, is_deleted, create_by, update_by, create_time, update_time from mall_payment_channel
+    </sql>
+
+    <select id="selectMallPaymentChannelList" parameterType="MallPaymentChannel" resultMap="MallPaymentChannelResult">
+        <include refid="selectMallPaymentChannelVo"/>
+        <where>  
+            <if test="channelCode != null  and channelCode != ''"> and channel_code = #{channelCode}</if>
+            <if test="channelName != null  and channelName != ''"> and channel_name like concat('%', #{channelName}, '%')</if>
+            <if test="channelType != null  and channelType != ''"> and channel_type = #{channelType}</if>
+            <if test="configJson != null  and configJson != ''"> and config_json = #{configJson}</if>
+            <if test="isEnabled != null  and isEnabled != ''"> and is_enabled = #{isEnabled}</if>
+            <if test="sortOrder != null  and sortOrder != ''"> and sort_order = #{sortOrder}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallPaymentChannelById" parameterType="String" resultMap="MallPaymentChannelResult">
+        <include refid="selectMallPaymentChannelVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallPaymentChannel" parameterType="MallPaymentChannel" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_payment_channel
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="channelCode != null and channelCode != ''">channel_code,</if>
+            <if test="channelName != null and channelName != ''">channel_name,</if>
+            <if test="channelType != null and channelType != ''">channel_type,</if>
+            <if test="configJson != null and configJson != ''">config_json,</if>
+            <if test="isEnabled != null">is_enabled,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="channelCode != null and channelCode != ''">#{channelCode},</if>
+            <if test="channelName != null and channelName != ''">#{channelName},</if>
+            <if test="channelType != null and channelType != ''">#{channelType},</if>
+            <if test="configJson != null and configJson != ''">#{configJson},</if>
+            <if test="isEnabled != null">#{isEnabled},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallPaymentChannel" parameterType="MallPaymentChannel">
+        update mall_payment_channel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="channelCode != null and channelCode != ''">channel_code = #{channelCode},</if>
+            <if test="channelName != null and channelName != ''">channel_name = #{channelName},</if>
+            <if test="channelType != null and channelType != ''">channel_type = #{channelType},</if>
+            <if test="configJson != null and configJson != ''">config_json = #{configJson},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallPaymentChannelById" parameterType="String">
+        delete from mall_payment_channel where id = #{id}
+    </delete>
+
+    <delete id="deleteMallPaymentChannelByIds" parameterType="String">
+        delete from mall_payment_channel where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

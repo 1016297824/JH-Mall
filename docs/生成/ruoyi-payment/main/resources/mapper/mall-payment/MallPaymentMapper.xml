@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.payment.mapper.MallPaymentMapper">
+    
+    <resultMap type="MallPayment" id="MallPaymentResult">
+        <result property="id"    column="id"    />
+        <result property="paymentNo"    column="payment_no"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="userId"    column="user_id"    />
+        <result property="payAmount"    column="pay_amount"    />
+        <result property="channelCode"    column="channel_code"    />
+        <result property="channelPaymentNo"    column="channel_payment_no"    />
+        <result property="channelPayStatus"    column="channel_pay_status"    />
+        <result property="paymentStatus"    column="payment_status"    />
+        <result property="paySuccessTime"    column="pay_success_time"    />
+        <result property="expireTime"    column="expire_time"    />
+        <result property="notifyUrl"    column="notify_url"    />
+        <result property="idempotentKey"    column="idempotent_key"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <resultMap id="MallPaymentMallPaymentRefundResult" type="MallPayment" extends="MallPaymentResult">
+        <collection property="mallPaymentRefundList" ofType="MallPaymentRefund" column="id" select="selectMallPaymentRefundList" />
+    </resultMap>
+
+    <resultMap type="MallPaymentRefund" id="MallPaymentRefundResult">
+        <result property="id"    column="id"    />
+        <result property="refundNo"    column="refund_no"    />
+        <result property="paymentId"    column="payment_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="afterSaleNo"    column="after_sale_no"    />
+        <result property="userId"    column="user_id"    />
+        <result property="refundAmount"    column="refund_amount"    />
+        <result property="refundReason"    column="refund_reason"    />
+        <result property="channelCode"    column="channel_code"    />
+        <result property="channelRefundNo"    column="channel_refund_no"    />
+        <result property="channelRefundStatus"    column="channel_refund_status"    />
+        <result property="refundStatus"    column="refund_status"    />
+        <result property="refundSuccessTime"    column="refund_success_time"    />
+        <result property="idempotentKey"    column="idempotent_key"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <sql id="selectMallPaymentVo">
+        select id, payment_no, order_no, user_id, pay_amount, channel_code, channel_payment_no, channel_pay_status, payment_status, pay_success_time, expire_time, notify_url, idempotent_key, is_deleted, create_by, update_by, create_time, update_time, version from mall_payment
+    </sql>
+
+    <select id="selectMallPaymentList" parameterType="MallPayment" resultMap="MallPaymentResult">
+        <include refid="selectMallPaymentVo"/>
+        <where>  
+            <if test="paymentNo != null  and paymentNo != ''"> and payment_no = #{paymentNo}</if>
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="userId != null  and userId != ''"> and user_id = #{userId}</if>
+            <if test="payAmount != null  and payAmount != ''"> and pay_amount = #{payAmount}</if>
+            <if test="channelCode != null  and channelCode != ''"> and channel_code = #{channelCode}</if>
+            <if test="channelPaymentNo != null  and channelPaymentNo != ''"> and channel_payment_no = #{channelPaymentNo}</if>
+            <if test="channelPayStatus != null  and channelPayStatus != ''"> and channel_pay_status = #{channelPayStatus}</if>
+            <if test="paymentStatus != null  and paymentStatus != ''"> and payment_status = #{paymentStatus}</if>
+            <if test="paySuccessTime != null "> and pay_success_time = #{paySuccessTime}</if>
+            <if test="expireTime != null "> and expire_time = #{expireTime}</if>
+            <if test="notifyUrl != null  and notifyUrl != ''"> and notify_url = #{notifyUrl}</if>
+            <if test="idempotentKey != null  and idempotentKey != ''"> and idempotent_key = #{idempotentKey}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+            <if test="version != null  and version != ''"> and version = #{version}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallPaymentById" parameterType="String" resultMap="MallPaymentMallPaymentRefundResult">
+        select id, payment_no, order_no, user_id, pay_amount, channel_code, channel_payment_no, channel_pay_status, payment_status, pay_success_time, expire_time, notify_url, idempotent_key, is_deleted, create_by, update_by, create_time, update_time, version
+        from mall_payment
+        where id = #{id}
+    </select>
+
+    <select id="selectMallPaymentRefundList" resultMap="MallPaymentRefundResult">
+        select id, refund_no, payment_id, order_no, after_sale_no, user_id, refund_amount, refund_reason, channel_code, channel_refund_no, channel_refund_status, refund_status, refund_success_time, idempotent_key, is_deleted, create_by, update_by, create_time, update_time, version
+        from mall_payment_refund
+        where payment_id = #{payment_id}
+    </select>
+
+    <insert id="insertMallPayment" parameterType="MallPayment" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_payment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="paymentNo != null and paymentNo != ''">payment_no,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="userId != null and userId != ''">user_id,</if>
+            <if test="payAmount != null and payAmount != ''">pay_amount,</if>
+            <if test="channelCode != null and channelCode != ''">channel_code,</if>
+            <if test="channelPaymentNo != null">channel_payment_no,</if>
+            <if test="channelPayStatus != null">channel_pay_status,</if>
+            <if test="paymentStatus != null and paymentStatus != ''">payment_status,</if>
+            <if test="paySuccessTime != null">pay_success_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="notifyUrl != null">notify_url,</if>
+            <if test="idempotentKey != null">idempotent_key,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="version != null">version,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="paymentNo != null and paymentNo != ''">#{paymentNo},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="payAmount != null and payAmount != ''">#{payAmount},</if>
+            <if test="channelCode != null and channelCode != ''">#{channelCode},</if>
+            <if test="channelPaymentNo != null">#{channelPaymentNo},</if>
+            <if test="channelPayStatus != null">#{channelPayStatus},</if>
+            <if test="paymentStatus != null and paymentStatus != ''">#{paymentStatus},</if>
+            <if test="paySuccessTime != null">#{paySuccessTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+            <if test="notifyUrl != null">#{notifyUrl},</if>
+            <if test="idempotentKey != null">#{idempotentKey},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="version != null">#{version},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallPayment" parameterType="MallPayment">
+        update mall_payment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="paymentNo != null and paymentNo != ''">payment_no = #{paymentNo},</if>
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="payAmount != null and payAmount != ''">pay_amount = #{payAmount},</if>
+            <if test="channelCode != null and channelCode != ''">channel_code = #{channelCode},</if>
+            <if test="channelPaymentNo != null">channel_payment_no = #{channelPaymentNo},</if>
+            <if test="channelPayStatus != null">channel_pay_status = #{channelPayStatus},</if>
+            <if test="paymentStatus != null and paymentStatus != ''">payment_status = #{paymentStatus},</if>
+            <if test="paySuccessTime != null">pay_success_time = #{paySuccessTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="notifyUrl != null">notify_url = #{notifyUrl},</if>
+            <if test="idempotentKey != null">idempotent_key = #{idempotentKey},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="version != null">version = #{version},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallPaymentById" parameterType="String">
+        delete from mall_payment where id = #{id}
+    </delete>
+
+    <delete id="deleteMallPaymentByIds" parameterType="String">
+        delete from mall_payment where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteMallPaymentRefundByPaymentIds" parameterType="String">
+        delete from mall_payment_refund where payment_id in 
+        <foreach item="paymentId" collection="array" open="(" separator="," close=")">
+            #{paymentId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMallPaymentRefundByPaymentId" parameterType="String">
+        delete from mall_payment_refund where payment_id = #{paymentId}
+    </delete>
+
+    <insert id="batchMallPaymentRefund">
+        insert into mall_payment_refund( id, refund_no, payment_id, order_no, after_sale_no, user_id, refund_amount, refund_reason, channel_code, channel_refund_no, channel_refund_status, refund_status, refund_success_time, idempotent_key, is_deleted, create_by, update_by, create_time, update_time, version) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.refundNo}, #{item.paymentId}, #{item.orderNo}, #{item.afterSaleNo}, #{item.userId}, #{item.refundAmount}, #{item.refundReason}, #{item.channelCode}, #{item.channelRefundNo}, #{item.channelRefundStatus}, #{item.refundStatus}, #{item.refundSuccessTime}, #{item.idempotentKey}, #{item.isDeleted}, #{item.createBy}, #{item.updateBy}, #{item.createTime}, #{item.updateTime}, #{item.version})
+        </foreach>
+    </insert>
+</mapper>

@@ -57,10 +57,12 @@ public class MallPaymentCallbackLog extends BaseEntity
     @Excel(name = "处理结果说明")
     private String processResult;
 
-    /** 回调随机数 */
-    @Excel(name = "回调随机数")
+    /** 回调防重放 nonce */
+    @Excel(name = "回调防重放 nonce")
     private String nonce;
 
+    /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
     public void setId(String id) 

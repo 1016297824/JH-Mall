@@ -276,6 +276,26 @@
               <el-input v-model="scope.row.spuName" placeholder="请输入SPU 名称" />
             </template>
           </el-table-column>
+          <el-table-column label="销售属性" prop="attrsJson" width="180">
+            <template #default="scope">
+              <el-input v-model="scope.row.attrsJson" placeholder="请输入销售属性 JSON" />
+            </template>
+          </el-table-column>
+          <el-table-column label="购买数量" prop="quantity" width="100">
+            <template #default="scope">
+              <el-input v-model.number="scope.row.quantity" placeholder="数量" @input="calcTotalPrice(scope.row)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="成交单价（单位：分）" prop="price" width="120">
+            <template #default="scope">
+              <el-input v-model.number="scope.row.price" placeholder="单价" @input="calcTotalPrice(scope.row)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="单项总价（单位：分）" prop="totalPrice" width="120">
+            <template #default="scope">
+              <span>{{ scope.row.totalPrice }}</span>
+            </template>
+          </el-table-column>
         </el-table>
       </el-form>
       <template #footer>
@@ -478,6 +498,13 @@ function handleDelete(row: MallOrder) {
 }
 
 let _orderItemRowKey = 0
+
+/** 自动计算单项总价 */
+function calcTotalPrice(row: MallOrderItem) {
+  const qty = Number(row.quantity) || 0
+  const p = Number(row.price) || 0
+  row.totalPrice = String(qty * p)
+}
 
 /** 订单项添加按钮操作 */
 function handleAddMallOrderItem() {

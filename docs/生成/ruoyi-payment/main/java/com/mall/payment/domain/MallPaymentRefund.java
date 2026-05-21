@@ -20,8 +20,8 @@ public class MallPaymentRefund extends BaseEntity
     /** 主键，自增 */
     private String id;
 
-    /** 退款单号 */
-    @Excel(name = "退款单号")
+    /** 退款单号，格式 REF + 时间戳 + 随机数 */
+    @Excel(name = "退款单号，格式 REF + 时间戳 + 随机数")
     private String refundNo;
 
     /** 关联支付单 ID */
@@ -41,19 +41,19 @@ public class MallPaymentRefund extends BaseEntity
     private String userId;
 
     /** 退款金额（单位：分） */
-    @Excel(name = "退款金额（单位：分）")
+    @Excel(name = "退款金额", readConverterExp = "单=位：分")
     private String refundAmount;
 
     /** 退款原因 */
     @Excel(name = "退款原因")
     private String refundReason;
 
-    /** 退款渠道编码 */
-    @Excel(name = "退款渠道编码")
+    /** 退款渠道编码，必须与原始支付渠道一致 */
+    @Excel(name = "退款渠道编码，必须与原始支付渠道一致")
     private String channelCode;
 
-    /** 渠道侧退款单号 */
-    @Excel(name = "渠道侧退款单号")
+    /** 渠道侧退款单号，对账用 */
+    @Excel(name = "渠道侧退款单号，对账用")
     private String channelRefundNo;
 
     /** 渠道侧退款状态 */
@@ -73,8 +73,12 @@ public class MallPaymentRefund extends BaseEntity
     @Excel(name = "幂等键")
     private String idempotentKey;
 
+    /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
+    /** 乐观锁版本号 */
+    @Excel(name = "乐观锁版本号")
     private String version;
 
     public void setId(String id) 

@@ -42,6 +42,8 @@ public class MallPaymentChannel extends BaseEntity
     @Excel(name = "排序值")
     private String sortOrder;
 
+    /** 逻辑删除标志 */
+    @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
     public void setId(String id) 

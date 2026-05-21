@@ -48,3 +48,8 @@ export * from "./mall-order/order";
 export * from "./mall-order/after_sale";
 export * from "./mall-order/amount";
 export * from "./mall-order/cart";
+
+// mall-payment 模块
+export * from "./mall-payment/payment";
+export * from "./mall-payment/log";
+export * from "./mall-payment/channel";

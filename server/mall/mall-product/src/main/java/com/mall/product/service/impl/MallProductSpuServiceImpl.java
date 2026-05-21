@@ -9,6 +9,7 @@ import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.mall.product.domain.MallProductSku;
 import com.mall.product.mapper.MallProductSpuMapper;
+import com.ruoyi.common.core.utils.uuid.Seq;
 import com.mall.product.domain.MallProductSpu;
 import com.mall.product.service.IMallProductSpuService;
 
@@ -123,6 +124,10 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
             for (MallProductSku mallProductSku : mallProductSkuList)
             {
                 mallProductSku.setSpuId(id);
+                if (StringUtils.isEmpty(mallProductSku.getSkuCode()))
+                {
+                    mallProductSku.setSkuCode("SKU" + Seq.getId());
+                }
                 list.add(mallProductSku);
             }
             if (list.size() > 0)
