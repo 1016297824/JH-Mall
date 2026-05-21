@@ -41,3 +41,6 @@ client/ruoyi-ui/auto-imports.d.ts
 
 # Docker 持久化数据
 /deploy/docker/data/
+
+# opencode配置
+.opencode
