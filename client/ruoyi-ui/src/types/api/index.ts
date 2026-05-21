@@ -53,3 +53,7 @@ export * from "./mall-order/cart";
 export * from "./mall-payment/payment";
 export * from "./mall-payment/log";
 export * from "./mall-payment/channel";
+
+// mall-marketing 模块
+export * from "./mall-marketing/coupon";
+export * from "./mall-marketing/promotion";

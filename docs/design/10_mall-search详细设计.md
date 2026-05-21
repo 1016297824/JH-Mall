@@ -8,13 +8,13 @@
 
 ### 1.1 子领域
 
-| 子领域 | 存储 | 说明 |
-|--------|------|------|
-| 全文搜索 | ES | 商品名称/副标题/规格多字段匹配，BM25 相关性排序 |
-| 聚合筛选 | ES | 按类目/品牌/价格区间/标签聚合，动态计算各筛选维度下的数量 |
-| 搜索建议 | ES | 输入补全（completion suggester），基于商品名称 |
-| 索引管理 | ES | 全量重建、增量同步、别名原子切换、版本回滚 |
-| 降级兜底 | — | ES 不可用时转发到 mall-product DB 兜底查询 |
+| 子领域   | 存储 | 说明                                                      |
+| -------- | ---- | --------------------------------------------------------- |
+| 全文搜索 | ES   | 商品名称/副标题/规格多字段匹配，BM25 相关性排序           |
+| 聚合筛选 | ES   | 按类目/品牌/价格区间/标签聚合，动态计算各筛选维度下的数量 |
+| 搜索建议 | ES   | 输入补全（completion suggester），基于商品名称            |
+| 索引管理 | ES   | 全量重建、增量同步、别名原子切换、版本回滚                |
+| 降级兜底 | —   | ES 不可用时转发到 mall-product DB 兜底查询                |
 
 ### 1.2 依赖关系
 
@@ -75,11 +75,11 @@ server/mall/mall-search/
 
 ### 2.2 接口 → Controller 映射
 
-| # | 方法 | 路径 | 方法名 | 需登录 | 说明 |
-|---|------|------|--------|:---:|------|
-| 1 | GET | `/api/search` | `search(req)` | 否 | 商品全文搜索（含筛选/排序/聚合） |
-| 2 | GET | `/api/search/suggest` | `suggest(keyword)` | 否 | 搜索补全建议 |
-| 3 | POST | `/admin/mall/search/index/rebuild` | `rebuildIndex()` | 管理端 | 触发全量重建 |
+| # | 方法 | 路径                                 | 方法名               | 需登录 | 说明                             |
+| - | ---- | ------------------------------------ | -------------------- | :----: | -------------------------------- |
+| 1 | GET  | `/api/search`                      | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合） |
+| 2 | GET  | `/api/search/suggest`              | `suggest(keyword)` |   否   | 搜索补全建议                     |
+| 3 | POST | `/admin/mall/search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建                     |
 
 ---
 
@@ -89,31 +89,33 @@ server/mall/mall-search/
 
 位于 `domain/ProductIndex.java`，使用 `@Document(indexName = "mall_product")` 通过别名读写。
 
-| 字段 | ES 类型 | 说明 |
-|------|---------|------|
-| productId | long | SPU ID |
-| spuName | text (ik_max_word) | 商品名称，权重 3.0 |
-| subTitle | text (ik_max_word) | 副标题，权重 1.5 |
-| keyword | keyword | 精确匹配用，如品牌词、热搜词 |
-| categoryId | long | 类目 ID，用于 term 过滤 |
-| categoryName | keyword | 类目名称，聚合展示 |
-| brandId | long | 品牌 ID |
-| brandName | keyword | 品牌名称 |
-| price | integer | 最低售价（分），C 端除以 100 |
-| salesCount | integer | 累计销量，排序用 |
-| tags | keyword[] | 标签数组，term 过滤 + 聚合 |
-| image | keyword (index=false) | 商品主图，不索引仅返回 |
-| isOnSale | boolean | 上架状态，filter 过滤下架商品 |
-| createTime | date | 创建时间，新品排序 |
-| spuSpecs | text (ik_max_word) | SKU 规格文本拼接，权重 1.0 |
-| suggest | completion | 搜索补全，使用 `ik_max_word` |
+| 字段         | ES 类型               | 说明                           |
+| ------------ | --------------------- | ------------------------------ |
+| productId    | long                  | SPU ID                         |
+| spuName      | text (ik_max_word)    | 商品名称，权重 3.0             |
+| subTitle     | text (ik_max_word)    | 副标题，权重 1.5               |
+| keyword      | keyword               | 精确匹配用，如品牌词、热搜词   |
+| categoryId   | long                  | 类目 ID，用于 term 过滤        |
+| categoryName | keyword               | 类目名称，聚合展示             |
+| brandId      | long                  | 品牌 ID                        |
+| brandName    | keyword               | 品牌名称                       |
+| price        | integer               | 最低售价（分），C 端除以 100   |
+| salesCount   | integer               | 累计销量，排序用               |
+| tags         | keyword[]             | 标签数组，term 过滤 + 聚合     |
+| image        | keyword (index=false) | 商品主图，不索引仅返回         |
+| isOnSale     | boolean               | 上架状态，filter 过滤下架商品  |
+| createTime   | date                  | 创建时间，新品排序             |
+| spuSpecs     | text (ik_max_word)    | SKU 规格文本拼接，权重 1.0     |
+| suggest      | completion            | 搜索补全，使用 `ik_max_word` |
 
 **索引 settings：**
+
 - `number_of_shards`: 3（生产），1（开发）
 - `number_of_replicas`: 1（生产），0（开发）
 - `refresh_interval`: 5s
 
 **约束：**
+
 - `price` 用 integer（分），避免浮点精度；前端除以 100 显示
 - `image` 不索引，节省空间
 - `isOnSale` 用 filter（不参与评分且缓存，性能优于 must）
@@ -125,6 +127,7 @@ server/mall/mall-search/
 位于 `service/search/impl/SearchServiceImpl.java`，ES 查询核心。
 
 **search(req)**：
+
 - 分词器：`ik_max_word`（最细粒度），保证高召回
 - 全文搜索：`multiMatchQuery` 跨 `spuName`(3.0) + `subTitle`(1.5) + `spuSpecs`(1.0)，`type=BEST_FIELDS`
 - 筛选：全部用 `filter`（不参与评分、自动缓存），包括类目/品牌/价格区间/标签/`isOnSale=true`
@@ -141,6 +144,7 @@ server/mall/mall-search/
 位于 `service/index/impl/IndexServiceImpl.java`，索引生命周期管理。
 
 **rebuildIndex()**：
+
 - ①Redis 分布式锁 `mall:search:index:rebuild_lock`，SETNX + UUID + 看门狗 3600s
 - ②创建新索引 `mall_product_v{yyyyMMddHHmmss}`，写入 mapping + settings
 - ③分批拉取 mall-product 全量商品：`RemoteProductAdapter.fetchAllSpus(page, 500)`
@@ -150,6 +154,7 @@ server/mall/mall-search/
 - ⑦保留上一版本索引供回滚，更早版本删除
 
 **syncProduct(productIndex)**：增量同步（Feign 直调）
+
 - 操作类型：`UPSERT`（上架/改价/改名）或 `DELETE`（下架/删除）
 - 写入 ES，失败记录日志不阻塞（异步 Outbox 兜底）
 
@@ -157,11 +162,11 @@ server/mall/mall-search/
 
 **索引生命周期**：
 
-| 配置 | 值 | 说明 |
-|------|-----|------|
-| 保留版本数 | 2 | 当前 + 上一版 |
-| 清理时机 | 切换成功观察 30 分钟后 | 不立即删，留观察窗口 |
-| 磁盘告警 | 可用磁盘 < 20% | 暂停新索引创建 |
+| 配置       | 值                     | 说明                 |
+| ---------- | ---------------------- | -------------------- |
+| 保留版本数 | 2                      | 当前 + 上一版        |
+| 清理时机   | 切换成功观察 30 分钟后 | 不立即删，留观察窗口 |
+| 磁盘告警   | 可用磁盘 < 20%         | 暂停新索引创建       |
 
 ### 3.4 SuggestServiceImpl
 
@@ -176,11 +181,11 @@ server/mall/mall-search/
 
 ES 不可用时：
 
-| 策略 | 触发 | 行为 |
-|------|------|------|
-| 转发降级 | ES 连接超时或 5xx | 调 `mall-product` 的 `/api/product/search/fallback` DB 兜底 |
-| 直接降级 | mall-product 也失败 | 返回 `A0801`，userTip "搜索服务暂时不可用" |
-| 缓存兜底 | Redis 有缓存 | 优先返回缓存的搜索结果 |
+| 策略     | 触发                | 行为                                                            |
+| -------- | ------------------- | --------------------------------------------------------------- |
+| 转发降级 | ES 连接超时或 5xx   | 调 `mall-product` 的 `/api/product/search/fallback` DB 兜底 |
+| 直接降级 | mall-product 也失败 | 返回 `A0801`，userTip "搜索服务暂时不可用"                    |
+| 缓存兜底 | Redis 有缓存        | 优先返回缓存的搜索结果                                          |
 
 ---
 
@@ -233,8 +238,8 @@ POST /_aliases
 
 ### 5.1 消费的事件
 
-| Topic | 消费者类 | 处理流程 |
-|-------|---------|---------|
+| Topic                | 消费者类               | 处理流程                                                                                                   |
+| -------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `mall:search:sync` | `SearchSyncConsumer` | ①幂等去重 `mall:search:dedup:{productId}:{operation}` ②调 `IndexService.syncProduct()` ③增量写入 ES |
 
 ### 5.2 幂等
@@ -251,6 +256,15 @@ POST /_aliases
 
 ```yaml
 spring:
+  datasource:
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+          username: root
+          password: 138992
   elasticsearch:
     uris: http://localhost:9200
     connection-timeout: 5s
@@ -322,32 +336,32 @@ spring:
 
 ### 6.3 配置项说明
 
-| 配置项 | 默认值 | 说明 |
-|--------|--------|------|
-| `mall.search.es.hosts` | `localhost:9200` | ES 集群地址 |
-| `mall.search.es.shards` | 3 | 索引分片数（生产） |
-| `mall.search.es.replicas` | 1 | 索引副本数（生产） |
-| `mall.search.query.timeout` | 2000ms | 搜索超时 |
-| `mall.search.page.max-size` | 60 | 单页最大条数 |
-| `mall.search.page.max-depth` | 10000 | 分页最大深度（from+size） |
-| `mall.search.suggest.cache-ttl` | 300s | 搜索建议缓存 |
-| `mall.search.result.cache-ttl` | 60s | 搜索结果缓存 |
-| `mall.search.rebuild.batch-size` | 500 | 全量重建单批条数 |
-| `mall.search.rebuild.timestamp-format` | `yyyyMMddHHmmss` | 索引版本号格式 |
-| `mall.search.index.keep-versions` | 2 | 保留索引版本数 |
-| `mall.search.disk.warning-threshold` | 20% | 磁盘告警阈值 |
+| 配置项                                   | 默认值             | 说明                      |
+| ---------------------------------------- | ------------------ | ------------------------- |
+| `mall.search.es.hosts`                 | `localhost:9200` | ES 集群地址               |
+| `mall.search.es.shards`                | 3                  | 索引分片数（生产）        |
+| `mall.search.es.replicas`              | 1                  | 索引副本数（生产）        |
+| `mall.search.query.timeout`            | 2000ms             | 搜索超时                  |
+| `mall.search.page.max-size`            | 60                 | 单页最大条数              |
+| `mall.search.page.max-depth`           | 10000              | 分页最大深度（from+size） |
+| `mall.search.suggest.cache-ttl`        | 300s               | 搜索建议缓存              |
+| `mall.search.result.cache-ttl`         | 60s                | 搜索结果缓存              |
+| `mall.search.rebuild.batch-size`       | 500                | 全量重建单批条数          |
+| `mall.search.rebuild.timestamp-format` | `yyyyMMddHHmmss` | 索引版本号格式            |
+| `mall.search.index.keep-versions`      | 2                  | 保留索引版本数            |
+| `mall.search.disk.warning-threshold`   | 20%                | 磁盘告警阈值              |
 
 ---
 
 ## 7 错误码汇总
 
-| 错误码 | HTTP | userTip | 说明 |
-|--------|:----:|---------|------|
-| 00000 | 200 | — | 成功 |
-| A0801 | 400 | 搜索关键词有误 | 搜索参数不合法 |
-| A0802 | 400 | 搜索结果超出限制，请细化筛选条件 | 分页超过深度上限 |
-| C0110 | 500 | 服务暂时不可用 | Redis 连接失败 |
-| C0140 | 503 | 搜索服务暂时不可用 | ES 连接失败或超时 |
+| 错误码 | HTTP | userTip                          | 说明              |
+| ------ | :--: | -------------------------------- | ----------------- |
+| 00000  | 200 | —                               | 成功              |
+| A0801  | 400 | 搜索关键词有误                   | 搜索参数不合法    |
+| A0802  | 400 | 搜索结果超出限制，请细化筛选条件 | 分页超过深度上限  |
+| C0110  | 500 | 服务暂时不可用                   | Redis 连接失败    |
+| C0140  | 503 | 搜索服务暂时不可用               | ES 连接失败或超时 |
 
 > 全部错误码来自系统设计第二章。
 

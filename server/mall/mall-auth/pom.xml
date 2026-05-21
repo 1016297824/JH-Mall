@@ -54,6 +54,16 @@
             <artifactId>ruoyi-common-log</artifactId>
         </dependency>
 
+        <!-- RuoYi Common DataSource（动态数据源 + MyBatis）-->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-datasource</artifactId>
+        </dependency>
+
         <!-- Mall API -->
         <dependency>
             <groupId>com.mall</groupId>

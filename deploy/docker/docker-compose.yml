@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    image: elasticsearch:8.17.2
+    image: elasticsearch:9.2.5
     container_name: mall-es
     ports:
       - "9200:9200"
