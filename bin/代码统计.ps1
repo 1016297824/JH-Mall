@@ -1,5 +1,6 @@
-﻿$tmp = "$env:TEMP\cloc_raw.csv"
-& "G:\scoop\shims\cloc.exe" client/ruoyi-ui/ server/ruoyi/ server/mall/ `
+﻿$root = "$PSScriptRoot\.."
+$tmp = "$env:TEMP\cloc_raw.csv"
+& "G:\scoop\shims\cloc.exe" "$root\client\ruoyi-ui" "$root\client\mall-ui" "$root\server\ruoyi" "$root\server\mall" `
   --exclude-dir=node_modules,target --csv --quiet --out=$tmp
 
 $keep = @('Java', 'Vuejs Component', 'TypeScript', 'JavaScript', 'SCSS')
