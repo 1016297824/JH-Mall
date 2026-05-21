@@ -140,7 +140,7 @@
 
       <!-- 添加或修改参数配置对话框 -->
       <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-         <el-form ref="dictRef" :model="form" :rules="rules" label-width="100px">
+         <el-form ref="dictRef" :model="form" :rules="rules" label-width="120px">
             <el-form-item label="字典名称" prop="dictName">
                <el-input v-model="form.dictName" placeholder="请输入字典名称" />
             </el-form-item>

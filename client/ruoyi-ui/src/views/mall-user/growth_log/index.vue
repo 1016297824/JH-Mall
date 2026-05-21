@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="业务单号" prop="bizNo">
         <el-input
           v-model="queryParams.bizNo"
@@ -87,7 +87,7 @@
 
     <!-- 添加或修改成长值流水对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="growth_logRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="growth_logRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="业务单号" prop="bizNo">

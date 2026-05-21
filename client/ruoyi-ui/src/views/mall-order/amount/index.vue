@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -51,7 +51,6 @@
 
     <el-table v-loading="loading" :data="amountList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="订单 ID" align="center" prop="orderId" />
       <el-table-column label="商品明细快照" align="center" prop="itemsJson" />
       <el-table-column label="优惠券使用快照" align="center" prop="couponSnapshotJson" />
@@ -61,7 +60,6 @@
       <el-table-column label="优惠总金额" align="center" prop="discountAmount" />
       <el-table-column label="运费" align="center" prop="freightAmount" />
       <el-table-column label="实付金额" align="center" prop="payAmount" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:amount:edit']">修改</el-button>
@@ -80,7 +78,7 @@
 
     <!-- 添加或修改金额快照对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="amountRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="amountRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="商品明细快照" prop="itemsJson">
@@ -139,7 +137,6 @@ const data = reactive({
     discountAmount: undefined,
     freightAmount: undefined,
     payAmount: undefined,
-    isDeleted: undefined,
   } as AmountQueryParams,
   rules: {
     orderId: [
@@ -200,7 +197,6 @@ function reset() {
     discountAmount: null,
     freightAmount: null,
     payAmount: null,
-    isDeleted: null,
     createTime: null,
     updateTime: null
   }
@@ -288,3 +284,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="类目名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -59,7 +59,7 @@
       <el-table-column label="排序值" align="center" prop="sortOrder" />
       <el-table-column label="是否前端可见" align="center" prop="isVisible" />
       <el-table-column label="类目路径" align="center" prop="path" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:category:edit']">修改</el-button>
@@ -71,7 +71,7 @@
 
     <!-- 添加或修改商品类目对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="categoryRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="categoryRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="父类目" prop="parentId">
@@ -138,7 +138,7 @@ const data = reactive({
     sortOrder: undefined,
     isVisible: undefined,
     path: undefined,
-    isDeleted: undefined,
+
   } as CategoryQueryParams,
   rules: {
     parentId: [
@@ -197,7 +197,7 @@ function reset() {
     sortOrder: null,
     isVisible: null,
     path: null,
-    isDeleted: null,
+
     createTime: null,
     updateTime: null
   }
@@ -287,3 +287,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

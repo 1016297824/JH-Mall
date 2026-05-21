@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -51,15 +51,15 @@
 
     <el-table v-loading="loading" :data="stockList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
+
       <el-table-column label="所属 SKU" align="center" prop="skuId" />
       <el-table-column label="总库存" align="center" prop="totalStock" />
       <el-table-column label="可用库存" align="center" prop="availableStock" />
       <el-table-column label="锁定库存" align="center" prop="lockedStock" />
       <el-table-column label="已售库存" align="center" prop="soldStock" />
       <el-table-column label="冻结库存" align="center" prop="frozenStock" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
-      <el-table-column label="版本号" align="center" prop="version" />
+
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:stock:edit']">修改</el-button>
@@ -78,7 +78,7 @@
 
     <!-- 添加或修改库存管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="stockRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="stockRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
         </el-row>
       </el-form>
@@ -119,8 +119,7 @@ const data = reactive({
     lockedStock: undefined,
     soldStock: undefined,
     frozenStock: undefined,
-    isDeleted: undefined,
-    version: undefined
+
   } as StockQueryParams,
   rules: {
     skuId: [
@@ -163,10 +162,10 @@ function reset() {
     lockedStock: null,
     soldStock: null,
     frozenStock: null,
-    isDeleted: null,
+
     createTime: null,
     updateTime: null,
-    version: null
+
   }
   proxy.resetForm("stockRef")
 }
@@ -252,3 +251,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="订单号" prop="orderNo">
         <el-input
           v-model="queryParams.orderNo"
@@ -115,7 +115,6 @@
 
     <el-table v-loading="loading" :data="orderList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="用户 ID" align="center" prop="userId" />
       <el-table-column label="订单状态" align="center" prop="orderStatus" />
@@ -152,8 +151,6 @@
       </el-table-column>
       <el-table-column label="买家备注" align="center" prop="remark" />
       <el-table-column label="幂等键" align="center" prop="idempotentKey" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
-      <el-table-column label="版本号" align="center" prop="version" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:order:edit']">修改</el-button>
@@ -172,7 +169,7 @@
 
     <!-- 添加或修改订单管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="orderRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="orderRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="订单号" prop="orderNo">
@@ -345,9 +342,7 @@ const data = reactive({
     cancelType: undefined,
     cancelReason: undefined,
     payExpireTime: undefined,
-    idempotentKey: undefined,
-    isDeleted: undefined,
-    version: undefined
+    idempotentKey: undefined
   } as OrderQueryParams,
   rules: {
     orderNo: [
@@ -415,12 +410,10 @@ function reset() {
     payExpireTime: null,
     remark: null,
     idempotentKey: null,
-    isDeleted: null,
     createBy: null,
     updateBy: null,
     createTime: null,
-    updateTime: null,
-    version: null
+    updateTime: null
   }
   mallOrderItemList.value = []
   proxy.resetForm("orderRef")
@@ -519,7 +512,6 @@ function handleAddMallOrderItem() {
   obj.quantity = undefined
   obj.price = undefined
   obj.totalPrice = undefined
-  obj.isDeleted = undefined
   mallOrderItemList.value.push(obj)
 }
 
@@ -550,3 +542,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

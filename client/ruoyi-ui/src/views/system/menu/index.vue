@@ -102,7 +102,7 @@
 
       <!-- 添加或修改菜单对话框 -->
       <el-dialog :title="title" v-model="open" width="680px" append-to-body>
-         <el-form ref="menuRef" :model="form" :rules="rules" label-width="100px">
+         <el-form ref="menuRef" :model="form" :rules="rules" label-width="120px">
             <el-row>
                <el-col :span="24">
                   <el-form-item label="上级菜单">

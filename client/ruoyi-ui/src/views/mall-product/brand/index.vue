@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="品牌名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -59,12 +59,12 @@
 
     <el-table v-loading="loading" :data="brandList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
+
       <el-table-column label="品牌名称" align="center" prop="name" />
       <el-table-column label="品牌 Logo" align="center" prop="logo" />
       <el-table-column label="品牌简介" align="center" prop="description" />
       <el-table-column label="排序值" align="center" prop="sortOrder" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:brand:edit']">修改</el-button>
@@ -83,7 +83,7 @@
 
     <!-- 添加或修改品牌管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="brandRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="brandRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="品牌名称" prop="name">
@@ -137,7 +137,7 @@ const data = reactive({
     logo: undefined,
     description: undefined,
     sortOrder: undefined,
-    isDeleted: undefined,
+
   } as BrandQueryParams,
   rules: {
     name: [
@@ -178,7 +178,7 @@ function reset() {
     logo: null,
     description: null,
     sortOrder: null,
-    isDeleted: null,
+
     createTime: null,
     updateTime: null
   }
@@ -266,3 +266,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

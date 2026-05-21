@@ -112,7 +112,7 @@
         <gen-info-form ref="genInfo" :info="info" :tables="tables" />
       </el-tab-pane>
     </el-tabs>
-    <el-form label-width="100px">
+    <el-form label-width="120px">
       <div style="text-align: center;margin-left:-100px;margin-top:10px;">
         <el-button type="primary" @click="submitForm()">提交</el-button>
         <el-button @click="close()">返回</el-button>

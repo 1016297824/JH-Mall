@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="SKU 编码" prop="skuCode">
         <el-input
           v-model="queryParams.skuCode"
@@ -9,10 +9,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="SKU 销售名称" prop="skuName">
+      <el-form-item label="SKU 名称" prop="skuName">
         <el-input
           v-model="queryParams.skuName"
-          placeholder="请输入SKU 销售名称"
+          placeholder="请输入SKU 名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -67,12 +67,11 @@
 
     <el-table v-loading="loading" :data="cartList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="用户 ID" align="center" prop="userId" />
       <el-table-column label="SKU ID" align="center" prop="skuId" />
       <el-table-column label="SPU ID" align="center" prop="spuId" />
       <el-table-column label="SKU 编码" align="center" prop="skuCode" />
-      <el-table-column label="SKU 销售名称" align="center" prop="skuName" />
+      <el-table-column label="SKU 名称" align="center" prop="skuName" />
       <el-table-column label="商品主图" align="center" prop="mainImage" width="100">
         <template #default="scope">
           <image-preview :src="scope.row.mainImage" :width="50" :height="50"/>
@@ -81,7 +80,6 @@
       <el-table-column label="当前销售价" align="center" prop="price" />
       <el-table-column label="加入数量" align="center" prop="quantity" />
       <el-table-column label="是否选中" align="center" prop="isSelected" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:cart:edit']">修改</el-button>
@@ -100,7 +98,7 @@
 
     <!-- 添加或修改购物车对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="cartRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="cartRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="SKU 编码" prop="skuCode">
@@ -108,8 +106,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="SKU 销售名称" prop="skuName">
-              <el-input v-model="form.skuName" placeholder="请输入SKU 销售名称" />
+            <el-form-item label="SKU 名称" prop="skuName">
+              <el-input v-model="form.skuName" placeholder="请输入SKU 名称" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -159,7 +157,6 @@ const data = reactive({
     price: undefined,
     quantity: undefined,
     isSelected: undefined,
-    isDeleted: undefined,
   } as CartQueryParams,
   rules: {
     userId: [
@@ -220,7 +217,6 @@ function reset() {
     price: null,
     quantity: null,
     isSelected: null,
-    isDeleted: null,
     createTime: null,
     updateTime: null
   }
@@ -308,3 +304,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

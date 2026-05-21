@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="支付单号，格式 PAY + 时间戳 + 随机数" prop="paymentNo">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
+      <el-form-item label="支付单号" prop="paymentNo">
         <el-input
           v-model="queryParams.paymentNo"
-          placeholder="请输入支付单号，格式 PAY + 时间戳 + 随机数"
+          placeholder="请输入支付单号"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -25,10 +25,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="渠道侧支付单号，对账用" prop="channelPaymentNo">
+      <el-form-item label="渠道单号" prop="channelPaymentNo">
         <el-input
           v-model="queryParams.channelPaymentNo"
-          placeholder="请输入渠道侧支付单号，对账用"
+          placeholder="请输入渠道单号"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -107,13 +107,13 @@
 
     <el-table v-loading="loading" :data="paymentList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键，自增" align="center" prop="id" />
-      <el-table-column label="支付单号，格式 PAY + 时间戳 + 随机数" align="center" prop="paymentNo" />
+
+      <el-table-column label="支付单号" align="center" prop="paymentNo" />
       <el-table-column label="关联订单号" align="center" prop="orderNo" />
       <el-table-column label="付款用户 ID" align="center" prop="userId" />
       <el-table-column label="支付金额" align="center" prop="payAmount" />
       <el-table-column label="支付渠道编码" align="center" prop="channelCode" />
-      <el-table-column label="渠道侧支付单号，对账用" align="center" prop="channelPaymentNo" />
+      <el-table-column label="渠道单号" align="center" prop="channelPaymentNo" />
       <el-table-column label="渠道侧支付状态" align="center" prop="channelPayStatus" />
       <el-table-column label="支付单状态" align="center" prop="paymentStatus" />
       <el-table-column label="支付成功时间" align="center" prop="paySuccessTime" width="180">
@@ -128,8 +128,8 @@
       </el-table-column>
       <el-table-column label="异步通知地址" align="center" prop="notifyUrl" />
       <el-table-column label="幂等键" align="center" prop="idempotentKey" />
-      <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
-      <el-table-column label="乐观锁版本号" align="center" prop="version" />
+
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-payment:payment:edit']">修改</el-button>
@@ -148,11 +148,11 @@
 
     <!-- 添加或修改支付单对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="paymentRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="paymentRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
-            <el-form-item label="支付单号，格式 PAY + 时间戳 + 随机数" prop="paymentNo">
-              <el-input v-model="form.paymentNo" placeholder="请输入支付单号，格式 PAY + 时间戳 + 随机数" />
+            <el-form-item label="支付单号" prop="paymentNo">
+              <el-input v-model="form.paymentNo" placeholder="请输入支付单号" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -166,8 +166,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="渠道侧支付单号，对账用" prop="channelPaymentNo">
-              <el-input v-model="form.channelPaymentNo" placeholder="请输入渠道侧支付单号，对账用" />
+            <el-form-item label="渠道单号" prop="channelPaymentNo">
+              <el-input v-model="form.channelPaymentNo" placeholder="请输入渠道单号" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -217,9 +217,9 @@
               {{ $index + 1 }}
             </template>
           </el-table-column>
-          <el-table-column label="退款单号，格式 REF + 时间戳 + 随机数" prop="refundNo" width="150">
+          <el-table-column label="退款单号" prop="refundNo" width="150">
             <template #default="scope">
-              <el-input v-model="scope.row.refundNo" placeholder="请输入退款单号，格式 REF + 时间戳 + 随机数" />
+              <el-input v-model="scope.row.refundNo" placeholder="请输入退款单号" />
             </template>
           </el-table-column>
           <el-table-column label="关联订单号" prop="orderNo" width="150">
@@ -242,14 +242,14 @@
               <el-input v-model="scope.row.refundReason" placeholder="请输入退款原因" />
             </template>
           </el-table-column>
-          <el-table-column label="退款渠道编码，必须与原始支付渠道一致" prop="channelCode" width="150">
+          <el-table-column label="退款渠道编码" prop="channelCode" width="150">
             <template #default="scope">
-              <el-input v-model="scope.row.channelCode" placeholder="请输入退款渠道编码，必须与原始支付渠道一致" />
+              <el-input v-model="scope.row.channelCode" placeholder="请输入退款渠道编码" />
             </template>
           </el-table-column>
-          <el-table-column label="渠道侧退款单号，对账用" prop="channelRefundNo" width="150">
+          <el-table-column label="渠道侧退款单号" prop="channelRefundNo" width="150">
             <template #default="scope">
-              <el-input v-model="scope.row.channelRefundNo" placeholder="请输入渠道侧退款单号，对账用" />
+              <el-input v-model="scope.row.channelRefundNo" placeholder="请输入渠道侧退款单号" />
             </template>
           </el-table-column>
           <el-table-column label="渠道侧退款状态" prop="channelRefundStatus" width="150">
@@ -327,13 +327,11 @@ const data = reactive({
     paySuccessTime: undefined,
     expireTime: undefined,
     notifyUrl: undefined,
-    idempotentKey: undefined,
-    isDeleted: undefined,
-    version: undefined
+    idempotentKey: undefined
   } as PaymentQueryParams,
   rules: {
     paymentNo: [
-      { required: true, message: "支付单号，格式 PAY + 时间戳 + 随机数不能为空", trigger: "blur" }
+      { required: true, message: "支付单号不能为空", trigger: "blur" }
     ],
     orderNo: [
       { required: true, message: "关联订单号不能为空", trigger: "blur" }
@@ -396,12 +394,10 @@ function reset() {
     expireTime: null,
     notifyUrl: null,
     idempotentKey: null,
-    isDeleted: null,
     createBy: null,
     updateBy: null,
     createTime: null,
-    updateTime: null,
-    version: null
+    updateTime: null
   }
   mallPaymentRefundList.value = []
   proxy.resetForm("paymentRef")
@@ -493,8 +489,6 @@ function handleAddMallPaymentRefund() {
   obj.refundStatus = undefined
   obj.refundSuccessTime = undefined
   obj.idempotentKey = undefined
-  obj.isDeleted = undefined
-  obj.version = undefined
   mallPaymentRefundList.value.push(obj)
 }
 
@@ -525,3 +519,4 @@ function handleExport() {
 
 getList()
 </script>
+

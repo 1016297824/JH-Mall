@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="售后单号" prop="afterSaleNo">
         <el-input
           v-model="queryParams.afterSaleNo"
@@ -57,12 +57,12 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="商家确认收货时间" prop="receiptTime">
+      <el-form-item label="确认收货时间" prop="receiptTime">
         <el-date-picker clearable
           v-model="queryParams.receiptTime"
           type="date"
           value-format="YYYY-MM-DD"
-          placeholder="请选择商家确认收货时间">
+          placeholder="请选择确认收货时间">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
@@ -115,7 +115,6 @@
 
     <el-table v-loading="loading" :data="after_saleList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="售后单号" align="center" prop="afterSaleNo" />
       <el-table-column label="关联订单 ID" align="center" prop="orderId" />
       <el-table-column label="关联订单项 ID" align="center" prop="orderItemId" />
@@ -137,12 +136,11 @@
       <el-table-column label="审核意见" align="center" prop="approveRemark" />
       <el-table-column label="退货物流公司" align="center" prop="returnExpressCompany" />
       <el-table-column label="退货物流单号" align="center" prop="returnExpressNo" />
-      <el-table-column label="商家确认收货时间" align="center" prop="receiptTime" width="180">
+      <el-table-column label="确认收货时间" align="center" prop="receiptTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.receiptTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="isDeleted" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:after_sale:edit']">修改</el-button>
@@ -161,7 +159,7 @@
 
     <!-- 添加或修改售后管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="after_saleRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="after_saleRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="售后单号" prop="afterSaleNo">
@@ -209,12 +207,12 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="商家确认收货时间" prop="receiptTime">
+            <el-form-item label="确认收货时间" prop="receiptTime">
               <el-date-picker clearable
                 v-model="form.receiptTime"
                 type="date"
                 value-format="YYYY-MM-DD"
-                placeholder="请选择商家确认收货时间">
+                placeholder="请选择确认收货时间">
               </el-date-picker>
             </el-form-item>
           </el-col>
@@ -265,7 +263,6 @@ const data = reactive({
     returnExpressCompany: undefined,
     returnExpressNo: undefined,
     receiptTime: undefined,
-    isDeleted: undefined,
   } as After_saleQueryParams,
   rules: {
     afterSaleNo: [
@@ -331,7 +328,6 @@ function reset() {
     returnExpressCompany: null,
     returnExpressNo: null,
     receiptTime: null,
-    isDeleted: null,
     createBy: null,
     updateBy: null,
     createTime: null,
@@ -421,3 +417,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+

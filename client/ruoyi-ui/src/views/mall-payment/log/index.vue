@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="关联支付单号" prop="paymentNo">
         <el-input
           v-model="queryParams.paymentNo"
@@ -41,10 +41,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="回调防重放 nonce" prop="nonce">
+      <el-form-item label="回调随机数" prop="nonce">
         <el-input
           v-model="queryParams.nonce"
-          placeholder="请输入回调防重放 nonce"
+          placeholder="请输入回调随机数"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -99,12 +99,12 @@
 
     <el-table v-loading="loading" :data="logList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键，自增" align="center" prop="id" />
+
       <el-table-column label="关联支付单号" align="center" prop="paymentNo" />
       <el-table-column label="关联退款单号" align="center" prop="refundNo" />
       <el-table-column label="渠道编码" align="center" prop="channelCode" />
       <el-table-column label="回调类型" align="center" prop="callbackType" />
-      <el-table-column label="原始回调报文 JSON" align="center" prop="rawBody" />
+      <el-table-column label="原始回调报文" align="center" prop="rawBody" />
       <el-table-column label="验签结果" align="center" prop="isVerified" />
       <el-table-column label="处理状态" align="center" prop="processStatus" />
       <el-table-column label="处理完成时间" align="center" prop="processTime" width="180">
@@ -113,8 +113,8 @@
         </template>
       </el-table-column>
       <el-table-column label="处理结果说明" align="center" prop="processResult" />
-      <el-table-column label="回调防重放 nonce" align="center" prop="nonce" />
-      <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
+      <el-table-column label="回调随机数" align="center" prop="nonce" />
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-payment:log:edit']">修改</el-button>
@@ -133,7 +133,7 @@
 
     <!-- 添加或修改回调日志对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="logRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="logRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="关联支付单号" prop="paymentNo">
@@ -151,7 +151,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="原始回调报文 JSON" prop="rawBody">
+            <el-form-item label="原始回调报文" prop="rawBody">
               <el-input v-model="form.rawBody" type="textarea" placeholder="请输入内容" />
             </el-form-item>
           </el-col>
@@ -171,8 +171,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="回调防重放 nonce" prop="nonce">
-              <el-input v-model="form.nonce" placeholder="请输入回调防重放 nonce" />
+            <el-form-item label="回调随机数" prop="nonce">
+              <el-input v-model="form.nonce" placeholder="请输入回调随机数" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -217,8 +217,7 @@ const data = reactive({
     processStatus: undefined,
     processTime: undefined,
     processResult: undefined,
-    nonce: undefined,
-    isDeleted: undefined,
+    nonce: undefined
   } as LogQueryParams,
   rules: {
     channelCode: [
@@ -271,7 +270,6 @@ function reset() {
     processTime: null,
     processResult: null,
     nonce: null,
-    isDeleted: null,
     createTime: null,
     updateTime: null
   }
@@ -356,3 +354,4 @@ function handleExport() {
 
 getList()
 </script>
+

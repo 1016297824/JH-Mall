@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.marketing.mapper.MallMarketingPromotionMapper">
+    
+    <resultMap type="MallMarketingPromotion" id="MallMarketingPromotionResult">
+        <result property="id"    column="id"    />
+        <result property="promotionName"    column="promotion_name"    />
+        <result property="promotionType"    column="promotion_type"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="promotionStatus"    column="promotion_status"    />
+        <result property="description"    column="description"    />
+        <result property="bannerImage"    column="banner_image"    />
+        <result property="sortOrder"    column="sort_order"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <resultMap id="MallMarketingPromotionMallMarketingPromotionRuleResult" type="MallMarketingPromotion" extends="MallMarketingPromotionResult">
+        <collection property="mallMarketingPromotionRuleList" ofType="MallMarketingPromotionRule" column="id" select="selectMallMarketingPromotionRuleList" />
+    </resultMap>
+
+    <resultMap type="MallMarketingPromotionRule" id="MallMarketingPromotionRuleResult">
+        <result property="id"    column="id"    />
+        <result property="promotionId"    column="promotion_id"    />
+        <result property="ruleType"    column="rule_type"    />
+        <result property="thresholdAmount"    column="threshold_amount"    />
+        <result property="benefitAmount"    column="benefit_amount"    />
+        <result property="benefitRate"    column="benefit_rate"    />
+        <result property="isExclusive"    column="is_exclusive"    />
+        <result property="sortOrder"    column="sort_order"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallMarketingPromotionVo">
+        select id, promotion_name, promotion_type, start_time, end_time, promotion_status, description, banner_image, sort_order, is_deleted, create_by, update_by, create_time, update_time from mall_marketing_promotion
+    </sql>
+
+    <select id="selectMallMarketingPromotionList" parameterType="MallMarketingPromotion" resultMap="MallMarketingPromotionResult">
+        <include refid="selectMallMarketingPromotionVo"/>
+        <where>  
+            <if test="promotionName != null  and promotionName != ''"> and promotion_name like concat('%', #{promotionName}, '%')</if>
+            <if test="promotionType != null  and promotionType != ''"> and promotion_type = #{promotionType}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="promotionStatus != null  and promotionStatus != ''"> and promotion_status = #{promotionStatus}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="bannerImage != null  and bannerImage != ''"> and banner_image = #{bannerImage}</if>
+            <if test="sortOrder != null  and sortOrder != ''"> and sort_order = #{sortOrder}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallMarketingPromotionById" parameterType="String" resultMap="MallMarketingPromotionMallMarketingPromotionRuleResult">
+        select id, promotion_name, promotion_type, start_time, end_time, promotion_status, description, banner_image, sort_order, is_deleted, create_by, update_by, create_time, update_time
+        from mall_marketing_promotion
+        where id = #{id}
+    </select>
+
+    <select id="selectMallMarketingPromotionRuleList" resultMap="MallMarketingPromotionRuleResult">
+        select id, promotion_id, rule_type, threshold_amount, benefit_amount, benefit_rate, is_exclusive, sort_order, is_deleted, create_time, update_time
+        from mall_marketing_promotion_rule
+        where promotion_id = #{promotion_id}
+    </select>
+
+    <insert id="insertMallMarketingPromotion" parameterType="MallMarketingPromotion" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_marketing_promotion
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="promotionName != null and promotionName != ''">promotion_name,</if>
+            <if test="promotionType != null and promotionType != ''">promotion_type,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="promotionStatus != null and promotionStatus != ''">promotion_status,</if>
+            <if test="description != null">description,</if>
+            <if test="bannerImage != null">banner_image,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="promotionName != null and promotionName != ''">#{promotionName},</if>
+            <if test="promotionType != null and promotionType != ''">#{promotionType},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="promotionStatus != null and promotionStatus != ''">#{promotionStatus},</if>
+            <if test="description != null">#{description},</if>
+            <if test="bannerImage != null">#{bannerImage},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallMarketingPromotion" parameterType="MallMarketingPromotion">
+        update mall_marketing_promotion
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="promotionName != null and promotionName != ''">promotion_name = #{promotionName},</if>
+            <if test="promotionType != null and promotionType != ''">promotion_type = #{promotionType},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="promotionStatus != null and promotionStatus != ''">promotion_status = #{promotionStatus},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="bannerImage != null">banner_image = #{bannerImage},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallMarketingPromotionById" parameterType="String">
+        delete from mall_marketing_promotion where id = #{id}
+    </delete>
+
+    <delete id="deleteMallMarketingPromotionByIds" parameterType="String">
+        delete from mall_marketing_promotion where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteMallMarketingPromotionRuleByPromotionIds" parameterType="String">
+        delete from mall_marketing_promotion_rule where promotion_id in 
+        <foreach item="promotionId" collection="array" open="(" separator="," close=")">
+            #{promotionId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMallMarketingPromotionRuleByPromotionId" parameterType="String">
+        delete from mall_marketing_promotion_rule where promotion_id = #{promotionId}
+    </delete>
+
+    <insert id="batchMallMarketingPromotionRule">
+        insert into mall_marketing_promotion_rule( id, promotion_id, rule_type, threshold_amount, benefit_amount, benefit_rate, is_exclusive, sort_order, is_deleted, create_time, update_time) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.promotionId}, #{item.ruleType}, #{item.thresholdAmount}, #{item.benefitAmount}, #{item.benefitRate}, #{item.isExclusive}, #{item.sortOrder}, #{item.isDeleted}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
+</mapper>

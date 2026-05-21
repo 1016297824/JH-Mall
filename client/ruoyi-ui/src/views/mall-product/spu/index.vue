@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="160px">
       <el-form-item label="SPU 名称" prop="spuName">
         <el-input
           v-model="queryParams.spuName"
@@ -59,7 +59,7 @@
 
     <el-table v-loading="loading" :data="spuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
+
       <el-table-column label="所属三级类目" align="center" prop="categoryId" />
       <el-table-column label="所属品牌" align="center" prop="brandId" />
       <el-table-column label="SPU 名称" align="center" prop="spuName" />
@@ -76,8 +76,8 @@
       <el-table-column label="评价条数" align="center" prop="reviewCount" />
       <el-table-column label="上下架状态" align="center" prop="publishStatus" />
       <el-table-column label="审核状态" align="center" prop="verifyStatus" />
-      <el-table-column label="状态" align="center" prop="isDeleted" />
-      <el-table-column label="版本号" align="center" prop="version" />
+
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-product:spu:edit']">修改</el-button>
@@ -96,7 +96,7 @@
 
     <!-- 添加或修改SPU 管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="spuRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="spuRef" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="SPU 名称" prop="spuName">
@@ -135,9 +135,9 @@
               {{ $index + 1 }}
             </template>
           </el-table-column>
-          <el-table-column label="SKU 销售名称" prop="skuName" width="150">
+          <el-table-column label="SKU 名称" prop="skuName" width="150">
             <template #default="scope">
-              <el-input v-model="scope.row.skuName" placeholder="请输入SKU 销售名称" />
+              <el-input v-model="scope.row.skuName" placeholder="请输入SKU 名称" />
             </template>
           </el-table-column>
           <el-table-column label="销售属性" prop="attrsJson" width="180">
@@ -217,8 +217,7 @@ const data = reactive({
     reviewCount: undefined,
     publishStatus: undefined,
     verifyStatus: undefined,
-    isDeleted: undefined,
-    version: undefined
+
   } as SpuQueryParams,
   rules: {
     categoryId: [
@@ -270,12 +269,12 @@ function reset() {
     reviewCount: null,
     publishStatus: null,
     verifyStatus: null,
-    isDeleted: null,
+
     createBy: null,
     updateBy: null,
     createTime: null,
     updateTime: null,
-    version: null
+
   }
   mallProductSkuList.value = []
   proxy.resetForm("spuRef")
@@ -365,7 +364,7 @@ function handleAddMallProductSku() {
   obj.image = undefined
   obj.weight = undefined
   obj.salesCount = undefined
-  obj.isDeleted = undefined
+
   mallProductSkuList.value.push(obj)
 }
 
@@ -396,3 +395,4 @@ getList()
 
 <style scoped lang="scss">
 </style>
+
