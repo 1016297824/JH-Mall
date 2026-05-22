@@ -415,27 +415,49 @@ $bytes = [byte[]]::new(64)
 
 追加到 `spring.cloud.gateway.routes` 末尾（管理端 5 条路由之后）：
 ```yaml
-        # C 端认证
-        - id: mall-auth
-          uri: lb://mall-auth
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
-        # C 端用户
-        - id: mall-user
-          uri: lb://mall-user
-          predicates:
-            - Path=/api/user/**
-          filters:
-            - StripPrefix=1
-        # C 端商品
-        - id: mall-product
-          uri: lb://mall-product
-          predicates:
-            - Path=/api/product/**
-          filters:
-            - StripPrefix=1
+            # ─── C 端路由（StripPrefix=0，保留 /api 前缀） ───
+            - id: mall-auth-api
+              uri: lb://mall-auth
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=0
+            - id: mall-user-api
+              uri: lb://mall-user
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - StripPrefix=0
+            - id: mall-product-api
+              uri: lb://mall-product
+              predicates:
+                - Path=/api/product/**
+              filters:
+                - StripPrefix=0
+            - id: mall-order-api
+              uri: lb://mall-order
+              predicates:
+                - Path=/api/order/**
+              filters:
+                - StripPrefix=0
+            - id: mall-payment-api
+              uri: lb://mall-payment
+              predicates:
+                - Path=/api/payment/**
+              filters:
+                - StripPrefix=0
+            - id: mall-marketing-api
+              uri: lb://mall-marketing
+              predicates:
+                - Path=/api/marketing/**
+              filters:
+                - StripPrefix=0
+            - id: mall-search-api
+              uri: lb://mall-search
+              predicates:
+                - Path=/api/search/**
+              filters:
+                - StripPrefix=0
 ```
 
 在文件末尾追加：

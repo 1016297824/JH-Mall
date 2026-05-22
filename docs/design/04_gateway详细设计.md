@@ -8,13 +8,13 @@
 
 ### 1.1 职责
 
-| 职责 | 说明 |
-|------|------|
-| 路由分发 | 管理端走 `discovery.locator` 自动路由，C 端走 `/api/**` 显式路由 |
-| 认证分流 | 两个 GlobalFilter 串行执行：AuthFilter 校验管理端 JWT，MallAuthFilter 校验 C 端 JWT |
-| 白名单 | `/api/**` 和 `/callback/**` 不在 AuthFilter 校验范围内 |
-| 请求头清洗 | 剥离外部注入的 `X-User-*` / `X-Admin-*` 头，注入可信内部请求头 |
-| 限流 | Sentinel 集群流控 |
+| 职责       | 说明                                                                                |
+| ---------- | ----------------------------------------------------------------------------------- |
+| 路由分发   | 管理端走 `discovery.locator` 自动路由，C 端走 `/api/**` 显式路由                    |
+| 认证分流   | 两个 GlobalFilter 串行执行：AuthFilter 校验管理端 JWT，MallAuthFilter 校验 C 端 JWT |
+| 白名单     | `/api/**` 和 `/callback/**` 不在 AuthFilter 校验范围内                              |
+| 请求头清洗 | 剥离外部注入的 `X-User-*` / `X-Admin-*` 头，注入可信内部请求头                      |
+| 限流       | Sentinel 集群流控                                                                   |
 
 ### 1.2 依赖关系
 
@@ -40,30 +40,30 @@ ruoyi-gateway (8080端口)
 
 #### AuthFilter（order=-200）
 
-| 逻辑 | 说明 |
-|------|------|
-| 白名单检查 | 路径匹配 `security.ignore.whites` 则直接跳过 |
-| 管理端 JWT 校验 | 非白名单路径校验若依 JWT，失败返回 401 |
-| 内部请求头 | 校验通过后注入 `X-Admin-Id`、`X-Admin-Roles` 等头 |
+| 逻辑            | 说明                                              |
+| --------------- | ------------------------------------------------- |
+| 白名单检查      | 路径匹配 `security.ignore.whites` 则直接跳过      |
+| 管理端 JWT 校验 | 非白名单路径校验若依 JWT，失败返回 401            |
+| 内部请求头      | 校验通过后注入 `X-Admin-Id`、`X-Admin-Roles` 等头 |
 
 #### MallAuthFilter（order=-150）
 
-| 逻辑 | 说明 |
-|------|------|
-| 路径判定 | 仅处理 `/api/` 开头的路径，非 `/api/` 路径直接放行 |
-| C 端 JWT 校验 | 校验 mall-auth 签发的 JWT，失败返回 401 |
-| 用户状态检查 | 校验用户状态（正常/冻结/注销） |
-| 内部请求头 | 校验通过后注入 `X-User-Id`、`X-Member-Id` 等头 |
+| 逻辑          | 说明                                               |
+| ------------- | -------------------------------------------------- |
+| 路径判定      | 仅处理 `/api/` 开头的路径，非 `/api/` 路径直接放行 |
+| C 端 JWT 校验 | 校验 mall-auth 签发的 JWT，失败返回 401            |
+| 用户状态检查  | 校验用户状态（正常/冻结/注销）                     |
+| 内部请求头    | 校验通过后注入 `X-User-Id`、`X-Member-Id` 等头     |
 
 #### 执行流程示例
 
-| 路径 | AuthFilter 行为 | MallAuthFilter 行为 | 结果 |
-|------|----------------|--------------------|------|
-| `/mall-user/user/list` | 非白名单 → 校验管理端 JWT | 非 `/api/` 开头 → 放行 | 管理端请求 |
-| `/api/auth/login` | 在白名单中 → 放行 | `/api/` 开头 → 放行（登录接口无 token） | C 端登录 |
-| `/api/user/profile` | 在白名单中 → 放行 | `/api/` 开头 → 校验 C 端 JWT | C 端认证请求 |
-| `/callback/payment/wechat` | 在白名单中 → 放行 | 非 `/api/` 开头 → 放行 | 支付回调 |
-| `/mall-user/api/user/profile` | 非白名单 → 校验管理端 JWT | `/api/` 开头 → 校验 C 端 JWT | 管理端 JWT 校验失败（C 端用户）→ 401 |
+| 路径                          | AuthFilter 行为           | MallAuthFilter 行为                     | 结果                                 |
+| ----------------------------- | ------------------------- | --------------------------------------- | ------------------------------------ |
+| `/mall-user/user/list`        | 非白名单 → 校验管理端 JWT | 非 `/api/` 开头 → 放行                  | 管理端请求                           |
+| `/api/auth/login`             | 在白名单中 → 放行         | `/api/` 开头 → 放行（登录接口无 token） | C 端登录                             |
+| `/api/user/profile`           | 在白名单中 → 放行         | `/api/` 开头 → 校验 C 端 JWT            | C 端认证请求                         |
+| `/callback/payment/wechat`    | 在白名单中 → 放行         | 非 `/api/` 开头 → 放行                  | 支付回调                             |
+| `/mall-user/api/user/profile` | 非白名单 → 校验管理端 JWT | `/api/` 开头 → 校验 C 端 JWT            | 管理端 JWT 校验失败（C 端用户）→ 401 |
 
 > `discovery.locator` 自动路由会暴露 `/{serviceId}/api/**` 路径，这些路径不在 AuthFilter 白名单中，因此 C 端用户访问会被拦截——形成意外安全防护。
 
@@ -103,6 +103,7 @@ security:
 ```
 
 例如：
+
 - `/mall-user/user/list` → discovery.locator → mall-user(9302) → `@RequestMapping("/user")` → list 方法
 - `/mall-order/order/list` → discovery.locator → mall-order(9304) → `@RequestMapping("/order")` → list 方法
 
@@ -201,7 +202,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: 
+      password:
   cloud:
     gateway:
       server:
@@ -319,23 +320,30 @@ security:
       - /csrf
       # C 端接口（不在 AuthFilter 校验范围，由 MallAuthFilter 处理）
       - /api/**
-      # 支付回调（完全放行，签名验签由 mall-payment 自行处理）
-      - /callback/**
 
 # springdoc配置
 springdoc:
   webjars:
     # 访问前缀
     prefix:
+
+# C 端安全配置
+mall:
+  security:
+    jwt-secret: 7COWPc0I1OG/8Cby86JRsZhk6+kR3tNbKXgxwr45O1mPSZm1SqfRmXyekGo1UojKSEnjVDUSSI7a0HEVKLZcoQ==
+    whites:
+      - /api/auth/login
+      - /api/auth/register
+      - /api/auth/sms-code
 ```
 
 ---
 
 ## 6 关键约束
 
-| 约束 | 说明 |
-|------|------|
-| `discovery.locator` 不可关闭 | 管理端前端依赖 `/{serviceId}/**` 自动路由 |
-| AuthFilter 与 MallAuthFilter 串行 | 两条过滤器不是二选一，MallAuthFilter 在前者通过后二次校验 |
-| 白名单顺序 | `/api/**` 必须放入 `security.ignore.whites`，否则 AuthFilter 拦截 C 端请求 |
-| Controller 包路径 | 管理端 `controller/admin/` + 不含 `/admin` 的路由前缀；C 端 `controller/api/` + 含 `/api` 的路由前缀 |
+| 约束                              | 说明                                                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `discovery.locator` 不可关闭      | 管理端前端依赖 `/{serviceId}/**` 自动路由                                                            |
+| AuthFilter 与 MallAuthFilter 串行 | 两条过滤器不是二选一，MallAuthFilter 在前者通过后二次校验                                            |
+| 白名单顺序                        | `/api/**` 必须放入 `security.ignore.whites`，否则 AuthFilter 拦截 C 端请求                           |
+| Controller 包路径                 | 管理端 `controller/admin/` + 不含 `/admin` 的路由前缀；C 端 `controller/api/` + 含 `/api` 的路由前缀 |

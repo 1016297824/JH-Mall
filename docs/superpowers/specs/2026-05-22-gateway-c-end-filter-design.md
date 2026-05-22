@@ -80,35 +80,58 @@ public class MallAuthFilter implements GlobalFilter, Ordered {
       - /callback/**
 ```
 
-### 3.2 `ruoyi-gateway-dev.yml` C 端路由追加（MVP）
+### 3.2 `ruoyi-gateway-dev.yml` C 端路由（全部 7 个服务）
 
 在 `spring.cloud.gateway.routes` 中追加（管理端 5 条路由保留不变）：
 
 ```yaml
-        # C 端认证
-        - id: mall-auth
-          uri: lb://mall-auth
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
-        # C 端用户
-        - id: mall-user
-          uri: lb://mall-user
-          predicates:
-            - Path=/api/user/**
-          filters:
-            - StripPrefix=1
-        # C 端商品
-        - id: mall-product
-          uri: lb://mall-product
-          predicates:
-            - Path=/api/product/**
-          filters:
-            - StripPrefix=1
+            # ─── C 端路由（StripPrefix=0，保留 /api 前缀） ───
+            - id: mall-auth-api
+              uri: lb://mall-auth
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=0
+            - id: mall-user-api
+              uri: lb://mall-user
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - StripPrefix=0
+            - id: mall-product-api
+              uri: lb://mall-product
+              predicates:
+                - Path=/api/product/**
+              filters:
+                - StripPrefix=0
+            - id: mall-order-api
+              uri: lb://mall-order
+              predicates:
+                - Path=/api/order/**
+              filters:
+                - StripPrefix=0
+            - id: mall-payment-api
+              uri: lb://mall-payment
+              predicates:
+                - Path=/api/payment/**
+              filters:
+                - StripPrefix=0
+            - id: mall-marketing-api
+              uri: lb://mall-marketing
+              predicates:
+                - Path=/api/marketing/**
+              filters:
+                - StripPrefix=0
+            - id: mall-search-api
+              uri: lb://mall-search
+              predicates:
+                - Path=/api/search/**
+              filters:
+                - StripPrefix=0
 ```
 
-> **注意**：`StripPrefix=1` 移除 `/api` 前缀，下游服务 Controller `@RequestMapping` 不包含 `/api`。例如 `/api/auth/login` → 转发至 mall-auth 的 `/login`。
+> `StripPrefix=0` 保留 `/api` 前缀，下游服务 Controller `@RequestMapping` 包含 `/api`。
+> 例如 `/api/auth/login` 转发至 mall-auth 的 `@RequestMapping("/api/auth")`。
 
 ### 3.3 `ruoyi-gateway-dev.yml` C 端白名单追加（MVP）
 
@@ -203,7 +226,7 @@ public class MallAuthProperties {
 | `discovery.locator.enabled: true` 不可关闭 | 管理端前端依赖 `/{serviceId}` 自动路由 |
 | AuthFilter 与 MallAuthFilter 串行 | 两者不是二选一关系 |
 | `/api/**` 必须在 `security.ignore.whites` 中 | 否则 AuthFilter 拦截 C 端请求 |
-| C 端 Controller `@RequestMapping` 不含 `/api` 前缀 | 网关 `StripPrefix=1` 已移除 `/api`，如 `@RequestMapping("/auth")` |
+| C 端 Controller `@RequestMapping` 含 `/api` 前缀 | 网关 `StripPrefix=0` 保留 `/api`，如 `@RequestMapping("/api/auth")` |
 | 管理端 Controller `@RequestMapping` 不含 `/api` 前缀 | 如 `/user/list` |
 
 ---

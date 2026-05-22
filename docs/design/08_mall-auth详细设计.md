@@ -10,14 +10,14 @@
 
 | 子领域     | 存储  | 说明                                                     |
 | ---------- | ----- | -------------------------------------------------------- |
-| 用户注册   | —     | 手机号+验证码注册，调 mall-user 落库                     |
+| 用户注册   | —    | 手机号+验证码注册，调 mall-user 落库                     |
 | 会话管理   | Redis | JWT access_token（30min）+ refresh_token（7d），多端共存 |
-| 密码认证   | —     | 手机号+密码登录，密码哈希校验（调 mall-user 取凭证）     |
+| 密码认证   | —    | 手机号+密码登录，密码哈希校验（调 mall-user 取凭证）     |
 | 短信认证   | Redis | 短信验证码登录/快捷注册，code 5min TTL                   |
-| 微信认证   | —     | 小程序 code→token，微信用户创建/关联                     |
+| 微信认证   | —    | 小程序 code→token，微信用户创建/关联                    |
 | token 刷新 | Redis | refresh_token 一次性轮换，旧 token 1h 宽限期             |
 | 账号安全   | Redis | 密码错误计数、账户冻结/注销、审计日志                    |
-| 解密服务   | —     | AES-256-GCM 密钥持有方，其他服务 Feign 调解密            |
+| 解密服务   | —    | AES-256-GCM 密钥持有方，其他服务 Feign 调解密            |
 
 ### 1.2 依赖关系
 
@@ -78,21 +78,21 @@ server/mall/mall-auth/
 
 ### 2.2 接口 → Controller 映射
 
-| #   | 方法   | 路径                             | 方法名                   | 需登录 | 审计 |
-| --- | ------ | -------------------------------- | ------------------------ | :----: | :--: |
-| 1   | POST   | `/api/auth/users`                | `register(req)`          |   否   |  —   |
-| 2   | POST   | `/api/auth/sms_codes`            | `sendSmsCode(req)`       |   否   |  —   |
-| 3   | POST   | `/api/auth/sessions`             | `loginByPassword(req)`   |   否   |  ✓   |
-| 4   | POST   | `/api/auth/sessions/sms`         | `loginBySms(req)`        |   否   |  ✓   |
-| 5   | POST   | `/api/auth/sessions/refresh`     | `refreshToken(req)`      |   否   |  —   |
-| 6   | DELETE | `/api/auth/sessions/current`     | `logout()`               |   是   |  ✓   |
-| 7   | POST   | `/api/auth/wechat/sessions`      | `loginByWechat(req)`     |   否   |  ✓   |
-| 8   | POST   | `/api/auth/wechat/phone_binding` | `bindPhone(req)`         |   是   |  ✓   |
-| 9   | PUT    | `/api/auth/phone`                | `changePhone(req)`       |   是   |  ✓   |
-| 10  | PUT    | `/api/auth/password/reset`       | `resetPassword(req)`     |   否   |  —   |
-| 11  | PUT    | `/api/auth/password`             | `changePassword(req)`    |   是   |  ✓   |
-| 12  | DELETE | `/api/auth/account`              | `deactivateAccount(req)` |   是   |  ✓   |
-| 13  | GET    | `/api/auth/sessions/current`     | `checkSession()`         |   是   |  —   |
+| #  | 方法   | 路径                               | 方法名                     | 需登录 | 审计 |
+| -- | ------ | ---------------------------------- | -------------------------- | :----: | :--: |
+| 1  | POST   | `/api/auth/users`                | `register(req)`          |   否   |  —  |
+| 2  | POST   | `/api/auth/sms_codes`            | `sendSmsCode(req)`       |   否   |  —  |
+| 3  | POST   | `/api/auth/sessions`             | `loginByPassword(req)`   |   否   |  ✓  |
+| 4  | POST   | `/api/auth/sessions/sms`         | `loginBySms(req)`        |   否   |  ✓  |
+| 5  | POST   | `/api/auth/sessions/refresh`     | `refreshToken(req)`      |   否   |  —  |
+| 6  | DELETE | `/api/auth/sessions/current`     | `logout()`               |   是   |  ✓  |
+| 7  | POST   | `/api/auth/wechat/sessions`      | `loginByWechat(req)`     |   否   |  ✓  |
+| 8  | POST   | `/api/auth/wechat/phone_binding` | `bindPhone(req)`         |   是   |  ✓  |
+| 9  | PUT    | `/api/auth/phone`                | `changePhone(req)`       |   是   |  ✓  |
+| 10 | PUT    | `/api/auth/password/reset`       | `resetPassword(req)`     |   否   |  —  |
+| 11 | PUT    | `/api/auth/password`             | `changePassword(req)`    |   是   |  ✓  |
+| 12 | DELETE | `/api/auth/account`              | `deactivateAccount(req)` |   是   |  ✓  |
+| 13 | GET    | `/api/auth/sessions/current`     | `checkSession()`         |   是   |  —  |
 
 > #10/#11 路径已从系统设计的同名 `PUT /api/auth/password` 修正为 `reset` 和 `/password` 两个不同路径（方案 A），避免 RESTful 冲突。
 
@@ -178,7 +178,7 @@ server/mall/mall-auth/
 
 | 参数             |      值      | 说明                                  |
 | ---------------- | :----------: | ------------------------------------- |
-| accessToken TTL  |    30min     | 短期安全令牌                          |
+| accessToken TTL  |    30min    | 短期安全令牌                          |
 | refreshToken TTL |      7d      | 长期刷新令牌，一次性轮换              |
 | 多端共存         |      ✅      | 每端独立 jti，PC+手机+Pad 各自登录    |
 | 密码修改后       | 踢其他端下线 | 修改密码/重置密码后 revokeAll(userId) |
@@ -221,8 +221,8 @@ server/mall/mall-auth/
 
 ### 4.1 Redis Key 规范
 
-| Key 模式                                 | 用途                     | TTL                |
-| ---------------------------------------- | ------------------------ | ------------------ |
+| Key 模式                                   | 用途                     | TTL                |
+| ------------------------------------------ | ------------------------ | ------------------ |
 | `mall:auth:session:{userId}:{jti}`       | 会话信息（设备/IP/时间） | 同 accessToken exp |
 | `mall:auth:refresh:{jti}`                | refreshToken 映射        | 7d                 |
 | `mall:auth:blacklist:{jti}`              | 黑名单（注销/刷新作废）  | 原 token 剩余时间  |
@@ -261,11 +261,11 @@ server/mall/mall-auth/
 
 ### 5.1 发送防刷
 
-| 维度   | 机制             |  阈值   |
+| 维度   | 机制             |  阈值  |
 | ------ | ---------------- | :-----: |
-| 手机号 | Redis SETNX 冷却 | 60s/次  |
+| 手机号 | Redis SETNX 冷却 | 60s/次 |
 | IP     | Redis 计数器     | 10次/天 |
-| 手机号 | Redis 计数器     | 5次/天  |
+| 手机号 | Redis 计数器     | 5次/天 |
 
 **流程：**
 
@@ -298,16 +298,16 @@ server/mall/mall-auth/
 | 长度   | 8~32 位                             |
 | 字符   | 必须同时包含字母和数字              |
 | 禁止   | 与手机号相同、纯数字、连续/重复字符 |
-| 错误码 | 不满足 →`A0121`                     |
+| 错误码 | 不满足 →`A0121`                  |
 
 ### 6.3 登录保护
 
-| 机制         | 说明                                                        |
-| ------------ | ----------------------------------------------------------- |
+| 机制         | 说明                                                          |
+| ------------ | ------------------------------------------------------------- |
 | 密码错误计数 | Redis `mall:auth:pwd_err:{userId}`，连续 5 次错误锁定 30min |
 | 冻结检查     | 登录前查用户状态，冻结 `A0202`                              |
 | 注销检查     | 注销用户不可登录 `A0203`                                    |
-| 审计日志     | 每次登录无论成功/失败都记录                                 |
+| 审计日志     | 每次登录无论成功/失败都记录                                   |
 
 ---
 
@@ -337,8 +337,8 @@ server/mall/mall-auth/
 
 ### 7.3 WechatAdapter 错误处理
 
-| 微信错误码               | 映射                        |
-| ------------------------ | --------------------------- |
+| 微信错误码                 | 映射                        |
+| -------------------------- | --------------------------- |
 | `-1` 系统繁忙            | C0230（重试）               |
 | `40029` code 无效        | C0230                       |
 | `40163` code 已使用      | C0230                       |
@@ -350,8 +350,8 @@ server/mall/mall-auth/
 
 mall-auth 生产 **1 个** topic，消费 **0 个**：
 
-| Topic                  | Payload 字段                                                         | 发布时机         |
-| ---------------------- | -------------------------------------------------------------------- | ---------------- |
+| Topic                    | Payload 字段                                                                 | 发布时机         |
+| ------------------------ | ---------------------------------------------------------------------------- | ---------------- |
 | `mall:user:registered` | `userId`、`phone`（脱敏）、`registerTime`、`channel`（PHONE/WECHAT） | 新用户注册成功后 |
 
 > topic `mall:user:registered` 由 mall-user 消费，用于初始化积分账户、成长值等。
@@ -364,8 +364,8 @@ mall-auth 生产 **1 个** topic，消费 **0 个**：
 
 mall-auth 作为密钥持有方，向其他服务暴露解密接口（定义在 `mall-api`）：
 
-| 方法                                | 说明                                |
-| ----------------------------------- | ----------------------------------- |
+| 方法                                  | 说明                                |
+| ------------------------------------- | ----------------------------------- |
 | `decrypt(encryptedData)`            | 解密单条 AES-256-GCM 密文，返回明文 |
 | `batchDecrypt(List<encryptedData>)` | 批量解密，最多 50 条                |
 
@@ -429,8 +429,8 @@ springdoc:
   api-docs:
     enabled: true
   info:
-    title: "认证模块接口文档"
-    description: "认证模块接口描述"
+    title: '认证模块接口文档'
+    description: '认证模块接口描述'
     contact:
       name: RuoYi
       url: https://ruoyi.vip
@@ -455,8 +455,9 @@ mall:
       cache-ttl: 60
       batch-limit: 50
   security:
-    jwt-secret:
+    jwt-secret: 7COWPc0I1OG/8Cby86JRsZhk6+kR3tNbKXgxwr45O1mPSZm1SqfRmXyekGo1UojKSEnjVDUSSI7a0HEVKLZcoQ==
     aes-key:
+
 ```
 
 > 以上配置通过 Nacos 下发，标 \* 的需重启生效。
@@ -490,12 +491,12 @@ spring:
 
 ### 11.3 配置项说明
 
-| 配置项                          | 默认值 | 单位 | 说明                                   |
-| ------------------------------- | ------ | :--: | -------------------------------------- |
+| 配置项                            | 默认值 | 单位 | 说明                                   |
+| --------------------------------- | ------ | :--: | -------------------------------------- |
 | `mall.auth.access-token-ttl`    | 1800   |  秒  | accessToken 有效期（30min）            |
 | `mall.auth.refresh-token-ttl`   | 604800 |  秒  | refreshToken 有效期（7d）              |
-| `mall.security.jwt-secret`      | —      |  —   | JWT 签名密钥（Nacos 管理，\*）         |
-| `mall.security.aes-key`         | —      |  —   | AES-256-GCM 密钥（Nacos 管理，\*）     |
+| `mall.security.jwt-secret`      | —     |  —  | JWT 签名密钥（Nacos 管理，\*）         |
+| `mall.security.aes-key`         | —     |  —  | AES-256-GCM 密钥（Nacos 管理，\*）     |
 | `mall.auth.sms.code-length`     | 6      |  位  | 验证码长度                             |
 | `mall.auth.sms.code-ttl`        | 300    |  秒  | 验证码有效期                           |
 | `mall.auth.sms.cooldown`        | 60     |  秒  | 同一手机号发送冷却                     |
@@ -503,9 +504,9 @@ spring:
 | `mall.auth.sms.ip-daily-limit`  | 10     |  次  | 同一 IP 日发送上限                     |
 | `mall.auth.pwd-err-limit`       | 5      |  次  | 密码连续错误锁定阈值                   |
 | `mall.auth.pwd-err-ttl`         | 1800   |  秒  | 错误计数 TTL（30min）                  |
-| `mall.auth.pwd-bcrypt-cost`     | 12     |  —   | BCrypt 哈希复杂度                      |
-| `mall.auth.wechat.app-id`       | —      |  —   | 微信小程序 AppId（\*）                 |
-| `mall.auth.wechat.app-secret`   | —      |  —   | 微信小程序 AppSecret（Nacos 加密，\*） |
+| `mall.auth.pwd-bcrypt-cost`     | 12     |  —  | BCrypt 哈希复杂度                      |
+| `mall.auth.wechat.app-id`       | —     |  —  | 微信小程序 AppId（\*）                 |
+| `mall.auth.wechat.app-secret`   | —     |  —  | 微信小程序 AppSecret（Nacos 加密，\*） |
 | `mall.auth.decrypt.cache-ttl`   | 60     |  秒  | 解密结果缓存时间                       |
 | `mall.auth.decrypt.batch-limit` | 50     |  条  | 批量解密上限                           |
 
@@ -515,28 +516,28 @@ spring:
 
 | 错误码 | HTTP | userTip                            | 说明                                   |
 | ------ | :--: | ---------------------------------- | -------------------------------------- |
-| 00000  | 200  | —                                  | 成功                                   |
-| A0101  | 400  | 请同意隐私协议                     | 未同意隐私协议（isPrivacyAgreed != 1） |
-| A0121  | 400  | 密码需 8~32 位且包含字母和数字     | 密码长度或复杂度不足                   |
-| A0131  | 400  | 验证码错误                         | 短信验证码不匹配                       |
-| A0132  | 400  | 验证码已过期                       | 验证码超过 5 分钟或已使用              |
-| A0151  | 400  | 手机号已被注册                     | 注册/换绑时手机号已存在                |
-| A0152  | 400  | 手机号格式错误                     | 手机号不符合格式                       |
-| A0201  | 400  | 账户不存在                         | 登录时手机号未注册                     |
-| A0202  | 400  | 账户已被冻结                       | 用户状态为冻结                         |
-| A0203  | 400  | 账户已注销                         | 用户状态为已注销                       |
-| A0210  | 400  | 密码错误                           | 密码不匹配                             |
-| A0211  | 400  | 密码错误次数过多，请 30 分钟后重试 | 连续 5 次密码错误触发临时锁定          |
-| A0231  | 401  | 登录已过期，请重新登录             | refresh_token 失效或 token 已注销      |
-| A0241  | 400  | 验证码尝试次数过多                 | 同一手机号日验证码尝试超限             |
-| A0301  | 401  | 请先登录                           | 未携带有效 token                       |
-| A0310  | 401  | 登录凭证非法                       | token 被篡改或伪造                     |
-| A0401  | 400  | 请完整填写信息                     | 必填参数为空                           |
-| A0410  | 429  | 请求过于频繁，请稍后再试           | 短信/接口频率限制                      |
-| B0001  | 500  | 系统繁忙，请稍后再试               | 未预期异常                             |
-| C0110  | 500  | 服务暂时不可用                     | Redis 连接失败                         |
-| C0220  | 503  | 短信服务异常                       | 短信平台调用失败                       |
-| C0230  | 503  | 微信服务异常                       | 微信 code2session 或解密失败           |
+| 00000  | 200 | —                                 | 成功                                   |
+| A0101  | 400 | 请同意隐私协议                     | 未同意隐私协议（isPrivacyAgreed != 1） |
+| A0121  | 400 | 密码需 8~32 位且包含字母和数字     | 密码长度或复杂度不足                   |
+| A0131  | 400 | 验证码错误                         | 短信验证码不匹配                       |
+| A0132  | 400 | 验证码已过期                       | 验证码超过 5 分钟或已使用              |
+| A0151  | 400 | 手机号已被注册                     | 注册/换绑时手机号已存在                |
+| A0152  | 400 | 手机号格式错误                     | 手机号不符合格式                       |
+| A0201  | 400 | 账户不存在                         | 登录时手机号未注册                     |
+| A0202  | 400 | 账户已被冻结                       | 用户状态为冻结                         |
+| A0203  | 400 | 账户已注销                         | 用户状态为已注销                       |
+| A0210  | 400 | 密码错误                           | 密码不匹配                             |
+| A0211  | 400 | 密码错误次数过多，请 30 分钟后重试 | 连续 5 次密码错误触发临时锁定          |
+| A0231  | 401 | 登录已过期，请重新登录             | refresh_token 失效或 token 已注销      |
+| A0241  | 400 | 验证码尝试次数过多                 | 同一手机号日验证码尝试超限             |
+| A0301  | 401 | 请先登录                           | 未携带有效 token                       |
+| A0310  | 401 | 登录凭证非法                       | token 被篡改或伪造                     |
+| A0401  | 400 | 请完整填写信息                     | 必填参数为空                           |
+| A0410  | 429 | 请求过于频繁，请稍后再试           | 短信/接口频率限制                      |
+| B0001  | 500 | 系统繁忙，请稍后再试               | 未预期异常                             |
+| C0110  | 500 | 服务暂时不可用                     | Redis 连接失败                         |
+| C0220  | 503 | 短信服务异常                       | 短信平台调用失败                       |
+| C0230  | 503 | 微信服务异常                       | 微信 code2session 或解密失败           |
 
 > 错误码遵循阿里规范 A/B/C 格式，除 C0220 外全部来自系统设计第二章。
 
