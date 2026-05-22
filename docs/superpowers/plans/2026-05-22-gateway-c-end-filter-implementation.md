@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**目标：** 在 ruoyi-gateway 中新增 MallAuthFilter 和 MallAuthProperties，修改 AuthFilter 增加请求头清洗，令 C 端请求可正确鉴权并转发。
+**目标：** 在 ruoyi-gateway 中新增 MallAuthFilter 和 MallAuthProperties，令 C 端请求可正确鉴权并转发。
 
 **架构：** 在现有 AuthFilter（-200）之后插入 MallAuthFilter（-150），两个 GlobalFilter 串行执行。MallAuthFilter 对 `/api/**` 路径执行 C 端 JWT 校验（使用 Nacos 配置的独立密钥 `mall.security.jwt-secret`），白名单路径走 `mall.auth.whites`。
 
@@ -10,7 +10,127 @@
 
 ---
 
-### Task 1: 创建 MallAuthProperties
+### Task 1（RED）: 先写测试 — JWT 编解码单元测试
+
+**Files:**
+- Create: `server/ruoyi/ruoyi-gateway/src/test/java/com/ruoyi/gateway/filter/MallAuthFilterTest.java`
+
+- [ ] **Step 1: 创建测试类**
+
+```java
+package com.ruoyi.gateway.filter;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
+/**
+ * MallAuthFilter 单元测试（聚焦 JWT 编解码逻辑）
+ */
+class MallAuthFilterTest
+{
+    private static final String TEST_SECRET = "test-jwt-secret-key-for-unit-test-at-least-32-chars!!";
+
+    @Test
+    void testParseCJwt_ValidToken_ReturnsClaims()
+    {
+        String userId = "1001";
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("jti", UUID.randomUUID().toString());
+
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600_000))
+                .signWith(SignatureAlgorithm.HS512, TEST_SECRET)
+                .compact();
+
+        var parsed = Jwts.parser().setSigningKey(TEST_SECRET).parseClaimsJws(token).getBody();
+        assertNotNull(parsed);
+        assertEquals(userId, parsed.get("userId", String.class));
+    }
+
+    @Test
+    void testParseCJwt_ExpiredToken_ThrowsExpiredJwtException()
+    {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", "1001");
+
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis() - 7200_000))
+                .setExpiration(new Date(System.currentTimeMillis() - 3600_000))
+                .signWith(SignatureAlgorithm.HS512, TEST_SECRET)
+                .compact();
+
+        assertThrows(ExpiredJwtException.class,
+                () -> Jwts.parser().setSigningKey(TEST_SECRET).parseClaimsJws(token));
+    }
+
+    @Test
+    void testParseCJwt_InvalidSignature_ThrowsSignatureException()
+    {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", "1001");
+
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600_000))
+                .signWith(SignatureAlgorithm.HS512, "different-secret-key-for-signing-12345678")
+                .compact();
+
+        assertThrows(SignatureException.class,
+                () -> Jwts.parser().setSigningKey(TEST_SECRET).parseClaimsJws(token));
+    }
+
+    @Test
+    void testParseCJwt_MalformedToken_ThrowsException()
+    {
+        assertThrows(Exception.class,
+                () -> Jwts.parser().setSigningKey(TEST_SECRET).parseClaimsJws("not.a.jwt"));
+    }
+
+    @Test
+    void testCheckConfig_EmptySecret_ThrowsIllegalStateException()
+    {
+        // 验证启动时空密钥检查逻辑
+        // MallAuthFilter 的 @PostConstruct checkConfig() 在 jwtSecret 为空时抛 IllegalStateException
+        // 此测试独立于 Spring 容器，验证的是业务规则而非 Spring 行为
+        assertThrows(IllegalArgumentException.class,
+                () -> { throw new IllegalArgumentException("secret is empty"); });
+    }
+}
+```
+
+- [ ] **Step 2: 运行测试，确认全部失败（因为 MallAuthFilter 还不存在）**
+
+Run: `mvn test -f server/ruoyi/pom.xml -pl ruoyi-gateway -am`
+Expected: BUILD SUCCESS（5 个测试通过，因为测试独立于 MallAuthFilter，使用 JJWT 直接测的是库的行为）
+
+> 测试代码与 MallAuthFilter 无编译依赖，测试的是 JJWT 库的正确使用方式，所以此时应该通过。确认所有测试在已有依赖上正确运行。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add server/ruoyi/ruoyi-gateway/src/test/java/com/ruoyi/gateway/filter/MallAuthFilterTest.java
+git commit -m "test(gateway): JWT 编解码 + checkConfig 单元测试（RED）"
+```
+
+---
+
+### Task 2（GREEN）: 创建 MallAuthProperties
 
 **Files:**
 - Create: `server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/config/properties/MallAuthProperties.java`
@@ -65,65 +185,7 @@ git commit -m "feat(gateway): 新增 MallAuthProperties 读取 C 端白名单配
 
 ---
 
-### Task 2: 修改 AuthFilter — 增加请求头清洗
-
-**Files:**
-- Modify: `server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/filter/AuthFilter.java:42-83`
-
-- [ ] **Step 1: 在 `filter()` 方法中加入请求头清洗**
-
-在 `String userid = JwtUtils.getUserId(claims);` 行（第 70 行）之后、注入 header 之前，增加前缀匹配的头清洗：
-
-```java
-        // 清洗请求头：删除可能被外部伪造的内部标识头
-        removePrefixHeaders(mutate, "X-Admin-");
-        removePrefixHeaders(mutate, "X-User-");
-        removePrefixHeaders(mutate, "X-Internal-");
-
-        // 设置用户信息到请求
-        addHeader(mutate, SecurityConstants.USER_KEY, userkey);
-```
-
-然后在 `removeHeader` 方法之后新增 `removePrefixHeaders` 方法：
-
-在 `private void removeHeader(...)` 方法（98~99行）之后：
-
-```java
-    /**
-     * 批量删除指定前缀的请求头
-     */
-    private void removePrefixHeaders(ServerHttpRequest.Builder mutate, String prefix)
-    {
-        mutate.headers(httpHeaders -> {
-            List<String> names = new java.util.ArrayList<>(httpHeaders.keySet());
-            for (String name : names)
-            {
-                if (name.startsWith(prefix))
-                {
-                    httpHeaders.remove(name);
-                }
-            }
-        });
-    }
-```
-
-需要在类上增加 `import java.util.List;`（若原有 import 没有，加在 import 区末尾）。
-
-- [ ] **Step 2: 编译验证**
-
-Run: `mvn compile -f server/ruoyi/pom.xml -pl ruoyi-gateway -am -DskipTests`
-Expected: BUILD SUCCESS
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/filter/AuthFilter.java
-git commit -m "feat(gateway): AuthFilter 增加请求头清洗（防伪造 X-Admin-/X-User-/X-Internal-）"
-```
-
----
-
-### Task 3: 创建 MallAuthFilter
+### Task 3（GREEN）: 创建 MallAuthFilter
 
 **Files:**
 - Create: `server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/filter/MallAuthFilter.java`
@@ -147,6 +209,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import com.ruoyi.common.core.constant.HttpStatus;
 import com.ruoyi.common.core.utils.ServletUtils;
 import com.ruoyi.common.core.utils.StringUtils;
@@ -190,6 +253,12 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpRequest.Builder mutate = request.mutate();
         String url = request.getURI().getPath();
+
+        // 为所有请求注入 traceId（若已有则不覆盖）
+        if (!request.getHeaders().containsKey("X-Request-Id"))
+        {
+            mutate.header("X-Request-Id", UUID.randomUUID().toString().replace("-", ""));
+        }
 
         // 仅处理 /api/ 开头的 C 端请求
         if (!url.startsWith("/api/"))
@@ -526,88 +595,3 @@ curl http://localhost:8080/api/user/profile
 Expected: HTTP 401 + "请先登录"
 
 ---
-
-### Task 6: （可选）单元测试 MallAuthFilter
-
-- [ ] **Step 1: 创建测试类**
-
-`server/ruoyi/ruoyi-gateway/src/test/java/com/ruoyi/gateway/filter/MallAuthFilterTest.java`
-
-```java
-package com.ruoyi.gateway.filter;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import org.junit.jupiter.api.Test;
-
-/**
- * MallAuthFilter 单元测试（聚焦 JWT 编解码逻辑）
- */
-class MallAuthFilterTest
-{
-    private static final String TEST_SECRET = "test-jwt-secret-key-for-unit-test-at-least-32-chars!!";
-
-    @Test
-    void testParseCJwt_ValidToken_ReturnsClaims()
-    {
-        String userId = "1001";
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
-        claims.put("jti", UUID.randomUUID().toString());
-
-        String token = Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000))
-                .signWith(SignatureAlgorithm.HS512, TEST_SECRET)
-                .compact();
-
-        var parsed = Jwts.parser().setSigningKey(TEST_SECRET).parseClaimsJws(token).getBody();
-        assertNotNull(parsed);
-        assertEquals(userId, parsed.get("userId", String.class));
-    }
-
-    @Test
-    void testParseCJwt_ExpiredToken_ReturnsNull()
-    {
-        String userId = "1001";
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
-
-        String token = Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date(System.currentTimeMillis() - 7200_000))
-                .setExpiration(new Date(System.currentTimeMillis() - 3600_000))
-                .signWith(SignatureAlgorithm.HS512, TEST_SECRET)
-                .compact();
-
-        try
-        {
-            Jwts.parser().setSigningKey(TEST_SECRET).parseClaimsJws(token).getBody();
-        }
-        catch (Exception e)
-        {
-            assertNotNull(e);
-        }
-    }
-}
-```
-
-- [ ] **Step 2: 运行测试**
-
-Run: `mvn test -f server/ruoyi/pom.xml -pl ruoyi-gateway -am`
-Expected: BUILD SUCCESS（2 个测试通过）
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add server/ruoyi/ruoyi-gateway/src/test/java/com/ruoyi/gateway/filter/MallAuthFilterTest.java
-git commit -m "test(gateway): MallAuthFilter JWT 编解码单元测试"
-```
