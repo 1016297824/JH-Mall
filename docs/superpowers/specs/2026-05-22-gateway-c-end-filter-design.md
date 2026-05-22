@@ -19,17 +19,10 @@
 
 两个过滤器对所有路径都执行，各自按路径判定放行或校验。
 
-### 2.1 AuthFilter（order=-200，已存在，需修改）
+### 2.1 AuthFilter（order=-200，已存在，本次不变）
 
-**已有逻辑**（不变）：
-
-- 白名单检查：`security.ignore.whites` 匹配则跳过
-- 非白名单路径 → 校验管理端 JWT → 注入 X-Admin-* 头
-
-**新增逻辑**（请求头清洗）：
-
-- 在所有路径上剥离 `X-Admin-*`、`X-User-*`、`X-Internal-*` 开头的请求头
-- 防止外部请求伪造内部身份头
+**保留全部已有逻辑**：
+- 白名单检查 → 校验管理端 JWT → 注入 X-Admin-* 头 / 清除 `from-source`
 
 ### 2.2 MallAuthFilter（order=-150，新建）
 
@@ -217,19 +210,6 @@ public class MallAuthProperties {
 }
 ```
 
-### 4.3 AuthFilter 修改
-
-在现有 `AuthFilter.filter()` 方法中，JWT 校验通过后、注入 header 之前增加请求头清洗（不可放在白名单检查之前，因为白名单路径直接 `return chain.filter(exchange)` 不应用 mutate）：
-
-```java
-// 清洗外部请求头，防止伪造
-removePrefixHeaders(mutate, "X-Admin-");
-removePrefixHeaders(mutate, "X-User-");
-removePrefixHeaders(mutate, "X-Internal-");
-```
-
-> `removeHeader` 方法已存在于 AuthFilter 中；`removePrefixHeaders` 为新增方法，按前缀批量删除。
-
 ---
 
 ## 五、关键约束
@@ -249,4 +229,5 @@ removePrefixHeaders(mutate, "X-Internal-");
 - mall-auth 模块本身的代码实现（后续任务）
 - mall-user 内部 Feign 端点（mall-auth 的前置依赖）
 - mall-api 契约层代码（mall-auth 的前置依赖）
+- AuthFilter 修改（若依原生代码，本次不动，MallAuthFilter 中已有 X-User-* 清洗）
 - AOP 日志脱敏（后续统一处理）
