@@ -124,21 +124,8 @@ server/mall/mall-product/
 | 5 | GET | `/api/product/spus/{spuId}` | SpuApiController | `detail(spuId)` | 否 | — |
 | 6 | GET | `/api/product/skus/{skuId}` | SkuApiController | `detail(skuId)` | 否 | — |
 | 7 | GET | `/api/product/search/fallback` | SearchFallbackController | `search(params)` | 否 | — |
-| 8 | POST | `/admin/mall/product/categories` | CategoryAdminController | `create(req)` | 管理端 | `mall:product:create` |
-| 9 | PUT | `/admin/mall/product/categories/{categoryId}` | CategoryAdminController | `update(categoryId, req)` | 管理端 | `mall:product:update` |
-| 10 | DELETE | `/admin/mall/product/categories/{categoryId}` | CategoryAdminController | `delete(categoryId)` | 管理端 | `mall:product:delete` |
-| 11 | POST | `/admin/mall/product/brands` | BrandAdminController | `create(req)` | 管理端 | `mall:product:create` |
-| 12 | PUT | `/admin/mall/product/brands/{brandId}` | BrandAdminController | `update(brandId, req)` | 管理端 | `mall:product:update` |
-| 13 | DELETE | `/admin/mall/product/brands/{brandId}` | BrandAdminController | `delete(brandId)` | 管理端 | `mall:product:delete` |
-| 14 | GET | `/admin/mall/product/spus` | SpuAdminController | `list(params)` | 管理端 | `mall:product:list` |
-| 15 | GET | `/admin/mall/product/spus/{spuId}` | SpuAdminController | `detail(spuId)` | 管理端 | `mall:product:detail` |
-| 16 | POST | `/admin/mall/product/spus` | SpuAdminController | `create(req)` | 管理端 | `mall:product:create` |
-| 17 | PUT | `/admin/mall/product/spus/{spuId}` | SpuAdminController | `update(spuId, req)` | 管理端 | `mall:product:update` |
-| 18 | PUT | `/admin/mall/product/spus/{spuId}/status` | SpuAdminController | `updateStatus(spuId, req)` | 管理端 | `mall:product:update` |
-| 19 | GET | `/admin/mall/product/skus` | SkuAdminController | `listBySpu(spuId)` | 管理端 | `mall:product:list` |
-| 20 | PUT | `/admin/mall/product/skus/{skuId}` | SkuAdminController | `update(skuId, req)` | 管理端 | `mall:product:update` |
-| 21 | GET | `/admin/mall/product/stock/{skuId}` | StockAdminController | `query(skuId)` | 管理端 | `mall:product:list` |
-| 22 | PUT | `/admin/mall/product/stock/{skuId}` | StockAdminController | `adjust(skuId, req)` | 管理端 | `mall:product:update` |
+
+管理端接口由若依代码生成器自动生成（类目/品牌/SPU/SKU/库存 CRUD + 上下架），权限码无需手动维护。
 
 ---
 

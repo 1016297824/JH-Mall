@@ -103,19 +103,8 @@ server/mall/mall-marketing/
 | 3 | GET | `/api/marketing/coupons/claims` | CouponApiController | `listMyCoupons(params)` | 是 | — |
 | 4 | GET | `/api/marketing/promotions` | PromotionApiController | `listActivePromotions()` | 否 | — |
 | 5 | POST | `/api/marketing/calculations` | CalculationApiController | `calculate(req)` | 是 | — |
-| 6 | GET | `/admin/mall/marketing/coupons` | CouponAdminController | `listCouponDefs(params)` | 管理端 | `mall:marketing:coupon:list` |
-| 7 | POST | `/admin/mall/marketing/coupons` | CouponAdminController | `createCouponDef(req)` | 管理端 | `mall:marketing:coupon:create` |
-| 8 | PUT | `/admin/mall/marketing/coupons/{couponDefId}` | CouponAdminController | `updateCouponDef(couponDefId, req)` | 管理端 | `mall:marketing:coupon:update` |
-| 9 | DELETE | `/admin/mall/marketing/coupons/{couponDefId}` | CouponAdminController | `deleteCouponDef(couponDefId)` | 管理端 | `mall:marketing:coupon:delete` |
-| 10 | GET | `/admin/mall/marketing/coupons/{couponDefId}/claims` | CouponAdminController | `listClaimRecords(couponDefId, params)` | 管理端 | `mall:marketing:coupon:list` |
-| 11 | GET | `/admin/mall/marketing/promotions` | PromotionAdminController | `listPromotions(params)` | 管理端 | `mall:marketing:promotion:list` |
-| 12 | POST | `/admin/mall/marketing/promotions` | PromotionAdminController | `createPromotion(req)` | 管理端 | `mall:marketing:promotion:create` |
-| 13 | PUT | `/admin/mall/marketing/promotions/{promotionId}` | PromotionAdminController | `updatePromotion(promotionId, req)` | 管理端 | `mall:marketing:promotion:update` |
-| 14 | DELETE | `/admin/mall/marketing/promotions/{promotionId}` | PromotionAdminController | `deletePromotion(promotionId)` | 管理端 | `mall:marketing:promotion:delete` |
-| 15 | GET | `/admin/mall/marketing/promotions/{promotionId}/rules` | PromotionAdminController | `listRules(promotionId)` | 管理端 | `mall:marketing:promotion:list` |
-| 16 | POST | `/admin/mall/marketing/promotions/{promotionId}/rules` | PromotionAdminController | `createRule(promotionId, req)` | 管理端 | `mall:marketing:promotion:create` |
-| 17 | PUT | `/admin/mall/marketing/promotions/{promotionId}/rules/{ruleId}` | PromotionAdminController | `updateRule(promotionId, ruleId, req)` | 管理端 | `mall:marketing:promotion:update` |
-| 18 | DELETE | `/admin/mall/marketing/promotions/{promotionId}/rules/{ruleId}` | PromotionAdminController | `deleteRule(promotionId, ruleId)` | 管理端 | `mall:marketing:promotion:delete` |
+
+管理端接口由若依代码生成器自动生成（优惠券定义/领取记录、活动/规则管理），权限码无需手动维护。
 
 ---
 

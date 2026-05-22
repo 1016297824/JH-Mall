@@ -121,14 +121,8 @@ server/mall/mall-user/
 | 10 | GET | `/api/user/points/records` | PointsController | `listRecords(params)` | 是 | — |
 | 11 | GET | `/api/user/growth` | GrowthController | `getGrowth()` | 是 | — |
 | 12 | GET | `/api/user/growth/records` | GrowthController | `listRecords(params)` | 是 | — |
-| 13 | GET | `/admin/mall/user/users` | UserAdminController | `listUsers(params)` | 管理端 | `mall:user:list` |
-| 14 | GET | `/admin/mall/user/users/{userId}` | UserAdminController | `getDetail(userId)` | 管理端 | `mall:user:detail` |
-| 15 | PUT | `/admin/mall/user/users/{userId}/status` | UserAdminController | `updateStatus(userId, req)` | 管理端 | `mall:user:freeze` |
-| 16 | GET | `/admin/mall/user/members` | MemberAdminController | `listMembers()` | 管理端 | `mall:member:list` |
-| 17 | POST | `/admin/mall/user/members` | MemberAdminController | `createMember(req)` | 管理端 | `mall:member:create` |
-| 18 | PUT | `/admin/mall/user/members/{memberId}` | MemberAdminController | `updateMember(memberId, req)` | 管理端 | `mall:member:update` |
-| 19 | DELETE | `/admin/mall/user/members/{memberId}` | MemberAdminController | `deleteMember(memberId)` | 管理端 | `mall:member:delete` |
-| 20 | POST | `/admin/mall/user/points/transactions` | PointsAdminController | `adjustPoints(req)` | 管理端 | `mall:points:adjust` |
+
+管理端接口由若依代码生成器自动生成（用户/会员/积分 CRUD + 冻结解冻、积分调整），权限码无需手动维护。
 
 ---
 

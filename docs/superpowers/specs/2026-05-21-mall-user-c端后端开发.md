@@ -1,12 +1,12 @@
 # mall-user C 端后端开发规格说明
 
-> 基于已有设计文档 `docs/design/11_mall-user详细设计.md`、`docs/design/04_mall-api契约层设计.md`、`docs/design/03_系统详细设计.md` 的实施规格。
+> 基于已有设计文档 `docs/design/12_mall-user详细设计.md`、`docs/design/05_mall-api契约层设计.md`、`docs/design/03_系统详细设计.md` 的实施规格。
 
 ## 架构原则
 
 - 包名统一使用 `com.mall.*`，遵循现有代码习惯
 - C 端 API 路径前缀 `/api/user/`，管理端路径前缀 `/admin/mall/user/`
-- C 端认证：从请求头解析 Token 获取 userId（使用若依 `SecurityUtils` 或手动解析 JWT）
+- C 端认证：从请求头手动解析 JWT 获取 userId（C 端 Token 与管理端不同体系，`SecurityUtils.getUserId()` 不可用）
 - 新增代码遵循阿里巴巴 Java 开发手册 + 项目 AGENTS.md 规范
 
 ## 一、mall-api 契约层
@@ -80,7 +80,7 @@
 所有 C 端 Controller：
 - 继承 `BaseController`，使用 `success()` / `error()` / `toAjax()` / `getDataTable()` 返回
 - 不继承 `@RequiresPermissions`（C 端 Token 认证由网关统一处理）
-- 通过 `SecurityUtils.getUserId()` 获取当前登录用户 ID
+- 通过手动解析 JWT 获取当前用户 ID（从 `HttpServletRequest` 提取 Token → 解析出 userId）
 
 ### 2.3 Request DTO（`com.mall.user.dto.request`）
 
@@ -152,7 +152,7 @@
 在现有 Mapper XML 中追加以下 SQL：
 
 **MallUserMapper.xml 新增**：
-- `selectUserByIdWithTrash(Long id)`: 不检查 is_deleted=0（Feign 内部调用需要）
+- `selectByIdInternal(Long id)`: 不检查 is_deleted=0（Feign 内部调用需要）
 - `updateUserStatus(@Param("userId") Long id, @Param("status") Integer status)`: 更新状态
 - `selectByPhoneHash(String phoneHash)`: 按 phone_hash 精确查询
 - `updatePassword(@Param("userId") Long id, @Param("password") String passwordHash)`
@@ -183,25 +183,25 @@
 
 ## 三、错误码处理
 
-遵循系统设计第二章错误码，C 端 API 统一返回 `AjaxResult`：
+遵循系统设计第二章错误码体系，C 端 API 统一返回 `AjaxResult`。错误码以 `ErrorCode` 枚举（位于 `com.mall.api.enums`）统一管理，Service 层通过 `ServiceException`（ruoyi-common-core 内置）抛出，由 `GlobalExceptionHandler`（ruoyi-common-security 内置）转换为响应。
 
-| 场景 | errorCode | HTTP | userTip |
-|------|-----------|:----:|---------|
-| 成功 | 00000 | 200 | — |
-| 未登录 | A0301 | 401 | 请先登录 |
-| 必填参数为空 | A0401 | 400 | 请完整填写信息 |
-| 参数格式错误 | A0402 | 400 | 参数格式错误 |
-| 资源不存在 | A0501 | 404 | 资源不存在 |
-| 地址数量已达上限 | A0511 | 400 | 地址数量已达上限 |
-| 系统异常 | B0001 | 500 | 系统繁忙，请稍后再试 |
+| errorCode | HTTP | userTip | 场景 |
+|-----------|:----:|---------|------|
+| 00000 | 200 | — | 成功 |
+| A0301 | 401 | 请先登录 | 未登录 |
+| A0401 | 400 | 请完整填写信息 | 必填参数为空 |
+| A0402 | 400 | 参数格式错误 | 参数格式错误 |
+| A0501 | 404 | 资源不存在 | 资源不存在（地址/用户不存在） |
+| A0511 | 400 | 地址数量已达上限 | 地址数量超过上限 |
 
 ## 四、实施顺序
 
-1. mall-api：4 个枚举 + 2 个 DTO + 2 个 Feign 接口
+1. mall-api：5 个枚举（+ErrorCode）+ 2 个 DTO + 2 个 Feign 接口
 2. mall-user 包结构调整：admin 子包 + api 子包 + vo/dto/convert/infrastructure 包
 3. 管理端 Controller 迁移（7 个文件改包 + 改路径）
-4. 新增 Mapper XML SQL
-5. C 端业务 Service 实现（5 个子域）
-6. C 端 Controller 实现（5 个）
-7. Convert 转换层实现
-8. 构建验证 `mvn clean install -f server/mall/pom.xml -DskipTests`
+4. 网关路由配置（ruoyi-gateway：更新管理端 7 条路由 + 新增 C 端 5 条路由）
+5. 新增 Mapper XML SQL
+6. Convert + VO + Request DTO 转换层实现
+7. C 端业务 Service 实现（5 个子域）
+8. C 端 Controller 实现（5 个）
+9. 构建验证 `mvn clean install -f server/mall/pom.xml -DskipTests`

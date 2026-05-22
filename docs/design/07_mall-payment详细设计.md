@@ -101,12 +101,13 @@ server/mall/mall-payment/
 | 1 | POST | `/api/payment/payments` | PaymentApiController | `createPayment(payRequest)` | C端token | — |
 | 2 | GET | `/api/payment/payments/{paymentId}` | PaymentApiController | `getPayment(paymentId)` | C端token | — |
 | 3 | POST | `/api/payment/refunds` | PaymentApiController | `createRefund(refundRequest)` | C端token | — |
-| 4 | GET | `/admin/mall/payment/payments` | PaymentAdminController | `listPayments(params)` | 管理端 | `mall:payment:list` |
-| 5 | GET | `/admin/mall/payment/payments/{paymentId}` | PaymentAdminController | `getPaymentDetail(paymentId)` | 管理端 | `mall:payment:detail` |
-| 6 | GET | `/admin/mall/payment/refunds` | PaymentAdminController | `listRefunds(params)` | 管理端 | `mall:payment:list` |
-| 7 | GET | `/admin/mall/payment/refunds/{refundId}` | PaymentAdminController | `getRefundDetail(refundId)` | 管理端 | `mall:payment:detail` |
-| 8 | GET | `/admin/mall/payment/channels` | PaymentAdminController | `listChannels()` | 管理端 | `mall:payment:config` |
-| 9 | PUT | `/admin/mall/payment/channels/{channelId}` | PaymentAdminController | `updateChannel(channelId, config)` | 管理端 | `mall:payment:config` |
+
+管理端接口由若依代码生成器自动生成（支付/退款查询、渠道配置），权限码无需手动维护。
+
+**回调接口（/callback/payment/，无需认证）：**
+
+| # | HTTP | 路径 | Controller | 方法名 | 认证 | 权限码 |
+|---|------|------|-----------|--------|:---:|--------|
 | 10 | POST | `/callback/payment/{channel}` | PaymentCallbackController | `payCallback(channel, body)` | 无(验签) | — |
 | 11 | POST | `/callback/payment/{channel}/refund` | PaymentCallbackController | `refundCallback(channel, body)` | 无(验签) | — |
 

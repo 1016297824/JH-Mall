@@ -96,13 +96,8 @@ mall-order/src/main/java/com/jhstore/mall/order/
 | 12 | POST | `/api/order/after_sales` | AfterSaleController | `submit` | — |
 | 13 | GET | `/api/order/after_sales` | AfterSaleController | `list` | — |
 | 14 | GET | `/api/order/after_sales/{id}` | AfterSaleController | `detail` | — |
-| 15 | GET | `/admin/mall/order/orders` | AdminOrderController | `list` | `mall:order:list` |
-| 16 | GET | `/admin/mall/order/orders/{id}` | AdminOrderController | `detail` | `mall:order:detail` |
-| 17 | PUT | `/admin/mall/order/orders/{id}/delivery` | AdminOrderController | `deliver` | `mall:order:delivery` |
-| 18 | POST | `/admin/mall/order/orders/{id}/cancellation` | AdminOrderController | `cancel` | `mall:order:cancel` |
-| 19 | GET | `/admin/mall/order/after_sales` | AdminAfterSaleController | `list` | `mall:order:refund` |
-| 20 | GET | `/admin/mall/order/after_sales/{id}` | AdminAfterSaleController | `detail` | `mall:order:refund` |
-| 21 | PUT | `/admin/mall/order/after_sales/{id}/status` | AdminAfterSaleController | `review` | `mall:order:refund` |
+
+管理端接口由若依代码生成器自动生成（CRUD + 发货/审核售后等），权限码无需手动维护。
 
 ---
 
