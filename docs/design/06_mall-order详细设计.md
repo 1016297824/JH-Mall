@@ -485,7 +485,7 @@ Outbox 投递失败后的指数退避：
 
 ### 8.3 审核与退款
 
-1. Controller 接收 `PUT /admin/mall/order/after_sales/{id}/status`
+1. Controller 接收 `PUT /mall-order/after_sales/{id}/status`
 2. 通过：`AfterSaleServiceImpl.approve()`：
    - `afterSaleMapper.updateStatus(id, APPROVED)`
    - 调 `RemotePaymentService.refund(payOrderNo, refundAmount, afterSaleId)` → mall-payment 创建退款单并调支付渠道

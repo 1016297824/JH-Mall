@@ -8,6 +8,7 @@ target/
 node_modules/
 dist/
 build/
+!client/ruoyi-ui/src/views/tool/build/
 
 # IDE
 .idea/

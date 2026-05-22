@@ -4,7 +4,7 @@
 
 **Goal:** 为 mall-user 模块添加 12 个 C 端 API，包括个人资料、地址管理、会员等级、积分、成长值功能
 
-**Architecture:** 新增 `controller/api/` 包存放 C 端 Controller，现有管理端 Controller 迁移到 `controller/admin/`。C 端业务逻辑在 `service/{user,address,member,points,growth}/` 子包中独立实现。跨服务调用通过 mall-api Feign 接口解耦。
+**Architecture:** 新增 `controller/api/` 包存放 C 端 Controller，现有管理端 Controller 迁移到 `controller/admin/`（`@RequestMapping` 不变）。管理端路由由 `discovery.locator` 自动生成（`/{serviceId}/{controllerPath}`），C 端走显式 `/api/**` 路由。C 端业务逻辑在 `service/{user,address,member,points,growth}/` 子包中独立实现。跨服务调用通过 mall-api Feign 接口解耦。
 
 ## CEO Review 修复摘要
 
@@ -12,8 +12,8 @@
 
 | # | 类型 | 修复内容 | 涉及位置 |
 |---|------|---------|---------|
-| 1 | 🔴 阻断 | Task 4 新增「网关路由配置」（已添加） | 已插入 |
-| 2 | 🔴 阻断 | SecurityUtils.getUserId() 不可用，C 端 Controller 改为手动解析 JWT | Task 9 所有 Controller |
+| 1 | 🟢 已更新 | Task 4 网关路由：去掉管理端显式路由（改为 discovery.locator），仅保留 C 端 `/api/user/**` | 已更新 |
+| 2 | 🟢 已更新 | SecurityUtils.getUserId() 不可用，C 端 Controller 改读 `X-User-Id` 请求头（MallAuthFilter 注入） | Task 9 所有 Controller |
 | 3 | 🔴 逻辑 bug | UserConvert 中 member.getLevelId() 应查等级名而非写 ID | Task 7 Step 9（已修复） |
 | 4 | 🟡 设计缺陷 | Service 层抛 ErrorCode 枚举 + ServiceException 替代 RuntimeException | Task 8 所有 Service |
 | 5 | 🟢 编译警告 | PointsController 删除 PageParam 无效 import | Task 9 Step 4 |
@@ -41,7 +41,7 @@
 
 ### mall-user 新增/修改文件
 
-**管理端 Controller 迁移（7 文件修改包+路径）**
+**管理端 Controller 搬迁到 controller/admin/ 包（7 文件，仅改包路径）**
 
 | 原位置 | 新位置 |
 |--------|--------|
@@ -459,19 +459,11 @@ git commit -m "feat(mall-api): add RemoteUserService and RemoteAuthService Feign
 
 ### Task 4: 网关路由配置
 
-需要更新 Nacos 中的 `ruoyi-gateway-dev.yml`，在 `spring.cloud.gateway.routes` 下新增 mall-user 模块的路由配置（管理端 + C 端）。
+需要更新 Nacos 中的 `ruoyi-gateway-dev.yml`，新增 mall-user 模块的 C 端路由（管理端由 `discovery.locator` 自动路由 `/{serviceId}/**`，无需显式配置）。
 
-**操作方式：** 登录 Nacos 管理台（`http://localhost:8848/nacos`）→ 配置管理 → 编辑 `ruoyi-gateway-dev.yml`，追加以下配置：
+**操作方式：** 登录 Nacos 管理台（`http://localhost:8848/nacos`）→ 配置管理 → 编辑 `ruoyi-gateway-dev.yml`，在 `spring.cloud.gateway.server.webflux.routes` 下追加 C 端路由：
 
 ```yaml
-# 商城-用户模块（管理端）
-- id: mall-user-admin
-  uri: lb://mall-user
-  predicates:
-    - Path=/admin/mall/user/**
-  filters:
-    - StripPrefix=0
-
 # 商城-用户模块（C 端）
 - id: mall-user-api
   uri: lb://mall-user
@@ -481,36 +473,36 @@ git commit -m "feat(mall-api): add RemoteUserService and RemoteAuthService Feign
     - StripPrefix=0
 ```
 
-同时删除或保留原有的 mall-user 对应路由（如果之前已有 `/user/**` 的测试路由需删除，避免冲突）。
-
-**注意：** `StripPrefix=0` 不截断路径前缀，转发后 `/admin/mall/user/users/list` 保持不变，与 Controller 的 `@RequestMapping` 精确匹配。
+同时在新版 `ruoyi-gateway-dev.yml` 的 `security.ignore.whites` 中添加 `/api/**`（如尚未添加），确保 C 端请求不被 AuthFilter 拦截。
 
 - [ ] **Step 1: 更新 Nacos 网关路由**
 
-在 `ruoyi-gateway-dev.yml` 中追加上方 2 条 mall-user 路由。
+在 `ruoyi-gateway-dev.yml` 中追加 C 端 mall-user 路由。
 
 - [ ] **Step 2: 确认路由生效**
 
-重启 ruoyi-gateway 后访问 `http://localhost:8080/admin/mall/user/users/list` 验证路由。
+重启 ruoyi-gateway 后调用 `POST http://localhost:8080/api/user/profile` 验证 C 端路由。
 
 - [ ] **Step 3: 提交**
 
 ```bash
 git add -A
-git commit -m "config(gateway): add mall-user admin and C-end routes to Nacos gateway config"
+git commit -m "config(gateway): add mall-user C-end route to Nacos gateway config"
 ```
 
 ---
 
-### Task 5: 管理端 Controller 迁移
+### Task 5: 管理端 Controller 搬迁到 controller/admin/ 包
+
+> 管理端路由由 `discovery.locator` 自动转发（`/{serviceId}/{controllerPath}`），Controller 的 `@RequestMapping` 和 `@RequiresPermissions` **保持原值不变**。此任务仅搬迁包路径，不改路径。
 
 **Files:**
-- Modify (move+rename): 7 controller files from `controller/` to `controller/admin/`
+- Modify (move): 7 controller files from `controller/` to `controller/admin/`
 
 For each controller:
 1. Change package from `com.mall.user.controller` to `com.mall.user.controller.admin`
-2. Update `@RequestMapping` path to include `/admin/mall/user/` prefix
-3. Update `@RequiresPermissions` prefix to `mall-user:*`
+2. `@RequestMapping` **保持不变**（如 `/user`、`/address`）
+3. `@RequiresPermissions` **保持不变**（已为 `mall-user:*` 格式）
 
 - [ ] **Step 1: Move MallUserController**
 
@@ -522,7 +514,7 @@ package com.mall.user.controller.admin;
 // ... imports unchanged ...
 
 @RestController
-@RequestMapping("/admin/mall/user/users")
+@RequestMapping("/user")
 public class MallUserController extends BaseController
 {
     @Autowired
@@ -590,7 +582,7 @@ package com.mall.user.controller.admin;
 // ... imports unchanged (change import for MallUserAddress to com.mall.user.domain) ...
 
 @RestController
-@RequestMapping("/admin/mall/user/addresses")
+@RequestMapping("/address")
 public class MallUserAddressController extends BaseController
 {
     @Autowired
@@ -653,8 +645,7 @@ Same pattern for: `MallUserMemberController`, `MallUserMemberLevelController`, `
 
 Each:
 - New package: `com.mall.user.controller.admin`
-- New `@RequestMapping` paths (see file structure table above)
-- `@RequiresPermissions` prefix changed to `mall-user:*`
+- `@RequestMapping` and `@RequiresPermissions` unchanged
 
 - [ ] **Step 4: 删除旧文件**
 
@@ -2116,7 +2107,7 @@ git commit -m "feat(mall-user): add C-end business services for profile/address/
 
 - [ ] **Step 1: Create ProfileController.java**
 
-Note: C 端 Controller 不使用 `@RequiresPermissions`（Token 认证由网关统一处理）。通过 `SecurityUtils.getUserId()` 获取当前用户 ID。
+Note: C 端 Controller 不使用 `@RequiresPermissions`（Token 认证由网关统一处理）。通过 `X-User-Id` 请求头（MallAuthFilter 注入）获取当前用户 ID。
 
 ```java
 package com.mall.user.controller.api;
@@ -2126,7 +2117,7 @@ import com.mall.user.service.user.UserService;
 import com.mall.user.vo.UserProfileVO;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -2141,9 +2132,12 @@ public class ProfileController extends BaseController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private HttpServletRequest request;
+
     @GetMapping
     public AjaxResult getProfile() {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         UserProfileVO profile = userService.getProfile(userId);
         if (profile == null) {
             return error("A0501|用户不存在");
@@ -2153,7 +2147,7 @@ public class ProfileController extends BaseController {
 
     @PutMapping
     public AjaxResult updateProfile(@RequestBody UpdateProfileReq req) {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         userService.updateProfile(userId, req.getNickname(), req.getAvatar(),
                 req.getGender(), req.getBirthday());
         return success();
@@ -2172,7 +2166,7 @@ import com.mall.user.service.address.AddressService;
 import com.mall.user.vo.AddressVO;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -2192,38 +2186,40 @@ public class AddressController extends BaseController {
     @Autowired
     private AddressService addressService;
 
+    @Autowired
+    private HttpServletRequest request;
+
+    private Long currentUserId() {
+        return Long.valueOf(request.getHeader("X-User-Id"));
+    }
+
     @GetMapping
     public AjaxResult list() {
-        Long userId = SecurityUtils.getUserId();
-        List<AddressVO> list = addressService.listByUser(userId);
+        List<AddressVO> list = addressService.listByUser(currentUserId());
         return success(list);
     }
 
     @PostMapping
     public AjaxResult create(@RequestBody CreateAddressReq req) {
-        Long userId = SecurityUtils.getUserId();
-        addressService.create(userId, req);
+        addressService.create(currentUserId(), req);
         return success();
     }
 
     @PutMapping("/{addressId}")
     public AjaxResult update(@PathVariable Long addressId, @RequestBody UpdateAddressReq req) {
-        Long userId = SecurityUtils.getUserId();
-        addressService.update(userId, addressId, req);
+        addressService.update(currentUserId(), addressId, req);
         return success();
     }
 
     @DeleteMapping("/{addressId}")
     public AjaxResult delete(@PathVariable Long addressId) {
-        Long userId = SecurityUtils.getUserId();
-        addressService.delete(userId, addressId);
+        addressService.delete(currentUserId(), addressId);
         return success();
     }
 
     @PutMapping("/{addressId}/default")
     public AjaxResult setDefault(@PathVariable Long addressId) {
-        Long userId = SecurityUtils.getUserId();
-        addressService.setDefault(userId, addressId);
+        addressService.setDefault(currentUserId(), addressId);
         return success();
     }
 }
@@ -2238,7 +2234,7 @@ import com.mall.user.service.member.MemberService;
 import com.mall.user.vo.MembershipVO;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -2251,9 +2247,12 @@ public class MembershipController extends BaseController {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private HttpServletRequest request;
+
     @GetMapping
     public AjaxResult getMembership() {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         MembershipVO membership = memberService.getMembership(userId);
         if (membership == null) {
             return error("A0501|会员信息不存在");
@@ -2268,12 +2267,11 @@ public class MembershipController extends BaseController {
 ```java
 package com.mall.user.controller.api;
 
-import com.mall.user.dto.request.PageParam;
 import com.mall.user.service.points.PointsService;
 import com.mall.user.vo.PointsRecordVO;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -2288,16 +2286,19 @@ public class PointsController extends BaseController {
     @Autowired
     private PointsService pointsService;
 
+    @Autowired
+    private HttpServletRequest request;
+
     @GetMapping
     public AjaxResult getPoints() {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         Long points = pointsService.getPoints(userId);
         return success(points);
     }
 
     @GetMapping("/records")
     public AjaxResult listRecords() {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         startPage();
         List<PointsRecordVO> records = pointsService.listRecords(userId);
         return success(records);
@@ -2314,7 +2315,7 @@ import com.mall.user.service.growth.GrowthService;
 import com.mall.user.vo.GrowthRecordVO;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -2329,16 +2330,19 @@ public class GrowthController extends BaseController {
     @Autowired
     private GrowthService growthService;
 
+    @Autowired
+    private HttpServletRequest request;
+
     @GetMapping
     public AjaxResult getGrowth() {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         Long growth = growthService.getGrowth(userId);
         return success(growth);
     }
 
     @GetMapping("/records")
     public AjaxResult listRecords() {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         startPage();
         List<GrowthRecordVO> records = growthService.listRecords(userId);
         return success(records);

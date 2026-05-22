@@ -43,7 +43,7 @@ server/mall/mall-payment/
     ├── MallPaymentApplication.java          # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
-    │   │   └── PaymentAdminController.java  # /admin/mall/payment/**
+    │   │   └── PaymentAdminController.java  # /mall-payment/**
     │   └── api/
     │       ├── PaymentApiController.java    # /api/payment/**
     │       └── PaymentCallbackController.java # /callback/payment/**

@@ -43,8 +43,8 @@ server/mall/mall-marketing/
     ├── MallMarketingApplication.java        # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
-    │   │   ├── CouponAdminController.java   # /admin/mall/marketing/coupons/**
-    │   │   └── PromotionAdminController.java # /admin/mall/marketing/promotions/**
+    │   │   ├── CouponAdminController.java   # /mall-marketing/coupons/**
+    │   │   └── PromotionAdminController.java # /mall-marketing/promotions/**
     │   └── api/
     │       ├── CouponApiController.java      # /api/marketing/coupons/**
     │       ├── PromotionApiController.java   # /api/marketing/promotions

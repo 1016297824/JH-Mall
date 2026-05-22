@@ -79,7 +79,7 @@ server/mall/mall-search/
 | - | ---- | ------------------------------------ | -------------------- | :----: | -------------------------------- |
 | 1 | GET  | `/api/search`                      | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合） |
 | 2 | GET  | `/api/search/suggest`              | `suggest(keyword)` |   否   | 搜索补全建议                     |
-| 3 | POST | `/admin/mall/search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建                     |
+| 3 | POST | `/mall-search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建                     |
 
 ---
 

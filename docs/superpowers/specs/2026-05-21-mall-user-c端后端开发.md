@@ -5,7 +5,7 @@
 ## 架构原则
 
 - 包名统一使用 `com.mall.*`，遵循现有代码习惯
-- C 端 API 路径前缀 `/api/user/`，管理端路径前缀 `/admin/mall/user/`
+- C 端 API 路径前缀 `/api/user/`，管理端路径前缀 `/mall-user/`
 - C 端认证：从请求头手动解析 JWT 获取 userId（C 端 Token 与管理端不同体系，`SecurityUtils.getUserId()` 不可用）
 - 新增代码遵循阿里巴巴 Java 开发手册 + 项目 AGENTS.md 规范
 
@@ -57,13 +57,13 @@
 
 | 文件 | 旧 @RequestMapping | 新 @RequestMapping |
 |------|-------------------|-------------------|
-| MallUserController | `/user` | `/admin/mall/user/users` |
-| MallUserAddressController | `/address` | `/admin/mall/user/addresses` |
-| MallUserMemberController | `/member` | `/admin/mall/user/members` |
-| MallUserMemberLevelController | `/level` | `/admin/mall/user/levels` |
-| MallUserPointsAccountController | `/account` | `/admin/mall/user/points/accounts` |
-| MallUserPointsLogController | `/points_log` | `/admin/mall/user/points/logs` |
-| MallUserGrowthLogController | `/growth_log` | `/admin/mall/user/growth/logs` |
+| MallUserController | `/user` | `/mall-user/users` |
+| MallUserAddressController | `/address` | `/mall-user/addresses` |
+| MallUserMemberController | `/member` | `/mall-user/members` |
+| MallUserMemberLevelController | `/level` | `/mall-user/levels` |
+| MallUserPointsAccountController | `/account` | `/mall-user/points/accounts` |
+| MallUserPointsLogController | `/points_log` | `/mall-user/points/logs` |
+| MallUserGrowthLogController | `/growth_log` | `/mall-user/growth/logs` |
 
 ### 2.2 新增 C 端 Controller
 

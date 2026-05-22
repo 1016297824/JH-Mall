@@ -43,9 +43,9 @@ server/mall/mall-user/
     ├── MallUserApplication.java            # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
-    │   │   ├── UserAdminController.java    # /admin/mall/user/users/**
-    │   │   ├── MemberAdminController.java  # /admin/mall/user/members/**
-    │   │   └── PointsAdminController.java  # /admin/mall/user/points/**
+    │   │   ├── UserAdminController.java    # /mall-user/users/**
+    │   │   ├── MemberAdminController.java  # /mall-user/members/**
+    │   │   └── PointsAdminController.java  # /mall-user/points/**
     │   └── api/
     │       ├── ProfileController.java      # /api/user/profile
     │       ├── AddressController.java      # /api/user/addresses/**

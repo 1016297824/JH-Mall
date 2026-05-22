@@ -45,11 +45,11 @@ server/mall/mall-product/
     ├── MallProductApplication.java          # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
-    │   │   ├── CategoryAdminController.java # /admin/mall/product/categories/**
-    │   │   ├── BrandAdminController.java    # /admin/mall/product/brands/**
-    │   │   ├── SpuAdminController.java      # /admin/mall/product/spus/**
-    │   │   ├── SkuAdminController.java      # /admin/mall/product/skus/**
-    │   │   └── StockAdminController.java    # /admin/mall/product/stock/**
+    │   │   ├── CategoryAdminController.java # /mall-product/categories/**
+    │   │   ├── BrandAdminController.java    # /mall-product/brands/**
+    │   │   ├── SpuAdminController.java      # /mall-product/spus/**
+    │   │   ├── SkuAdminController.java      # /mall-product/skus/**
+    │   │   └── StockAdminController.java    # /mall-product/stock/**
     │   └── api/
     │       ├── CategoryApiController.java   # /api/product/categories/**
     │       ├── BrandApiController.java      # /api/product/brands
