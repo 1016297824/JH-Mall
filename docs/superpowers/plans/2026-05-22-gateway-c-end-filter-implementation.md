@@ -129,11 +129,12 @@ git commit -m "feat(gateway): AuthFilter 增加请求头清洗（防伪造 X-Adm
 - Create: `server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/filter/MallAuthFilter.java`
 - Reference: `server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/filter/AuthFilter.java`（模板）
 
-- [ ] **Step 1: 创建 MallAuthFilter.java**
+- [ ] **Step 1: 创建 MallAuthFilter.java（含启动时密钥空值检查）**
 
 ```java
 package com.ruoyi.gateway.filter;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,6 +172,17 @@ public class MallAuthFilter implements GlobalFilter, Ordered
 
     @Value("${mall.security.jwt-secret:}")
     private String jwtSecret;
+
+    @PostConstruct
+    public void checkConfig()
+    {
+        if (StringUtils.isEmpty(jwtSecret))
+        {
+            log.error("[C端鉴权] 致命: mall.security.jwt-secret 未配置，网关无法校验 C 端 JWT");
+            throw new IllegalStateException("mall.security.jwt-secret is not configured");
+        }
+        log.info("[C端鉴权] mall.security.jwt-secret 已配置");
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
@@ -309,7 +321,7 @@ Expected: BUILD SUCCESS
 
 ```bash
 git add server/ruoyi/ruoyi-gateway/src/main/java/com/ruoyi/gateway/filter/MallAuthFilter.java
-git commit -m "feat(gateway): 新增 MallAuthFilter 处理 C 端 JWT 鉴权"
+git commit -m "feat(gateway): 新增 MallAuthFilter 处理 C 端 JWT 鉴权 + 启动密钥空值检查"
 ```
 
 ---

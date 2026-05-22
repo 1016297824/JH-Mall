@@ -219,16 +219,16 @@ public class MallAuthProperties {
 
 ### 4.3 AuthFilter 修改
 
-在现有 `AuthFilter.filter()` 方法开头增加请求头清洗：
+在现有 `AuthFilter.filter()` 方法中，JWT 校验通过后、注入 header 之前增加请求头清洗（不可放在白名单检查之前，因为白名单路径直接 `return chain.filter(exchange)` 不应用 mutate）：
 
 ```java
 // 清洗外部请求头，防止伪造
-removeHeader(mutate, "X-Admin-");
-removeHeader(mutate, "X-User-");
-removeHeader(mutate, "X-Internal-");
+removePrefixHeaders(mutate, "X-Admin-");
+removePrefixHeaders(mutate, "X-User-");
+removePrefixHeaders(mutate, "X-Internal-");
 ```
 
-> `removeHeader` 方法已存在于 AuthFilter 中。
+> `removeHeader` 方法已存在于 AuthFilter 中；`removePrefixHeaders` 为新增方法，按前缀批量删除。
 
 ---
 
