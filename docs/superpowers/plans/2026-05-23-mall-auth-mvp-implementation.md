@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 实现 CAPTCHA 验证码子系统（图片验证码替代短信验证码），涵盖 6 个 CAPTCHA 端点（获取/注册/登录/改密/换绑手机/注销）和配套的 JWT Token 服务
+**Goal:** 实现 CAPTCHA 验证码子系统（图片验证码替代短信验证码），涵盖 6 个 CAPTCHA 端点（获取/注册/登录/改密/换绑手机/注销）和配套的 JWT Token 服务；同时建立 C 端公共基础设施模块 `mall-common`
 
-**架构:** mall-auth 持 CAPTCHA + Token + BCrypt，不持 MySQL 表，用户 CRUD 通过 Feign 调 mall-user；mall-api 新增 Feign 契约 + DTO 定义；mall-user 扩展 Mapper/Service + 新增 InnerController
+**架构:** mall-common 提供全局异常处理器兜底（`MallExceptionHandler`）；mall-auth 持 CAPTCHA + Token + BCrypt，不持 MySQL 表，用户 CRUD 通过 Feign 调 mall-user；mall-api 新增 Feign 契约 + DTO 定义；mall-user 扩展 Mapper/Service + 新增 InnerController
 
-**设计文档:** `docs/superpowers/specs/2026-05-25-mall-auth-mvp-design.md`（当前生效）
+**设计文档:** `docs/superpowers/specs/2026-05-23-mall-auth-mvp-design.md`（当前生效）
 
 **前置条件:**
 - Nacos 运行中，`mall.security.jwt-secret` 已配置到 `ruoyi-gateway-dev.yml` 和 `mall-auth-dev.yml`
@@ -52,22 +52,118 @@
 | 21 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/SmsService.java` | 短信服务接口（仅签名） |
 | 22 | `server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/feign/RemoteUserAdapter.java` | Feign 调用封装骨架 |
 | 23 | `server/mall/mall-user/src/main/java/com/mall/user/controller/api/RemoteUserInnerController.java` | mall-user 内部 Feign 入口 |
+| **24** | `server/mall/mall-common/pom.xml` | mall-common 模块 POM |
+| **25** | `server/mall/mall-common/src/main/java/com/mall/common/handler/MallExceptionHandler.java` | 全局异常处理器（CaptchaException + Exception 兜底） |
 
 ### 修改的文件
 
 | # | 文件路径 | 修改内容 |
 |---|---------|---------|
-| 24 | `server/mall/mall-auth/pom.xml` | 加 easy-captcha + spring-security-crypto + jjwt 依赖 |
-| 25 | `server/mall/mall-auth/src/main/java/com/mall/auth/MallAuthApplication.java` | `@EnableFeignClients` + `"com.mall.api"` |
-| 26 | `server/mall/mall-user/src/main/java/com/mall/user/MallUserApplication.java` | `@EnableFeignClients` + `"com.mall.api"` |
-| 27 | `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMapper.java` | 追加 4 个 C 端方法 |
-| 28 | `server/mall/mall-user/src/main/java/com/mall/user/service/IMallUserService.java` | 追加 6 个 C 端方法 |
-| 29 | `server/mall/mall-user/src/main/java/com/mall/user/service/impl/MallUserServiceImpl.java` | 追加 6 个 C 端方法实现 |
-| 30 | `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMapper.xml` | 追加 4 个 SQL 片段 |
+| 26 | `server/mall/pom.xml` | 注册 `<module>mall-common</module>` |
+| 27 | `server/mall/mall-auth/pom.xml` | 加 easy-captcha + spring-security-crypto + jjwt 依赖 |
+| 28 | `server/mall/mall-auth/src/main/java/com/mall/auth/MallAuthApplication.java` | `@EnableFeignClients` + `"com.mall.api"` + `"com.mall.common"` |
+| 29 | `server/mall/mall-user/pom.xml` | 加 `mall-common` 依赖 |
+| 30 | `server/mall/mall-user/src/main/java/com/mall/user/MallUserApplication.java` | `@EnableFeignClients` + `"com.mall.api"` + `"com.mall.common"` |
+| 31 | `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMapper.java` | 追加 4 个 C 端方法 |
+| 32 | `server/mall/mall-user/src/main/java/com/mall/user/service/IMallUserService.java` | 追加 6 个 C 端方法 |
+| 33 | `server/mall/mall-user/src/main/java/com/mall/user/service/impl/MallUserServiceImpl.java` | 追加 6 个 C 端方法实现 |
+| 34 | `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMapper.xml` | 追加 4 个 SQL 片段 |
+| 35 | `server/mall/mall-product/order/payment/marketing/search/pom.xml` | 各加 `mall-common` 依赖 |
 
 ---
 
-### Task 1: mall-api 契约层 — MallResult + DTO + Feign 接口
+### Task 1: mall-common 公共基础设施 — 模块创建 + MallExceptionHandler
+
+**设计依据:** `06_mall-common公共模块设计.md` §3（MallExceptionHandler 详细设计）
+
+**前置说明:** mall-common 是 C 端公共基础设施模块，所有 `mall-*` 业务模块通过 Maven 依赖引入。
+
+**文件:**
+- Create: `server/mall/mall-common/pom.xml`（已在设计阶段创建）
+- Create: `server/mall/mall-common/src/main/java/com/mall/common/handler/MallExceptionHandler.java`
+
+**修改:**
+- `server/mall/pom.xml` → `<module>mall-common</module>`（已在设计阶段完成）
+- 各业务模块 pom.xml → 加 `mall-common` 依赖（已在设计阶段完成）
+
+- [ ] **Step 1: 在 MallAuthApplication 和 MallUserApplication 的 `@SpringBootApplication` 中加入 `"com.mall.common"` 扫描包**
+
+使用示例：
+```java
+@SpringBootApplication(scanBasePackages = {"com.mall.auth", "com.mall.common"})
+```
+
+> 因为 `@RestControllerAdvice` 在 `com.mall.common.handler` 下，`@SpringBootApplication` 默认只扫描启动类所在包，不扫描 JAR 依赖中的 `com.mall.common`。
+
+- [ ] **Step 2: 编写 MallExceptionHandler.java**
+
+```java
+package com.mall.common.handler;
+
+import com.mall.api.dto.MallResult;
+import com.mall.auth.infrastructure.exception.CaptchaException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+@RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class MallExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(MallExceptionHandler.class);
+
+    /**
+     * CaptchaException：精确匹配，返回 MallResult.error(errorCode, msg, userTip)
+     */
+    @ExceptionHandler(CaptchaException.class)
+    public MallResult<Void> handleCaptcha(CaptchaException e) {
+        return MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+    }
+
+    /**
+     * @Validated 参数校验失败 → "A0401 请完整填写信息"
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public MallResult<Void> handleValidation(MethodArgumentNotValidException e) {
+        String msg = e.getBindingResult().getFieldError() != null
+                ? e.getBindingResult().getFieldError().getDefaultMessage()
+                : "请完整填写信息";
+        return MallResult.error("A0401", msg, msg);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public MallResult<Void> handleConstraintViolation(ConstraintViolationException e) {
+        return MallResult.error("A0401", e.getMessage(), e.getMessage());
+    }
+
+    /**
+     * 兜底：所有未捕获异常 → "B0001 系统繁忙，请稍后再试"
+     */
+    @ExceptionHandler(Exception.class)
+    public MallResult<Void> handleException(Exception e) {
+        log.error("unhandled exception", e);
+        return MallResult.error("B0001", "系统繁忙，请稍后再试");
+    }
+}
+```
+
+> 注：`@Order(Ordered.HIGHEST_PRECEDENCE)` 确保优先级高于若依 `GlobalExceptionHandler`，避免 C 端响应被 `AjaxResult` 污染。
+
+- [ ] **Step 3: git commit**
+```bash
+git add server/mall/mall-common/ server/mall/pom.xml server/mall/mall-*/pom.xml server/mall/mall-auth/src/main/java/com/mall/auth/MallAuthApplication.java server/mall/mall-user/src/main/java/com/mall/user/MallUserApplication.java
+git commit -m "feat(mall-common): add C-end common module with MallExceptionHandler"
+```
+
+---
+
+### Task 2: mall-api 契约层 — MallResult + DTO + Feign 接口
 
 **设计依据:** `05_mall-api契约层设计.md` §7（MallResult）+ §3.1（RemoteUserService）+ §8.1（MallUserDTO）+ spec §8
 
@@ -282,7 +378,7 @@ git commit -m "feat(mall-api): add MallResult, MallUserDTO, RemoteUserService Fe
 
 ---
 
-### Task 2: 依赖注入 + @EnableFeignClients 修复
+### Task 3: 依赖注入 + @EnableFeignClients 修复
 
 **设计依据:** spec §10
 
@@ -314,6 +410,12 @@ git commit -m "feat(mall-api): add MallResult, MallUserDTO, RemoteUserService Fe
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
         </dependency>
+
+        <!-- Spring Boot Validation（@Valid + @NotBlank 等） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 ```
 
 - [ ] **Step 2: MallAuthApplication.java 修复 @EnableFeignClients**
@@ -339,12 +441,12 @@ Expected: BUILD SUCCESS
 
 ```bash
 git add server/mall/mall-auth/pom.xml server/mall/mall-auth/src/main/java/com/mall/auth/MallAuthApplication.java server/mall/mall-user/src/main/java/com/mall/user/MallUserApplication.java
-git commit -m "chore: add easy-captcha/jjwt deps, fix @EnableFeignClients scan to include com.mall.api"
+git commit -m "chore: add easy-captcha/jjwt/validation deps, fix @EnableFeignClients scan to include com.mall.api"
 ```
 
 ---
 
-### Task 3: mall-user — Mapper + Service 扩展（C 端方法）
+### Task 4: mall-user — Mapper + Service 扩展（C 端方法）
 
 **设计依据:** spec §9.1 + §9.2
 
@@ -533,7 +635,7 @@ git commit -m "feat(mall-user): add C-end mapper methods and service extensions 
 
 ---
 
-### Task 4: mall-user — RemoteUserInnerController
+### Task 5: mall-user — RemoteUserInnerController
 
 **设计依据:** spec §9.3，路径前缀 `/inner/user`，Feign 直连不走网关
 
@@ -628,7 +730,7 @@ git commit -m "feat(mall-user): add RemoteUserInnerController for Feign access t
 
 ---
 
-### Task 5: mall-auth — 异常 + 响应 DTO + Redis Key 常量
+### Task 6: mall-auth — 异常 + 响应 DTO + Redis Key 常量
 
 **设计依据:** spec §3.2 包结构、§5.4 Redis Key、§11 错误码
 
@@ -732,7 +834,7 @@ git commit -m "feat(mall-auth): add CaptchaException, CaptchaResponse, TokenResp
 
 ---
 
-### Task 6: mall-auth — TokenService 完整实现
+### Task 7: mall-auth — TokenService 完整实现
 
 **设计依据:** spec §4（完整设计）
 
@@ -1007,7 +1109,7 @@ git commit -m "feat(mall-auth): add TokenService with JWT issue/verify/refresh/r
 
 ---
 
-### Task 7: mall-auth — CaptchaService 完整实现
+### Task 8: mall-auth — CaptchaService 完整实现
 
 **设计依据:** spec §5（完整设计）
 
@@ -1149,7 +1251,7 @@ git commit -m "feat(mall-auth): add CaptchaService with EasyCaptcha generate/ver
 
 ---
 
-### Task 8: mall-auth — Request DTOs + CaptchaController 完整实现
+### Task 9: mall-auth — Request DTOs + CaptchaController 完整实现
 
 **设计依据:** spec §6（CAPTCHA 端点详细流程）+ §3.2（包结构）
 
@@ -1174,11 +1276,25 @@ CaptchaRegisterReq.java:
 ```java
 package com.mall.auth.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class CaptchaRegisterReq {
+    @NotBlank(message = "手机号不能为空")
     private String phone;
+
+    @NotBlank(message = "密码不能为空")
+    @Size(min = 8, max = 32, message = "密码需 8~32 位")
     private String password;
+
+    @NotBlank(message = "验证码 Key 不能为空")
     private String captchaKey;
+
+    @NotBlank(message = "验证码不能为空")
     private String captchaCode;
+
+    @NotNull(message = "请同意隐私协议")
     private Integer isPrivacyAgreed;
 
     public String getPhone() { return phone; }
@@ -1198,10 +1314,19 @@ CaptchaLoginReq.java:
 ```java
 package com.mall.auth.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class CaptchaLoginReq {
+    @NotBlank(message = "手机号不能为空")
     private String phone;
+
+    @NotBlank(message = "密码不能为空")
     private String password;
+
+    @NotBlank(message = "验证码 Key 不能为空")
     private String captchaKey;
+
+    @NotBlank(message = "验证码不能为空")
     private String captchaCode;
 
     public String getPhone() { return phone; }
@@ -1219,10 +1344,21 @@ CaptchaResetPasswordReq.java:
 ```java
 package com.mall.auth.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class CaptchaResetPasswordReq {
+    @NotBlank(message = "手机号不能为空")
     private String phone;
+
+    @NotBlank(message = "新密码不能为空")
+    @Size(min = 8, max = 32, message = "密码需 8~32 位")
     private String newPassword;
+
+    @NotBlank(message = "验证码 Key 不能为空")
     private String captchaKey;
+
+    @NotBlank(message = "验证码不能为空")
     private String captchaCode;
 
     public String getPhone() { return phone; }
@@ -1240,9 +1376,16 @@ CaptchaChangePhoneReq.java:
 ```java
 package com.mall.auth.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class CaptchaChangePhoneReq {
+    @NotBlank(message = "原手机号不能为空")
     private String oldPhone;
+
+    @NotBlank(message = "密码不能为空")
     private String password;
+
+    @NotBlank(message = "新手机号不能为空")
     private String newPhone;
 
     public String getOldPhone() { return oldPhone; }
@@ -1258,8 +1401,13 @@ CaptchaDeactivateReq.java:
 ```java
 package com.mall.auth.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class CaptchaDeactivateReq {
+    @NotBlank(message = "手机号不能为空")
     private String phone;
+
+    @NotBlank(message = "密码不能为空")
     private String password;
 
     public String getPhone() { return phone; }
@@ -1288,6 +1436,7 @@ import com.mall.auth.infrastructure.exception.CaptchaException;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -1348,19 +1497,19 @@ public class CaptchaController {
      * POST /api/auth/captcha/register
      */
     @PostMapping("/register")
-    public MallResult<TokenResponse> register(@RequestBody CaptchaRegisterReq req,
-                                               HttpServletRequest request) {
+    public MallResult<TokenResponse> register(@Valid @RequestBody CaptchaRegisterReq req,
+                                                HttpServletRequest request) {
         String clientIp = getClientIp(request);
 
         // ① 校验验证码
         captchaService.verify(req.getCaptchaKey(), req.getCaptchaCode(), clientIp);
 
-        // ② 隐私协议检查
-        if (req.getIsPrivacyAgreed() == null || req.getIsPrivacyAgreed() != 1) {
+        // ② 隐私协议检查（@NotNull 已确保非 null）
+        if (req.getIsPrivacyAgreed() != 1) {
             return MallResult.error("A0101", "请同意隐私协议", "请同意隐私协议");
         }
 
-        // ③ 密码复杂度
+        // ③ 密码复杂度（@Size 已确保长度，此方法仅检查字母+数字）
         String pwdError = validatePassword(req.getPassword());
         if (pwdError != null) {
             return MallResult.error("A0121", pwdError, pwdError);
@@ -1396,7 +1545,7 @@ public class CaptchaController {
      * POST /api/auth/captcha/login
      */
     @PostMapping("/login")
-    public MallResult<TokenResponse> login(@RequestBody CaptchaLoginReq req,
+    public MallResult<TokenResponse> login(@Valid @RequestBody CaptchaLoginReq req,
                                             HttpServletRequest request) {
         String clientIp = getClientIp(request);
 
@@ -1446,7 +1595,7 @@ public class CaptchaController {
      * POST /api/auth/captcha/password/reset
      */
     @PostMapping("/password/reset")
-    public MallResult<Void> resetPassword(@RequestBody CaptchaResetPasswordReq req,
+    public MallResult<Void> resetPassword(@Valid @RequestBody CaptchaResetPasswordReq req,
                                            HttpServletRequest request) {
         String clientIp = getClientIp(request);
 
@@ -1485,7 +1634,7 @@ public class CaptchaController {
      * PUT /api/auth/captcha/phone
      */
     @PutMapping("/phone")
-    public MallResult<Void> changePhone(@RequestBody CaptchaChangePhoneReq req) {
+    public MallResult<Void> changePhone(@Valid @RequestBody CaptchaChangePhoneReq req) {
         // ① 查旧手机号用户
         MallUserDTO oldUser = remoteUserService.findByPhone(req.getOldPhone());
         if (oldUser == null) {
@@ -1521,7 +1670,7 @@ public class CaptchaController {
      * DELETE /api/auth/captcha/account
      */
     @DeleteMapping("/account")
-    public MallResult<Void> deactivateAccount(@RequestBody CaptchaDeactivateReq req) {
+    public MallResult<Void> deactivateAccount(@Valid @RequestBody CaptchaDeactivateReq req) {
         // ① 查用户
         MallUserDTO user = remoteUserService.findByPhone(req.getPhone());
         if (user == null) {
@@ -1596,7 +1745,7 @@ git commit -m "feat(mall-auth): add CaptchaController with 6 CAPTCHA endpoints a
 
 ---
 
-### Task 9: mall-auth — AuthController 骨架 + 剩余接口 + RemoteUserAdapter 骨架
+### Task 10: mall-auth — AuthController 骨架 + 剩余接口 + RemoteUserAdapter 骨架
 
 **设计依据:** spec §3.2（包结构）+ §7（AuthController 骨架）
 
@@ -1839,38 +1988,40 @@ git commit -m "feat(mall-auth): add AuthController stub, AuthService/DecryptServ
 
 | Spec 章节 | 实现任务 | 状态 |
 |-----------|---------|------|
-| §1 MVP 范围（CaptchaController 完整） | Task 8 | ✅ |
-| §1 MVP 范围（CaptchaService 完整） | Task 7 | ✅ |
-| §1 MVP 范围（TokenService 完整） | Task 6 | ✅ |
-| §1 MVP 范围（AuthController 骨架） | Task 9 | ✅ |
-| §1 MVP 范围（AuthService 接口） | Task 9 | ✅ |
-| §1 MVP 范围（DecryptService/SmsService 接口） | Task 9 | ✅ |
-| §1 MVP 范围（RemoteUserService Feign） | Task 1 | ✅ |
-| §1 MVP 范围（MallUserDTO） | Task 1 | ✅ |
-| §1 MVP 范围（MallResult） | Task 1 | ✅ |
-| §1 MVP 范围（RemoteUserInnerController） | Task 4 | ✅ |
-| §1 MVP 范围（mall-user Mapper/Service 扩展） | Task 3 | ✅ |
-| §1 MVP 范围（@EnableFeignClients 修复） | Task 2 | ✅ |
-| §3.2 包结构（mall-auth） | Task 5-9 | ✅ |
-| §3.3 包结构（mall-user） | Task 3-4 | ✅ |
-| §4 TokenService（issue/verify/refresh/revoke/revokeAll） | Task 6 | ✅ |
-| §4.4 Redis Key 命名 | Task 6 | ✅ |
-| §5 CaptchaService（generate/verify） | Task 7 | ✅ |
-| §5.3 校验流程（5 步验证） | Task 7 | ✅ |
-| §6.1 GET /api/auth/captcha | Task 8 | ✅ |
-| §6.2 POST /api/auth/captcha/register | Task 8 | ✅ |
-| §6.3 POST /api/auth/captcha/login | Task 8 | ✅ |
-| §6.4 POST /api/auth/captcha/password/reset | Task 8 | ✅ |
-| §6.5 PUT /api/auth/captcha/phone | Task 8 | ✅ |
-| §6.6 DELETE /api/auth/captcha/account | Task 8 | ✅ |
-| §7 AuthController 13 端点占位 | Task 9 | ✅ |
-| §8 mall-api 契约 | Task 1 | ✅ |
-| §9.1 Mapper 追加 | Task 3 | ✅ |
-| §9.2 Service 追加 | Task 3 | ✅ |
-| §9.3 RemoteUserInnerController | Task 4 | ✅ |
-| §10.1 pom.xml 新增依赖 | Task 2 | ✅ |
-| §10.2 @EnableFeignClients 修复 | Task 2 | ✅ |
-| §11 错误码（CaptchaController 全部使用） | Task 8 | ✅ |
+| `06_mall-common公共模块设计.md` §3 MallExceptionHandler | Task 1 | ✅ |
+| §1 MVP 范围（CaptchaController 完整） | Task 9 | ✅ |
+| §1 MVP 范围（CaptchaService 完整） | Task 8 | ✅ |
+| §1 MVP 范围（TokenService 完整） | Task 7 | ✅ |
+| §1 MVP 范围（AuthController 骨架） | Task 10 | ✅ |
+| §1 MVP 范围（AuthService 接口） | Task 10 | ✅ |
+| §1 MVP 范围（DecryptService/SmsService 接口） | Task 10 | ✅ |
+| §1 MVP 范围（RemoteUserService Feign） | Task 2 | ✅ |
+| §1 MVP 范围（MallUserDTO） | Task 2 | ✅ |
+| §1 MVP 范围（MallResult） | Task 2 | ✅ |
+| §1 MVP 范围（RemoteUserInnerController） | Task 5 | ✅ |
+| §1 MVP 范围（mall-user Mapper/Service 扩展） | Task 4 | ✅ |
+| §1 MVP 范围（@EnableFeignClients 修复） | Task 3 | ✅ |
+| §3.2 包结构（mall-auth） | Task 6-10 | ✅ |
+| §3.3 包结构（mall-user） | Task 4-5 | ✅ |
+| §4 TokenService（issue/verify/refresh/revoke/revokeAll） | Task 7 | ✅ |
+| §4.4 Redis Key 命名 | Task 7 | ✅ |
+| §5 CaptchaService（generate/verify） | Task 8 | ✅ |
+| §5.3 校验流程（5 步验证） | Task 8 | ✅ |
+| §6.1 GET /api/auth/captcha | Task 9 | ✅ |
+| §6.2 POST /api/auth/captcha/register | Task 9 | ✅ |
+| §6.3 POST /api/auth/captcha/login | Task 9 | ✅ |
+| §6.4 POST /api/auth/captcha/password/reset | Task 9 | ✅ |
+| §6.5 PUT /api/auth/captcha/phone | Task 9 | ✅ |
+| §6.6 DELETE /api/auth/captcha/account | Task 9 | ✅ |
+| §7 AuthController 13 端点占位 | Task 10 | ✅ |
+| §8 mall-api 契约 | Task 2 | ✅ |
+| §9.1 Mapper 追加 | Task 4 | ✅ |
+| §9.2 Service 追加 | Task 4 | ✅ |
+| §9.3 RemoteUserInnerController | Task 5 | ✅ |
+| §10.1 pom.xml 新增依赖 | Task 3 | ✅ |
+| §10.2 @EnableFeignClients 修复 | Task 3 | ✅ |
+| §11 错误码（CaptchaController 全部使用） | Task 9 | ✅ |
+| `@Validated` 参数校验（DTO + Controller + ExceptionHandler） | Task 6/9/1 | ✅ |
 
 ### 2. 占位符检查
 
@@ -1878,18 +2029,19 @@ git commit -m "feat(mall-auth): add AuthController stub, AuthService/DecryptServ
 
 ### 3. 类型一致性检查
 
-- `userId`: String 类型（Task 1 MallUserDTO → Task 6 TokenService → Task 8 CaptchaController），一致 ✅
+- `userId`: String 类型（Task 2 MallUserDTO → Task 7 TokenService → Task 9 CaptchaController），一致 ✅
 - `MallResult<T>`: 所有 Controller 返回类型统一 ✅
-- `RemoteUserService.RegisterRequest`: Task 1 定义内部类 → Task 4 引用 → Task 8 构造使用，一致 ✅
-- `CaptchaException`: Task 5 定义 → Task 7 CaptchaServiceImpl 抛出 → Task 8 CaptchaController 未捕获（由全局异常处理器处理），注意补充全局异常处理器 ⚠️
-- `CaptchaResponse`: Task 5 定义 → Task 8 CaptchaController 返回，一致 ✅
-- `TokenResponse`: Task 5 定义 → Task 6 TokenService 返回 → Task 8 CaptchaController 返回，一致 ✅
-- `BCryptPasswordEncoder`: Task 8 直接 new，12 rounds，一致 ✅
-- `DigestUtils.sha256Hex`: `org.apache.commons.codec.digest.DigestUtils`，Task 3 Service 和 Task 8 Controller 均使用，一致 ✅
+- `RemoteUserService.RegisterRequest`: Task 2 定义内部类 → Task 5 引用 → Task 9 构造使用，一致 ✅
+- `CaptchaException`: Task 6 定义 → Task 8 CaptchaServiceImpl 抛出 → Task 1 MallExceptionHandler 捕获转 MallResult ✅
+- `CaptchaResponse`: Task 6 定义 → Task 9 CaptchaController 返回，一致 ✅
+- `TokenResponse`: Task 6 定义 → Task 7 TokenService 返回 → Task 9 CaptchaController 返回，一致 ✅
+- `BCryptPasswordEncoder`: Task 9 直接 new，12 rounds，一致 ✅
+- `DigestUtils.sha256Hex`: `org.apache.commons.codec.digest.DigestUtils`，Task 4 Service 和 Task 9 Controller 均使用，一致 ✅
+- `@Valid` 参数校验：DTO 使用 `@NotBlank/@Size/@NotNull`（Task 6）→ Controller 使用 `@Valid @RequestBody`（Task 9）→ MallExceptionHandler 处理 `MethodArgumentNotValidException`（Task 1），链路完整 ✅
 
-### 4. 需补充的全局异常处理器
+### 4. 全局异常处理器
 
-CaptchaController 直接调用 `tokenService.verify()` 等方法可能抛 `RuntimeException`（"token 已被撤销"等），当前 CaptchaController 未 try-catch。建议在 CaptchaController 增加 try-catch 或将异常转为 MallResult.error。但 Task 8 已实现为直接 `return MallResult.error(...)` 模式，非抛异常模式，所以 TokenService 的 verify 异常只在后续非 Controller 使用场景才会触发。MVP 阶段可接受。
+MallExceptionHandler 位于 Task 1（mall-common），`@Order(HIGHEST_PRECEDENCE)` 优先于若依 GlobalExceptionHandler。CaptchaException 由精确类型匹配捕获 → `MallResult.error(errorCode, msg, userTip)`。兜底 Exception → `MallResult.error("B0001")`。不再需要各 Controller 单独 try-catch。
 
 ---
 

@@ -24,6 +24,7 @@
         <dependency><groupId>com.ruoyi</groupId><artifactId>ruoyi-common-security</artifactId></dependency>
         <dependency><groupId>com.ruoyi</groupId><artifactId>ruoyi-common-log</artifactId></dependency>
         <dependency><groupId>com.mall</groupId><artifactId>mall-api</artifactId><version>1.0.0</version></dependency>
+        <dependency><groupId>com.mall</groupId><artifactId>mall-common</artifactId><version>1.0.0</version></dependency>
     </dependencies>
 
     <build><plugins><plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId></plugin></plugins></build>

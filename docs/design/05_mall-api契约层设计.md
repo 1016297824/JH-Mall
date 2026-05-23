@@ -1,6 +1,7 @@
 # JH-Store mall-api 契约层设计
 
 > mall-api 是跨服务共享契约模块（非独立部署），定义 Feign 接口、共享 DTO、枚举。所有 `server/mall/mall-*` 服务通过 `mall-api` 进行服务间调用。
+> 公共基础设施（全局异常处理器等）位于兄弟模块 `mall-common`，两者职责不重叠。
 > 依据概要设计 `02_系统概要设计_补充.md` 第 2 章包结构规划。
 
 ---
@@ -21,11 +22,18 @@
 ### 1.2 依赖关系
 
 ```
-mall-api (共享库)
-  ├── 被依赖方：所有 mall-* 服务通过 maven 依赖引入
+mall-api (契约层)
+  ├── 被依赖方：所有 mall-* 服务 + mall-common
   ├── 依赖：ruoyi-common（复用若依返回结构、异常、Feign 基础配置）
   └── 独立部署：否（JAR 包供各服务引用）
+
+mall-common (公共基础设施层)
+  ├── 被依赖方：所有 mall-* 业务模块
+  ├── 依赖：mall-api（复用 MallResult、Feign 接口）
+  └── 独立部署：否（JAR 包供各服务引用）
 ```
+
+> mall-common 不能反向依赖业务模块，业务模块之间通过 mall-api 的 Feign 接口通信。
 
 ---
 

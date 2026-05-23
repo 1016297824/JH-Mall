@@ -1,6 +1,6 @@
 # mall-user C 端后端开发规格说明
 
-> 基于已有设计文档 `docs/design/12_mall-user详细设计.md`、`docs/design/05_mall-api契约层设计.md`、`docs/design/03_系统详细设计.md` 的实施规格。
+> 基于已有设计文档 `docs/design/09_mall-user详细设计.md`、`docs/design/05_mall-api契约层设计.md`、`docs/design/03_系统详细设计.md` 的实施规格。
 
 ## 架构原则
 

@@ -64,6 +64,13 @@
             <artifactId>mall-api</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+        <!-- Mall Common -->
+        <dependency>
+            <groupId>com.mall</groupId>
+            <artifactId>mall-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,6 +1,6 @@
 # mall-auth MVP 完整设计
 
-> 基于 `08_mall-auth详细设计.md` 和 `03_系统详细设计.md`，限定 MVP 阶段实现范围。
+> 基于 `07_mall-auth详细设计.md` 和 `03_系统详细设计.md`，限定 MVP 阶段实现范围。
 
 ---
 
@@ -51,6 +51,7 @@
 - userId 类型为 `String`（雪花 ID）
 - C 端响应体用 `MallResult<T>`（`com.mall.api.dto`），**不**使用若依 `AjaxResult`
 - **调 Feign 方式：** CaptchaController 直接 `@Autowired RemoteUserService`（`mall-api` 的 Feign 接口），`RemoteUserAdapter` 保留骨架但 MVP 不被调用，供后续 `AuthServiceImpl` 使用
+- **参数校验：** 所有 Controller 统一使用 `@Validated`/`@Valid` 触发校验，DTO 字段加 `jakarta.validation.constraints` 注解，失败由 `MallExceptionHandler` 处理 → `MallResult.error("A0401", ...)`
 
 ---
 
@@ -508,7 +509,7 @@ mall-auth 和 mall-user 的 Application.java 均改为：
 
 | 文档                         | 更新内容                                   |
 | ---------------------------- | ------------------------------------------ |
-| `08_mall-auth详细设计.md`  | §13 MVP CAPTCHA 图片验证码                |
+| `07_mall-auth详细设计.md`  | §13 MVP CAPTCHA 图片验证码                |
 | `03_系统详细设计.md`       | §3.1.14~3.1.19 CAPTCHA 端点小节（待更新） |
 | `05_mall-api契约层设计.md` | Feign 接口签名 + MallResult 定义（待更新） |
 
