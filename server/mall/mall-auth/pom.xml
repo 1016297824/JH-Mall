@@ -48,12 +48,6 @@
             <artifactId>ruoyi-common-security</artifactId>
         </dependency>
 
-        <!-- RuoYi Common Log（审计日志）-->
-        <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-log</artifactId>
-        </dependency>
-
         <!-- RuoYi Common DataSource（动态数据源 + MyBatis）-->
         <dependency>
             <groupId>com.mysql</groupId>

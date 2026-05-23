@@ -385,6 +385,8 @@ mall-auth 作为密钥持有方，向其他服务暴露解密接口（定义在 
 
 ## 10 审计日志
 
+### 10.1 审计内容
+
 | 操作              | 记录内容                             |
 | ----------------- | ------------------------------------ |
 | 登录（成功/失败） | userId、IP、设备、时间、结果         |
@@ -394,7 +396,20 @@ mall-auth 作为密钥持有方，向其他服务暴露解密接口（定义在 
 | 注销账号          | userId、IP、时间                     |
 | 微信绑定手机号    | userId、绑定手机号脱敏、IP、时间     |
 
-审计日志存储方式：通过若依 `RemoteLogService` Feign 写入 `sys_oper_log` 表（复用若依审计能力）。
+### 10.2 存储方式
+
+C 端审计日志写入 `mall` 库独立表 `mall_audit_log`，Service 层直写 INSERT，不走若依 `RemoteLogService` Feign。
+
+原因：
+- `mall` 与 `ry-cloud` 分属不同数据库，跨库 Feign 写入 `sys_oper_log` 不可靠
+- C 端审计与管理端审计在身份体系（userId vs adminId）、查看入口上完全独立
+
+### 10.3 实现约定
+
+- C 端 Controller 包路径：`com.mall.{module}.controller.api`
+- C 端 Controller **禁止** `import com.ruoyi.common.log.*`（即不使用注解 `@Log`）
+- 审计写入时机：登录/注册/AOP 拦截时，在本模块 Service 层直接 INSERT
+- `mall_audit_log` 表 DDL 在 mall-auth 开发阶段落地（使用 Flyway 命名 `V2.0.0__mall_audit_log.sql`）
 
 ---
 
