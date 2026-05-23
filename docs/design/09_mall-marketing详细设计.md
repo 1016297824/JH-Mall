@@ -39,7 +39,7 @@ mall-marketing (9306端口)
 
 ```
 server/mall/mall-marketing/
-└── src/main/java/com/jhstore/mall/marketing/
+└── src/main/java/com/mall/marketing/
     ├── MallMarketingApplication.java        # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
@@ -54,10 +54,10 @@ server/mall/mall-marketing/
     │   │                                       CreateRuleReq, CalculationReq
     │   └── response/                        → CouponDefResp, CouponRecordResp, CalculationResp
     ├── domain/
-    │   ├── MallCouponDO.java                # 对应 mall_marketing_coupon 表
-    │   ├── MallCouponRecordDO.java          # 对应 mall_marketing_coupon_record 表
-    │   ├── MallPromotionDO.java             # 对应 mall_marketing_promotion 表
-    │   └── MallPromotionRuleDO.java         # 对应 mall_marketing_promotion_rule 表
+    │   ├── MallCoupon.java                  # 对应 mall_marketing_coupon 表
+    │   ├── MallCouponRecord.java            # 对应 mall_marketing_coupon_record 表
+    │   ├── MallPromotion.java               # 对应 mall_marketing_promotion 表
+    │   └── MallPromotionRule.java           # 对应 mall_marketing_promotion_rule 表
     ├── service/
     │   ├── coupon/
     │   │   ├── CouponDefService.java        # 接口
@@ -89,9 +89,9 @@ server/mall/mall-marketing/
     │   └── feign/
     │       └── RemoteOrderAdapter.java       # 调 mall-order 查询订单状态
     └── convert/
-        ├── CouponConvert.java               # MallCouponDO ↔ CouponDefResp
-        ├── CouponRecordConvert.java          # MallCouponRecordDO ↔ CouponRecordResp
-        └── PromotionConvert.java            # MallPromotionDO ↔ PromotionResp
+        ├── CouponConvert.java               # MallCoupon ↔ CouponDefResp
+        ├── CouponRecordConvert.java          # MallCouponRecord ↔ CouponRecordResp
+        └── PromotionConvert.java            # MallPromotion ↔ PromotionResp
 ```
 
 ### 2.2 接口 → Controller 映射

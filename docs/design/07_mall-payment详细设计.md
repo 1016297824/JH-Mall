@@ -39,7 +39,7 @@ mall-payment (9305端口)
 
 ```
 server/mall/mall-payment/
-└── src/main/java/com/jhstore/mall/payment/
+└── src/main/java/com/mall/payment/
     ├── MallPaymentApplication.java          # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
@@ -48,10 +48,10 @@ server/mall/mall-payment/
     │       ├── PaymentApiController.java    # /api/payment/**
     │       └── PaymentCallbackController.java # /callback/payment/**
     ├── domain/
-    │   ├── MallPaymentDO.java               # 对应 mall_payment 表
-    │   ├── MallRefundDO.java                # 对应 mall_payment_refund 表
-    │   ├── MallPaymentChannelDO.java        # 对应 mall_payment_channel 表
-    │   └── MallPaymentCallbackLogDO.java    # 对应 mall_payment_callback_log 表
+    │   ├── MallPayment.java                 # 对应 mall_payment 表
+    │   ├── MallRefund.java                  # 对应 mall_payment_refund 表
+    │   ├── MallPaymentChannel.java          # 对应 mall_payment_channel 表
+    │   └── MallPaymentCallbackLog.java      # 对应 mall_payment_callback_log 表
     ├── service/
     │   ├── PaymentService.java              # 接口
     │   ├── impl/
@@ -90,8 +90,8 @@ server/mall/mall-payment/
     │   ├── RefundDetailVO.java                # 管理端退款单详情
     │   └── ChannelConfigVO.java               # 管理端渠道配置（屏蔽密钥明文）
     └── convert/                               # 纯转换器（Entity↔DTO↔VO 字段映射）
-        ├── PaymentConvert.java                # MallPaymentDO → PaymentVO / PaymentDetailVO / PayResultDTO
-        └── RefundConvert.java                 # MallRefundDO → RefundVO / RefundDetailVO
+        ├── PaymentConvert.java                # MallPayment → PaymentVO / PaymentDetailVO / PayResultDTO
+        └── RefundConvert.java                 # MallRefund → RefundVO / RefundDetailVO
 ```
 
 ### 2.2 接口 → Controller 映射表
@@ -122,7 +122,7 @@ server/mall/mall-payment/
 类结构（文字描述）：
 
 - 注入 `MallPaymentMapper` + `MallRefundMapper`，不直接访问其他 Service
-- `paymentTransition(paymentNo, event)`：支付单转移入口。内部查 `MallPaymentDO`，校验前置条件，执行 `UPDATE ... WHERE status=? AND version=?`，影响 0 行抛 `A0702`
+- `paymentTransition(paymentNo, event)`：支付单转移入口。内部查 `MallPayment`，校验前置条件，执行 `UPDATE ... WHERE status=? AND version=?`，影响 0 行抛 `A0702`
 - `refundTransition(refundNo, event)`：退款单转移入口，逻辑同上
 - 前后置检查封装为 `PaymentPrecondition` / `RefundPrecondition` 内部类
 - 不负责 RocketMQ 发布和渠道调用，只做 DB 状态推进
@@ -218,9 +218,9 @@ server/mall/mall-payment/
 `PaymentChannelAdapter` 接口定义：
 
 ```java
-PayResult invokePay(MallPaymentDO payment, MallPaymentChannelDO channel, String openid);
-RefundResult invokeRefund(MallPaymentDO payment, MallRefundDO refund, MallPaymentChannelDO channel);
-ChannelBillResult queryBill(String channelPaymentNo, MallPaymentChannelDO channel);
+PayResult invokePay(MallPayment payment, MallPaymentChannel channel, String openid);
+RefundResult invokeRefund(MallPayment payment, MallRefund refund, MallPaymentChannel channel);
+ChannelBillResult queryBill(String channelPaymentNo, MallPaymentChannel channel);
 ```
 
 | 适配器 | 适用场景 | SDK 依赖 |
@@ -409,7 +409,7 @@ refundTransition(refundNo, RefundEvent event)
 | `mall:refund:succeeded` | `refundNo`、`paymentNo`、`orderNo`、`afterSaleNo`、`userId`、`refundAmount`（分）、`refundTime`、`channelRefundNo` | 退款回调成功 |
 | `mall:refund:failed` | `refundNo`、`paymentNo`、`orderNo`、`afterSaleNo`、`userId`、`refundAmount`（分）、`failReason`、`channelRefundNo` | 退款回调失败 |
 
-> Payload 使用稳定 DTO，不直接序列化 MallPaymentDO/MallRefundDO。字段命名 lowerCamelCase。
+> Payload 使用稳定 DTO，不直接序列化 MallPayment/MallRefund。字段命名 lowerCamelCase。
 
 ### 8.2 Outbox 重试策略
 

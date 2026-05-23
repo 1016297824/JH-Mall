@@ -39,7 +39,7 @@ mall-user (9302端口)
 
 ```
 server/mall/mall-user/
-└── src/main/java/com/jhstore/mall/user/
+└── src/main/java/com/mall/user/
     ├── MallUserApplication.java            # Spring Boot 启动类
     ├── controller/
     │   ├── admin/
@@ -63,13 +63,13 @@ server/mall/mall-user/
     │   ├── PointsRecordVO.java             # 积分流水单条
     │   └── UserAdminVO.java               # 管理端用户详情（全字段）
     ├── domain/
-    │   ├── MallUserDO.java                 # 对应 mall_user 表
-    │   ├── MallMemberLevelDO.java          # 对应 mall_user_member_level 表
-    │   ├── MallUserMemberDO.java           # 对应 mall_user_member 表
-    │   ├── MallUserAddressDO.java          # 对应 mall_user_address 表
-    │   ├── MallPointsAccountDO.java        # 对应 mall_user_points_account 表
-    │   ├── MallPointsLogDO.java            # 对应 mall_user_points_log 表
-    │   └── MallGrowthLogDO.java            # 对应 mall_user_growth_log 表
+    │   ├── MallUser.java                   # 对应 mall_user 表
+    │   ├── MallMemberLevel.java            # 对应 mall_user_member_level 表
+    │   ├── MallUserMember.java             # 对应 mall_user_member 表
+    │   ├── MallUserAddress.java            # 对应 mall_user_address 表
+    │   ├── MallPointsAccount.java          # 对应 mall_user_points_account 表
+    │   ├── MallPointsLog.java              # 对应 mall_user_points_log 表
+    │   └── MallGrowthLog.java              # 对应 mall_user_growth_log 表
     ├── service/
     │   ├── user/
     │   │   ├── UserService.java
@@ -98,10 +98,10 @@ server/mall/mall-user/
     │   └── feign/
     │       └── RemoteAuthAdapter.java       # 调 mall-auth 解密手机号
     └── convert/
-        ├── UserConvert.java                # MallUserDO → UserProfileVO / UserAdminVO
-        ├── AddressConvert.java             # MallUserAddressDO → AddressVO
-        ├── MemberConvert.java              # MallUserMemberDO → MembershipVO
-        ├── PointsConvert.java              # MallPointsLogDO → PointsRecordVO
+        ├── UserConvert.java                # MallUser → UserProfileVO / UserAdminVO
+        ├── AddressConvert.java             # MallUserAddress → AddressVO
+        ├── MemberConvert.java              # MallUserMember → MembershipVO
+        ├── PointsConvert.java              # MallPointsLog → PointsRecordVO
         └── GrowthConvert.java
 ```
 
@@ -143,7 +143,7 @@ server/mall/mall-user/
 
 **findByPhone(phoneHash)**（Feign 接口，供 mall-auth 调用）：
 - 查询：`WHERE phone_hash = SHA2(CONCAT(?, salt), 256)`
-- 返回 `MallUserDO`（含密码哈希、状态），用于登录校验
+- 返回 `MallUser`（含密码哈希、状态），用于登录校验
 
 **register(phoneEncrypted, phoneHash, passwordHash)**（Feign 接口，供 mall-auth 调用）：
 - 插入 `mall_user` + 初始化 `mall_user_member` + `mall_user_points_account`

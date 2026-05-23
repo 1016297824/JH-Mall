@@ -37,7 +37,7 @@ mall-order
 ### 2.1 包结构
 
 ```
-mall-order/src/main/java/com/jhstore/mall/order/
+mall-order/src/main/java/com/mall/order/
 ├─ controller/
 │  ├─ admin/          → AdminOrderController, AdminAfterSaleController
 │  └─ api/            → CartController, OrderController, AfterSaleController

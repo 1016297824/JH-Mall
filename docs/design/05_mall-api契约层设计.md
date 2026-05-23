@@ -14,6 +14,7 @@
 | Feign 接口 | `Remote*Service` 7 个接口 | 只定义接口签名 + `@FeignClient` + fallback |
 | 共享 DTO | 请求/响应 DTO | 不含 VO、不含数据库实体 |
 | 共享枚举 | 跨服务必须一致的枚举 | 如订单状态、支付状态、优惠券状态 |
+| C 端响应体 | `MallResult<T>` | 所有 C 端模块统一使用，替代若依 `AjaxResult` |
 
 **禁止放入 mall-api 的：** VO（视图对象）、数据库实体（DO/domain）、Mapper、Service 实现、constant 常量类。
 
@@ -32,7 +33,7 @@ mall-api (共享库)
 
 ```
 server/mall/mall-api/
-└── src/main/java/com/jhstore/mall/api/
+└── src/main/java/com/mall/api/
     ├── feign/                                # Feign 远程调用接口
     │   ├── RemoteUserService.java            # 用户服务（提供方：mall-user）
     │   ├── RemoteProductService.java         # 商品服务（提供方：mall-product）
@@ -42,12 +43,15 @@ server/mall/mall-api/
     │   ├── RemoteSearchService.java          # 搜索服务（提供方：mall-search）
     │   └── RemoteAuthService.java            # 认证服务（提供方：mall-auth）
     ├── dto/                                  # 跨服务共享 DTO（按域分包）
-    │   ├── user/                             → UserDTO, AddressDTO ...
+    │   ├── user/                             → AddressDTO ...
     │   ├── product/                          → ProductSkuDTO, SpuDTO ...
     │   ├── order/                            → OrderDTO ...
     │   ├── payment/                          → RefundDTO, RefundResultDTO ...
     │   ├── marketing/                        → CalculationReq, CalculationResp ...
     │   └── search/                           → ProductIndex ...
+    └── dto/
+        ├── MallResult.java                  # C 端统一响应体（替代若依 AjaxResult）
+        └── MallUserDTO.java                 # 用户数据传输对象（userId 为 String）
     └── enums/                                # 跨服务必须共享的枚举
         ├── OrderStatusEnum.java              # WAIT_PAY/PAID/WAIT_DELIVER/WAIT_RECEIVE/COMPLETED/CANCELLED/CLOSED/REFUNDING/REFUNDED
         ├── PaymentStatusEnum.java            # UNPAID/PAID/FAILED/CLOSED/REFUNDING/REFUNDED
@@ -69,14 +73,16 @@ server/mall/mall-api/
 
 | 方法 | 参数 | 返回 | 说明 |
 |------|------|------|------|
-| `register` | `phoneEncrypted`(String), `phoneHash`(String), `passwordHash`(String) | `Long userId` | 注册新用户，同时初始化会员+积分账户 |
-| `findByPhone` | `phoneHash`(String) | `UserDTO`(含 passwordHash, userStatus, userId) | 按手机号哈希查用户，供 mall-auth 登录校验 |
-| `findByWechatOpenId` | `openId`(String) | `UserDTO` | 按微信 openId 查用户 |
-| `registerByWechat` | `openId`(String), `unionId`(String) | `Long userId` | 微信首次授权自动注册 |
-| `updatePassword` | `userId`(Long), `newPasswordHash`(String) | `void` | 更新密码哈希（改密/重置密码） |
-| `updatePhone` | `userId`(Long), `phoneEncrypted`(String), `phoneHash`(String) | `void` | 换绑手机号 |
-| `deactivateAccount` | `userId`(Long) | `void` | 注销账号（userStatus→2） |
-| `validateAddress` | `userId`(Long), `addressId`(Long) | `boolean` | 校验收货地址归属，供 mall-order 下单时校验 |
+| `register` | `RegisterRequest`(phone, phoneHash, password, registerType) | `String userId` | 注册新用户，同时初始化会员+积分账户 |
+| `findByPhone` | `phone`(String) | `MallUserDTO` | 按手机号查用户，供 mall-auth 登录校验 |
+| `findByWechatOpenId` | `openId`(String) | `MallUserDTO` | 按微信 openId 查用户 |
+| `registerByWechat` | `openId`(String), `unionId`(String) | `String userId` | 微信首次授权自动注册 |
+| `updatePassword` | `userId`(String), `PasswordUpdateRequest`(newPassword) | `void` | 更新密码哈希（改密/重置密码） |
+| `updatePhone` | `userId`(String), `PhoneUpdateRequest`(newPhone, newPhoneHash) | `void` | 换绑手机号 |
+| `deactivateAccount` | `userId`(String) | `void` | 注销账号（userStatus→2） |
+| `validateAddress` | `userId`(String), `addressId`(Long) | `boolean` | 校验收货地址归属，供 mall-order 下单时校验 |
+
+> 请求对象 RegisterRequest / PasswordUpdateRequest / PhoneUpdateRequest 定义为 RemoteUserService 内部类。
 
 ### 3.2 RemoteAuthService
 
@@ -187,7 +193,33 @@ server/mall/mall-api/
 
 ---
 
-## 7 关键约束
+## 7 C 端统一响应体 MallResult<T>
+
+所有 C 端模块使用 `MallResult<T>`（`com.mall.api.dto`）替代若依管理端的 `AjaxResult`。
+
+```json
+{
+  "errorCode": "00000",
+  "errorMessage": "操作成功",
+  "userTip": "",
+  "data": {},
+  "requestId": "..."
+}
+```
+
+静态工厂方法：
+
+| 方法 | 说明 |
+|------|------|
+| `success(data)` | 成功返回，errorCode=00000，userTip="" |
+| `error(errorCode, errorMessage)` | 错误返回，data=null |
+| `error(errorCode, errorMessage, userTip)` | 带用户提示的错误返回 |
+
+注解 `@JsonInclude(NON_NULL)`：成功时 userTip 序列化为 `""` 而非 `null`，错误时 data=null 不序列化。
+
+---
+
+## 8 关键约束
 
 | 约束 | 说明 |
 |------|------|

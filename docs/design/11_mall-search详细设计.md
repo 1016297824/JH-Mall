@@ -38,7 +38,7 @@ mall-search (9307端口)
 
 ```
 server/mall/mall-search/
-└── src/main/java/com/jhstore/mall/search/
+└── src/main/java/com/mall/search/
     ├── MallSearchApplication.java           # Spring Boot 启动类
     ├── controller/
     │   └── SearchController.java            # 单 Controller，C 端搜索 + 管理端维护

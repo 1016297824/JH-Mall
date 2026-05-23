@@ -34,6 +34,8 @@ mall-auth (9301端口)
 
 > **关键边界**：mall-auth 是认证中心，不持有用户数据表。用户 CRUD 全部通过 Feign 委托 mall-user。mall-auth 持有 JWT secret 和 AES 密钥，是唯一密钥持有方。
 
+**MVP 范围说明：** 以下结构为完整设计。MVP 阶段仅实现 CAPTCHA 子系统（§13）+ TokenService + Feign 契约。AuthController 13 个端点返回占位"功能暂未开放"，AuthService 仅建接口，SmsService/DecryptService 仅建接口，WechatAdapter 不建。详见 `docs/superpowers/specs/2026-05-25-mall-auth-mvp-design.md`。
+
 ---
 
 ## 2 包结构与接口映射
@@ -42,16 +44,22 @@ mall-auth (9301端口)
 
 ```
 server/mall/mall-auth/
-└── src/main/java/com/jhstore/mall/auth/
+└── src/main/java/com/mall/auth/
     ├── MallAuthApplication.java             # Spring Boot 启动类
     ├── controller/
-    │   └── AuthController.java              # 单 Controller，13 个认证接口
+    │   ├── AuthController.java              # 主 Controller，13 个认证接口
+    │   └── CaptchaController.java           # MVP CAPTCHA 6 端点（独立实现）
     ├── dto/
     │   ├── request/                         → RegisterReq, LoginReq, SmsLoginReq, SmsCodeReq,
     │   │                                       RefreshTokenReq, WechatLoginReq, PhoneBindReq,
     │   │                                       ChangePhoneReq, ResetPasswordReq, ChangePasswordReq,
-    │   │                                       DeactivateReq
-    │   └── response/                        → TokenResp, SmsCodeResp, SessionInfoResp
+    │   │                                       DeactivateReq,
+    │   │                                       CaptchaRegisterReq, CaptchaLoginReq,
+    │   │                                       CaptchaResetPasswordReq, CaptchaChangePhoneReq,
+    │   │                                       CaptchaDeactivateReq
+    │   └── response/                        → TokenResp, SmsCodeResp, SessionInfoResp,
+    │                                           CaptchaResponse
+    │                                           （MallResult<T> 在 mall-api/com.mall.api.dto，非本模块）
     ├── service/
     │   ├── AuthService.java                 # 接口
     │   ├── impl/
@@ -63,8 +71,11 @@ server/mall/mall-auth/
     │   ├── impl/
     │   │   └── SmsServiceImpl.java          # 短信验证码发送/校验/防刷
     │   ├── DecryptService.java              # 接口
+    │   ├── impl/
+    │   │   └── DecryptServiceImpl.java      # AES-256-GCM 解密（Feign 暴露给其他服务）
+    │   ├── CaptchaService.java              # 接口（MVP）
     │   └── impl/
-    │       └── DecryptServiceImpl.java      # AES-256-GCM 解密（Feign 暴露给其他服务）
+    │       └── CaptchaServiceImpl.java      # CAPTCHA 生成/校验
     └── infrastructure/
         ├── feign/
         │   └── RemoteUserAdapter.java       # 调 mall-user 用户 CRUD
@@ -74,7 +85,7 @@ server/mall/mall-auth/
             └── WechatAdapter.java           # 微信 code2session + 解密
 ```
 
-> 与 mall-order/mall-payment 不同：mall-auth **无 domain/、无 mapper/、无 statemachine/** 包。用户数据通过 `infrastructure/feign/RemoteUserAdapter` 调 mall-user。
+> 与 mall-order/mall-payment 不同：mall-auth **无 domain/、无 mapper/、无 statemachine/** 包。用户数据通过 `infrastructure/feign/RemoteUserAdapter` 调 mall-user。所有 userId 类型为 `String`（雪花 ID）。
 
 ### 2.2 接口 → Controller 映射
 
@@ -95,6 +106,19 @@ server/mall/mall-auth/
 | 13 | GET    | `/api/auth/sessions/current`     | `checkSession()`         |   是   |  —  |
 
 > #10/#11 路径已从系统设计的同名 `PUT /api/auth/password` 修正为 `reset` 和 `/password` 两个不同路径（方案 A），避免 RESTful 冲突。
+
+### 2.3 MVP CAPTCHA 接口映射（独立实现）
+
+| #  | 方法   | 路径                               | 方法名                       | 需登录 | 审计 |
+| -- | ------ | ---------------------------------- | ---------------------------- | :----: | :--: |
+| 14 | GET    | `/api/auth/captcha`              | `getCaptcha(req)`          |   否   |  —  |
+| 15 | POST   | `/api/auth/captcha/register`     | `registerByCaptcha(req)`   |   否   |  —  |
+| 16 | POST   | `/api/auth/captcha/login`        | `loginByCaptcha(req)`      |   否   |  ✓  |
+| 17 | POST   | `/api/auth/captcha/password/reset` | `resetPasswordByCaptcha(req)` | 否 |  —  |
+| 18 | PUT    | `/api/auth/captcha/phone`        | `changePhoneByCaptcha(req)`|   是   |  ✓  |
+| 19 | DELETE | `/api/auth/captcha/account`      | `deactivateAccount(req)`   |   是   |  ✓  |
+
+> #14~#19 为 MVP 阶段独立端点，与原有端点完全隔离。原有端点不动，后续接入真实短信后 CAPTCHA 端点可整体下线。
 
 ---
 
@@ -555,5 +579,50 @@ spring:
 | C0230  | 503 | 微信服务异常                       | 微信 code2session 或解密失败           |
 
 > 错误码遵循阿里规范 A/B/C 格式，除 C0220 外全部来自系统设计第二章。
+
+---
+
+## 13 MVP CAPTCHA 图片验证码
+
+### 13.1 背景
+
+MVP 阶段无真实短信通道，用图片验证码代替短信验证码。原有 13 个认证端点**完全保留不动**，独立新增 6 个 `/api/auth/captcha/*` 端点。MVP 前端只调用 CAPTCHA 端点，后续接入真实短信后 CAPTCHA 端点可整体删除。
+
+### 13.2 实现类
+
+| 类 | 说明 |
+|----|------|
+| `CaptchaController` | 6 个 CAPTCHA 端点，位于 `controller/` 包 |
+| `CaptchaService` | 接口 |
+| `CaptchaServiceImpl` | 生成/校验逻辑 |
+
+**generate()**：EasyCaptcha 生成 4 位字符图片（排除 0/O/1/I），JPEG Base64 返回，Redis 存储 300s。
+
+**verify(captchaKey, code)**：Redis 比对（忽略大小写），一次性消费。失败计数按 IP 防刷。
+
+### 13.3 端点
+
+| 端点 | 替代说明 |
+|------|---------|
+| `GET /api/auth/captcha` | 获取图片验证码，返回 `{ captchaKey, captchaImage }` |
+| `POST /api/auth/captcha/register` | 用 `captchaKey+captchaCode` 替换 `smsCode` |
+| `POST /api/auth/captcha/login` | 密码登录 + 图片验证码防刷 |
+| `POST /api/auth/captcha/password/reset` | 用 `captchaKey+captchaCode` 替换 `smsCode` |
+| `PUT /api/auth/captcha/phone` | 用 `password` 替换短信验证 |
+| `DELETE /api/auth/captcha/account` | 用 `password` 替换短信验证 |
+
+### 13.4 依赖
+
+```xml
+<dependency>
+    <groupId>com.github.whvcse</groupId>
+    <artifactId>easy-captcha</artifactId>
+    <version>1.6.2</version>
+</dependency>
+```
+
+### 13.5 设计文档索引
+
+完整设计见 `docs/superpowers/specs/2026-05-23-mall-auth-captcha-design.md`。
 
 ---
