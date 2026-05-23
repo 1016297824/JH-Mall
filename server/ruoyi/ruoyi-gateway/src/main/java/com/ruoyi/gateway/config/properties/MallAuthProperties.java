@@ -1,5 +1,6 @@
 package com.ruoyi.gateway.config.properties;
 
+import java.util.Arrays;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * C 端认证配置属性
  *
  * @author ruoyi
+ * @date 2026/05/22
  */
 @Configuration
 @RefreshScope
@@ -17,8 +19,8 @@ public class MallAuthProperties
     /** C 端 JWT 密钥（HS512，至少 32 字符） */
     private String jwtSecret;
 
-    /** C 端白名单路径（逗号分隔） */
-    private String[] whites = new String[] {};
+    /** C 端匿名路径（不需 token 即可访问） */
+    private String[] anonymousPaths = new String[] {};
 
     public String getJwtSecret()
     {
@@ -30,13 +32,19 @@ public class MallAuthProperties
         this.jwtSecret = jwtSecret;
     }
 
-    public String[] getWhites()
+    public String[] getAnonymousPaths()
     {
-        return whites;
+        return anonymousPaths;
     }
 
-    public void setWhites(String[] whites)
+    public void setAnonymousPaths(String[] anonymousPaths)
     {
-        this.whites = whites;
+        this.anonymousPaths = anonymousPaths;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "MallAuthProperties{jwtSecret='***', anonymousPaths=" + Arrays.toString(anonymousPaths) + "}";
     }
 }

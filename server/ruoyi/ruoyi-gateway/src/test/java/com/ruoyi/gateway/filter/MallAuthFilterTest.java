@@ -1,13 +1,16 @@
 package com.ruoyi.gateway.filter;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.ruoyi.gateway.config.properties.MallAuthProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,9 +83,30 @@ class MallAuthFilterTest
     }
 
     @Test
-    void testCheckConfig_EmptySecret_ThrowsIllegalStateException()
+    void testCheckConfig_EmptySecret_ThrowsIllegalStateException() throws Exception
     {
-        assertThrows(IllegalArgumentException.class,
-                () -> { throw new IllegalArgumentException("secret is empty"); });
+        MallAuthFilter filter = new MallAuthFilter();
+        MallAuthProperties props = new MallAuthProperties();
+        props.setJwtSecret(null);
+
+        Field field = MallAuthFilter.class.getDeclaredField("mallAuthProperties");
+        field.setAccessible(true);
+        field.set(filter, props);
+
+        assertThrows(IllegalStateException.class, () -> filter.checkConfig());
+    }
+
+    @Test
+    void testCheckConfig_ValidSecret_DoesNotThrow() throws Exception
+    {
+        MallAuthFilter filter = new MallAuthFilter();
+        MallAuthProperties props = new MallAuthProperties();
+        props.setJwtSecret("test-secret-key-for-unit-test-which-is-long-enough!!");
+
+        Field field = MallAuthFilter.class.getDeclaredField("mallAuthProperties");
+        field.setAccessible(true);
+        field.set(filter, props);
+
+        assertDoesNotThrow(() -> filter.checkConfig());
     }
 }

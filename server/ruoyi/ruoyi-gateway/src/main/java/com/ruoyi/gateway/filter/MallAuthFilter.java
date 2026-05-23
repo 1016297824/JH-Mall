@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -28,10 +30,13 @@ import reactor.core.publisher.Mono;
  * C 端认证过滤器（order = -150，拦截 /api/**）
  *
  * @author ruoyi
+ * @date 2026/05/22
  */
 @Component
 public class MallAuthFilter implements GlobalFilter, Ordered
 {
+    private static final Logger log = LoggerFactory.getLogger(MallAuthFilter.class);
+
     private static final String C_TOKEN_PREFIX = "Bearer ";
 
     private static final String USER_ID_KEY = "userId";
@@ -41,6 +46,9 @@ public class MallAuthFilter implements GlobalFilter, Ordered
     @Autowired
     private MallAuthProperties mallAuthProperties;
 
+    /**
+     * 启动时校验 C 端 JWT 密钥是否已配置
+     */
     @PostConstruct
     public void checkConfig()
     {
@@ -63,28 +71,29 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         ServerHttpResponse response = exchange.getResponse();
         String path = request.getURI().getPath();
 
-        // 1. 白名单放行
-        if (isWhites(path))
-        {
-            return chain.filter(exchange);
-        }
-
-        // 2. 只拦截 /api/** 路径
+        // 1. 只处理 /api/** 路径（非 C 端路径由 AuthFilter 管理）
         if (!StringUtils.isMatch("/api/**", path))
         {
             return chain.filter(exchange);
         }
 
-        // 3. 清洗入站头（X-User-*, X-Mall-*）
+        // 2. 清洗入站头（X-User-*, X-Mall-*），所有 /api/** 路径统一处理
         request = cleanHeaders(request);
 
-        // 4. 注入 X-Request-Id traceId
+        // 3. 注入 X-Request-Id traceId
         request = injectRequestId(request);
+
+        // 4. 匿名路径直接放行
+        if (isAnonymousPath(path))
+        {
+            return chain.filter(exchange.mutate().request(request).build());
+        }
 
         // 5. 解析 Authorization 头
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith(C_TOKEN_PREFIX))
         {
+            log.warn("[C 端鉴权失败] 请求路径:{} 原因:缺少 token", path);
             return unauthorized(response, "C 端请求缺少 token");
         }
 
@@ -99,14 +108,17 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         }
         catch (ExpiredJwtException e)
         {
+            log.warn("[C 端鉴权失败] 请求路径:{} 原因:token 已过期", path);
             return unauthorized(response, "C 端 token 已过期");
         }
         catch (SignatureException e)
         {
+            log.warn("[C 端鉴权失败] 请求路径:{} 原因:签名无效", path);
             return unauthorized(response, "C 端 token 签名无效");
         }
         catch (Exception e)
         {
+            log.warn("[C 端鉴权失败] 请求路径:{} 原因:token 解析异常", path);
             return unauthorized(response, "C 端 token 无效");
         }
 
@@ -114,6 +126,7 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         String userId = claims.get(USER_ID_KEY, String.class);
         if (StringUtils.isEmpty(userId))
         {
+            log.warn("[C 端鉴权失败] 请求路径:{} 原因:token 中缺少 userId", path);
             return unauthorized(response, "C 端 token 缺少 userId");
         }
 
@@ -126,18 +139,18 @@ public class MallAuthFilter implements GlobalFilter, Ordered
     }
 
     /**
-     * 判断请求路径是否在白名单中
+     * 判断请求路径是否在匿名路径中
      */
-    private boolean isWhites(String path)
+    private boolean isAnonymousPath(String path)
     {
-        String[] whites = mallAuthProperties.getWhites();
-        if (whites == null || whites.length == 0)
+        String[] paths = mallAuthProperties.getAnonymousPaths();
+        if (paths == null || paths.length == 0)
         {
             return false;
         }
-        for (String white : whites)
+        for (String p : paths)
         {
-            if (StringUtils.isMatch(white, path))
+            if (StringUtils.isMatch(p, path))
             {
                 return true;
             }

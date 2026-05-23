@@ -331,7 +331,7 @@ springdoc:
 mall:
   security:
     jwt-secret: 7COWPc0I1OG/8Cby86JRsZhk6+kR3tNbKXgxwr45O1mPSZm1SqfRmXyekGo1UojKSEnjVDUSSI7a0HEVKLZcoQ==
-    whites:
+    anonymous-paths:
       - /api/auth/login
       - /api/auth/register
       - /api/auth/sms-code
