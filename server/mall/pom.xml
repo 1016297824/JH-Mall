@@ -15,6 +15,10 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
     <name>mall</name>
     <description>JH-Store 商城业务模块</description>
 
