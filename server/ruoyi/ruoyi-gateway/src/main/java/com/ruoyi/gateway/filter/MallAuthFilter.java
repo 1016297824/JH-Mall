@@ -37,10 +37,13 @@ public class MallAuthFilter implements GlobalFilter, Ordered
 {
     private static final Logger log = LoggerFactory.getLogger(MallAuthFilter.class);
 
+    /** C 端 JWT 前缀 */
     private static final String C_TOKEN_PREFIX = "Bearer ";
 
+    /** JWT 负载中的用户 ID 键名 */
     private static final String USER_ID_KEY = "userId";
 
+    /** C 端匿名默认用户名 */
     private static final String DEFAULT_USER_NAME = "c_end_user";
 
     @Autowired
@@ -58,6 +61,9 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         }
     }
 
+    /**
+     * 过滤器优先级，-150 介于 AuthFilter(-200) 和 Sentinel 之间
+     */
     @Override
     public int getOrder()
     {
