@@ -116,11 +116,13 @@ CREATE TABLE IF NOT EXISTS `mall_outbox` (
     `status`          varchar(16)  NOT NULL DEFAULT 'NEW'              COMMENT '投递状态',
     `retry_count`     int          DEFAULT 0                           COMMENT '已重试次数',
     `next_retry_time` datetime     DEFAULT NULL                        COMMENT '下次重试时间',
+    `scheduled_time`  datetime     DEFAULT NULL                        COMMENT '预约投递时间，NULL=立即投递',
     `create_time`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT '创建时间',
     `update_time`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_message_id` (`message_id`),
     KEY `idx_status_next_retry` (`status`, `next_retry_time`),
+    KEY `idx_scheduled_time` (`scheduled_time`, `status`),
     KEY `idx_aggregate` (`aggregate_type`, `aggregate_id`),
     KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Outbox 消息表';

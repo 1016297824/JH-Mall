@@ -267,12 +267,13 @@ Feign 调用失败不会自动回滚远程事务，需手动调 `releaseStock()`
 
 ### 5.9 超时关闭竞态处理
 
-支付回调与超时扫描可能同时触发 WAIT_PAY 的状态转移：
+支付回调与 MQ 延迟消息可能同时触发 WAIT_PAY 的状态转移：
 
 | 触发方 | 事件 | 目标状态 |
 |--------|------|---------|
 | 支付回调 | PAY_SUCCESS | PAID |
-| 超时扫描 | PAY_TIMEOUT | CLOSED |
+| MQ 延迟消息 | PAY_TIMEOUT | CLOSED |
+| ruoyi-job 兜底 | PAY_TIMEOUT | CLOSED |
 
 **防护机制：** 超时关闭使用乐观锁：
 
@@ -282,8 +283,9 @@ SET status = 'CLOSED', close_time = NOW()
 WHERE order_no = ? AND status = 'WAIT_PAY'
 ```
 
-- 支付回调先到 → status 已变为 PAID → `WHERE status='WAIT_PAY'` 影响 0 行 → 超时关闭跳过
-- 超时扫描先到 → status 已变为 CLOSED → 支付回调时状态机报 `A0702` → 回调记录日志后返回 200（不推进已关闭订单）
+- 支付回调先到 → status 已变为 PAID → `WHERE status='WAIT_PAY'` 影响 0 行 → MQ Consumer 和兜底任务跳过
+- MQ 先到 → status 已变为 CLOSED → 支付回调时状态机报 `A0702` → 回调记录日志后返回 200（不推进已关闭订单）
+- 支付成功时同步取消待投递的延迟消息：`UPDATE outbox SET status='CANCELLED' WHERE aggregate_id=orderNo AND topic='mall:order:timeout' AND status='NEW'`
 
 ### 5.10 自动确认收货
 
@@ -402,16 +404,17 @@ OrderServiceImpl.payCallback(orderNo):
 
 ### 7.1 生产（Outbox 投递）
 
-6 个 topic，由订单创建或状态转移时写 Outbox，定时任务投递：
+8 个 topic，由订单创建或状态转移时写 Outbox，Outbox 调度器投递：
 
 | Topic | 触发场景 | 消费者 | 备注 |
 |-------|---------|--------|------|
 | `mall:order:created` | 下单成功 | 暂无 | 预留通知 |
 | `mall:order:paid` | WAIT_PAY→PAID | 暂无 | 预留商家通知 |
-| `mall:order:cancelled` | 取消/超时关闭 | mall-product、mall-marketing | 释放库存+优惠券 |
+| `mall:order:cancelled` | 取消/超时关闭 | mall-product、mall-marketing | 释放库存+优惠券；超时关闭时 cancelReason=PAY_TIMEOUT |
 | `mall:order:delivered` | 商家发货 | 暂无 | 预留物流通知 |
 | `mall:order:completed` | 确认收货 | 暂无 | 预留积分发放 |
 | `mall:order:refunded` | 退款完成 | 暂无 | 预留通知 |
+| `mall:order:timeout` | 下单成功（延迟触发） | `OrderTimeoutConsumer`（mall-order） | `scheduled_time=NOW+30min`，到期投递后消费 |
 
 **Payload 字段规范：**
 
@@ -423,6 +426,7 @@ OrderServiceImpl.payCallback(orderNo):
 | `mall:order:delivered` | `orderNo`, `logisticsCompany`, `logisticsNo` |
 | `mall:order:completed` | `orderNo`, `userId` |
 | `mall:order:refunded` | `orderNo`, `userId`, `refundAmount` |
+| `mall:order:timeout` | `orderNo` |
 
 **Payload 约束：**
 
@@ -453,12 +457,19 @@ Outbox 投递失败后的指数退避：
 
 | Topic | 消费者类 | 处理流程 |
 |-------|---------|---------|
-| `mall:payment:paid` | `PaymentPaidConsumer` | ①幂等去重 ②调 `OrderServiceImpl.payCallback(orderNo)` ③状态机 WAIT_PAY→PAID ④Service 层写 Outbox `mall:order:paid` |
+| `mall:payment:paid` | `PaymentPaidConsumer` | ①幂等去重 ②调 `OrderServiceImpl.payCallback(orderNo)` ③状态机 WAIT_PAY→PAID ④Service 层写 Outbox `mall:order:paid` ⑤同步 UPDATE `mall_outbox` 取消 `mall:order:timeout` 延迟消息 |
 | `mall:refund:succeeded` | `RefundSucceededConsumer` | ①幂等去重 ②调 `AfterSaleServiceImpl.refundCallback()` ③如为退货退款，调 `RemoteProductService.restock(skuId, qty)` 回补库存 |
+| `mall:order:timeout` | `OrderTimeoutConsumer` | ①幂等去重 ②查订单 `orderMapper.selectByOrderNo(orderNo)` ③校验 `status=WAIT_PAY AND pay_expire_time<=NOW()` ④乐观锁关单 `UPDATE mall_order SET status='CLOSED' WHERE status='WAIT_PAY'` ⑤影响 1 行则写 Outbox `mall:order:cancelled`（释放库存+优惠券） |
 
 ### 7.4 消费幂等
 
-- Key：`mall:mq:dedup:{messageId}:mall-order`
+消费方统一使用 Redis SETNX 做幂等去重：
+
+| Topic | 幂等 Key |
+|-------|---------|
+| 所有 topic | `mall:mq:dedup:{messageId}:mall-order` |
+| `mall:order:timeout` 额外校验 | 消费端查 `order.status` + `pay_expire_time` 双重校验，非 WAIT_PAY 或未到期直接 ACK 跳过 |
+
 - 操作：消费前 Redis SETNX，命中 → 直接 ACK 跳过
 - TTL：24h（超过消息最长存活时间）
 - 消费成功后不主动删除，待 TTL 自然过期
@@ -542,8 +553,8 @@ springdoc:
 mall:
   order:
     pay-expire-minutes: 30
-    timeout-scan-interval: 30
-    timeout-batch-size: 500
+    timeout-topic: mall:order:timeout
+    timeout-fallback-cron: 0 0 2 * * ?
     refund-days: 7
     auto-receive-days: 15
     cart-max-items: 99
@@ -584,8 +595,8 @@ spring:
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|:---:|------|------|
 | `mall.order.pay-expire-minutes` | 30 | 分钟 | 下单后未支付自动关闭 |
-| `mall.order.timeout-scan-interval` | 30 | 秒 | 超时扫描间隔 |
-| `mall.order.timeout-batch-size` | 500 | 条 | 单次扫描上限 |
+| `mall.order.timeout-topic` | `mall:order:timeout` | — | 超时关单延迟消息 topic |
+| `mall.order.timeout-fallback-cron` | `0 0 2 * * ?` | — | ruoyi-job 兜底日扫 cron 表达式 |
 | `mall.order.refund-days` | 7 | 天 | 收货后可申请售后 |
 | `mall.order.auto-receive-days` | 15 | 天 | 发货后自动确认收货 |
 | `mall.order.cart-max-items` | 99 | 个 | 购物车最多商品数 |
