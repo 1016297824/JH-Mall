@@ -1,6 +1,6 @@
 package com.mall.user.service.impl;
 
-import com.mall.api.enums.UserStatusEnum;
+import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.user.domain.MallUser;
 import com.mall.user.mapper.MallUserMapper;
 import org.junit.jupiter.api.BeforeEach;

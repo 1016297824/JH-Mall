@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import com.ruoyi.common.core.utils.DateUtils;
-import com.mall.api.enums.UserStatusEnum;
+import com.mall.common.enums.user.UserStatusEnum;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.mall.common.handler;
 
-import com.mall.api.dto.MallResult;
+import com.mall.common.dto.MallResult;
 import com.mall.common.exception.BusinessException;
 import com.mall.common.exception.CaptchaException;
 import com.mall.common.exception.TokenException;

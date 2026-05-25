@@ -11,16 +11,9 @@
 
     <artifactId>mall-common</artifactId>
 
-    <description>JH-Store 商城 C 端公共基础设施（全局异常处理器等）</description>
+    <description>JH-Store C 端共享类型与基础设施（DTO/枚举/MallResult/全局异常处理器），不依赖任何 mall 模块</description>
 
     <dependencies>
-        <!-- Mall API（MallResult、Feign 接口等契约）-->
-        <dependency>
-            <groupId>com.mall</groupId>
-            <artifactId>mall-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <!-- Spring Boot Web（@RestControllerAdvice）-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,6 +1,6 @@
 package com.mall.auth.infrastructure.feign;
 
-import com.mall.api.dto.MallUserDTO;
+import com.mall.common.dto.user.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.common.exception.BusinessException;
 import org.slf4j.Logger;

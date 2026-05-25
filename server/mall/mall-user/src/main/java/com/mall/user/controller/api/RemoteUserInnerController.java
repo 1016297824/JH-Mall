@@ -1,8 +1,8 @@
 package com.mall.user.controller.api;
 
-import com.mall.api.enums.UserStatusEnum;
-
-import com.mall.api.dto.MallUserDTO;
+import com.mall.common.enums.user.UserStatusEnum;
+import com.mall.api.feign.RemoteUserService;
+import com.mall.common.dto.user.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.user.domain.MallUser;
 import com.mall.user.service.IMallUserService;

@@ -1,6 +1,6 @@
 package com.mall.auth.controller;
 
-import com.mall.api.dto.MallResult;
+import com.mall.common.dto.MallResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

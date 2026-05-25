@@ -1,7 +1,7 @@
 package com.mall.auth.controller;
 
-import com.mall.api.dto.MallUserDTO;
-import com.mall.api.dto.MallResult;
+import com.mall.common.dto.user.MallUserDTO;
+import com.mall.common.dto.MallResult;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.dto.request.CaptchaChangePhoneReq;
 import com.mall.auth.dto.request.CaptchaDeactivateReq;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.mall.api.enums.UserStatusEnum;
+import com.mall.common.enums.user.UserStatusEnum;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;

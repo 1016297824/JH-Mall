@@ -1,7 +1,7 @@
 # JH-Store mall-api 契约层设计
 
-> mall-api 是跨服务共享契约模块（非独立部署），定义 Feign 接口、共享 DTO、枚举。所有 `server/mall/mall-*` 服务通过 `mall-api` 进行服务间调用。
-> 公共基础设施（全局异常处理器等）位于兄弟模块 `mall-common`，两者职责不重叠。
+> mall-api 是跨服务共享契约模块（非独立部署），**仅定义 Feign 接口**。共享 DTO、枚举、`MallResult<T>` 响应体位于兄弟模块 `mall-common`。
+> `mall-common` 作为基础层（不依赖任何 mall 模块），`mall-api` 依赖 `mall-common` 使用共享类型。
 > 依据概要设计 `02_系统概要设计_补充.md` 第 2 章包结构规划。
 
 ---
@@ -10,30 +10,22 @@
 
 ### 1.1 职责
 
-| 层 | 内容 | 约束 |
-|----|------|------|
-| Feign 接口 | `Remote*Service` 7 个接口 | 只定义接口签名 + `@FeignClient` + fallback |
-| 共享 DTO | 请求/响应 DTO | 不含 VO、不含数据库实体 |
-| 共享枚举 | 跨服务必须一致的枚举 | 如订单状态、支付状态、优惠券状态 |
-| C 端响应体 | `MallResult<T>` | 所有 C 端模块统一使用，替代若依 `AjaxResult` |
+| 内容 | 约束 |
+|------|------|
+| Feign 接口 `Remote*Service` | **仅**定义接口签名 + `@FeignClient` + fallback |
 
-**禁止放入 mall-api 的：** VO（视图对象）、数据库实体（DO/domain）、Mapper、Service 实现、constant 常量类。
+**禁止放入 mall-api 的：** DTO、枚举、VO、数据库实体、Mapper、Service 实现、global constant 常量类、异常处理器。共享类型全部在 `mall-common`（详见 `06_mall-common公共模块设计.md`）。
 
 ### 1.2 依赖关系
 
 ```
-mall-api (契约层)
-  ├── 被依赖方：所有 mall-* 服务 + mall-common
-  ├── 依赖：ruoyi-common（复用若依返回结构、异常、Feign 基础配置）
-  └── 独立部署：否（JAR 包供各服务引用）
-
-mall-common (公共基础设施层)
-  ├── 被依赖方：所有 mall-* 业务模块
-  ├── 依赖：mall-api（复用 MallResult、Feign 接口）
+mall-api (Feign 契约层)
+  ├── 被依赖方：所有 mall-* 服务（通过 Feign 接口调用）
+  ├── 依赖：mall-common（共享类型）、spring-cloud-starter-openfeign（@FeignClient）
   └── 独立部署：否（JAR 包供各服务引用）
 ```
 
-> mall-common 不能反向依赖业务模块，业务模块之间通过 mall-api 的 Feign 接口通信。
+> mall-api 不定义任何业务类型，DTO/枚举/MallResult 等共享类型一律在 `mall-common`。
 
 ---
 
@@ -42,33 +34,17 @@ mall-common (公共基础设施层)
 ```
 server/mall/mall-api/
 └── src/main/java/com/mall/api/
-    ├── feign/                                # Feign 远程调用接口
-    │   ├── RemoteUserService.java            # 用户服务（提供方：mall-user）
-    │   ├── RemoteProductService.java         # 商品服务（提供方：mall-product）
-    │   ├── RemoteOrderService.java           # 订单服务（提供方：mall-order）
-    │   ├── RemotePaymentService.java         # 支付服务（提供方：mall-payment）
-    │   ├── RemoteMarketingService.java       # 营销服务（提供方：mall-marketing）
-    │   ├── RemoteSearchService.java          # 搜索服务（提供方：mall-search）
-    │   └── RemoteAuthService.java            # 认证服务（提供方：mall-auth）
-    ├── dto/                                  # 跨服务共享 DTO（按域分包）
-    │   ├── user/                             → AddressDTO ...
-    │   ├── product/                          → ProductSkuDTO, SpuDTO ...
-    │   ├── order/                            → OrderDTO ...
-    │   ├── payment/                          → RefundDTO, RefundResultDTO ...
-    │   ├── marketing/                        → CalculationReq, CalculationResp ...
-    │   └── search/                           → ProductIndex ...
-    └── dto/
-        ├── MallResult.java                  # C 端统一响应体（替代若依 AjaxResult）
-        └── MallUserDTO.java                 # 用户数据传输对象（userId 为 String）
-    └── enums/                                # 跨服务必须共享的枚举
-        ├── OrderStatusEnum.java              # WAIT_PAY/PAID/WAIT_DELIVER/WAIT_RECEIVE/COMPLETED/CANCELLED/CLOSED/REFUNDING/REFUNDED
-        ├── PaymentStatusEnum.java            # UNPAID/PAID/FAILED/CLOSED/REFUNDING/REFUNDED
-        ├── RefundStatusEnum.java             # PROCESSING/SUCCESS/FAILED
-        ├── CouponRecordStatusEnum.java       # AVAILABLE/LOCKED/USED/RELEASED/EXPIRED
-        ├── CouponTypeEnum.java               # FULL_REDUCE/DISCOUNT/NO_THRESHOLD
-        ├── PromotionTypeEnum.java            # FULL_REDUCE/FULL_DISCOUNT/FREE_SHIPPING/SECKILL
-        └── UserStatusEnum.java               # NORMAL/FROZEN/DELETED
+    └── feign/                                # Feign 远程调用接口
+        ├── RemoteUserService.java            # 用户服务（提供方：mall-user）
+        ├── RemoteProductService.java         # 商品服务（提供方：mall-product）
+        ├── RemoteOrderService.java           # 订单服务（提供方：mall-order）
+        ├── RemotePaymentService.java         # 支付服务（提供方：mall-payment）
+        ├── RemoteMarketingService.java       # 营销服务（提供方：mall-marketing）
+        ├── RemoteSearchService.java          # 搜索服务（提供方：mall-search）
+        └── RemoteAuthService.java            # 认证服务（提供方：mall-auth）
 ```
+
+> DTO、枚举、`MallResult<T>` 响应体等共享类型在 `mall-common`，详见 `06_mall-common公共模块设计.md`。
 
 ---
 
@@ -179,7 +155,7 @@ server/mall/mall-api/
 | 超时 | connect 2s，read 5s |
 | 重试 | 默认 1 次（仅幂等接口开启） |
 | 降级 | 每个接口建议配 fallback，避免调用方阻塞 |
-| 错误码 | 被调方异常通过若依 `R<T>` 统一返回，使用系统设计第二章错误码 |
+| 错误码 | C 端被调方异常通过 `MallResult<T>` 统一返回，使用系统设计第二章错误码 |
 | 日志 | Feign 请求/响应 debug 级别，异常 error 级别 |
 | 禁止 | Feign 接口不放 VO、不引用 domain 实体、不包含业务逻辑 |
 
@@ -187,23 +163,13 @@ server/mall/mall-api/
 
 ## 6 共享枚举
 
-| 枚举 | 值 | 使用方 |
-|------|----|--------|
-| `OrderStatusEnum` | WAIT_PAY / PAID / WAIT_DELIVER / WAIT_RECEIVE / COMPLETED / CANCELLED / CLOSED / REFUNDING / REFUNDED | mall-order, mall-payment, mall-marketing |
-| `PaymentStatusEnum` | UNPAID / PAID / FAILED / CLOSED / REFUNDING / REFUNDED | mall-payment, mall-order |
-| `RefundStatusEnum` | PROCESSING / SUCCESS / FAILED | mall-payment, mall-order |
-| `CouponRecordStatusEnum` | AVAILABLE / LOCKED / USED / RELEASED / EXPIRED | mall-marketing, mall-order |
-| `CouponTypeEnum` | FULL_REDUCE(1) / DISCOUNT(2) / NO_THRESHOLD(3) | mall-marketing |
-| `PromotionTypeEnum` | FULL_REDUCE(1) / FULL_DISCOUNT(2) / FREE_SHIPPING(3) / SECKILL(4) | mall-marketing |
-| `UserStatusEnum` | NORMAL(0) / FROZEN(1) / DELETED(2) | mall-user, mall-auth |
-
-> 枚举统一使用字符串值（如 `WAIT_PAY`），DB 存储数字编码由各服务 domain 层自行映射。
+> 跨服务枚举定义统一在 `mall-common`，详见 `06_mall-common公共模块设计.md` §2.2。
 
 ---
 
-## 7 C 端统一响应体 MallResult<T>
+## 6 C 端统一响应体 MallResult<T>
 
-所有 C 端模块使用 `MallResult<T>`（`com.mall.api.dto`）替代若依管理端的 `AjaxResult`。
+所有 C 端模块使用 `MallResult<T>`（`com.mall.common.dto`）替代若依管理端的 `AjaxResult`。
 
 ```json
 {
@@ -227,15 +193,13 @@ server/mall/mall-api/
 
 ---
 
-## 8 关键约束
+## 7 关键约束
 
 | 约束 | 说明 |
 |------|------|
-| mall-api 不放 VO | VO 属各模块视图层，不放共享库 |
-| mall-api 不放 domain/DO | 数据库实体各模块私有 |
-| mall-api 不放 Service 实现 | 只放接口签名 |
+| mall-api 不放 DTO/枚举 | 共享类型全部在 mall-common |
+| mall-common 不放 Feign 接口 | 契约接口只在 mall-api |
+| mall-common 不依赖 mall-api | 最底层不能依赖上层 |
 | 不循环依赖 | Feign 调用链必须单向，检查：mall-order→mall-payment→mall-order（OK，不同方法） |
-| DTO 命名 | 请求 `*Req`、响应 `*Resp` 或 `*DTO`，统一 lowerCamelCase |
-| 版本兼容 | 新增字段向后兼容（可选），不删字段 |
 
 ---

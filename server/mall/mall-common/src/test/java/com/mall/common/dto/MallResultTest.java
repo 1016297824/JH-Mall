@@ -1,8 +1,7 @@
-package com.mall.api.dto;
+package com.mall.common.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mall.common.dto.MallResult;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
