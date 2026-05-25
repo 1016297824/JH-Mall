@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(contextId = "remoteUserService", value = "mall-user")
+@FeignClient(contextId = "mall-user", value = "mall-user")
 public interface RemoteUserService {
 
     @GetMapping("/inner/user/phone/{phone}")

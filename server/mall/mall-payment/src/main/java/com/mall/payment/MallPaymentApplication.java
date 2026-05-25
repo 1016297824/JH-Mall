@@ -10,7 +10,7 @@ import org.mybatis.spring.annotation.MapperScan;
  * mall-payment 支付服务
  * 端口：9304
  */
-@EnableFeignClients(basePackages = "com.ruoyi")
+@EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.payment.mapper")
 @EnableDiscoveryClient
 @SpringBootApplication

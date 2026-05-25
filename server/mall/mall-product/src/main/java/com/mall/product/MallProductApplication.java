@@ -10,7 +10,7 @@ import org.mybatis.spring.annotation.MapperScan;
  * mall-product 商品服务
  * 端口：9302
  */
-@EnableFeignClients(basePackages = "com.ruoyi")
+@EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.product.mapper")
 @EnableDiscoveryClient
 @SpringBootApplication

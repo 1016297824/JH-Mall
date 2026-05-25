@@ -36,10 +36,10 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- RuoYi Common Redis（Token 存储、验证码、黑名单）-->
+        <!-- Redis（Token 存储、验证码、黑名单）-->
         <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-redis</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
         <!-- RuoYi Common Security -->

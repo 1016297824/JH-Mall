@@ -10,7 +10,7 @@ import org.mybatis.spring.annotation.MapperScan;
  * mall-search 搜索服务
  * 端口：9306
  */
-@EnableFeignClients(basePackages = "com.ruoyi")
+@EnableFeignClients(basePackages = "com.mall.api")
 @MapperScan("com.mall.search.mapper")
 @EnableDiscoveryClient
 @SpringBootApplication

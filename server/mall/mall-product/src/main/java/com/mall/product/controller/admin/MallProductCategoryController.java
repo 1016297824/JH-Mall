@@ -1,4 +1,4 @@
-package com.mall.product.controller;
+package com.mall.product.controller.admin;
 
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +22,7 @@ import com.ruoyi.common.core.utils.poi.ExcelUtil;
 
 /**
  * 商品类目Controller
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */

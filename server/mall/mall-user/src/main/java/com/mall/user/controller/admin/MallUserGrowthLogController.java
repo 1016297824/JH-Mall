@@ -1,4 +1,4 @@
-package com.mall.user.controller;
+package com.mall.user.controller.admin;
 
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +23,7 @@ import com.ruoyi.common.core.web.page.TableDataInfo;
 
 /**
  * 成长值流水Controller
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
