@@ -7,6 +7,7 @@ import com.mall.auth.dto.response.CaptchaResponse;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
+import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.common.exception.CaptchaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ class CaptchaControllerTest {
     private RedisTemplate<String, Object> redisTemplate;
     private ValueOperations<String, Object> valueOperations;
     private BCryptPasswordEncoder passwordEncoder;
+    private MallAuthConfigProperties authProperties;
 
     @SuppressWarnings("unchecked")
     @BeforeEach
@@ -53,11 +55,14 @@ class CaptchaControllerTest {
         redisTemplate = mock(RedisTemplate.class);
         valueOperations = mock(ValueOperations.class);
         passwordEncoder = new BCryptPasswordEncoder(4);
+        authProperties = new MallAuthConfigProperties();
+        authProperties.setPwdErrLimit(5);
+        authProperties.setPwdErrTtl(1800);
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         CaptchaController controller = new CaptchaController(
-                captchaService, tokenService, remoteUserService, redisTemplate, passwordEncoder);
+                captchaService, tokenService, remoteUserService, redisTemplate, passwordEncoder, authProperties);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new com.mall.common.handler.MallExceptionHandler())

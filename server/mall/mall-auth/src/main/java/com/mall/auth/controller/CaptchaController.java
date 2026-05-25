@@ -3,6 +3,7 @@ package com.mall.auth.controller;
 import com.mall.common.dto.user.MallUserDTO;
 import com.mall.common.dto.MallResult;
 import com.mall.api.feign.RemoteUserService;
+import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.dto.request.CaptchaChangePhoneReq;
 import com.mall.auth.dto.request.CaptchaDeactivateReq;
 import com.mall.auth.dto.request.CaptchaLoginReq;
@@ -39,8 +40,6 @@ import java.util.regex.Pattern;
 public class CaptchaController {
 
     private static final String KEY_PWD_ERR = "mall:auth:pwd_err:";
-    private static final long PWD_ERR_TTL = 1800L;
-    private static final int PWD_ERR_MAX = 5;
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d).+$");
 
     private final CaptchaService captchaService;
@@ -48,15 +47,17 @@ public class CaptchaController {
     private final RemoteUserService remoteUserService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MallAuthConfigProperties authProperties;
 
     public CaptchaController(CaptchaService captchaService, TokenService tokenService,
                              RemoteUserService remoteUserService, RedisTemplate<String, Object> redisTemplate,
-                             BCryptPasswordEncoder passwordEncoder) {
+                             BCryptPasswordEncoder passwordEncoder, MallAuthConfigProperties authProperties) {
         this.captchaService = captchaService;
         this.tokenService = tokenService;
         this.remoteUserService = remoteUserService;
         this.redisTemplate = redisTemplate;
         this.passwordEncoder = passwordEncoder;
+        this.authProperties = authProperties;
     }
 
     @GetMapping
@@ -119,7 +120,7 @@ public class CaptchaController {
         String pwdErrKey = KEY_PWD_ERR + user.getId();
         Object errCountObj = redisTemplate.opsForValue().get(pwdErrKey);
         int errCount = errCountObj instanceof Number ? ((Number) errCountObj).intValue() : 0;
-        if (errCount >= PWD_ERR_MAX) {
+        if (errCount >= authProperties.getPwdErrLimit()) {
             throw new BusinessException("A0211", "密码错误次数过多",
                     "密码错误次数过多，请30分钟后重试");
         }
@@ -222,7 +223,7 @@ public class CaptchaController {
     private void incrementPwdErrCount(String key) {
         Long count = redisTemplate.opsForValue().increment(key, 1L);
         if (count != null && count == 1) {
-            redisTemplate.expire(key, PWD_ERR_TTL, TimeUnit.SECONDS);
+            redisTemplate.expire(key, authProperties.getPwdErrTtl(), TimeUnit.SECONDS);
         }
     }
 

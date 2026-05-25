@@ -1,5 +1,6 @@
 package com.mall.auth.service.impl;
 
+import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.TokenService;
 import com.mall.common.exception.TokenException;
@@ -25,24 +26,20 @@ public class TokenServiceImpl implements TokenService {
     @Value("${mall.security.jwt-secret}")
     private String jwtSecret;
 
-    @Value("${mall.auth.access-token-ttl:1800}")
-    private long accessTtl;
-
-    @Value("${mall.auth.refresh-token-ttl:604800}")
-    private long refreshTtl;
-
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MallAuthConfigProperties authProperties;
 
-    public TokenServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+    public TokenServiceImpl(RedisTemplate<String, Object> redisTemplate, MallAuthConfigProperties authProperties) {
         this.redisTemplate = redisTemplate;
+        this.authProperties = authProperties;
     }
 
     @Override
     public TokenResponse issue(String userId) {
         byte[] key = jwtSecret.getBytes(StandardCharsets.UTF_8);
         Date now = new Date();
-        Date accessExp = new Date(now.getTime() + accessTtl * 1000);
-        Date refreshExp = new Date(now.getTime() + refreshTtl * 1000);
+        Date accessExp = new Date(now.getTime() + authProperties.getAccessTokenTtl() * 1000);
+        Date refreshExp = new Date(now.getTime() + authProperties.getRefreshTokenTtl() * 1000);
 
         String accessJti = UUID.randomUUID().toString();
         String refreshJti = UUID.randomUUID().toString();
@@ -68,12 +65,12 @@ public class TokenServiceImpl implements TokenService {
                 .compact();
 
         String sessionKey = "mall:auth:session:" + userId + ":" + accessJti;
-        redisTemplate.opsForValue().set(sessionKey, "1", accessTtl, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(sessionKey, "1", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
 
         String refreshKey = "mall:auth:refresh:" + refreshJti;
-        redisTemplate.opsForValue().set(refreshKey, userId, refreshTtl, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(refreshKey, userId, authProperties.getRefreshTokenTtl(), TimeUnit.SECONDS);
 
-        return new TokenResponse(accessToken, refreshToken, accessTtl);
+        return new TokenResponse(accessToken, refreshToken, authProperties.getAccessTokenTtl());
     }
 
     @Override
@@ -156,7 +153,7 @@ public class TokenServiceImpl implements TokenService {
         for (String sessionKey : keys) {
             String jti = sessionKey.substring(sessionKey.lastIndexOf(':') + 1);
             String blacklistKey = "mall:auth:blacklist:" + jti;
-            redisTemplate.opsForValue().set(blacklistKey, "revoked", accessTtl, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(blacklistKey, "revoked", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
             redisTemplate.delete(sessionKey);
         }
     }

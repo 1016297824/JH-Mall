@@ -1,5 +1,6 @@
 package com.mall.auth.service.impl;
 
+import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.common.exception.CaptchaException;
 import com.wf.captcha.SpecCaptcha;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +33,18 @@ class CaptchaServiceImplTest {
     @InjectMocks
     private CaptchaServiceImpl captchaService;
 
+    @Mock
+    private MallAuthConfigProperties authProperties;
+
     @BeforeEach
     void setUp() {
+        MallAuthConfigProperties.Sms sms = new MallAuthConfigProperties.Sms();
+        sms.setCodeTtl(300);
+        sms.setIpDailyLimit(10);
+        MallAuthConfigProperties.Captcha captcha = new MallAuthConfigProperties.Captcha();
+        captcha.setIpTtl(86400);
+        lenient().when(authProperties.getSms()).thenReturn(sms);
+        lenient().when(authProperties.getCaptcha()).thenReturn(captcha);
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 

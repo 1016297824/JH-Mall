@@ -11,8 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class AuthConfig {
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
+    public BCryptPasswordEncoder passwordEncoder(MallAuthConfigProperties authProperties) {
+        return new BCryptPasswordEncoder(authProperties.getPwdBcryptCost());
     }
 
     @Bean

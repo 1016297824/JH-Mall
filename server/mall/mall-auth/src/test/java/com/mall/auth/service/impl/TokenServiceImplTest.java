@@ -1,5 +1,6 @@
 package com.mall.auth.service.impl;
 
+import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Jwts;
@@ -40,11 +41,14 @@ class TokenServiceImplTest {
     private static final String JWT_SECRET = "7COWPc0I1OG/8Cby86JRsZhk6+kR3tNbKXgxwr45O1mPSZm1SqfRmXyekGo1UojKSEnjVDUSSI7a0HEVKLZcoQ==";
     private static final String USER_ID = "1234567890";
 
+    @Mock
+    private MallAuthConfigProperties authProperties;
+
     @BeforeEach
     void setUp() {
+        lenient().when(authProperties.getAccessTokenTtl()).thenReturn(1800L);
+        lenient().when(authProperties.getRefreshTokenTtl()).thenReturn(604800L);
         ReflectionTestUtils.setField(tokenService, "jwtSecret", JWT_SECRET);
-        ReflectionTestUtils.setField(tokenService, "accessTtl", 1800L);
-        ReflectionTestUtils.setField(tokenService, "refreshTtl", 604800L);
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 

@@ -1,5 +1,6 @@
 package com.mall.auth.service.impl;
 
+import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.service.CaptchaService;
 import com.mall.common.exception.CaptchaException;
 import com.wf.captcha.SpecCaptcha;
@@ -17,14 +18,12 @@ public class CaptchaServiceImpl implements CaptchaService {
     private static final String KEY_CAPTCHA = "mall:auth:captcha:";
     private static final String KEY_IP = "mall:auth:captcha:ip:";
 
-    private static final long CAPTCHA_TTL = 300;
-    private static final long IP_TTL = 86400;
-    private static final int IP_MAX_ATTEMPTS = 10;
-
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MallAuthConfigProperties authProperties;
 
-    public CaptchaServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+    public CaptchaServiceImpl(RedisTemplate<String, Object> redisTemplate, MallAuthConfigProperties authProperties) {
         this.redisTemplate = redisTemplate;
+        this.authProperties = authProperties;
     }
 
     @Override
@@ -41,7 +40,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         redisTemplate.opsForValue().set(
                 KEY_CAPTCHA + captchaKey,
                 text,
-                CAPTCHA_TTL,
+                authProperties.getSms().getCodeTtl(),
                 TimeUnit.SECONDS);
 
         Map<String, String> result = new HashMap<>();
@@ -58,7 +57,7 @@ public class CaptchaServiceImpl implements CaptchaService {
 
         String ipKey = KEY_IP + clientIp;
         Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
-        if (ipCount != null && ipCount >= IP_MAX_ATTEMPTS) {
+        if (ipCount != null && ipCount >= authProperties.getSms().getIpDailyLimit()) {
             throw new CaptchaException("A0241", "验证码尝试次数过多", "验证码尝试次数过多，请 24 小时后重试");
         }
 
@@ -80,7 +79,7 @@ public class CaptchaServiceImpl implements CaptchaService {
     private void incrementIpCount(String ipKey) {
         Long count = redisTemplate.opsForValue().increment(ipKey, 1L);
         if (count != null && count == 1) {
-            redisTemplate.expire(ipKey, IP_TTL, TimeUnit.SECONDS);
+            redisTemplate.expire(ipKey, authProperties.getCaptcha().getIpTtl(), TimeUnit.SECONDS);
         }
     }
 }
