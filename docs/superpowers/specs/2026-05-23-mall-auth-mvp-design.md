@@ -100,11 +100,22 @@ server/mall/mall-auth/
     └── infrastructure/
         ├── feign/
         │   └── RemoteUserAdapter.java   # Feign 调用封装
-        └── exception/
-            └── CaptchaException.java    # 验证码异常
+        └── exception/               # 占位保留，MVP 未启用
 ```
 
-### 3.3 mall-user 修改
+### 3.3 mall-common 新增
+
+```
+server/mall/mall-common/
+└── src/main/java/com/mall/common/
+    ├── handler/
+    │   └── MallExceptionHandler.java    # 全局异常处理器（CaptchaException/TokenException/FeignException + 兜底）
+    └── exception/
+        ├── CaptchaException.java       # 验证码异常（由 mall-auth CaptchaService 抛出）
+        └── TokenException.java         # Token 异常，携带 A0231（由 mall-auth TokenService 抛出）
+```
+
+### 3.4 mall-user 修改
 
 ```
 server/mall/mall-user/
@@ -509,7 +520,8 @@ mall-auth 和 mall-user 的 Application.java 均改为：
 
 | 文档                         | 更新内容                                   |
 | ---------------------------- | ------------------------------------------ |
-| `07_mall-auth详细设计.md`  | §13 MVP CAPTCHA 图片验证码                |
+| `06_mall-common公共模块设计.md` | §3 MallExceptionHandler 补充 TokenException/FeignException + 代码骨架更新 |
+| `07_mall-auth详细设计.md`  | §3.2 TokenServiceImpl 补充 TokenException 异常抛出 + errorCode A0231 |
 | `03_系统详细设计.md`       | §3.1.14~3.1.19 CAPTCHA 端点小节（待更新） |
 | `05_mall-api契约层设计.md` | Feign 接口签名 + MallResult 定义（待更新） |
 

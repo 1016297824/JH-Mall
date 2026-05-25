@@ -33,42 +33,44 @@
 | 2 | `server/mall/mall-api/src/main/java/com/mall/api/dto/MallUserDTO.java` | 用户数据传输对象 |
 | 3 | `server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteUserService.java` | 用户 Feign 契约（含内部请求类） |
 | 4 | `server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteAuthService.java` | 认证 Feign 契约（占位） |
-| 5 | `server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/exception/CaptchaException.java` | 验证码异常类 |
-| 6 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java` | 验证码响应（captchaKey + captchaImage） |
-| 7 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java` | Token 响应（accessToken/refreshToken/expiresIn） |
-| 8 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/TokenService.java` | Token 服务接口 |
-| 9 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/impl/TokenServiceImpl.java` | Token 服务实现（JWT + Redis） |
-| 10 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/CaptchaService.java` | 验证码服务接口 |
-| 11 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/impl/CaptchaServiceImpl.java` | 验证码服务实现（EasyCaptcha + Redis） |
-| 12 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaRegisterReq.java` | 注册请求 DTO |
-| 13 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaLoginReq.java` | 登录请求 DTO |
-| 14 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaResetPasswordReq.java` | 重置密码请求 DTO |
-| 15 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaChangePhoneReq.java` | 换绑手机请求 DTO |
-| 16 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaDeactivateReq.java` | 注销请求 DTO |
-| 17 | `server/mall/mall-auth/src/main/java/com/mall/auth/controller/CaptchaController.java` | CAPTCHA 6 端点 Controller |
-| 18 | `server/mall/mall-auth/src/main/java/com/mall/auth/controller/AuthController.java` | 13 端点骨架占位 Controller |
-| 19 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/AuthService.java` | 认证服务接口（仅签名） |
-| 20 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/DecryptService.java` | 解密服务接口（仅签名） |
-| 21 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/SmsService.java` | 短信服务接口（仅签名） |
-| 22 | `server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/feign/RemoteUserAdapter.java` | Feign 调用封装骨架 |
-| 23 | `server/mall/mall-user/src/main/java/com/mall/user/controller/api/RemoteUserInnerController.java` | mall-user 内部 Feign 入口 |
-| **24** | `server/mall/mall-common/pom.xml` | mall-common 模块 POM |
-| **25** | `server/mall/mall-common/src/main/java/com/mall/common/handler/MallExceptionHandler.java` | 全局异常处理器（CaptchaException + Exception 兜底） |
+| 5 | `server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java` | 验证码异常类 |
+| 6 | `server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java` | Token 异常类（A0231） |
+| 7 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java` | 验证码响应（captchaKey + captchaImage） |
+| 8 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java` | Token 响应（accessToken/refreshToken/expiresIn） |
+| 9 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/TokenService.java` | Token 服务接口 |
+| 10 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/impl/TokenServiceImpl.java` | Token 服务实现（JWT + Redis） |
+| 11 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/CaptchaService.java` | 验证码服务接口 |
+| 12 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/impl/CaptchaServiceImpl.java` | 验证码服务实现（EasyCaptcha + Redis） |
+| 13 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaRegisterReq.java` | 注册请求 DTO |
+| 14 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaLoginReq.java` | 登录请求 DTO |
+| 15 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaResetPasswordReq.java` | 重置密码请求 DTO |
+| 16 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaChangePhoneReq.java` | 换绑手机请求 DTO |
+| 17 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaDeactivateReq.java` | 注销请求 DTO |
+| 18 | `server/mall/mall-auth/src/main/java/com/mall/auth/controller/CaptchaController.java` | CAPTCHA 6 端点 Controller |
+| 19 | `server/mall/mall-auth/src/main/java/com/mall/auth/controller/AuthController.java` | 13 端点骨架占位 Controller |
+| 20 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/AuthService.java` | 认证服务接口（仅签名） |
+| 21 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/DecryptService.java` | 解密服务接口（仅签名） |
+| 22 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/SmsService.java` | 短信服务接口（仅签名） |
+| 23 | `server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/feign/RemoteUserAdapter.java` | Feign 调用封装骨架 |
+| 24 | `server/mall/mall-user/src/main/java/com/mall/user/controller/api/RemoteUserInnerController.java` | mall-user 内部 Feign 入口 |
+| **25** | `server/mall/mall-common/pom.xml` | mall-common 模块 POM |
+| **26** | `server/mall/mall-common/src/main/java/com/mall/common/handler/MallExceptionHandler.java` | 全局异常处理器（CaptchaException/TokenException/FeignException + 兜底） |
 
 ### 修改的文件
 
 | # | 文件路径 | 修改内容 |
 |---|---------|---------|
 | 26 | `server/mall/pom.xml` | 注册 `<module>mall-common</module>` |
-| 27 | `server/mall/mall-auth/pom.xml` | 加 easy-captcha + spring-security-crypto + jjwt 依赖 |
-| 28 | `server/mall/mall-auth/src/main/java/com/mall/auth/MallAuthApplication.java` | `@EnableFeignClients` + `"com.mall.api"` + `"com.mall.common"` |
-| 29 | `server/mall/mall-user/pom.xml` | 加 `mall-common` 依赖 |
-| 30 | `server/mall/mall-user/src/main/java/com/mall/user/MallUserApplication.java` | `@EnableFeignClients` + `"com.mall.api"` + `"com.mall.common"` |
-| 31 | `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMapper.java` | 追加 4 个 C 端方法 |
-| 32 | `server/mall/mall-user/src/main/java/com/mall/user/service/IMallUserService.java` | 追加 6 个 C 端方法 |
-| 33 | `server/mall/mall-user/src/main/java/com/mall/user/service/impl/MallUserServiceImpl.java` | 追加 6 个 C 端方法实现 |
-| 34 | `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMapper.xml` | 追加 4 个 SQL 片段 |
-| 35 | `server/mall/mall-product/order/payment/marketing/search/pom.xml` | 各加 `mall-common` 依赖 |
+| 27 | `server/mall/mall-common/pom.xml` | 加 `feign-core` 依赖（MallExceptionHandler 需要 `FeignException`） |
+| 28 | `server/mall/mall-auth/pom.xml` | 加 easy-captcha + spring-security-crypto + jjwt 依赖 |
+| 29 | `server/mall/mall-auth/src/main/java/com/mall/auth/MallAuthApplication.java` | `@EnableFeignClients` + `"com.mall.api"` + `"com.mall.common"` |
+| 30 | `server/mall/mall-user/pom.xml` | 加 `mall-common` 依赖 |
+| 31 | `server/mall/mall-user/src/main/java/com/mall/user/MallUserApplication.java` | `@EnableFeignClients` + `"com.mall.api"` + `"com.mall.common"` |
+| 32 | `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMapper.java` | 追加 4 个 C 端方法 |
+| 33 | `server/mall/mall-user/src/main/java/com/mall/user/service/IMallUserService.java` | 追加 6 个 C 端方法 |
+| 34 | `server/mall/mall-user/src/main/java/com/mall/user/service/impl/MallUserServiceImpl.java` | 追加 6 个 C 端方法实现 |
+| 35 | `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMapper.xml` | 追加 4 个 SQL 片段 |
+| 36 | `server/mall/mall-product/order/payment/marketing/search/pom.xml` | 各加 `mall-common` 依赖 |
 
 ---
 
@@ -83,8 +85,23 @@
 - Create: `server/mall/mall-common/src/main/java/com/mall/common/handler/MallExceptionHandler.java`
 
 **修改:**
+- `server/mall/mall-common/pom.xml` → 追加 `feign-core` 依赖（MallExceptionHandler 需要 `FeignException`）
+
+**修改:**
 - `server/mall/pom.xml` → `<module>mall-common</module>`（已在设计阶段完成）
 - 各业务模块 pom.xml → 加 `mall-common` 依赖（已在设计阶段完成）
+
+- [ ] **Step 0: mall-common/pom.xml 追加 feign-core 依赖（MallExceptionHandler 需要 FeignException）**
+
+在 `</dependencies>` 前插入：
+
+```xml
+        <!-- Feign Core（MallExceptionHandler 引用 FeignException）-->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+        </dependency>
+```
 
 - [ ] **Step 1: 在 MallAuthApplication 和 MallUserApplication 的 `@SpringBootApplication` 中加入 `"com.mall.common"` 扫描包**
 
@@ -101,7 +118,9 @@
 package com.mall.common.handler;
 
 import com.mall.api.dto.MallResult;
-import com.mall.auth.infrastructure.exception.CaptchaException;
+import com.mall.common.exception.CaptchaException;
+import com.mall.common.exception.TokenException;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -118,17 +137,23 @@ public class MallExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(MallExceptionHandler.class);
 
-    /**
-     * CaptchaException：精确匹配，返回 MallResult.error(errorCode, msg, userTip)
-     */
     @ExceptionHandler(CaptchaException.class)
     public MallResult<Void> handleCaptcha(CaptchaException e) {
         return MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
     }
 
-    /**
-     * @Validated 参数校验失败 → "A0401 请完整填写信息"
-     */
+    @ExceptionHandler(TokenException.class)
+    public MallResult<Void> handleToken(TokenException e) {
+        log.warn("Token 异常: {} - {}", e.getErrorCode(), e.getMessage());
+        return MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public MallResult<Void> handleFeign(FeignException e) {
+        log.error("Feign 调用异常: {}", e.getMessage());
+        return MallResult.error("B0001", "服务暂时不可用，请稍后重试");
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public MallResult<Void> handleValidation(MethodArgumentNotValidException e) {
         String msg = e.getBindingResult().getFieldError() != null
@@ -142,9 +167,6 @@ public class MallExceptionHandler {
         return MallResult.error("A0401", e.getMessage(), e.getMessage());
     }
 
-    /**
-     * 兜底：所有未捕获异常 → "B0001 系统繁忙，请稍后再试"
-     */
     @ExceptionHandler(Exception.class)
     public MallResult<Void> handleException(Exception e) {
         log.error("unhandled exception", e);
@@ -234,12 +256,17 @@ public class MallResult<T> {
 ```java
 package com.mall.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class MallUserDTO {
 
     private String id;
     private String phone;
     private String phoneHash;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
     private String nickname;
     private String avatar;
     private String email;
@@ -707,6 +734,7 @@ public class RemoteUserInnerController {
     private MallUserDTO toDTO(MallUser user) {
         MallUserDTO dto = new MallUserDTO();
         BeanUtils.copyProperties(user, dto);
+        dto.setPassword(null); // 不传输密码哈希
         return dto;
     }
 }
@@ -730,19 +758,22 @@ git commit -m "feat(mall-user): add RemoteUserInnerController for Feign access t
 
 ---
 
-### Task 6: mall-auth — 异常 + 响应 DTO + Redis Key 常量
+### Task 6: mall-common/mall-auth — 异常类 + 响应 DTO + Redis Key 常量
 
 **设计依据:** spec §3.2 包结构、§5.4 Redis Key、§11 错误码
 
+CaptchaException 和 TokenException 放 mall-common（避免循环依赖），CaptchaResponse、TokenResponse 放 mall-auth。
+
 **文件:**
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/exception/CaptchaException.java`
+- Create: `server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java`
+- Create: `server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java`
 - Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java`
 - Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java`
 
-- [ ] **Step 1: 创建 CaptchaException.java**
+- [ ] **Step 1: 创建 CaptchaException.java（mall-common）**
 
 ```java
-package com.mall.auth.infrastructure.exception;
+package com.mall.common.exception;
 
 public class CaptchaException extends RuntimeException {
 
@@ -766,7 +797,34 @@ public class CaptchaException extends RuntimeException {
 }
 ```
 
-- [ ] **Step 2: 创建 CaptchaResponse.java**
+- [ ] **Step 1b: 创建 TokenException.java（mall-common）**
+
+```java
+package com.mall.common.exception;
+
+public class TokenException extends RuntimeException {
+
+    private final String errorCode;
+    private final String userTip;
+
+    public TokenException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+        this.userTip = message;
+    }
+
+    public TokenException(String errorCode, String message, String userTip) {
+        super(message);
+        this.errorCode = errorCode;
+        this.userTip = userTip;
+    }
+
+    public String getErrorCode() { return errorCode; }
+    public String getUserTip() { return userTip; }
+}
+```
+
+- [ ] **Step 2: 创建 CaptchaResponse.java（mall-auth）**
 
 ```java
 package com.mall.auth.dto.response;
@@ -790,7 +848,7 @@ public class CaptchaResponse {
 }
 ```
 
-- [ ] **Step 3: 创建 TokenResponse.java**
+- [ ] **Step 3: 创建 TokenResponse.java（mall-auth）**
 
 ```java
 package com.mall.auth.dto.response;
@@ -821,6 +879,9 @@ public class TokenResponse {
 - [ ] **Step 4: 编译验证**
 
 ```bash
+# 先编译 mall-common（含 CaptchaException + TokenException）
+mvn clean install -f server/mall/pom.xml -pl mall-common -am -DskipTests
+# 再编译 mall-auth
 mvn clean install -f server/mall/pom.xml -pl mall-auth -am -DskipTests
 ```
 Expected: BUILD SUCCESS
@@ -828,8 +889,8 @@ Expected: BUILD SUCCESS
 - [ ] **Step 5: 提交**
 
 ```bash
-git add server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/exception/CaptchaException.java server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java
-git commit -m "feat(mall-auth): add CaptchaException, CaptchaResponse, TokenResponse"
+git add server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java
+git commit -m "feat(mall-common): add CaptchaException and TokenException; feat(mall-auth): add CaptchaResponse and TokenResponse"
 ```
 
 ---
@@ -848,7 +909,7 @@ git commit -m "feat(mall-auth): add CaptchaException, CaptchaResponse, TokenResp
 - `redisCache.setCacheObject(key, value, timeout, TimeUnit)` — 带 TTL
 - `redisCache.getCacheObject(key)` — 返回 Object
 - `redisCache.deleteObject(key)` — 删除
-- `redisCache.keys(pattern)` — 按模式查找 key（生产慎用，但 MVP 可接受）
+- `redisCache.scan(pattern)` — 使用 SCAN 非阻塞迭代（替代 KEYS）
 
 **文件:**
 - Create: `server/mall/mall-auth/src/main/java/com/mall/auth/service/TokenService.java`
@@ -882,22 +943,26 @@ package com.mall.auth.service.impl;
 
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.TokenService;
+import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -956,25 +1021,23 @@ public class TokenServiceImpl implements TokenService {
     public String verify(String accessToken) {
         Claims claims = parseJwt(accessToken);
         if (claims == null) {
-            throw new RuntimeException("token 无效");
+            throw new TokenException("A0231", "token 无效或已过期");
         }
         if (!"access".equals(claims.get("type"))) {
-            throw new RuntimeException("token 类型错误");
+            throw new TokenException("A0231", "token 类型错误");
         }
 
         String jti = claims.getId();
         String userId = claims.get("userId", String.class);
 
-        // 黑名单检查
         Boolean blacklisted = redisTemplate.hasKey(KEY_BLACKLIST + jti);
         if (Boolean.TRUE.equals(blacklisted)) {
-            throw new RuntimeException("token 已被撤销");
+            throw new TokenException("A0231", "token 已被撤销");
         }
 
-        // session 存在性检查
         Boolean sessionExists = redisTemplate.hasKey(KEY_SESSION + userId + ":" + jti);
         if (!Boolean.TRUE.equals(sessionExists)) {
-            throw new RuntimeException("token 会话不存在或已过期");
+            throw new TokenException("A0231", "token 会话不存在或已过期");
         }
 
         return userId;
@@ -984,35 +1047,29 @@ public class TokenServiceImpl implements TokenService {
     public TokenResponse refresh(String refreshToken) {
         Claims claims = parseJwt(refreshToken);
         if (claims == null) {
-            throw new RuntimeException("refreshToken 无效");
+            throw new TokenException("A0231", "refreshToken 无效或已过期");
         }
         if (!"refresh".equals(claims.get("type"))) {
-            throw new RuntimeException("refreshToken 类型错误");
+            throw new TokenException("A0231", "refreshToken 类型错误");
         }
 
         String jti = claims.getId();
         String userId = claims.get("userId", String.class);
 
-        // 黑名单检查
         Boolean blacklisted = redisTemplate.hasKey(KEY_BLACKLIST + jti);
         if (Boolean.TRUE.equals(blacklisted)) {
-            throw new RuntimeException("refreshToken 已被撤销");
+            throw new TokenException("A0231", "refreshToken 已被撤销");
         }
 
-        // refresh 映射存在性
         String storedUserId = (String) redisTemplate.opsForValue().get(KEY_REFRESH + jti);
         if (storedUserId == null) {
-            throw new RuntimeException("refreshToken 已过期");
+            throw new TokenException("A0231", "refreshToken 已过期");
         }
 
-        // 撤销旧 token
         long ttl = getRemainingTtl(KEY_REFRESH + jti);
         redisTemplate.opsForValue().set(KEY_BLACKLIST + jti, "1", ttl, TimeUnit.SECONDS);
         redisTemplate.delete(KEY_REFRESH + jti);
-        // 旧 access 对应的 session 也会被删除（通过 revokeAllSessionJtis）
-        revokeUserSessionByRefreshJti(userId, jti);
 
-        // 签发新 token 对
         return issue(userId);
     }
 
@@ -1033,16 +1090,24 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public void revokeAll(String userId) {
-        Set<String> sessionKeys = redisTemplate.keys(KEY_SESSION + userId + ":*");
-        if (sessionKeys != null) {
-            for (String key : sessionKeys) {
+        String pattern = KEY_SESSION + userId + ":*";
+        List<String> keysToDelete = new ArrayList<>();
+        try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection()
+                .scan(ScanOptions.scanOptions().match(pattern).count(100).build())) {
+            while (cursor.hasNext()) {
+                String key = new String(cursor.next(), StandardCharsets.UTF_8);
+                keysToDelete.add(key);
                 String jti = key.substring(key.lastIndexOf(":") + 1);
                 long ttl = getRemainingTtl(key);
                 if (ttl > 0) {
                     redisTemplate.opsForValue().set(KEY_BLACKLIST + jti, "1", ttl, TimeUnit.SECONDS);
                 }
             }
-            redisTemplate.delete(sessionKeys);
+        } catch (Exception e) {
+            log.error("SCAN 查找用户 {} session 失败", userId, e);
+        }
+        if (!keysToDelete.isEmpty()) {
+            redisTemplate.delete(keysToDelete);
         }
     }
 
@@ -1085,11 +1150,6 @@ public class TokenServiceImpl implements TokenService {
         return ttl != null ? ttl : 0;
     }
 
-    private void revokeUserSessionByRefreshJti(String userId, String refreshJti) {
-        // 简化实现：按 refreshJti 无法直接找到对应的 access session
-        // 这里不精确删除，依赖 access token 自然过期
-        // 后续可通过存 refresh→access 映射优化
-    }
 }
 ```
 
@@ -1144,7 +1204,7 @@ public interface CaptchaService {
 ```java
 package com.mall.auth.service.impl;
 
-import com.mall.auth.infrastructure.exception.CaptchaException;
+import com.mall.common.exception.CaptchaException;
 import com.mall.auth.service.CaptchaService;
 import com.wf.captcha.SpecCaptcha;
 import java.util.HashMap;
@@ -1175,11 +1235,11 @@ public class CaptchaServiceImpl implements CaptchaService {
         SpecCaptcha captcha = new SpecCaptcha(130, 48, 4);
         String text = captcha.text().toLowerCase();
 
-        // 排除 0/O/1/I（替换为随机字符）
-        text = text.replace('0', '2').replace('o', 'p')
-                .replace('1', '3').replace('i', 'j');
-        // 重新生成 base64（EasyCaptcha 的 toBase64 基于已生成的图片，更换文本不影响已生成的 base64 图片）
-        // 实际图片中字符已固定，我们只影响 Redis 中存储的预期值
+        // 重试直到生成不含歧义字符 0/O/1/I 的文本，避免用户混淆
+        while (text.contains("0") || text.contains("o") || text.contains("1") || text.contains("i")) {
+            captcha = new SpecCaptcha(130, 48, 4);
+            text = captcha.text().toLowerCase();
+        }
         String captchaKey = UUID.randomUUID().toString().replace("-", "");
 
         redisTemplate.opsForValue().set(
@@ -1432,7 +1492,6 @@ import com.mall.auth.dto.request.CaptchaRegisterReq;
 import com.mall.auth.dto.request.CaptchaResetPasswordReq;
 import com.mall.auth.dto.response.CaptchaResponse;
 import com.mall.auth.dto.response.TokenResponse;
-import com.mall.auth.infrastructure.exception.CaptchaException;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -2032,16 +2091,24 @@ git commit -m "feat(mall-auth): add AuthController stub, AuthService/DecryptServ
 - `userId`: String 类型（Task 2 MallUserDTO → Task 7 TokenService → Task 9 CaptchaController），一致 ✅
 - `MallResult<T>`: 所有 Controller 返回类型统一 ✅
 - `RemoteUserService.RegisterRequest`: Task 2 定义内部类 → Task 5 引用 → Task 9 构造使用，一致 ✅
-- `CaptchaException`: Task 6 定义 → Task 8 CaptchaServiceImpl 抛出 → Task 1 MallExceptionHandler 捕获转 MallResult ✅
+- `CaptchaException`: Task 6（mall-common）定义 → Task 8 CaptchaServiceImpl 抛出 → Task 1 MallExceptionHandler 捕获转 MallResult ✅
+- `TokenException`: Task 6（mall-common）定义 → Task 7 TokenServiceImpl 抛出 → Task 1 MallExceptionHandler 捕获转 MallResult 带 A0231 ✅
 - `CaptchaResponse`: Task 6 定义 → Task 9 CaptchaController 返回，一致 ✅
 - `TokenResponse`: Task 6 定义 → Task 7 TokenService 返回 → Task 9 CaptchaController 返回，一致 ✅
 - `BCryptPasswordEncoder`: Task 9 直接 new，12 rounds，一致 ✅
 - `DigestUtils.sha256Hex`: `org.apache.commons.codec.digest.DigestUtils`，Task 4 Service 和 Task 9 Controller 均使用，一致 ✅
 - `@Valid` 参数校验：DTO 使用 `@NotBlank/@Size/@NotNull`（Task 6）→ Controller 使用 `@Valid @RequestBody`（Task 9）→ MallExceptionHandler 处理 `MethodArgumentNotValidException`（Task 1），链路完整 ✅
+- `MallUserDTO.password`: Task 2 `@JsonProperty(WRITE_ONLY)` + Task 5 `toDTO()` 置空，防泄露 ✅
 
 ### 4. 全局异常处理器
 
-MallExceptionHandler 位于 Task 1（mall-common），`@Order(HIGHEST_PRECEDENCE)` 优先于若依 GlobalExceptionHandler。CaptchaException 由精确类型匹配捕获 → `MallResult.error(errorCode, msg, userTip)`。兜底 Exception → `MallResult.error("B0001")`。不再需要各 Controller 单独 try-catch。
+MallExceptionHandler 位于 Task 1（mall-common），`@Order(HIGHEST_PRECEDENCE)` 优先于若依 GlobalExceptionHandler。覆盖：
+- `CaptchaException` → 精确匹配，返回带错误码的 `MallResult`
+- `TokenException` → 精确匹配，返回 A0231 `MallResult`
+- `FeignException` → 友好提示"服务暂时不可用"
+- 参数校验异常 → A0401
+- 兜底 Exception → `B0001`
+不再需要各 Controller 单独 try-catch。
 
 ---
 

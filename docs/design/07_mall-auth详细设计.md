@@ -196,16 +196,19 @@ server/mall/mall-auth/
 
 **verify(accessToken)**：
 
-- ①JWT 签名校验 + 过期校验
-- ②Redis 黑名单检查：key `mall:auth:blacklist:{jti}` 存在 → token 已注销 `A0231`
-- ③Redis session 存在性检查：key `mall:auth:session:{userId}:{jti}` 存在 → token 有效
-- ④返回 `(userId, device)`
+- ①JWT 签名校验 + 过期校验 → 失败抛 `TokenException("A0231", "token 无效或已过期")`
+- ②Redis 黑名单检查：key `mall:auth:blacklist:{jti}` 存在 → 抛 `TokenException("A0231", "token 已被撤销")`
+- ③Redis session 存在性检查：key `mall:auth:session:{userId}:{jti}` 不存在 → 抛 `TokenException("A0231", "token 会话不存在或已过期")`
+- ④返回 `userId`
 
 **refresh(refreshToken)**：
 
-- ①校验 refreshToken 有效性
-- ②一次性轮换：旧 refreshToken jti 加入黑名单（TTL 同原 exp） + 删除旧 session + 签发新 token 对
-- ③旧 accessToken 保留 1h 宽限期（黑名单不过期，仍在有效期的旧 accessToken 仍可用）
+- ①校验 refreshToken 有效性（同 verify 逻辑）→ 失败抛 `TokenException("A0231", ...)`
+- ②校验 `type="refresh"` → 否抛 `TokenException("A0231", "refreshToken 类型错误")`
+- ③黑名单检查 → 已撤销抛 `TokenException("A0231", "refreshToken 已被撤销")`
+- ④Redis refresh 映射存在性 → 不存在抛 `TokenException("A0231", "refreshToken 已过期")`
+- ⑤一次性轮换：旧 refreshToken jti 加入黑名单（TTL 同原 exp） + 删除旧 session
+- ⑥签发新 token 对
 
 **revoke(accessToken)**：jti 加入黑名单 `SETEX mall:auth:blacklist:{jti} {exp-now} "logout"` → 删除 session
 
