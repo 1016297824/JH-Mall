@@ -10,10 +10,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * mall-user 用户服务
  * 端口：9301
  */
-@EnableFeignClients(basePackages = "com.ruoyi")
+@EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.user.mapper")
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.mall.user", "com.mall.common"})
 public class MallUserApplication {
 
     public static void main(String[] args) {

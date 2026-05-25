@@ -1,0 +1,86 @@
+package com.mall.auth.service.impl;
+
+import com.mall.auth.service.CaptchaService;
+import com.mall.common.exception.CaptchaException;
+import com.wf.captcha.SpecCaptcha;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+@Service
+public class CaptchaServiceImpl implements CaptchaService {
+
+    private static final String KEY_CAPTCHA = "mall:auth:captcha:";
+    private static final String KEY_IP = "mall:auth:captcha:ip:";
+
+    private static final long CAPTCHA_TTL = 300;
+    private static final long IP_TTL = 86400;
+    private static final int IP_MAX_ATTEMPTS = 10;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public CaptchaServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+    @Override
+    public Map<String, String> generate() {
+        SpecCaptcha captcha = new SpecCaptcha(130, 48, 4);
+        String text = captcha.text().toLowerCase();
+
+        while (text.contains("0") || text.contains("o") || text.contains("1") || text.contains("i")) {
+            captcha = new SpecCaptcha(130, 48, 4);
+            text = captcha.text().toLowerCase();
+        }
+        String captchaKey = UUID.randomUUID().toString().replace("-", "");
+
+        redisTemplate.opsForValue().set(
+                KEY_CAPTCHA + captchaKey,
+                text,
+                CAPTCHA_TTL,
+                TimeUnit.SECONDS);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("captchaKey", captchaKey);
+        result.put("captchaImage", captcha.toBase64());
+        return result;
+    }
+
+    @Override
+    public void verify(String captchaKey, String captchaCode, String clientIp) {
+        if (captchaKey == null || captchaCode == null || captchaKey.isEmpty() || captchaCode.isEmpty()) {
+            throw new CaptchaException("A0401", "请完整填写信息");
+        }
+
+        String ipKey = KEY_IP + clientIp;
+        Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
+        if (ipCount != null && ipCount >= IP_MAX_ATTEMPTS) {
+            throw new CaptchaException("A0241", "验证码尝试次数过多", "验证码尝试次数过多，请 24 小时后重试");
+        }
+
+        String redisKey = KEY_CAPTCHA + captchaKey;
+        String storedCode = (String) redisTemplate.opsForValue().get(redisKey);
+        if (storedCode == null) {
+            incrementIpCount(ipKey);
+            throw new CaptchaException("A0132", "验证码已过期", "验证码已过期，请重新获取");
+        }
+
+        if (!storedCode.equalsIgnoreCase(captchaCode)) {
+            incrementIpCount(ipKey);
+            throw new CaptchaException("A0131", "验证码错误", "验证码错误，请重新输入");
+        }
+
+        redisTemplate.delete(redisKey);
+    }
+
+    private void incrementIpCount(String ipKey) {
+        Long count = redisTemplate.opsForValue().increment(ipKey, 1L);
+        if (count != null && count == 1) {
+            redisTemplate.expire(ipKey, IP_TTL, TimeUnit.SECONDS);
+        }
+    }
+}

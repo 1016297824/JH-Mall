@@ -58,4 +58,39 @@ public interface IMallUserService
      * @return 结果
      */
     int deleteMallUserById(String id);
+
+    /**
+     * 按 phone_hash 查询用户
+     */
+    MallUser selectByPhoneHash(String phoneHash);
+
+    /**
+     * 按手机号查询用户（SHA256 哈希后查 phone_hash）
+     */
+    MallUser selectByPhone(String phone);
+
+    /**
+     * 按微信 OpenID 查询用户（MVP 返回 null）
+     */
+    MallUser selectByWechatOpenId(String openId);
+
+    /**
+     * 手机号注册用户，返回用户 ID
+     */
+    String registerByPhone(String phone, String phoneHash, String passwordHash);
+
+    /**
+     * 更新密码
+     */
+    int updatePasswordById(String id, String newPasswordHash);
+
+    /**
+     * 更新手机号
+     */
+    int updatePhoneById(String id, String newPhone, String newPhoneHash);
+
+    /**
+     * 更新用户状态
+     */
+    int updateUserStatusById(String id, String userStatus);
 }

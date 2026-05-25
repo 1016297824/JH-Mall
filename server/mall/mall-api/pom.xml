@@ -13,6 +13,16 @@
 
     <description>JH-Store 共享契约层：Feign 接口 + DTO + 枚举</description>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- RuoYi Common Core（复用若依返回结构、异常、基础工具） -->
         <dependency>
@@ -30,6 +40,13 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-system</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Test（JUnit 5 + AssertJ + Mockito） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

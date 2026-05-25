@@ -2,6 +2,7 @@ package com.mall.user.mapper;
 
 import java.util.List;
 import com.mall.user.domain.MallUser;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 用户账号Mapper接口
@@ -58,4 +59,24 @@ public interface MallUserMapper
      * @return 结果
      */
     int deleteMallUserByIds(String[] ids);
+
+    /**
+     * 按 phone_hash 查询用户
+     */
+    MallUser selectByPhoneHash(@Param("phoneHash") String phoneHash);
+
+    /**
+     * 更新密码
+     */
+    int updatePassword(@Param("id") String id, @Param("password") String password);
+
+    /**
+     * 更新手机号
+     */
+    int updatePhone(@Param("id") String id, @Param("phone") String phone, @Param("phoneHash") String phoneHash);
+
+    /**
+     * 更新用户状态
+     */
+    int updateUserStatus(@Param("id") String id, @Param("userStatus") String userStatus);
 }

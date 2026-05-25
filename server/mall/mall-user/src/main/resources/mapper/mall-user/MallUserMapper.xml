@@ -173,4 +173,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <select id="selectByPhoneHash" parameterType="String" resultMap="MallUserResult">
+        <include refid="selectMallUserVo"/>
+        where phone_hash = #{phoneHash} limit 1
+    </select>
+
+    <update id="updatePassword">
+        update mall_user set password = #{password}, update_time = now() where id = #{id}
+    </update>
+
+    <update id="updatePhone">
+        update mall_user set phone = #{phone}, phone_hash = #{phoneHash}, update_time = now() where id = #{id}
+    </update>
+
+    <update id="updateUserStatus">
+        update mall_user set user_status = #{userStatus}, update_time = now() where id = #{id}
+    </update>
 </mapper>
