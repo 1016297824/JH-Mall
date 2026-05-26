@@ -395,6 +395,7 @@ mall:
 ```
 
 > 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
+> 配置项通过 `MallProductConfigProperties`（`@ConfigurationProperties(prefix = "mall.product")` + `@RefreshScope`）注入，各 Service/Controller 通过构造注入获取，禁止使用 `@Value`。
 
 ### 8.2 本地配置文件 `bootstrap.yml`
 

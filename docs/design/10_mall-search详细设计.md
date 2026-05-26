@@ -306,6 +306,7 @@ mall:
 ```
 
 > 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新（标 * 的需重启生效）。
+> 配置项通过 `MallSearchConfigProperties`（`@ConfigurationProperties(prefix = "mall.search")` + `@RefreshScope`）注入，各 Service/Controller 通过构造注入获取，禁止使用 `@Value`。
 
 ### 6.2 本地配置文件 `bootstrap.yml`
 
@@ -338,9 +339,9 @@ spring:
 
 | 配置项                                   | 默认值             | 说明                      |
 | ---------------------------------------- | ------------------ | ------------------------- |
-| `mall.search.es.hosts`                 | `localhost:9200` | ES 集群地址               |
-| `mall.search.es.shards`                | 3                  | 索引分片数（生产）        |
-| `mall.search.es.replicas`              | 1                  | 索引副本数（生产）        |
+| `mall.search.es.hosts` *                 | `localhost:9200` | ES 集群地址               |
+| `mall.search.es.shards` *                | 3                  | 索引分片数（生产）        |
+| `mall.search.es.replicas` *              | 1                  | 索引副本数（生产）        |
 | `mall.search.query.timeout`            | 2000ms             | 搜索超时                  |
 | `mall.search.page.max-size`            | 60                 | 单页最大条数              |
 | `mall.search.page.max-depth`           | 10000              | 分页最大深度（from+size） |
