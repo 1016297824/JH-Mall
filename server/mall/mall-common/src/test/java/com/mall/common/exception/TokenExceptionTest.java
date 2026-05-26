@@ -1,29 +1,30 @@
 package com.mall.common.exception;
 
+import com.mall.common.enums.ErrorCode;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TokenExceptionTest {
 
     @Test
-    void shouldCreateWithTwoArgConstructor() {
-        TokenException ex = new TokenException("A0201", "Token无效");
-        assertEquals("A0201", ex.getErrorCode());
-        assertEquals("Token无效", ex.getMessage());
-        assertEquals("Token无效", ex.getUserTip());
+    void shouldCreateWithErrorCode() {
+        TokenException ex = new TokenException(ErrorCode.TOKEN_INVALID);
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), ex.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getMessage(), ex.getMessage());
+        assertEquals(ErrorCode.TOKEN_INVALID.getUserTip(), ex.getUserTip());
     }
 
     @Test
-    void shouldCreateWithThreeArgConstructor() {
-        TokenException ex = new TokenException("A0201", "Token已过期", "请重新登录");
-        assertEquals("A0201", ex.getErrorCode());
-        assertEquals("Token已过期", ex.getMessage());
-        assertEquals("请重新登录", ex.getUserTip());
+    void shouldCreateWithExpiredToken() {
+        TokenException ex = new TokenException(ErrorCode.TOKEN_INVALID);
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), ex.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getMessage(), ex.getMessage());
+        assertEquals(ErrorCode.TOKEN_INVALID.getUserTip(), ex.getUserTip());
     }
 
     @Test
     void shouldBeRuntimeException() {
-        TokenException ex = new TokenException("A0201", "Token无效");
+        TokenException ex = new TokenException(ErrorCode.TOKEN_INVALID);
         assertInstanceOf(RuntimeException.class, ex);
     }
 }

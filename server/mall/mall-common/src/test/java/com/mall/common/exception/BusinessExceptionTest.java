@@ -1,29 +1,30 @@
 package com.mall.common.exception;
 
+import com.mall.common.enums.ErrorCode;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BusinessExceptionTest {
 
     @Test
-    void shouldCreateWithTwoArgConstructor() {
-        BusinessException ex = new BusinessException("A0101", "未同意隐私协议");
-        assertEquals("A0101", ex.getErrorCode());
-        assertEquals("未同意隐私协议", ex.getMessage());
-        assertEquals("未同意隐私协议", ex.getUserTip());
+    void shouldCreateWithErrorCode() {
+        BusinessException ex = new BusinessException(ErrorCode.PRIVACY_NOT_AGREED);
+        assertEquals(ErrorCode.PRIVACY_NOT_AGREED.getCode(), ex.getErrorCode());
+        assertEquals(ErrorCode.PRIVACY_NOT_AGREED.getMessage(), ex.getMessage());
+        assertEquals(ErrorCode.PRIVACY_NOT_AGREED.getUserTip(), ex.getUserTip());
     }
 
     @Test
-    void shouldCreateWithThreeArgConstructor() {
-        BusinessException ex = new BusinessException("A0202", "账户已被冻结", "您的账户已被冻结，请联系客服");
-        assertEquals("A0202", ex.getErrorCode());
-        assertEquals("账户已被冻结", ex.getMessage());
-        assertEquals("您的账户已被冻结，请联系客服", ex.getUserTip());
+    void shouldCreateWithThreeDifferentParams() {
+        BusinessException ex = new BusinessException(ErrorCode.ACCOUNT_FROZEN);
+        assertEquals(ErrorCode.ACCOUNT_FROZEN.getCode(), ex.getErrorCode());
+        assertEquals(ErrorCode.ACCOUNT_FROZEN.getMessage(), ex.getMessage());
+        assertEquals(ErrorCode.ACCOUNT_FROZEN.getUserTip(), ex.getUserTip());
     }
 
     @Test
     void shouldBeRuntimeException() {
-        BusinessException ex = new BusinessException("A0101", "未同意隐私协议");
+        BusinessException ex = new BusinessException(ErrorCode.PRIVACY_NOT_AGREED);
         assertInstanceOf(RuntimeException.class, ex);
     }
 }

@@ -13,6 +13,7 @@ import com.mall.auth.dto.response.CaptchaResponse;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.common.exception.CaptchaException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,14 +77,14 @@ public class CaptchaController {
         captchaService.verify(req.getCaptchaKey(), req.getCaptchaCode(), clientIp);
 
         if (!Boolean.TRUE.equals(req.getIsPrivacyAgreed())) {
-            throw new BusinessException("A0101", "请同意隐私协议", "请同意隐私协议");
+            throw new BusinessException(ErrorCode.PRIVACY_NOT_AGREED);
         }
 
         validatePassword(req.getPassword());
 
         MallUserDTO existing = remoteUserService.findByPhone(req.getPhone());
         if (existing != null) {
-            throw new BusinessException("A0151", "手机号已被注册", "手机号已被注册");
+            throw new BusinessException(ErrorCode.PHONE_EXISTS);
         }
 
         String passwordHash = passwordEncoder.encode(req.getPassword());
@@ -108,27 +109,26 @@ public class CaptchaController {
 
         MallUserDTO user = remoteUserService.findByPhone(req.getPhone());
         if (user == null) {
-            throw new BusinessException("A0201", "账户不存在", "账户不存在");
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
         if (String.valueOf(UserStatusEnum.FROZEN.getCode()).equals(user.getUserStatus())) {
-            throw new BusinessException("A0202", "账户已被冻结", "账户已被冻结");
+            throw new BusinessException(ErrorCode.ACCOUNT_FROZEN);
         }
         if (String.valueOf(UserStatusEnum.DELETED.getCode()).equals(user.getUserStatus())) {
-            throw new BusinessException("A0203", "账户已注销", "账户已注销");
+            throw new BusinessException(ErrorCode.ACCOUNT_DELETED);
         }
 
         String pwdErrKey = CacheConstants.Auth.PWD_ERR + user.getId();
         Object errCountObj = redisTemplate.opsForValue().get(pwdErrKey);
         int errCount = errCountObj instanceof Number ? ((Number) errCountObj).intValue() : 0;
         if (errCount >= authProperties.getPwdErrLimit()) {
-            throw new BusinessException("A0211", "密码错误次数过多",
-                    "密码错误次数过多，请30分钟后重试");
+            throw new BusinessException(ErrorCode.PASSWORD_LOCKED);
         }
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             incrementPwdErrCount(pwdErrKey);
-            throw new BusinessException("A0210", "密码错误", "密码错误");
+            throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
 
         redisTemplate.delete(pwdErrKey);
@@ -144,7 +144,7 @@ public class CaptchaController {
 
         MallUserDTO user = remoteUserService.findByPhone(req.getPhone());
         if (user == null) {
-            throw new BusinessException("A0201", "账户不存在", "账户不存在");
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
         validatePassword(req.getNewPassword());
@@ -163,16 +163,16 @@ public class CaptchaController {
     public MallResult<Void> changePhone(@Valid @RequestBody CaptchaChangePhoneReq req) {
         MallUserDTO user = remoteUserService.findByPhone(req.getOldPhone());
         if (user == null) {
-            throw new BusinessException("A0201", "账户不存在", "账户不存在");
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new BusinessException("A0210", "密码错误", "密码错误");
+            throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
 
         MallUserDTO newPhoneUser = remoteUserService.findByPhone(req.getNewPhone());
         if (newPhoneUser != null) {
-            throw new BusinessException("A0151", "手机号已被注册", "手机号已被注册");
+            throw new BusinessException(ErrorCode.PHONE_EXISTS);
         }
 
         String newPhoneHash = sha256(req.getNewPhone());
@@ -189,11 +189,11 @@ public class CaptchaController {
     public MallResult<Void> deactivateAccount(@Valid @RequestBody CaptchaDeactivateReq req) {
         MallUserDTO user = remoteUserService.findByPhone(req.getPhone());
         if (user == null) {
-            throw new BusinessException("A0201", "账户不存在", "账户不存在");
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new BusinessException("A0210", "密码错误", "密码错误");
+            throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
 
         remoteUserService.deactivateAccount(user.getId());
@@ -204,8 +204,7 @@ public class CaptchaController {
 
     private void validatePassword(String password) {
         if (password.length() < 8 || password.length() > 32 || !PASSWORD_PATTERN.matcher(password).matches()) {
-            throw new BusinessException("A0121", "密码需8~32位且包含字母和数字",
-                    "密码需8~32位且包含字母和数字");
+            throw new BusinessException(ErrorCode.PASSWORD_WEAK);
         }
     }
 

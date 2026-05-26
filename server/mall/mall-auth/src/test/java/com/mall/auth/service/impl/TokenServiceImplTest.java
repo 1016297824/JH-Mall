@@ -2,6 +2,7 @@ package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.dto.response.TokenResponse;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -81,7 +82,7 @@ class TokenServiceImplTest {
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.verify(response.getAccessToken()));
-        assertEquals("A0231", exception.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), exception.getErrorCode());
     }
 
     @Test
@@ -100,7 +101,7 @@ class TokenServiceImplTest {
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.verify(expiredToken));
-        assertEquals("A0231", exception.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), exception.getErrorCode());
     }
 
     @Test
@@ -112,7 +113,7 @@ class TokenServiceImplTest {
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.verify(response.getAccessToken()));
-        assertEquals("A0231", exception.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), exception.getErrorCode());
     }
 
     @Test
@@ -139,7 +140,7 @@ class TokenServiceImplTest {
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.refresh(response.getAccessToken()));
-        assertEquals("A0231", exception.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), exception.getErrorCode());
     }
 
     @Test
@@ -150,7 +151,7 @@ class TokenServiceImplTest {
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.refresh(response.getRefreshToken()));
-        assertEquals("A0231", exception.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), exception.getErrorCode());
     }
 
     @Test
@@ -162,7 +163,7 @@ class TokenServiceImplTest {
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.refresh(response.getRefreshToken()));
-        assertEquals("A0231", exception.getErrorCode());
+        assertEquals(ErrorCode.TOKEN_INVALID.getCode(), exception.getErrorCode());
     }
 
     @Test

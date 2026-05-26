@@ -3,6 +3,7 @@ package com.mall.auth.service.impl;
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.service.CaptchaService;
 import com.mall.common.constant.CacheConstants;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.CaptchaException;
 import com.wf.captcha.SpecCaptcha;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -50,25 +51,25 @@ public class CaptchaServiceImpl implements CaptchaService {
     @Override
     public void verify(String captchaKey, String captchaCode, String clientIp) {
         if (captchaKey == null || captchaCode == null || captchaKey.isEmpty() || captchaCode.isEmpty()) {
-            throw new CaptchaException("A0401", "请完整填写信息");
+            throw new CaptchaException(ErrorCode.PARAM_MISSING);
         }
 
         String ipKey = CacheConstants.Auth.CAPTCHA_IP + clientIp;
         Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
         if (ipCount != null && ipCount >= authProperties.getSms().getIpDailyLimit()) {
-            throw new CaptchaException("A0241", "验证码尝试次数过多", "验证码尝试次数过多，请 24 小时后重试");
+            throw new CaptchaException(ErrorCode.CAPTCHA_RETRY_LIMIT);
         }
 
         String redisKey = CacheConstants.Auth.CAPTCHA + captchaKey;
         String storedCode = (String) redisTemplate.opsForValue().get(redisKey);
         if (storedCode == null) {
             incrementIpCount(ipKey);
-            throw new CaptchaException("A0132", "验证码已过期", "验证码已过期，请重新获取");
+            throw new CaptchaException(ErrorCode.CAPTCHA_EXPIRED);
         }
 
         if (!storedCode.equalsIgnoreCase(captchaCode)) {
             incrementIpCount(ipKey);
-            throw new CaptchaException("A0131", "验证码错误", "验证码错误，请重新输入");
+            throw new CaptchaException(ErrorCode.CAPTCHA_WRONG);
         }
 
         redisTemplate.delete(redisKey);

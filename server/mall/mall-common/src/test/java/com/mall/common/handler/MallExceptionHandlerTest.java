@@ -1,6 +1,7 @@
 package com.mall.common.handler;
 
 import com.mall.common.dto.MallResult;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.common.exception.CaptchaException;
 import com.mall.common.exception.TokenException;
@@ -32,17 +33,17 @@ class MallExceptionHandlerTest {
     static class TestController {
         @GetMapping("/test/captcha")
         public void throwCaptcha() {
-            throw new CaptchaException("A0001", "验证码错误", "请重新输入验证码");
+            throw new CaptchaException(ErrorCode.CAPTCHA_VERIFY_ERROR);
         }
 
         @GetMapping("/test/token")
         public void throwToken() {
-            throw new TokenException("A0201", "Token无效", "请重新登录");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
         @GetMapping("/test/business")
         public void throwBusiness() {
-            throw new BusinessException("A0101", "未同意隐私协议", "请同意隐私协议");
+            throw new BusinessException(ErrorCode.PRIVACY_NOT_AGREED);
         }
 
         @GetMapping("/test/exception")
@@ -55,7 +56,7 @@ class MallExceptionHandlerTest {
     void shouldReturnCaptchaErrorWhenCaptchaExceptionThrown() throws Exception {
         mockMvc.perform(get("/test/captcha").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errorCode").value("A0001"))
+                .andExpect(jsonPath("$.errorCode").value("A0240"))
                 .andExpect(jsonPath("$.errorMessage").value("验证码错误"));
     }
 
@@ -64,15 +65,15 @@ class MallExceptionHandlerTest {
         mockMvc.perform(get("/test/business").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A0101"))
-                .andExpect(jsonPath("$.errorMessage").value("未同意隐私协议"));
+                .andExpect(jsonPath("$.errorMessage").value("未同意隐私协议（isPrivacyAgreed != 1）"));
     }
 
     @Test
     void shouldReturnTokenErrorWhenTokenExceptionThrown() throws Exception {
         mockMvc.perform(get("/test/token").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errorCode").value("A0201"))
-                .andExpect(jsonPath("$.errorMessage").value("Token无效"));
+                .andExpect(jsonPath("$.errorCode").value("A0231"))
+                .andExpect(jsonPath("$.errorMessage").value("refresh_token 失效或 token 已注销"));
     }
 
     @Test

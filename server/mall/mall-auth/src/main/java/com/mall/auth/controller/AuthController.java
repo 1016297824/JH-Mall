@@ -1,6 +1,8 @@
 package com.mall.auth.controller;
 
 import com.mall.common.dto.MallResult;
+import com.mall.common.enums.ErrorCode;
+import com.mall.common.exception.BusinessException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,71 +14,68 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private static final String NOT_OPEN_CODE = "A9999";
-    private static final String NOT_OPEN_MSG = "该功能暂未开放，请使用 CAPTCHA 端点";
-
     @PostMapping("/users")
     public MallResult<Void> createUser() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PostMapping("/sms_codes")
     public MallResult<Void> sendSmsCode() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PostMapping("/sessions")
     public MallResult<Void> createSession() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PostMapping("/sessions/sms")
     public MallResult<Void> createSessionBySms() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PostMapping("/sessions/refresh")
     public MallResult<Void> refreshSession() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @GetMapping("/sessions/current")
     public MallResult<Void> getCurrentSession() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @DeleteMapping("/sessions/current")
     public MallResult<Void> deleteCurrentSession() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PostMapping("/wechat/sessions")
     public MallResult<Void> createWechatSession() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PostMapping("/wechat/phone_binding")
     public MallResult<Void> wechatPhoneBinding() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PutMapping("/phone")
     public MallResult<Void> changePhone() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PutMapping("/password/reset")
     public MallResult<Void> resetPassword() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @PutMapping("/password")
     public MallResult<Void> changePassword() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 
     @DeleteMapping("/account")
     public MallResult<Void> deleteAccount() {
-        return MallResult.error(NOT_OPEN_CODE, NOT_OPEN_MSG);
+        throw new BusinessException(ErrorCode.NOT_OPEN);
     }
 }

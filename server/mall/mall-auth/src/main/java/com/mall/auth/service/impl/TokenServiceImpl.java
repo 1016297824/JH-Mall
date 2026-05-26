@@ -4,6 +4,7 @@ import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.TokenService;
 import com.mall.common.constant.CacheConstants;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -83,12 +84,12 @@ public class TokenServiceImpl implements TokenService {
 
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey))) {
-            throw new TokenException("A0231", "token已被撤销");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
         String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionKey))) {
-            throw new TokenException("A0231", "token会话不存在或已过期");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
         return userId;
@@ -100,7 +101,7 @@ public class TokenServiceImpl implements TokenService {
 
         String type = claims.get("type", String.class);
         if (!"refresh".equals(type)) {
-            throw new TokenException("A0231", "refreshToken类型错误");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
         String jti = claims.getId();
@@ -109,12 +110,12 @@ public class TokenServiceImpl implements TokenService {
 
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey))) {
-            throw new TokenException("A0231", "refreshToken已被撤销");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
         String refreshMappingKey = CacheConstants.Auth.REFRESH + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(refreshMappingKey))) {
-            throw new TokenException("A0231", "refreshToken已过期");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
         long remainingSeconds = Math.max(0,
@@ -167,9 +168,9 @@ public class TokenServiceImpl implements TokenService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            throw new TokenException("A0231", "token无效或已过期");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         } catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
-            throw new TokenException("A0231", "token无效或已过期");
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
     }
 }

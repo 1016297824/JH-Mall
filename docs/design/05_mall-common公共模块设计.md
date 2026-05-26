@@ -327,8 +327,9 @@ public final class HeaderConstants {
 |------|----|--------|
 | `OutboxStatusEnum` | NEW("NEW") / PENDING("PENDING") / SENT("SENT") / FAILED("FAILED") | 各服务 |
 
-> 核心业务枚举（`tinyint unsigned`）共 19 个字段，Java 用 `int` 编码直接对应，MyBatis 可直接映射，无需 TypeHandler。
+> 核心业务枚举（`tinyint unsigned`）共 17 个字段，Java 用 `int` 编码直接对应，MyBatis 可直接映射，无需 TypeHandler。
 > `RegisterTypeEnum`、`CancelTypeEnum`、`OutboxStatusEnum` 使用 `String` 值，对应数据库 `varchar` 字段。
+> 以上 20 个枚举已全部在 `com.mall.common.enums` 中实现，按域分包。
 
 ---
 

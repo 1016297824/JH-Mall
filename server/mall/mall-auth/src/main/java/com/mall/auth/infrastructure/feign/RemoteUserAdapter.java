@@ -1,6 +1,7 @@
 package com.mall.auth.infrastructure.feign;
 
 import com.mall.common.dto.user.MallUserDTO;
+import com.mall.common.enums.ErrorCode;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.common.exception.BusinessException;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class RemoteUserAdapter {
             return remoteUserService.findByPhone(phone);
         } catch (Exception e) {
             log.error("调用mall-user findByPhone失败, phone={}", phone, e);
-            throw new BusinessException("B0001", "用户服务不可用", "用户服务暂不可用，请稍后重试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
 
@@ -32,7 +33,7 @@ public class RemoteUserAdapter {
             return remoteUserService.register(request);
         } catch (Exception e) {
             log.error("调用mall-user register失败", e);
-            throw new BusinessException("B0001", "用户服务不可用", "用户服务暂不可用，请稍后重试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
 
@@ -41,7 +42,7 @@ public class RemoteUserAdapter {
             remoteUserService.updatePassword(userId, request);
         } catch (Exception e) {
             log.error("调用mall-user updatePassword失败, userId={}", userId, e);
-            throw new BusinessException("B0001", "用户服务不可用", "用户服务暂不可用，请稍后重试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
 
@@ -50,7 +51,7 @@ public class RemoteUserAdapter {
             remoteUserService.updatePhone(userId, request);
         } catch (Exception e) {
             log.error("调用mall-user updatePhone失败, userId={}", userId, e);
-            throw new BusinessException("B0001", "用户服务不可用", "用户服务暂不可用，请稍后重试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
 
@@ -59,7 +60,7 @@ public class RemoteUserAdapter {
             remoteUserService.deactivateAccount(userId);
         } catch (Exception e) {
             log.error("调用mall-user deactivateAccount失败, userId={}", userId, e);
-            throw new BusinessException("B0001", "用户服务不可用", "用户服务暂不可用，请稍后重试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
 }

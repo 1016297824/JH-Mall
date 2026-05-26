@@ -1,6 +1,7 @@
 package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.CaptchaException;
 import com.wf.captcha.SpecCaptcha;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,7 +115,7 @@ class CaptchaServiceImplTest {
     void shouldVerifyThrowWhenCaptchaKeyIsNull() {
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify(null, "1234", "127.0.0.1"));
-        assertEquals("A0401", exception.getErrorCode());
+        assertEquals(ErrorCode.PARAM_MISSING.getCode(), exception.getErrorCode());
         assertEquals("请完整填写信息", exception.getUserTip());
     }
 
@@ -122,21 +123,21 @@ class CaptchaServiceImplTest {
     void shouldVerifyThrowWhenCaptchaCodeIsNull() {
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify("key-123", null, "127.0.0.1"));
-        assertEquals("A0401", exception.getErrorCode());
+        assertEquals(ErrorCode.PARAM_MISSING.getCode(), exception.getErrorCode());
     }
 
     @Test
     void shouldVerifyThrowWhenCaptchaKeyIsEmpty() {
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify("", "1234", "127.0.0.1"));
-        assertEquals("A0401", exception.getErrorCode());
+        assertEquals(ErrorCode.PARAM_MISSING.getCode(), exception.getErrorCode());
     }
 
     @Test
     void shouldVerifyThrowWhenCaptchaCodeIsEmpty() {
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify("key-123", "", "127.0.0.1"));
-        assertEquals("A0401", exception.getErrorCode());
+        assertEquals(ErrorCode.PARAM_MISSING.getCode(), exception.getErrorCode());
     }
 
     // ========== verify() IP 防刷测试 ==========
@@ -147,8 +148,8 @@ class CaptchaServiceImplTest {
 
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify("key-123", "abcd", "127.0.0.1"));
-        assertEquals("A0241", exception.getErrorCode());
-        assertEquals("验证码尝试次数过多，请 24 小时后重试", exception.getUserTip());
+        assertEquals(ErrorCode.CAPTCHA_RETRY_LIMIT.getCode(), exception.getErrorCode());
+        assertEquals("验证码尝试次数过多", exception.getUserTip());
     }
 
     // ========== verify() 验证码过期测试 ==========
@@ -161,8 +162,8 @@ class CaptchaServiceImplTest {
 
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify("key-123", "abcd", "127.0.0.1"));
-        assertEquals("A0132", exception.getErrorCode());
-        assertEquals("验证码已过期，请重新获取", exception.getUserTip());
+        assertEquals(ErrorCode.CAPTCHA_EXPIRED.getCode(), exception.getErrorCode());
+        assertEquals("验证码已过期", exception.getUserTip());
         verify(valueOperations).increment(eq("mall:auth:captcha:ip:127.0.0.1"), eq(1L));
     }
 
@@ -176,8 +177,8 @@ class CaptchaServiceImplTest {
 
         CaptchaException exception = assertThrows(CaptchaException.class,
                 () -> captchaService.verify("key-123", "wrong", "127.0.0.1"));
-        assertEquals("A0131", exception.getErrorCode());
-        assertEquals("验证码错误，请重新输入", exception.getUserTip());
+        assertEquals(ErrorCode.CAPTCHA_WRONG.getCode(), exception.getErrorCode());
+        assertEquals("验证码错误", exception.getUserTip());
         verify(valueOperations).increment(eq("mall:auth:captcha:ip:127.0.0.1"), eq(1L));
         verify(redisTemplate, never()).delete(anyString());
     }

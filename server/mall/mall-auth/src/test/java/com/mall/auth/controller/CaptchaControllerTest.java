@@ -1,6 +1,7 @@
 package com.mall.auth.controller;
 
 import com.mall.common.dto.user.MallUserDTO;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.dto.response.CaptchaResponse;
@@ -163,7 +164,7 @@ class CaptchaControllerTest {
 
     @Test
     void shouldRegisterFailWhenCaptchaError() throws Exception {
-        doThrow(new CaptchaException("A0131", "验证码错误", "验证码错误，请重新输入"))
+        doThrow(new CaptchaException(ErrorCode.CAPTCHA_WRONG))
                 .when(captchaService).verify(anyString(), anyString(), anyString());
 
         mockMvc.perform(post("/api/auth/captcha/register")
