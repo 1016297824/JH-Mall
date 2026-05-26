@@ -3,6 +3,7 @@ package com.mall.auth.service.impl;
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.TokenService;
+import com.mall.common.constant.CacheConstants;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -64,10 +65,10 @@ public class TokenServiceImpl implements TokenService {
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
 
-        String sessionKey = "mall:auth:session:" + userId + ":" + accessJti;
+        String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + accessJti;
         redisTemplate.opsForValue().set(sessionKey, "1", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
 
-        String refreshKey = "mall:auth:refresh:" + refreshJti;
+        String refreshKey = CacheConstants.Auth.REFRESH + refreshJti;
         redisTemplate.opsForValue().set(refreshKey, userId, authProperties.getRefreshTokenTtl(), TimeUnit.SECONDS);
 
         return new TokenResponse(accessToken, refreshToken, authProperties.getAccessTokenTtl());
@@ -80,12 +81,12 @@ public class TokenServiceImpl implements TokenService {
         String jti = claims.getId();
         String userId = claims.getSubject();
 
-        String blacklistKey = "mall:auth:blacklist:" + jti;
+        String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey))) {
             throw new TokenException("A0231", "token已被撤销");
         }
 
-        String sessionKey = "mall:auth:session:" + userId + ":" + jti;
+        String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionKey))) {
             throw new TokenException("A0231", "token会话不存在或已过期");
         }
@@ -106,12 +107,12 @@ public class TokenServiceImpl implements TokenService {
         String userId = claims.getSubject();
         Date expiration = claims.getExpiration();
 
-        String blacklistKey = "mall:auth:blacklist:" + jti;
+        String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey))) {
             throw new TokenException("A0231", "refreshToken已被撤销");
         }
 
-        String refreshMappingKey = "mall:auth:refresh:" + jti;
+        String refreshMappingKey = CacheConstants.Auth.REFRESH + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(refreshMappingKey))) {
             throw new TokenException("A0231", "refreshToken已过期");
         }
@@ -135,16 +136,16 @@ public class TokenServiceImpl implements TokenService {
         long remainingSeconds = Math.max(0,
                 (expiration.getTime() - System.currentTimeMillis()) / 1000);
 
-        String blacklistKey = "mall:auth:blacklist:" + jti;
+        String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         redisTemplate.opsForValue().set(blacklistKey, "revoked", remainingSeconds, TimeUnit.SECONDS);
 
-        String sessionKey = "mall:auth:session:" + userId + ":" + jti;
+        String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + jti;
         redisTemplate.delete(sessionKey);
     }
 
     @Override
     public void revokeAll(String userId) {
-        String pattern = "mall:auth:session:" + userId + ":*";
+        String pattern = CacheConstants.Auth.SESSION + userId + ":*";
         Set<String> keys = redisTemplate.keys(pattern);
         if (keys == null || keys.isEmpty()) {
             return;
@@ -152,7 +153,7 @@ public class TokenServiceImpl implements TokenService {
 
         for (String sessionKey : keys) {
             String jti = sessionKey.substring(sessionKey.lastIndexOf(':') + 1);
-            String blacklistKey = "mall:auth:blacklist:" + jti;
+            String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
             redisTemplate.opsForValue().set(blacklistKey, "revoked", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
             redisTemplate.delete(sessionKey);
         }

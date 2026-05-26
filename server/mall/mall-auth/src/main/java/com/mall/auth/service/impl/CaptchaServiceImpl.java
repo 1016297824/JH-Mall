@@ -2,6 +2,7 @@ package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.service.CaptchaService;
+import com.mall.common.constant.CacheConstants;
 import com.mall.common.exception.CaptchaException;
 import com.wf.captcha.SpecCaptcha;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,9 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class CaptchaServiceImpl implements CaptchaService {
-
-    private static final String KEY_CAPTCHA = "mall:auth:captcha:";
-    private static final String KEY_IP = "mall:auth:captcha:ip:";
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final MallAuthConfigProperties authProperties;
@@ -38,7 +36,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         String captchaKey = UUID.randomUUID().toString().replace("-", "");
 
         redisTemplate.opsForValue().set(
-                KEY_CAPTCHA + captchaKey,
+                CacheConstants.Auth.CAPTCHA + captchaKey,
                 text,
                 authProperties.getSms().getCodeTtl(),
                 TimeUnit.SECONDS);
@@ -55,13 +53,13 @@ public class CaptchaServiceImpl implements CaptchaService {
             throw new CaptchaException("A0401", "请完整填写信息");
         }
 
-        String ipKey = KEY_IP + clientIp;
+        String ipKey = CacheConstants.Auth.CAPTCHA_IP + clientIp;
         Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
         if (ipCount != null && ipCount >= authProperties.getSms().getIpDailyLimit()) {
             throw new CaptchaException("A0241", "验证码尝试次数过多", "验证码尝试次数过多，请 24 小时后重试");
         }
 
-        String redisKey = KEY_CAPTCHA + captchaKey;
+        String redisKey = CacheConstants.Auth.CAPTCHA + captchaKey;
         String storedCode = (String) redisTemplate.opsForValue().get(redisKey);
         if (storedCode == null) {
             incrementIpCount(ipKey);

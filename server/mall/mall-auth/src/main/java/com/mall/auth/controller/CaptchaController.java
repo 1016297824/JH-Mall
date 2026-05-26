@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.mall.common.constant.CacheConstants;
+import com.mall.common.constant.HeaderConstants;
 import com.mall.common.enums.user.UserStatusEnum;
 
 import java.util.Map;
@@ -39,7 +41,6 @@ import java.util.regex.Pattern;
 @RequestMapping("/api/auth/captcha")
 public class CaptchaController {
 
-    private static final String KEY_PWD_ERR = "mall:auth:pwd_err:";
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d).+$");
 
     private final CaptchaService captchaService;
@@ -117,7 +118,7 @@ public class CaptchaController {
             throw new BusinessException("A0203", "账户已注销", "账户已注销");
         }
 
-        String pwdErrKey = KEY_PWD_ERR + user.getId();
+        String pwdErrKey = CacheConstants.Auth.PWD_ERR + user.getId();
         Object errCountObj = redisTemplate.opsForValue().get(pwdErrKey);
         int errCount = errCountObj instanceof Number ? ((Number) errCountObj).intValue() : 0;
         if (errCount >= authProperties.getPwdErrLimit()) {
@@ -209,11 +210,11 @@ public class CaptchaController {
     }
 
     private String getClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        String xForwardedFor = request.getHeader(HeaderConstants.X_FORWARDED_FOR);
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
             return xForwardedFor.split(",")[0].trim();
         }
-        String xRealIp = request.getHeader("X-Real-IP");
+        String xRealIp = request.getHeader(HeaderConstants.X_REAL_IP);
         if (xRealIp != null && !xRealIp.isEmpty()) {
             return xRealIp.trim();
         }

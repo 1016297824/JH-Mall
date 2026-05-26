@@ -46,6 +46,13 @@ public class MallAuthFilter implements GlobalFilter, Ordered
     /** C 端匿名默认用户名 */
     private static final String DEFAULT_USER_NAME = "c_end_user";
 
+    /** 网关透传 Header 名称 */
+    private static final String HEADER_X_USER_ID = "X-User-Id";
+    private static final String HEADER_X_USER_NAME = "X-User-Name";
+    private static final String HEADER_X_REQUEST_ID = "X-Request-Id";
+    private static final String HEADER_X_USER_PREFIX = "X-User-";
+    private static final String HEADER_X_MALL_PREFIX = "X-Mall-";
+
     @Autowired
     private MallAuthProperties mallAuthProperties;
 
@@ -137,8 +144,8 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         }
 
         request = request.mutate()
-                .header("X-User-Id", userId)
-                .header("X-User-Name", DEFAULT_USER_NAME)
+                .header(HEADER_X_USER_ID, userId)
+                .header(HEADER_X_USER_NAME, DEFAULT_USER_NAME)
                 .build();
 
         return chain.filter(exchange.mutate().request(request).build());
@@ -172,7 +179,7 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         List<String> headersToRemove = new ArrayList<>();
         for (String headerName : request.getHeaders().toSingleValueMap().keySet())
         {
-            if (headerName.startsWith("X-User-") || headerName.startsWith("X-Mall-"))
+            if (headerName.startsWith(HEADER_X_USER_PREFIX) || headerName.startsWith(HEADER_X_MALL_PREFIX))
             {
                 headersToRemove.add(headerName);
             }
@@ -194,10 +201,10 @@ public class MallAuthFilter implements GlobalFilter, Ordered
      */
     private ServerHttpRequest injectRequestId(ServerHttpRequest request)
     {
-        if (request.getHeaders().getFirst("X-Request-Id") == null)
+        if (request.getHeaders().getFirst(HEADER_X_REQUEST_ID) == null)
         {
             request = request.mutate()
-                    .header("X-Request-Id", UUID.randomUUID().toString().replace("-", ""))
+                    .header(HEADER_X_REQUEST_ID, UUID.randomUUID().toString().replace("-", ""))
                     .build();
         }
         return request;

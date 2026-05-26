@@ -57,6 +57,8 @@ mall-common (共享基础层)
 ```
 server/mall/mall-common/
 └── src/main/java/com/mall/common/
+    ├── constant/                             # 跨服务共享常量（Redis Key 等）
+    │   └── CacheConstants.java              # 商城统一 Redis Key 常量
     ├── dto/                                  # 跨服务共享 DTO + 响应体
     │   ├── MallResult.java                  # C 端统一响应体（替代若依 AjaxResult）
     │   ├── user/
@@ -77,6 +79,191 @@ server/mall/mall-common/
 > 共享 DTO 按域分包（如 `user/`、`product/`）
 
 预留 `config/`、`filter/` 等包供后续扩展。新增内容需遵循 §1.2 约束。
+
+### 2.1.1 CacheConstants 设计
+
+`constant/CacheConstants.java` 管理商城所有 Redis Key 常量，按模块分内部类组织。**禁止在各 Controller/Service 中 `private static final` 定义 Redis key 常量或硬编码字符串**，全部收敛到此类。若依原生 `ruoyi-common-core` 已有 `CacheConstants`，商城侧独立维护，不与之混用。
+
+```java
+package com.mall.common.constant;
+
+public class CacheConstants {
+
+    /** 认证模块 Redis Key — 11 个常量 */
+    public static final class Auth {
+        public static final String SESSION      = "mall:auth:session:";
+        public static final String REFRESH      = "mall:auth:refresh:";
+        public static final String BLACKLIST    = "mall:auth:blacklist:";
+        public static final String SMS_CODE     = "mall:auth:sms:code:";
+        public static final String SMS_LIMIT    = "mall:auth:sms:limit:";
+        public static final String SMS_TRY      = "mall:auth:sms:try:";
+        public static final String SMS_IP       = "mall:auth:sms:ip:";
+        public static final String PWD_ERR      = "mall:auth:pwd_err:";
+        public static final String DECRYPT      = "mall:auth:decrypt:";
+        public static final String CAPTCHA      = "mall:auth:captcha:";
+        public static final String CAPTCHA_IP   = "mall:auth:captcha:ip:";
+    }
+
+    /** 用户模块 Redis Key */
+    public static final class User {
+        public static final String PROFILE      = "mall:user:profile:";
+        public static final String SIGN         = "mall:user:sign:";
+    }
+
+    /** 商品模块 Redis Key */
+    public static final class Product {
+        public static final String SKU           = "mall:product:sku:";
+        public static final String CATEGORY_TREE = "mall:product:category:tree";
+        public static final String CATEGORY      = "mall:product:category:";
+        public static final String NEWEST_LIST   = "mall:product:newest:list";
+        public static final String TAG           = "mall:product:tag:";
+        public static final String HOT_RANK      = "mall:product:hot:rank";
+        public static final String UV            = "mall:product:uv:";
+    }
+
+    /** 订单模块 Redis Key */
+    public static final class Order {
+        public static final String CART       = "mall:order:cart:";
+        public static final String IDEMPOTENT = "mall:order:idempotent:";
+    }
+
+    /** 支付模块 Redis Key */
+    public static final class Payment {
+        public static final String CALLBACK        = "mall:payment:callback:";
+        public static final String REFUND_CALLBACK = "mall:payment:refund_callback:";
+        public static final String IDEMPOTENT      = "mall:payment:idempotent:";
+    }
+
+    /** 营销模块 Redis Key */
+    public static final class Marketing {
+        public static final String COUPON_LOCK = "mall:marketing:coupon_lock:";
+    }
+
+    /** 搜索模块 Redis Key */
+    public static final class Search {
+        public static final String RESULT                = "mall:search:result:";
+        public static final String INDEX_REBUILD_LOCK    = "mall:search:index:rebuild_lock";
+        public static final String DEDUP                 = "mall:search:dedup:";
+        public static final String SUGGESTION_HOT_KEYWORDS = "mall:search:suggestion:hot_keywords";
+        public static final String SUGGEST               = "mall:search:suggest:";
+    }
+
+    /** MQ 基础设施 — 消息消费幂等去重 */
+    public static final class MQ {
+        public static final String DEDUP = "mall:mq:dedup:";
+    }
+
+    /** 分布式任务锁 */
+    public static final class Job {
+        public static final String LOCK_ORDER_TIMEOUT = "mall:job:lock:order_timeout";
+    }
+}
+```
+
+> **命名规范**：`{mall}:{service}:{biz}:{id}`，见 `02_系统概要设计_补充.md` §6。前置部分固定为 `mall` 前缀，与若依 `ry-cloud` 库的 key 前缀隔离。
+>
+> **新增 Redis key 流程**：① 在 `CacheConstants` 对应内部类中新增常量声明 → ② 代码中通过 `CacheConstants.XX.YYY` 引用，禁止直接硬编码字符串 → ③ 同步更新对应模块设计文档的 Redis Key 规范表。
+
+### 2.1.2 MqTopicConstants 设计
+
+`constant/MqTopicConstants.java` 管理商城所有 MQ Topic 名称常量，按业务域分内部类组织。禁止在生产者/消费者中硬编码 Topic 字符串。
+
+```java
+package com.mall.common.constant;
+
+public class MqTopicConstants {
+
+    /** 订单域 — 7 个 Topic */
+    public static final class Order {
+        public static final String CREATED   = "mall:order:created";
+        public static final String PAID      = "mall:order:paid";
+        public static final String CANCELLED = "mall:order:cancelled";
+        public static final String DELIVERED = "mall:order:delivered";
+        public static final String COMPLETED = "mall:order:completed";
+        public static final String REFUNDED  = "mall:order:refunded";
+        public static final String TIMEOUT   = "mall:order:timeout";
+    }
+
+    /** 支付/退款域 — 5 个 Topic */
+    public static final class Payment {
+        public static final String CREATED          = "mall:payment:created";
+        public static final String PAID             = "mall:payment:paid";
+        public static final String FAILED           = "mall:payment:failed";
+        public static final String REFUND_CREATED   = "mall:refund:created";
+        public static final String REFUND_SUCCEEDED = "mall:refund:succeeded";
+    }
+
+    /** 用户域 — 1 个 Topic */
+    public static final class User {
+        public static final String REGISTERED = "mall:user:registered";
+    }
+
+    /** 库存域 — 2 个 Topic */
+    public static final class Stock {
+        public static final String RESERVED = "mall:stock:reserved";
+        public static final String RELEASED = "mall:stock:released";
+    }
+
+    /** 营销域 — 3 个 Topic */
+    public static final class Coupon {
+        public static final String LOCKED   = "mall:coupon:locked";
+        public static final String USED     = "mall:coupon:used";
+        public static final String RELEASED = "mall:coupon:released";
+    }
+
+    /** 搜索域 — 2 个 Topic */
+    public static final class Search {
+        public static final String SYNC    = "mall:search:sync";
+        public static final String REBUILD = "mall:search:rebuild";
+    }
+}
+```
+
+> **命名规范**：`{mall}:{domain}:{action}`，共 20 个 Topic。新增 Topic 必须先在此类声明。
+
+### 2.1.3 HeaderConstants 设计
+
+`constant/HeaderConstants.java` 管理 C 端 HTTP 请求头名称常量。网关 MallAuthFilter 注入的 Header 和 mall 模块消费的 Header 使用同名常量，禁止硬编码字符串。
+
+```java
+package com.mall.common.constant;
+
+public final class HeaderConstants {
+
+    /** C端 JWT Token */
+    public static final String AUTHORIZATION = "Authorization";
+
+    /** C端用户ID（网关注入） */
+    public static final String X_USER_ID = "X-User-Id";
+
+    /** C端认证用户名（网关注入） */
+    public static final String X_USER_NAME = "X-User-Name";
+
+    /** 全链路追踪ID */
+    public static final String X_REQUEST_ID = "X-Request-Id";
+
+    /** 下单幂等键（客户端生成 UUID v4） */
+    public static final String IDEMPOTENT_KEY = "Idempotent-Key";
+
+    /** 客户端真实IP（代理透传） */
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
+    /** 客户端真实IP（Nginx） */
+    public static final String X_REAL_IP = "X-Real-IP";
+
+    /** 内部服务签名头 */
+    public static final String X_INTERNAL_TIMESTAMP = "X-Internal-Timestamp";
+    public static final String X_INTERNAL_NONCE     = "X-Internal-Nonce";
+    public static final String X_INTERNAL_SIGNATURE = "X-Internal-Signature";
+    public static final String X_INTERNAL_VERIFIED  = "X-Internal-Verified";
+
+    /** 网关透传前缀 */
+    public static final String X_USER_PREFIX = "X-User-";
+    public static final String X_MALL_PREFIX = "X-Mall-";
+}
+```
+
+> **注意**：`ruoyi-gateway` 模块不依赖 `mall-common`，MallAuthFilter 中 Header 常量以 `private static final` 形式本地定义，无需跨模块同步。
 
 ### 2.2 共享枚举
 

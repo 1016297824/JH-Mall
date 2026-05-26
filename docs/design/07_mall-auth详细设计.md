@@ -261,17 +261,21 @@ server/mall/mall-auth/
 
 ### 4.1 Redis Key 规范
 
-| Key 模式                                   | 用途                     | TTL                |
-| ------------------------------------------ | ------------------------ | ------------------ |
-| `mall:auth:session:{userId}:{jti}`       | 会话信息（设备/IP/时间） | 同 accessToken exp |
-| `mall:auth:refresh:{jti}`                | refreshToken 映射        | 7d                 |
-| `mall:auth:blacklist:{jti}`              | 黑名单（注销/刷新作废）  | 原 token 剩余时间  |
-| `mall:auth:sms:code:{phone}:{scene}`     | 短信验证码               | 300s               |
-| `mall:auth:sms:limit:{phone}`            | 发送冷却                 | 60s                |
-| `mall:auth:sms:try:{phone}`              | 验证尝试计数             | 24h                |
-| `mall:auth:sms:ip:{ip}`                  | IP 日发送量              | 24h                |
-| `mall:auth:pwd_err:{userId}`             | 密码错误计数             | 30min              |
-| `mall:auth:decrypt:{sha256(ciphertext)}` | 解密结果缓存             | 60s                |
+| Key 模式                                   | 常量引用                                      | 用途                     | TTL                |
+| ------------------------------------------ | --------------------------------------------- | ------------------------ | ------------------ |
+| `mall:auth:session:{userId}:{jti}`       | `CacheConstants.Auth.SESSION`               | 会话信息（设备/IP/时间） | 同 accessToken exp |
+| `mall:auth:refresh:{jti}`                | `CacheConstants.Auth.REFRESH`               | refreshToken 映射        | 7d                 |
+| `mall:auth:blacklist:{jti}`              | `CacheConstants.Auth.BLACKLIST`             | 黑名单（注销/刷新作废）  | 原 token 剩余时间  |
+| `mall:auth:sms:code:{phone}:{scene}`     | `CacheConstants.Auth.SMS_CODE`              | 短信验证码               | 300s               |
+| `mall:auth:sms:limit:{phone}`            | `CacheConstants.Auth.SMS_LIMIT`             | 发送冷却                 | 60s                |
+| `mall:auth:sms:try:{phone}`              | `CacheConstants.Auth.SMS_TRY`               | 验证尝试计数             | 24h                |
+| `mall:auth:sms:ip:{ip}`                  | `CacheConstants.Auth.SMS_IP`                | IP 日发送量              | 24h                |
+| `mall:auth:pwd_err:{userId}`             | `CacheConstants.Auth.PWD_ERR`               | 密码错误计数             | 30min              |
+| `mall:auth:decrypt:{sha256(ciphertext)}` | `CacheConstants.Auth.DECRYPT`               | 解密结果缓存             | 60s                |
+| `mall:auth:captcha:{captchaKey}`         | `CacheConstants.Auth.CAPTCHA`               | 图片验证码               | 300s               |
+| `mall:auth:captcha:ip:{ip}`              | `CacheConstants.Auth.CAPTCHA_IP`            | 验证码 IP 防刷计数       | 24h                |
+
+> **常量管理**：所有 Redis key 统一定义在 `mall-common` 的 `CacheConstants.Auth` 内部类中，禁止在 Controller/Service 中 `private static final` 或硬编码字符串。新增 key 必须先在 `CacheConstants` 中声明。
 
 ### 4.2 Token 刷新流程
 
