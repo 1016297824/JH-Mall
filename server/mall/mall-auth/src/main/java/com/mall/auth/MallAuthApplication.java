@@ -8,7 +8,11 @@ import org.mybatis.spring.annotation.MapperScan;
 
 /**
  * mall-auth 认证服务
- * 端口：9210
+ *
+ * <p>端口：9301</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
  */
 @EnableFeignClients(basePackages = "com.mall.api")
 //@MapperScan("com.mall.auth.mapper")

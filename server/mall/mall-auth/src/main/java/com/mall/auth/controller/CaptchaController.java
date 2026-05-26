@@ -52,15 +52,32 @@ import java.util.regex.Pattern;
 @RequestMapping("/api/auth/captcha")
 public class CaptchaController {
 
+    /** 密码正则：必须包含字母和数字 */
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d).+$");
 
+    /** 验证码服务 */
     private final CaptchaService captchaService;
+    /** Token 服务 */
     private final TokenService tokenService;
+    /** 用户服务 Feign 接口 */
     private final RemoteUserService remoteUserService;
+    /** Redis 模板 */
     private final RedisTemplate<String, Object> redisTemplate;
+    /** 密码编码器 */
     private final BCryptPasswordEncoder passwordEncoder;
+    /** 认证配置属性 */
     private final MallAuthConfigProperties authProperties;
 
+    /**
+     * 构造认证控制器
+     *
+     * @param captchaService    验证码服务
+     * @param tokenService      Token 服务
+     * @param remoteUserService 用户服务 Feign 接口
+     * @param redisTemplate     Redis 模板
+     * @param passwordEncoder   密码编码器
+     * @param authProperties    认证配置属性
+     */
     public CaptchaController(CaptchaService captchaService, TokenService tokenService,
                              RemoteUserService remoteUserService, RedisTemplate<String, Object> redisTemplate,
                              BCryptPasswordEncoder passwordEncoder, MallAuthConfigProperties authProperties) {
@@ -72,6 +89,11 @@ public class CaptchaController {
         this.authProperties = authProperties;
     }
 
+    /**
+     * 获取图形验证码
+     *
+     * @return 验证码响应
+     */
     @GetMapping
     public MallResult<CaptchaResponse> getCaptcha() {
         Map<String, String> result = captchaService.generate();
@@ -80,6 +102,13 @@ public class CaptchaController {
         return MallResult.success(response);
     }
 
+    /**
+     * 验证码注册
+     *
+     * @param req     注册请求
+     * @param request HTTP 请求（用于获取客户端 IP）
+     * @return Token 响应
+     */
     @PostMapping("/register")
     public MallResult<TokenResponse> register(@Valid @RequestBody CaptchaRegisterReq req,
                                               HttpServletRequest request) {
@@ -111,6 +140,13 @@ public class CaptchaController {
         return MallResult.success(token);
     }
 
+    /**
+     * 验证码密码登录
+     *
+     * @param req     登录请求
+     * @param request HTTP 请求（用于获取客户端 IP）
+     * @return Token 响应
+     */
     @PostMapping("/login")
     public MallResult<TokenResponse> login(@Valid @RequestBody CaptchaLoginReq req,
                                            HttpServletRequest request) {
@@ -146,6 +182,13 @@ public class CaptchaController {
         return MallResult.success(token);
     }
 
+    /**
+     * 验证码重置密码
+     *
+     * @param req     重置密码请求
+     * @param request HTTP 请求（用于获取客户端 IP）
+     * @return 成功响应
+     */
     @PostMapping("/password/reset")
     public MallResult<Void> resetPassword(@Valid @RequestBody CaptchaResetPasswordReq req,
                                           HttpServletRequest request) {
@@ -169,6 +212,12 @@ public class CaptchaController {
         return MallResult.success(null);
     }
 
+    /**
+     * 换绑手机号（图形验证码已在前端校验）
+     *
+     * @param req 换绑手机请求
+     * @return 成功响应
+     */
     @PutMapping("/phone")
     public MallResult<Void> changePhone(@Valid @RequestBody CaptchaChangePhoneReq req) {
         MallUserDTO user = remoteUserService.findByPhone(req.getOldPhone());
@@ -195,6 +244,12 @@ public class CaptchaController {
         return MallResult.success(null);
     }
 
+    /**
+     * 注销账户
+     *
+     * @param req 注销账户请求
+     * @return 成功响应
+     */
     @DeleteMapping("/account")
     public MallResult<Void> deactivateAccount(@Valid @RequestBody CaptchaDeactivateReq req) {
         MallUserDTO user = remoteUserService.findByPhone(req.getPhone());
@@ -212,12 +267,25 @@ public class CaptchaController {
         return MallResult.success(null);
     }
 
+    /**
+     * 校验密码复杂度
+     *
+     * @param password 明文密码
+     */
     private void validatePassword(String password) {
         if (password.length() < 8 || password.length() > 32 || !PASSWORD_PATTERN.matcher(password).matches()) {
             throw new BusinessException(ErrorCode.PASSWORD_WEAK);
         }
     }
 
+    /**
+     * 获取客户端真实 IP
+     *
+     * <p>优先级：X-Forwarded-For &gt; X-Real-IP &gt; RemoteAddr</p>
+     *
+     * @param request HTTP 请求
+     * @return 客户端 IP
+     */
     private String getClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader(HeaderConstants.X_FORWARDED_FOR);
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
@@ -230,6 +298,11 @@ public class CaptchaController {
         return request.getRemoteAddr();
     }
 
+    /**
+     * 递增密码错误计数（首次设置 TTL）
+     *
+     * @param key 密码错误计数 Key
+     */
     private void incrementPwdErrCount(String key) {
         Long count = redisTemplate.opsForValue().increment(key, 1L);
         if (count != null && count == 1) {
@@ -237,6 +310,12 @@ public class CaptchaController {
         }
     }
 
+    /**
+     * SHA-256 哈希
+     *
+     * @param input 输入字符串
+     * @return 哈希值（Hex）
+     */
     private String sha256(String input) {
         return DigestUtils.sha256Hex(input);
     }

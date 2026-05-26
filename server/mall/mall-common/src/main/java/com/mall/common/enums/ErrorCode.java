@@ -114,24 +114,49 @@ public enum ErrorCode {
     // ============================================================
     NOT_OPEN("A9999", "该功能暂未开放", "该功能暂未开放");
 
+    /** 错误码 */
     private final String code;
+    /** 日志/系统消息 */
     private final String message;
+    /** 用户提示 */
     private final String userTip;
 
+    /**
+     * 构造错误码枚举
+     *
+     * @param code    错误码
+     * @param message 日志/系统消息
+     * @param userTip 用户提示
+     */
     ErrorCode(String code, String message, String userTip) {
         this.code = code;
         this.message = message;
         this.userTip = userTip;
     }
 
+    /**
+     * 获取错误码
+     *
+     * @return 错误码
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * 获取日志/系统消息
+     *
+     * @return 日志/系统消息
+     */
     public String getMessage() {
         return message;
     }
 
+    /**
+     * 获取用户提示
+     *
+     * @return 用户提示
+     */
     public String getUserTip() {
         return userTip;
     }

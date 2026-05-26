@@ -22,6 +22,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Token 服务实现
+ *
+ * <p>使用 HS512 签名生成 JWT（accessToken + refreshToken），通过 Redis 维护会话（session Key）
+ * 和黑名单（blacklist Key）。refreshToken 一次性使用，刷新时旧 refreshToken 立即加入黑名单。</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 @Service
 public class TokenServiceImpl implements TokenService {
 
@@ -29,6 +38,13 @@ public class TokenServiceImpl implements TokenService {
     private final MallAuthConfigProperties authProperties;
     private final MallSecurityConfigProperties securityProperties;
 
+    /**
+     * 构造 Token 服务
+     *
+     * @param redisTemplate      Redis 模板
+     * @param authProperties     认证配置属性
+     * @param securityProperties 安全配置属性
+     */
     public TokenServiceImpl(RedisTemplate<String, Object> redisTemplate,
                             MallAuthConfigProperties authProperties,
                             MallSecurityConfigProperties securityProperties) {
@@ -37,6 +53,12 @@ public class TokenServiceImpl implements TokenService {
         this.securityProperties = securityProperties;
     }
 
+    /**
+     * 签发 Token（同时生成 accessToken 和 refreshToken）
+     *
+     * @param userId 用户 ID
+     * @return Token 响应
+     */
     @Override
     public TokenResponse issue(String userId) {
         byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
@@ -76,6 +98,12 @@ public class TokenServiceImpl implements TokenService {
         return new TokenResponse(accessToken, refreshToken, authProperties.getAccessTokenTtl());
     }
 
+    /**
+     * 校验 accessToken 并返回 userId
+     *
+     * @param accessToken 访问令牌
+     * @return 用户 ID
+     */
     @Override
     public String verify(String accessToken) {
         Claims claims = parseToken(accessToken);
@@ -96,6 +124,12 @@ public class TokenServiceImpl implements TokenService {
         return userId;
     }
 
+    /**
+     * 使用 refreshToken 刷新 Token（旧 refreshToken 一次性使用后立即失效）
+     *
+     * @param refreshToken 刷新令牌
+     * @return 新的 Token 响应
+     */
     @Override
     public TokenResponse refresh(String refreshToken) {
         Claims claims = parseToken(refreshToken);
@@ -127,6 +161,11 @@ public class TokenServiceImpl implements TokenService {
         return issue(userId);
     }
 
+    /**
+     * 吊销单条 accessToken（加入黑名单）
+     *
+     * @param accessToken 访问令牌
+     */
     @Override
     public void revoke(String accessToken) {
         Claims claims = parseToken(accessToken);
@@ -145,6 +184,11 @@ public class TokenServiceImpl implements TokenService {
         redisTemplate.delete(sessionKey);
     }
 
+    /**
+     * 吊销用户所有 Token（通过 pattern 匹配 session Key）
+     *
+     * @param userId 用户 ID
+     */
     @Override
     public void revokeAll(String userId) {
         String pattern = CacheConstants.Auth.SESSION + userId + ":*";
@@ -161,6 +205,12 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
+    /**
+     * 解析并验证 JWT Token
+     *
+     * @param token JWT Token 字符串
+     * @return JWT Claims
+     */
     private Claims parseToken(String token) {
         try {
             byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);

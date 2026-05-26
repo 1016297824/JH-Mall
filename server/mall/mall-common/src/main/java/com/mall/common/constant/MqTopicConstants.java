@@ -1,5 +1,14 @@
 package com.mall.common.constant;
 
+/**
+ * C 端 MQ Topic 常量
+ *
+ * <p>按领域内部类分组，格式统一为 {@code mall:{domain}:{action}}。
+ * 所有 Topic 常量由各模块生产者/消费者使用，禁止硬编码 Topic 字符串。</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 public class MqTopicConstants {
 
     /** 订单域 */

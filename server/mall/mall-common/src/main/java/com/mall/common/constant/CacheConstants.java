@@ -1,5 +1,14 @@
 package com.mall.common.constant;
 
+/**
+ * C 端 Redis Key 常量
+ *
+ * <p>按模块内部类分组，格式统一为 {@code mall:{service}:{biz}:{id}}。
+ * 所有 Key 常量由各模块 Service 使用，禁止硬编码 Redis Key 字符串。</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 public class CacheConstants {
 
     /** 认证模块 Redis Key */
