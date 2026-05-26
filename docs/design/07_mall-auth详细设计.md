@@ -469,19 +469,6 @@ spring:
       host: localhost
       port: 6379
       password:
-  datasource:
-    dynamic:
-      primary: master
-      datasource:
-        master:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-          username: root
-          password: 138992
-# mybatis配置
-mybatis:
-  typeAliasesPackage: com.mall.auth.**.domain
-  mapperLocations: classpath:mapper/**/*.xml
 # springdoc配置
 springdoc:
   gatewayUrl: http://localhost:8080/${spring.application.name}

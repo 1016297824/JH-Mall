@@ -299,63 +299,54 @@ public class MallUserMemberServiceImpl implements IMallUserMemberService {
 
 ---
 
-### Task 5: Mapper 扩展 — MallUserAddressMapper
+### Task 5: Mapper 改造 — MyBatis-Plus 集成
+
+> MyBatis-Plus 向后兼容 MyBatis XML Mapper。本次只做两件事：① Mapper 接口加 `extends BaseMapper<T>`（解锁 LambdaQueryWrapper）；② 仅在 XML 保留自定义 UPDATE 和有副作用的 SQL，简单查询在 Service 中用 `LambdaQueryWrapper` 替代。
 
 **Files:**
 - Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserAddressMapper.java`
+- Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMemberMapper.java`
+- Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserPointsAccountMapper.java`
+- Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMemberLevelMapper.java`
 - Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserAddressMapper.xml`
+- Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMemberMapper.xml`
+- Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserPointsAccountMapper.xml`
 
-- [ ] **Step 1: MallUserAddressMapper.java 追加 3 个方法**
+- [ ] **Step 1: MallUserAddressMapper 加 `extends BaseMapper<MallUserAddress>`，XML 只追加 `clearDefault`**
 
+MallUserAddressMapper.java：
 ```java
-List<MallUserAddress> selectByUserId(@Param("userId") String userId);
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-int countByUserId(@Param("userId") String userId);
-
-int clearDefault(@Param("userId") String userId);
+public interface MallUserAddressMapper extends BaseMapper<MallUserAddress> {
+    // ... 已有方法不变
+    int clearDefault(@Param("userId") String userId);
+}
 ```
 
-- [ ] **Step 2: MallUserAddressMapper.xml 追加 SQL**
-
+MallUserAddressMapper.xml 追加：
 ```xml
-<select id="selectByUserId" parameterType="String" resultMap="MallUserAddressResult">
-    <include refid="selectMallUserAddressVo"/>
-    where user_id = #{userId} order by is_default desc, create_time desc
-</select>
-
-<select id="countByUserId" parameterType="String" resultType="int">
-    select count(1) from mall_user_address where user_id = #{userId}
-</select>
-
 <update id="clearDefault">
     update mall_user_address set is_default = '0', update_time = now() where user_id = #{userId}
 </update>
 ```
 
----
+> `selectByUserId` / `countByUserId` 由 Service 用 `LambdaQueryWrapper` 替代，见 Task 10。
 
-### Task 6: Mapper 扩展 — MallUserMemberMapper
+- [ ] **Step 2: MallUserMemberMapper 加 `extends BaseMapper<MallUserMember>`，XML 追加 `addGrowth`**
 
-**Files:**
-- Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMemberMapper.java`
-- Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMemberMapper.xml`
-
-- [ ] **Step 1: MallUserMemberMapper.java 追加 2 个方法**
-
+MallUserMemberMapper.java：
 ```java
-MallUserMember selectByUserId(@Param("userId") String userId);
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-int addGrowth(@Param("userId") String userId, @Param("growth") Long growth);
+public interface MallUserMemberMapper extends BaseMapper<MallUserMember> {
+    // ... 已有方法不变
+    int addGrowth(@Param("userId") String userId, @Param("growth") Long growth);
+}
 ```
 
-- [ ] **Step 2: MallUserMemberMapper.xml 追加 SQL**
-
+MallUserMemberMapper.xml 追加：
 ```xml
-<select id="selectByUserId" parameterType="String" resultMap="MallUserMemberResult">
-    <include refid="selectMallUserMemberVo"/>
-    where user_id = #{userId} limit 1
-</select>
-
 <update id="addGrowth">
     update mall_user_member
     set growth = growth + #{growth},
@@ -365,31 +356,23 @@ int addGrowth(@Param("userId") String userId, @Param("growth") Long growth);
 </update>
 ```
 
----
+> `selectByUserId` 由 Service 用 `LambdaQueryWrapper` 替代。
 
-### Task 7: Mapper 扩展 — MallUserPointsAccountMapper
+- [ ] **Step 3: MallUserPointsAccountMapper 加 `extends BaseMapper<MallUserPointsAccount>`，XML 追加 `addPoints`**
 
-**Files:**
-- Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserPointsAccountMapper.java`
-- Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserPointsAccountMapper.xml`
-
-- [ ] **Step 1: MallUserPointsAccountMapper.java 追加 2 个方法**
-
+MallUserPointsAccountMapper.java：
 ```java
-MallUserPointsAccount selectByUserId(@Param("userId") String userId);
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-int addPoints(@Param("userId") String userId, @Param("points") int points,
-              @Param("version") int version);
+public interface MallUserPointsAccountMapper extends BaseMapper<MallUserPointsAccount> {
+    // ... 已有方法不变
+    int addPoints(@Param("userId") String userId, @Param("points") int points,
+                  @Param("version") int version);
+}
 ```
 
-- [ ] **Step 2: MallUserPointsAccountMapper.xml 追加 SQL**
-
+MallUserPointsAccountMapper.xml 追加：
 ```xml
-<select id="selectByUserId" parameterType="String" resultMap="MallUserPointsAccountResult">
-    <include refid="selectMallUserPointsAccountVo"/>
-    where user_id = #{userId} limit 1
-</select>
-
 <update id="addPoints">
     update mall_user_points_account
     set available_points = available_points + #{points},
@@ -400,72 +383,92 @@ int addPoints(@Param("userId") String userId, @Param("points") int points,
 </update>
 ```
 
+> `selectByUserId` 由 Service 用 `LambdaQueryWrapper` 替代。
+
+- [ ] **Step 4: MallUserMemberLevelMapper 加 `extends BaseMapper<MallUserMemberLevel>`**
+
+```java
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+public interface MallUserMemberLevelMapper extends BaseMapper<MallUserMemberLevel> {
+    // ... 已有方法不变
+}
+```
+
+> `selectAllOrderByLevelValue` 由 Service 用 `LambdaQueryWrapper` 替代，无需 XML。
+
 ---
 
-### Task 8: Mapper 扩展 — MallUserPointsLogMapper + MallUserGrowthLogMapper + MallUserMemberLevelMapper
+### Task 6: Mapper 扩展 — 流水表分页查询（XML + MyBatis-Plus Page）
+
+> 流水表 `MallUserPointsLog` / `MallUserGrowthLog` 的分页查询需要指定列 + `order by`，保留 XML 方式。用 MyBatis-Plus 的 `Page<T>` + `IPage<T>` 替代 PageHelper。追加 `bizType` 过滤入参（Fix 2）。
 
 **Files:**
 - Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserPointsLogMapper.java`
 - Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserPointsLogMapper.xml`
 - Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserGrowthLogMapper.java`
 - Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserGrowthLogMapper.xml`
-- Modify: `server/mall/mall-user/src/main/java/com/mall/user/mapper/MallUserMemberLevelMapper.java`
-- Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserMemberLevelMapper.xml`
 
-- [ ] **Step 1: MallUserPointsLogMapper.java**
+- [ ] **Step 1: MallUserPointsLogMapper + XML**
 
 ```java
-List<MallUserPointsLog> selectByUserIdPage(@Param("userId") String userId);
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+public interface MallUserPointsLogMapper extends BaseMapper<MallUserPointsLog> {
+    // ... 已有方法不变
+    IPage<MallUserPointsLog> selectByUserIdPage(Page<MallUserPointsLog> page,
+            @Param("userId") String userId, @Param("bizType") String bizType);
+}
 ```
 
-- [ ] **Step 2: MallUserPointsLogMapper.xml — 分页查询 SQL**
-
+XML（若 resultMap 不存在需补 `MallUserPointsLogResult`）：
 ```xml
-<select id="selectByUserIdPage" parameterType="String" resultMap="MallUserPointsLogResult">
-    select id, user_id, biz_type, biz_no, change_type, points, before_points, after_points, remark, create_time
+<select id="selectByUserIdPage" resultMap="MallUserPointsLogResult">
+    select id, user_id, biz_type, biz_no, change_type, points,
+           before_points, after_points, remark, create_time
     from mall_user_points_log
     where user_id = #{userId}
+    <if test="bizType != null and bizType != ''"> and biz_type = #{bizType}</if>
     order by create_time desc
 </select>
 ```
 
-> 注意：resultMap 需在已有 XML 中检查是否存在；若不存在需补上
-
-- [ ] **Step 3: MallUserGrowthLogMapper.java**
+- [ ] **Step 2: MallUserGrowthLogMapper + XML（同理）**
 
 ```java
-List<MallUserGrowthLog> selectByUserIdPage(@Param("userId") String userId);
+public interface MallUserGrowthLogMapper extends BaseMapper<MallUserGrowthLog> {
+    // ... 已有方法不变
+    IPage<MallUserGrowthLog> selectByUserIdPage(Page<MallUserGrowthLog> page,
+            @Param("userId") String userId, @Param("bizType") String bizType);
+}
 ```
 
-- [ ] **Step 4: MallUserGrowthLogMapper.xml**
+XML 同结构，字段调为 `growth`/`before_growth`/`after_growth`。MyBatis-Plus 检测到 `Page` 参数自动添加 COUNT + LIMIT，无需在 SQL 中手写。
 
-```xml
-<select id="selectByUserIdPage" parameterType="String" resultMap="MallUserGrowthLogResult">
-    select id, user_id, biz_type, biz_no, change_type, growth, before_growth, after_growth, remark, create_time
-    from mall_user_growth_log
-    where user_id = #{userId}
-    order by create_time desc
-</select>
-```
+- [ ] **Step 3: PointsExpireTask 分页查询 Mapper（Fix 6）**
 
-- [ ] **Step 5: MallUserMemberLevelMapper.java**
-
+在 `MallUserPointsAccountMapper` 追加：
 ```java
-List<MallUserMemberLevel> selectAllOrderByLevelValue();
+List<MallUserPointsAccount> selectAvailablePointsByPage(@Param("offset") int offset,
+        @Param("limit") int limit);
 ```
 
-- [ ] **Step 6: MallUserMemberLevelMapper.xml**
-
+XML：
 ```xml
-<select id="selectAllOrderByLevelValue" resultMap="MallUserMemberLevelResult">
-    <include refid="selectMallUserMemberLevelVo"/>
-    order by level_value
+<select id="selectAvailablePointsByPage" resultMap="MallUserPointsAccountResult">
+    select id, user_id, total_points, available_points, used_points, expired_points, version
+    from mall_user_points_account
+    where available_points > 0
+    order by id
+    limit #{offset}, #{limit}
 </select>
 ```
 
 ---
 
-### Task 9: RemoteAuthAdapter
+### Task 7: RemoteAuthAdapter
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/infrastructure/feign/RemoteAuthAdapter.java`
@@ -497,7 +500,7 @@ public class RemoteAuthAdapter {
 
 ---
 
-### Task 10: VO 类（9 个）
+### Task 8: VO 类（9 个）
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/UserProfileVO.java`
@@ -673,7 +676,7 @@ public class SignInVO {
 
 ---
 
-### Task 11: C 端 Service — UserProfileService
+### Task 9: C 端 Service — UserProfileService
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/service/customer/UserProfileService.java`
@@ -841,7 +844,14 @@ mvn clean compile -f server/mall/pom.xml -pl mall-user -DskipTests
 
 ---
 
-### Task 12: C 端 Service — AddressBookService
+### Task 10: C 端 Service — AddressBookService
+
+> MyBatis-Plus 模式下，`selectByUserId` / `countByUserId` 用 `LambdaQueryWrapper`，无需 XML 方法：
+> ```java
+> mapper.selectList(new LambdaQueryWrapper<MallUserAddress>().eq(MallUserAddress::getUserId, userId)
+>     .orderByDesc(MallUserAddress::getIsDefault).orderByDesc(MallUserAddress::getCreateTime));
+> mapper.selectCount(new LambdaQueryWrapper<MallUserAddress>().eq(MallUserAddress::getUserId, userId));
+> ```
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/service/customer/AddressBookService.java`
@@ -974,7 +984,9 @@ public class AddressBookService {
 
 ---
 
-### Task 13: C 端 Service — MemberService
+### Task 11: C 端 Service — MemberService
+
+> MyBatis-Plus 模式：`selectByUserId` → `LambdaQueryWrapper`；`selectAllOrderByLevelValue` → `mapper.selectList(new LambdaQueryWrapper<MallUserMemberLevel>().orderByAsc(MallUserMemberLevel::getLevelValue))`。
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/service/customer/MemberService.java`
@@ -1126,7 +1138,9 @@ public class MemberService {
 
 ---
 
-### Task 14: C 端 Service — PointsService
+### Task 12: C 端 Service — PointsService
+
+> MyBatis-Plus 模式：`selectByUserId` → `LambdaQueryWrapper`；`selectByUserIdPage` 用 XML + MyBatis-Plus `Page<T>` 分页。
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/service/customer/PointsService.java`
@@ -1136,8 +1150,8 @@ public class MemberService {
 ```java
 package com.mall.user.service.customer;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.common.enums.user.BizTypeEnum;
 import com.mall.user.controller.api.vo.PointsRecordVO;
 import com.mall.user.controller.api.vo.PointsVO;
@@ -1185,14 +1199,11 @@ public class PointsService {
         return vo;
     }
 
-    public PageInfo<PointsRecordVO> getPointsRecords(String userId, String bizType, int page, int size) {
-        PageHelper.startPage(page, size);
-        List<MallUserPointsLog> logs = mallUserPointsLogMapper.selectByUserIdPage(userId);
+    public IPage<PointsRecordVO> getPointsRecords(String userId, String bizType, int page, int size) {
+        Page<MallUserPointsLog> mpPage = new Page<>(page, size);
+        IPage<MallUserPointsLog> logPage = mallUserPointsLogMapper.selectByUserIdPage(mpPage, userId, bizType);
         List<PointsRecordVO> vos = new ArrayList<>();
-        for (MallUserPointsLog logEntry : logs) {
-            if (bizType != null && !bizType.isEmpty() && !bizType.equals(logEntry.getBizType())) {
-                continue;
-            }
+        for (MallUserPointsLog logEntry : logPage.getRecords()) {
             PointsRecordVO vo = new PointsRecordVO();
             vo.setId(logEntry.getId());
             vo.setBizType(logEntry.getBizType());
@@ -1206,12 +1217,8 @@ public class PointsService {
             vo.setCreateTime(logEntry.getCreateTime());
             vos.add(vo);
         }
-        PageInfo<MallUserPointsLog> pageInfo = new PageInfo<>(logs);
-        PageInfo<PointsRecordVO> result = new PageInfo<>();
-        result.setList(vos);
-        result.setTotal(pageInfo.getTotal());
-        result.setPageNum(pageInfo.getPageNum());
-        result.setPageSize(pageInfo.getPageSize());
+        Page<PointsRecordVO> result = new Page<>(page, size, logPage.getTotal());
+        result.setRecords(vos);
         return result;
     }
 
@@ -1249,7 +1256,7 @@ public class PointsService {
 
 ---
 
-### Task 15: C 端 Service — SignInService
+### Task 13: C 端 Service — SignInService
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/service/customer/SignInService.java`
@@ -1351,7 +1358,7 @@ public class SignInService {
 
 ---
 
-### Task 16: C 端 Controller — UserProfileController
+### Task 14: C 端 Controller — UserProfileController
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/UserProfileController.java`
@@ -1400,7 +1407,7 @@ public class UserProfileController {
 
 ---
 
-### Task 17: C 端 Controller — AddressController
+### Task 15: C 端 Controller — AddressController
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/AddressController.java`
@@ -1475,7 +1482,7 @@ public class AddressController {
 
 ---
 
-### Task 18: C 端 Controller — MemberController
+### Task 16: C 端 Controller — MemberController
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/MemberController.java`
@@ -1515,7 +1522,7 @@ public class MemberController {
 
 ---
 
-### Task 19: C 端 Controller — PointsController + GrowthController
+### Task 17: C 端 Controller — PointsController + GrowthController
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/PointsController.java`
@@ -1526,7 +1533,7 @@ public class MemberController {
 ```java
 package com.mall.user.controller.api;
 
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mall.common.dto.MallResult;
 import com.mall.user.controller.api.vo.PointsRecordVO;
 import com.mall.user.controller.api.vo.PointsVO;
@@ -1556,7 +1563,7 @@ public class PointsController {
     }
 
     @GetMapping("/points/records")
-    public MallResult<PageInfo<PointsRecordVO>> getPointsRecords(
+    public MallResult<IPage<PointsRecordVO>> getPointsRecords(
             HttpServletRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -1572,7 +1579,7 @@ public class PointsController {
 ```java
 package com.mall.user.controller.api;
 
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mall.common.dto.MallResult;
 import com.mall.user.controller.api.vo.GrowthRecordVO;
 import com.mall.user.controller.api.vo.GrowthVO;
@@ -1611,12 +1618,12 @@ public class GrowthController {
     }
 
     @GetMapping("/growth/records")
-    public MallResult<PageInfo<GrowthRecordVO>> getGrowthRecords(
+    public MallResult<IPage<GrowthRecordVO>> getGrowthRecords(
             HttpServletRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String bizType) {
-        PageInfo<GrowthRecordVO> emptyPage = new PageInfo<>(Collections.emptyList());
+        Page<GrowthRecordVO> emptyPage = new Page<>(page, size, 0);
         return MallResult.success(emptyPage);
     }
 }
@@ -1666,7 +1673,7 @@ public class SignInController {
 
 ---
 
-### Task 21: MQ Consumer — UserOrderCompletedConsumer
+### Task 19: MQ Consumer — UserOrderCompletedConsumer
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/mq/consumer/UserOrderCompletedConsumer.java`
@@ -1728,9 +1735,9 @@ public class UserOrderCompletedConsumer implements RocketMQListener<String> {
 
 ---
 
-### Task 22: 补充 GrowthService + GrowthController 完整实现
+### Task 20: 补充 GrowthService + GrowthController 完整实现
 
-由于成长值流水需要 `MallUserGrowthLogMapper.selectByUserIdPage` 返回的数据，在 Task 8 已追加 Mapper 方法，现在补充 GrowthController：
+由于成长值流水需要 `MallUserGrowthLogMapper.selectByUserIdPage` 返回的数据，在 Task 6 已追加 Mapper 方法，现在补充 GrowthController：
 
 - [ ] **Step 1: 在 MemberService 追加 getGrowth 和 getGrowthRecords 方法**
 
@@ -1768,14 +1775,11 @@ public GrowthVO getGrowth(String userId) {
     return vo;
 }
 
-public PageInfo<GrowthRecordVO> getGrowthRecords(String userId, String bizType, int page, int size) {
-    PageHelper.startPage(page, size);
-    List<MallUserGrowthLog> logs = mallUserGrowthLogMapper.selectByUserIdPage(userId);
+public IPage<GrowthRecordVO> getGrowthRecords(String userId, String bizType, int page, int size) {
+    Page<MallUserGrowthLog> mpPage = new Page<>(page, size);
+    IPage<MallUserGrowthLog> logPage = mallUserGrowthLogMapper.selectByUserIdPage(mpPage, userId, bizType);
     List<GrowthRecordVO> vos = new ArrayList<>();
-    for (MallUserGrowthLog logEntry : logs) {
-        if (bizType != null && !bizType.isEmpty() && !bizType.equals(logEntry.getBizType())) {
-            continue;
-        }
+    for (MallUserGrowthLog logEntry : logPage.getRecords()) {
         GrowthRecordVO vo = new GrowthRecordVO();
         vo.setId(logEntry.getId());
         vo.setBizType(logEntry.getBizType());
@@ -1789,31 +1793,27 @@ public PageInfo<GrowthRecordVO> getGrowthRecords(String userId, String bizType, 
         vo.setCreateTime(logEntry.getCreateTime());
         vos.add(vo);
     }
-    PageInfo<MallUserGrowthLog> pageInfo = new PageInfo<>(logs);
-    PageInfo<GrowthRecordVO> result = new PageInfo<>();
-    result.setList(vos);
-    result.setTotal(pageInfo.getTotal());
-    result.setPageNum(pageInfo.getPageNum());
-    result.setPageSize(pageInfo.getPageSize());
+    Page<GrowthRecordVO> result = new Page<>(page, size, logPage.getTotal());
+    result.setRecords(vos);
     return result;
 }
 ```
 
 对应新增 import：
 ```java
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.user.controller.api.vo.GrowthRecordVO;
 import com.mall.user.controller.api.vo.GrowthVO;
 import com.mall.user.domain.MallUserGrowthLog;
 ```
 
-- [ ] **Step 2: 重写 GrowthController**
+**Step 2: 重写 GrowthController**
 
 ```java
 package com.mall.user.controller.api;
 
-import com.github.pagehelper.PageInfo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mall.common.dto.MallResult;
 import com.mall.user.controller.api.vo.GrowthRecordVO;
 import com.mall.user.controller.api.vo.GrowthVO;
@@ -1843,7 +1843,7 @@ public class GrowthController {
     }
 
     @GetMapping("/growth/records")
-    public MallResult<PageInfo<GrowthRecordVO>> getGrowthRecords(
+    public MallResult<IPage<GrowthRecordVO>> getGrowthRecords(
             HttpServletRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -1854,11 +1854,11 @@ public class GrowthController {
 }
 ```
 
-> 同时需将 Task 19 中创建的 GrowthController 替换为此完整版本。
+> 同时需将 Task 17 中创建的 GrowthController 骨架替换为此完整版本。
 
 ---
 
-### Task 23: 定时任务 — PointsExpireTask
+### Task 21: 定时任务 — PointsExpireTask
 
 **Files:**
 - Create: `server/mall/mall-user/src/main/java/com/mall/user/schedule/PointsExpireTask.java`
@@ -1918,7 +1918,7 @@ public class PointsExpireTask {
 
 ---
 
-### Task 24: 配置变更 — pom.xml + MallUserApplication
+### Task 22: 配置变更 — pom.xml + MallUserApplication
 
 **Files:**
 - Modify: `server/mall/mall-user/pom.xml`
@@ -1926,8 +1926,9 @@ public class PointsExpireTask {
 
 - [ ] **Step 1: pom.xml 追加 RocketMQ 依赖**
 
-在 `</dependencies>` 前追加：
+> MyBatis-Plus 依赖已在 Task 5 环节添加完毕，本步只加 RocketMQ。
 
+在 `</dependencies>` 前追加：
 ```xml
 <!-- RocketMQ -->
 <dependency>
@@ -1938,6 +1939,8 @@ public class PointsExpireTask {
 ```
 
 - [ ] **Step 2: MallUserApplication 加 @EnableScheduling**
+
+> MyBatis-Plus 兼容 `org.mybatis.spring.annotation.MapperScan`，无需改动。
 
 ```java
 package com.mall.user;
@@ -1968,7 +1971,7 @@ public class MallUserApplication {
 
 ---
 
-### Task 25: Nacos 配置 + RocketMQ 配置
+### Task 23: Nacos 配置 + RocketMQ 配置
 
 - [ ] **Step 1: Nacos 控制台 — mall-user-dev.yml 追加配置项**
 
@@ -1993,7 +1996,7 @@ rocketmq:
 
 ---
 
-### Task 26: 完整验证
+### Task 24: 完整验证
 
 - [ ] **Step 1: 编译验证**
 
@@ -2029,7 +2032,7 @@ curl -H "Authorization: Bearer <jwt_token>" http://localhost:9302/api/user/point
 
 ---
 
-### Task 27: MQ 消费者幂等验证（可选，需 mall-order 发消息）
+### Task 25: MQ 消费者幂等验证（可选，需 mall-order 发消息）
 
 - [ ] **Step 1: 模拟发送订单完成消息**
 
@@ -2132,12 +2135,12 @@ public class UpdateProfileRequest {
 
 ### Fix 5: GrowthController 合并为单一 Task
 
-> 原 Task 19 写骨架 + Task 22 替换完整版，两次写同一文件。
+> 原 Task 17 写骨架 + Task 20 替换完整版，两次写同一文件。
 
 合并后：
-- Task 19 → 仅 `PointsController`
-- Task 20 → 仅 `SignInController`
-- Task 22 → 改为 **Task 20.5: GrowthController**（直接写完整版，含 MemberService.getGrowth/getGrowthRecords 追加）
+- Task 17 → 仅 `PointsController`
+- Task 18 → 仅 `SignInController`
+- Task 20 → 直接写完整版 GrowthController（含 MemberService.getGrowth/getGrowthRecords 追加）
 
 ### Fix 6: PointsExpireTask 分页查询
 

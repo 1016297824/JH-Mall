@@ -535,7 +535,7 @@ spring:
           username: root
           password: 138992
 
-mybatis:
+mybatis-plus:
   typeAliasesPackage: com.mall.order.**.domain
   mapperLocations: classpath:mapper/**/*.xml
 
