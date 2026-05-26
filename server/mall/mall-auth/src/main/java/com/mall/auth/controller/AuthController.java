@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * C 端认证接口（占位，尚未开放）
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

@@ -14,6 +14,7 @@ import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
 import com.mall.common.enums.ErrorCode;
+import com.mall.common.enums.user.RegisterTypeEnum;
 import com.mall.common.exception.BusinessException;
 import com.mall.common.exception.CaptchaException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,15 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+/**
+ * C 端认证控制器（验证码注册/登录/密码重置/换绑手机/注销）
+ *
+ * <p>所有接口通过图形验证码校验后执行，防止自动化攻击。
+ * 密码使用 BCrypt 哈希，三次失败计入错误计数。</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 @RestController
 @RequestMapping("/api/auth/captcha")
 public class CaptchaController {
@@ -94,7 +104,7 @@ public class CaptchaController {
         registerReq.setPhone(req.getPhone());
         registerReq.setPhoneHash(phoneHash);
         registerReq.setPassword(passwordHash);
-        registerReq.setRegisterType("PHONE");
+        registerReq.setRegisterType(RegisterTypeEnum.PHONE.getCode());
 
         String userId = remoteUserService.register(registerReq);
         TokenResponse token = tokenService.issue(userId);

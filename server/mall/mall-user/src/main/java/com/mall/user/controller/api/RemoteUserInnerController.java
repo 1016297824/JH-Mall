@@ -3,11 +3,9 @@ package com.mall.user.controller.api;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.common.dto.user.MallUserDTO;
-import com.mall.api.feign.RemoteUserService;
 import com.mall.user.domain.MallUser;
 import com.mall.user.service.IMallUserService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +15,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * C 端用户内部接口（供 RemoteUserService Feign 调用）
+ *
+ * <p>无鉴权，仅限服务间内网调用，禁止暴露到网关</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 @RestController
 @RequestMapping("/inner/user")
 public class RemoteUserInnerController {
 
-    @Autowired
-    private IMallUserService mallUserService;
+    private final IMallUserService mallUserService;
+
+    public RemoteUserInnerController(IMallUserService mallUserService) {
+        this.mallUserService = mallUserService;
+    }
 
     @GetMapping("/phone/{phone}")
     public MallUserDTO findByPhone(@PathVariable("phone") String phone) {

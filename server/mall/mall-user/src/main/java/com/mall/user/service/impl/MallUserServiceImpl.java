@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.mall.common.enums.user.RegisterTypeEnum;
 import com.mall.common.enums.user.UserStatusEnum;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ import com.mall.user.service.IMallUserService;
 @Service
 public class MallUserServiceImpl implements IMallUserService 
 {
+    private static final String NICKNAME_PREFIX = "用户";
+    private static final String PRIVACY_AGREED = "1";
+
     @Autowired
     private MallUserMapper mallUserMapper;
 
@@ -125,10 +129,10 @@ public class MallUserServiceImpl implements IMallUserService
         user.setPhone(phone);
         user.setPhoneHash(phoneHash);
         user.setPassword(passwordHash);
-        user.setNickname("用户" + phone.substring(phone.length() - 4));
+        user.setNickname(NICKNAME_PREFIX + phone.substring(phone.length() - 4));
         user.setUserStatus(String.valueOf(UserStatusEnum.NORMAL.getCode()));
-        user.setRegisterType("phone");
-        user.setIsPrivacyAgreed("1");
+        user.setRegisterType(RegisterTypeEnum.PHONE.getCode());
+        user.setIsPrivacyAgreed(PRIVACY_AGREED);
         Date now = DateUtils.getNowDate();
         user.setRegisterTime(now);
         user.setCreateTime(now);

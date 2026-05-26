@@ -1,6 +1,7 @@
 package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
+import com.mall.auth.config.MallSecurityConfigProperties;
 import com.mall.auth.dto.response.TokenResponse;
 import com.mall.auth.service.TokenService;
 import com.mall.common.constant.CacheConstants;
@@ -12,7 +13,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -25,20 +25,21 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-    @Value("${mall.security.jwt-secret}")
-    private String jwtSecret;
-
     private final RedisTemplate<String, Object> redisTemplate;
     private final MallAuthConfigProperties authProperties;
+    private final MallSecurityConfigProperties securityProperties;
 
-    public TokenServiceImpl(RedisTemplate<String, Object> redisTemplate, MallAuthConfigProperties authProperties) {
+    public TokenServiceImpl(RedisTemplate<String, Object> redisTemplate,
+                            MallAuthConfigProperties authProperties,
+                            MallSecurityConfigProperties securityProperties) {
         this.redisTemplate = redisTemplate;
         this.authProperties = authProperties;
+        this.securityProperties = securityProperties;
     }
 
     @Override
     public TokenResponse issue(String userId) {
-        byte[] key = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
         Date now = new Date();
         Date accessExp = new Date(now.getTime() + authProperties.getAccessTokenTtl() * 1000);
         Date refreshExp = new Date(now.getTime() + authProperties.getRefreshTokenTtl() * 1000);
@@ -162,7 +163,7 @@ public class TokenServiceImpl implements TokenService {
 
     private Claims parseToken(String token) {
         try {
-            byte[] key = jwtSecret.getBytes(StandardCharsets.UTF_8);
+            byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
             return Jwts.parser()
                     .setSigningKey(key)
                     .parseClaimsJws(token)
