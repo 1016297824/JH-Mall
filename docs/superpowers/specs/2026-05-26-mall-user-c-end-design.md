@@ -61,11 +61,10 @@ server/mall/mall-user/src/main/java/com/mall/user/
 
 ```
 server/mall/mall-common/src/main/java/com/mall/common/
-├── constant/
-│   └── ErrorCodeConstants.java              # 🆕 ErrorCode 常量引用
 └── enums/user/
     └── BizTypeEnum.java                     # 🆕 积分/成长值共用业务类型
 ```
+> ErrorCode 枚举已存在，直接 `import static com.mall.common.enums.ErrorCode.*` 使用。
 
 ## 3. 接口契约
 
@@ -217,18 +216,18 @@ PointsExpireTask.execute()
 
 ## 5. 错误码
 
-| 常量 | ErrorCode | msg | userTip |
-|------|-----------|-----|---------|
-| `ErrorCodeConstants.User.PHONE_EXISTS` | `A0151` | 手机号已存在 | 手机号已注册 |
-| `ErrorCodeConstants.User.EMAIL_EXISTS` | `A0154` | 邮箱已存在 | 邮箱已注册 |
-| `ErrorCodeConstants.User.ACCOUNT_NOT_FOUND` | `A0201` | 用户不存在 | 用户不存在 |
-| `ErrorCodeConstants.User.ACCOUNT_FROZEN` | `A0202` | 用户已冻结 | 账户已冻结 |
-| `ErrorCodeConstants.User.ACCOUNT_DELETED` | `A0203` | 用户已注销 | 账户已注销 |
-| `ErrorCodeConstants.User.NOT_AUTHENTICATED` | `A0301` | 未登录 | 请先登录 |
-| `ErrorCodeConstants.User.RESOURCE_NOT_FOUND` | `A0501` | 资源不存在 | 资源不存在 |
-| `ErrorCodeConstants.User.RESOURCE_EXISTS` | `A0502` | 已签到 | 今日已签到 |
-| `ErrorCodeConstants.User.RESOURCE_STATUS_ERROR` | `A0503` | 资源状态错误 | 账户状态异常 |
-| `ErrorCodeConstants.User.ADDRESS_LIMIT` | `A0511` | 地址数量超限 | 最多添加20个地址 |
+直接使用 `ErrorCode` 枚举值（`throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND)`）：
+
+| ErrorCode | msg | userTip | 使用场景 |
+|-----------|-----|---------|----------|
+| `RESOURCE_NOT_FOUND` | 资源不存在 | 资源不存在 | 地址不存在、用户不存在等 |
+| `RESOURCE_EXISTS` | 已签到 | 今日已签到 | 重复签到 |
+| `RESOURCE_STATUS_ERROR` | 资源状态错误 | 账户状态异常 | 冻结/注销用户操作 |
+| `ADDRESS_LIMIT` | 地址数量已达上限 | 最多添加20个地址 | 地址超限 |
+| `ACCOUNT_NOT_FOUND` | 用户不存在 | 用户不存在 | 用户查询 |
+| `ACCOUNT_FROZEN` | 用户已冻结 | 账户已冻结 | 冻结用户拦截 |
+| `ACCOUNT_DELETED` | 用户已注销 | 账户已注销 | 注销用户拦截 |
+| `PARAM_MISSING` | 必填参数为空 | 请完整填写信息 | 参数校验 |
 
 ## 6. 缓存 Key & MQ Topic
 
