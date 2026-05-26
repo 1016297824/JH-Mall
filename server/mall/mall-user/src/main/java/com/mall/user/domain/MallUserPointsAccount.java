@@ -38,6 +38,10 @@ public class MallUserPointsAccount extends BaseEntity
     @Excel(name = "已过期积分")
     private Long expiredPoints;
 
+    /** 乐观锁版本号 */
+    @Excel(name = "乐观锁版本号")
+    private Integer version;
+
     /** 逻辑删除标志 */
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
@@ -102,6 +106,16 @@ public class MallUserPointsAccount extends BaseEntity
         return expiredPoints;
     }
 
+    public void setVersion(Integer version) 
+    {
+        this.version = version;
+    }
+
+    public Integer getVersion() 
+    {
+        return version;
+    }
+
     public void setIsDeleted(String isDeleted) 
     {
         this.isDeleted = isDeleted;
@@ -121,6 +135,7 @@ public class MallUserPointsAccount extends BaseEntity
             .append("availablePoints", getAvailablePoints())
             .append("usedPoints", getUsedPoints())
             .append("expiredPoints", getExpiredPoints())
+            .append("version", getVersion())
             .append("isDeleted", getIsDeleted())
             .append("createTime", getCreateTime())
             .append("updateTime", getUpdateTime())

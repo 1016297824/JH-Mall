@@ -2060,3 +2060,127 @@ curl -H "Authorization: Bearer <jwt_token>" http://localhost:9302/api/user/point
 | 魔法值已消除 | ✅ |
 | VO 类全部定义 | ✅ |
 | 枚举 BizTypeEnum 覆盖所有场景 | ✅ |
+
+---
+
+## 审查修复项（plan-eng-review 产出，已确认）
+
+### Fix 1: 乐观锁 version 字段（DDL + 实体 + XML）🆕
+
+> 设计文档 `08_mall-user详细设计.md §3.3` 要求 `addPoints` 用乐观锁 `WHERE user_id=? AND version=?`，但 DDL 中 `mall_user_points_account` 表缺少 `version` 列。
+
+**文件:**
+- Create: `db/mall-sql/V1.0.1__add_version_to_points_account.sql`
+- Modify: `server/mall/mall-user/src/main/java/com/mall/user/domain/MallUserPointsAccount.java`
+- Modify: `server/mall/mall-user/src/main/resources/mapper/mall-user/MallUserPointsAccountMapper.xml`
+
+DDL:
+```sql
+ALTER TABLE `mall_user_points_account`
+    ADD COLUMN `version` int unsigned DEFAULT 0 COMMENT '乐观锁版本号' AFTER `expired_points`;
+```
+
+实体补字段 `Integer version` + getter/setter + toString。
+XML: resultMap 补 `<result property="version" column="version"/>`，SQL 片段补 `version` 列。
+
+> ✅ 已执行：DDL/实体/XML 均已修改完毕。
+
+### Fix 2: bizType 下推到 SQL 层
+
+> `PointsService.getPointsRecords` 原在 Java 层过滤 bizType，导致分页错乱（DB 返回 20 行过滤后可能 3 行，total 仍为 20）。
+
+`MallUserPointsLogMapper.selectByUserIdPage` 签名改为：
+
+```java
+List<MallUserPointsLog> selectByUserIdPage(@Param("userId") String userId,
+        @Param("bizType") String bizType);
+```
+
+XML 追加 `<if test="bizType != null"> and biz_type = #{bizType}</if>`。
+
+`PointsService.getPointsRecords` 删除 Java 层 bizType 过滤循环。
+
+### Fix 3: SignInService 补 Redis EXPIRE
+
+> spec §6 要求签到 Bitmap Key TTL 60 天，原实现遗漏。
+
+在 `SignInService.signIn()` 的 `SETBIT` 后加：
+
+```java
+redisTemplate.expire(key, 60, TimeUnit.DAYS);
+```
+
+### Fix 4: UserProfileVO 拆分为响应 + 请求 DTO
+
+> 原 `UserProfileVO` 被同时用作 GET 响应和 PUT 请求体，请求中包含 userId/points/growth 等无法修改的字段。
+
+新建 `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/UpdateProfileRequest.java`：
+
+```java
+public class UpdateProfileRequest {
+    private String nickname;
+    private String avatar;
+    private Integer gender;
+    private String birthday;
+    private String email;
+    // getters / setters
+}
+```
+
+`UserProfileController.updateProfile` 参数改为 `@RequestBody UpdateProfileRequest`。
+`UserProfileService.updateProfile` 参数同步改为 `UpdateProfileRequest`。
+
+### Fix 5: GrowthController 合并为单一 Task
+
+> 原 Task 19 写骨架 + Task 22 替换完整版，两次写同一文件。
+
+合并后：
+- Task 19 → 仅 `PointsController`
+- Task 20 → 仅 `SignInController`
+- Task 22 → 改为 **Task 20.5: GrowthController**（直接写完整版，含 MemberService.getGrowth/getGrowthRecords 追加）
+
+### Fix 6: PointsExpireTask 分页查询
+
+> 原实现全量 SELECT 后分批 UPDATE，大量用户时内存压力大。
+
+改为分页循环：
+
+```java
+int offset = 0;
+int pageSize = 500;
+while (true) {
+    List<MallUserPointsAccount> batch = mapper.selectAllAvailablePoints(offset, pageSize);
+    if (batch.isEmpty()) break;
+    // ... 逐条处理
+    offset += pageSize;
+}
+```
+
+需在 `MallUserPointsAccountMapper` 追加分页查询方法：
+
+```java
+List<MallUserPointsAccount> selectAllAvailablePoints(@Param("offset") int offset,
+        @Param("limit") int limit);
+```
+
+XML:
+```xml
+<select id="selectAllAvailablePoints" resultMap="MallUserPointsAccountResult">
+    select id, user_id, total_points, available_points, used_points, expired_points, version
+    from mall_user_points_account
+    where available_points > 0
+    order by id
+    limit #{offset}, #{limit}
+</select>
+```
+
+---
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Runs | Status | Findings |
+|--------|---------|------|--------|----------|
+| Eng Review | `/plan-eng-review` | 1 | CLEAR (PLAN) | Architecture:3 / Code Quality:2 / Test:30+ gaps / Performance:1 |
+
+- **FIXES CONFIRMED:** 6 fixes applied to plan (DDL / SQL / Redis / DTO split / task merge / pagination)
+- **VERDICT:** ENG CLEARED — 6 fixes confirmed, ready to implement
