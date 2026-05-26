@@ -2,21 +2,21 @@
 
 > 基于系统详细设计 `03_系统详细设计.md` 展开。数据表 DDL 在系统设计 1.1 节统一维护，此处只引用表名和字段。
 
----
+***
 
 ## 1 模块概述
 
 ### 1.1 子领域
 
-| 子领域 | 实体 | 说明 |
-|--------|------|------|
-| 用户账号 | `mall_user` | 基本信息（加密手机号/密码哈希/昵称/头像/状态） |
-| 会员等级 | `mall_user_member_level` | 等级定义（成长值区间/折扣率/包邮/积分倍数） |
-| 用户会员 | `mall_user_member` | 用户当前等级+成长值，与用户 1:1 |
-| 地址簿 | `mall_user_address` | 收货地址（最多 20 条），手机号加密存储 |
-| 积分账户 | `mall_user_points_account` | 积分余额+累计，与用户 1:1 |
-| 积分流水 | `mall_user_points_log` | 积分变动记录（获取/消耗/过期/调整） |
-| 成长值流水 | `mall_user_growth_log` | 成长值变动记录（获取/消耗） |
+| 子领域   | 实体                         | 说明                        |
+| ----- | -------------------------- | ------------------------- |
+| 用户账号  | `mall_user`                | 基本信息（加密手机号/密码哈希/昵称/头像/状态） |
+| 会员等级  | `mall_user_member_level`   | 等级定义（成长值区间/折扣率/包邮/积分倍数）   |
+| 用户会员  | `mall_user_member`         | 用户当前等级+成长值，与用户 1:1        |
+| 地址簿   | `mall_user_address`        | 收货地址（最多 20 条），手机号加密存储     |
+| 积分账户  | `mall_user_points_account` | 积分余额+累计，与用户 1:1           |
+| 积分流水  | `mall_user_points_log`     | 积分变动记录（获取/消耗/过期/调整）       |
+| 成长值流水 | `mall_user_growth_log`     | 成长值变动记录（获取/消耗）            |
 
 ### 1.2 依赖关系
 
@@ -31,7 +31,7 @@ mall-user (9302端口)
 
 > **关键约束**：手机号/邮箱 AES-256-GCM 加密存储，等值查询通过 SHA256 哈希辅助列。mall-user 是用户数据唯一持有方，其他服务通过 Feign 调 RemoteUserService 操作。
 
----
+***
 
 ## 2 包结构与接口映射
 
@@ -107,24 +107,24 @@ server/mall/mall-user/
 
 ### 2.2 接口 → Controller 映射
 
-| # | 方法 | 路径 | Controller | 方法名 | 需登录 | 权限码 |
-|---|------|------|-----------|--------|:---:|--------|
-| 1 | GET | `/api/user/profile` | ProfileController | `getProfile()` | 是 | — |
-| 2 | PUT | `/api/user/profile` | ProfileController | `updateProfile(req)` | 是 | — |
-| 3 | GET | `/api/user/addresses` | AddressController | `list()` | 是 | — |
-| 4 | POST | `/api/user/addresses` | AddressController | `create(req)` | 是 | — |
-| 5 | PUT | `/api/user/addresses/{addressId}` | AddressController | `update(addressId, req)` | 是 | — |
-| 6 | DELETE | `/api/user/addresses/{addressId}` | AddressController | `delete(addressId)` | 是 | — |
-| 7 | PUT | `/api/user/addresses/{addressId}/default` | AddressController | `setDefault(addressId)` | 是 | — |
-| 8 | GET | `/api/user/membership` | MembershipController | `getMembership()` | 是 | — |
-| 9 | GET | `/api/user/points` | PointsController | `getPoints()` | 是 | — |
-| 10 | GET | `/api/user/points/records` | PointsController | `listRecords(params)` | 是 | — |
-| 11 | GET | `/api/user/growth` | GrowthController | `getGrowth()` | 是 | — |
-| 12 | GET | `/api/user/growth/records` | GrowthController | `listRecords(params)` | 是 | — |
+| #  | 方法     | 路径                                        | Controller           | 方法名                      | 需登录 | 权限码 |
+| -- | ------ | ----------------------------------------- | -------------------- | ------------------------ | :-: | --- |
+| 1  | GET    | `/api/user/profile`                       | ProfileController    | `getProfile()`           |  是  | —   |
+| 2  | PUT    | `/api/user/profile`                       | ProfileController    | `updateProfile(req)`     |  是  | —   |
+| 3  | GET    | `/api/user/addresses`                     | AddressController    | `list()`                 |  是  | —   |
+| 4  | POST   | `/api/user/addresses`                     | AddressController    | `create(req)`            |  是  | —   |
+| 5  | PUT    | `/api/user/addresses/{addressId}`         | AddressController    | `update(addressId, req)` |  是  | —   |
+| 6  | DELETE | `/api/user/addresses/{addressId}`         | AddressController    | `delete(addressId)`      |  是  | —   |
+| 7  | PUT    | `/api/user/addresses/{addressId}/default` | AddressController    | `setDefault(addressId)`  |  是  | —   |
+| 8  | GET    | `/api/user/membership`                    | MembershipController | `getMembership()`        |  是  | —   |
+| 9  | GET    | `/api/user/points`                        | PointsController     | `getPoints()`            |  是  | —   |
+| 10 | GET    | `/api/user/points/records`                | PointsController     | `listRecords(params)`    |  是  | —   |
+| 11 | GET    | `/api/user/growth`                        | GrowthController     | `getGrowth()`            |  是  | —   |
+| 12 | GET    | `/api/user/growth/records`                | GrowthController     | `listRecords(params)`    |  是  | —   |
 
 管理端接口由若依代码生成器自动生成（用户/会员/积分 CRUD + 冻结解冻、积分调整），权限码无需手动维护。
 
----
+***
 
 ## 3 核心类设计
 
@@ -133,6 +133,7 @@ server/mall/mall-user/
 位于 `service/user/impl/UserServiceImpl.java`，用户账号管理。
 
 **getProfile(userId)**：
+
 - 查 `mall_user` + `mall_user_member` + `mall_user_points_account` LEFT JOIN
 - 手机号/邮箱脱敏后返回（通过 Jackson `@Sensitive` 注解）
 - 组合为 `UserProfileVO` 返回
@@ -142,10 +143,12 @@ server/mall/mall-user/
 **updateStatus(userId, userStatus)**：管理端冻结/解冻。已注销用户不可操作 → `A0503`
 
 **findByPhone(phoneHash)**（Feign 接口，供 mall-auth 调用）：
+
 - 查询：`WHERE phone_hash = SHA2(CONCAT(?, salt), 256)`
 - 返回 `MallUser`（含密码哈希、状态），用于登录校验
 
 **register(phoneEncrypted, phoneHash, passwordHash)**（Feign 接口，供 mall-auth 调用）：
+
 - 插入 `mall_user` + 初始化 `mall_user_member` + `mall_user_points_account`
 - 手机号唯一约束：`uk_phone_hash`
 
@@ -168,6 +171,7 @@ server/mall/mall-user/
 **getMembership(userId)**：查 `mall_user_member` + `mall_user_member_level`，返回当前等级、权益、到下一级的进度
 
 **addGrowth(userId, growth, bizType, bizNo)**（Feign 接口，消费 `mall:user:registered` 事件时调用）：
+
 - `UPDATE mall_user_member SET growth=growth+#{growth}, total_growth=total_growth+#{growth}`
 - 判断是否升级：查当前等级 `max_growth`，超则升到下一级
 - 记录 `mall_user_growth_log`
@@ -179,50 +183,52 @@ server/mall/mall-user/
 位于 `service/points/impl/PointsServiceImpl.java`，积分管理。
 
 **addPoints(userId, points, bizType, bizNo)**：
+
 - `UPDATE mall_user_points_account SET available_points=available_points+#{points}, total_points=total_points+#{points} WHERE user_id=? AND version=?`
 - 乐观锁防并发
-- 记录 `mall_user_points_log`（change_type=1）
+- 记录 `mall_user_points_log`（change\_type=1）
 
 **consumePoints(userId, points, bizNo)**：
+
 - 校验 `available_points >= points`
 - `UPDATE ... SET available_points=available_points-#{points}, used_points=used_points+#{points}`
-- 记录流水（change_type=2）
+- 记录流水（change\_type=2）
 
 **expirePoints()**（定时任务）：扫描有效期到期的积分，自动扣减
 
 **adjustPoints(userId, points, reason)**：管理端手动调整，审计日志记录操作人
 
----
+***
 
 ## 4 会员成长值设计
 
 ### 4.1 成长值获取
 
-| 来源 | 成长值 | 说明 |
-|------|:---:|------|
+| 来源   |    成长值   | 说明        |
+| ---- | :------: | --------- |
 | 订单完成 | 订单金额/100 | 订单确认收货后发放 |
-| 每日签到 | 5~10 | 连续签到递增 |
-| 评价商品 | 10 | 带图+20 |
+| 每日签到 |   5\~10  | 连续签到递增    |
+| 评价商品 |    10    | 带图+20     |
 
 ### 4.2 升级/降级
 
-| 操作 | 时机 | 说明 |
-|------|------|------|
-| 升级 | 成长值达到上级 `min_growth` | 实时触发，消费积分/成长值事件后检查 |
+| 操作 | 时机                       | 说明                 |
+| -- | ------------------------ | ------------------ |
+| 升级 | 成长值达到上级 `min_growth`     | 实时触发，消费积分/成长值事件后检查 |
 | 降级 | 年度到期扣除后低于本级 `min_growth` | 每年 1 月 1 日执行（初期不做） |
 
 ### 4.3 会员权益
 
-| 等级 | 折扣率 | 包邮 | 积分倍数 |
-|------|:---:|:---:|:---:|
-| 普通会员 | 100% | 否 | 1.0x |
-| 银卡会员 | 98% | 满 99 包邮 | 1.1x |
-| 金卡会员 | 95% | 包邮 | 1.2x |
-| 钻石会员 | 90% | 包邮 | 1.5x |
+| 等级   |  折扣率 |    包邮   | 积分倍数 |
+| ---- | :--: | :-----: | :--: |
+| 普通会员 | 100% |    否    | 1.0x |
+| 银卡会员 |  98% | 满 99 包邮 | 1.1x |
+| 金卡会员 |  95% |    包邮   | 1.2x |
+| 钻石会员 |  90% |    包邮   | 1.5x |
 
 > 会员权益在 `mall_user_member_level.benefits_json` 中以 JSON 存储，前端根据此字段展示权益明细。
 
----
+***
 
 ## 5 手机号加密存储
 
@@ -230,12 +236,12 @@ server/mall/mall-user/
 
 遵循系统设计 7.1 节：
 
-| 方面 | 方案 |
-|------|------|
-| 算法 | AES-256-GCM（认证加密） |
-| 密钥持有 | mall-auth（Nacos `mall.security.aes-key`） |
-| 查询方式 | SHA256 哈希辅助列 `phone_hash`（等值匹配） |
-| 解密 | mall-user 调 `RemoteAuthAdapter.decrypt(encryptedPhone)` |
+| 方面   | 方案                                                      |
+| ---- | ------------------------------------------------------- |
+| 算法   | AES-256-GCM（认证加密）                                       |
+| 密钥持有 | mall-auth（Nacos `mall.security.aes-key`）                |
+| 查询方式 | SHA256 哈希辅助列 `phone_hash`（等值匹配）                         |
+| 解密   | mall-user 调 `RemoteAuthAdapter.decrypt(encryptedPhone)` |
 
 ### 5.2 解密调用链
 
@@ -248,7 +254,7 @@ mall-user 需要展示手机号
 
 管理端用户详情可查看完整手机号（权限控制），C 端始终脱敏展示。
 
----
+***
 
 ## 6 Nacos 配置
 
@@ -301,6 +307,7 @@ mall:
     points:
       signin-base: 5
       signin-consecutive: 10
+      signin-consecutive-bonus: 1
       review: 10
       review-with-photo: 20
 ```
@@ -337,35 +344,37 @@ spring:
 
 ### 6.3 配置项说明
 
-| 配置项 | 默认值 | 单位 | 说明 |
-|--------|--------|:---:|------|
-| `mall.user.address.max-count` | 20 | 条 | 地址簿上限 |
-| `mall.user.profile.cache-ttl` | 600 | 秒 | 用户资料缓存时间 |
-| `mall.user.member.default-level` | 1 | — | 新用户默认会员等级 |
-| `mall.user.points.signin-base` | 5 | 分 | 每日签到基础积分 |
-| `mall.user.points.signin-consecutive` | 10 | 分 | 连续签到上限积分 |
-| `mall.user.points.review` | 10 | 分 | 评价奖励积分 |
-| `mall.user.points.review-with-photo` | 20 | 分 | 带图评价积分 |
+| 配置项                                         | 默认值 |  单位 | 说明         |
+| ------------------------------------------- | --- | :-: | ---------- |
+| `mall.user.address.max-count`               | 20  |  条  | 地址簿上限      |
+| `mall.user.profile.cache-ttl`               | 600 |  秒  | 用户资料缓存时间   |
+| `mall.user.member.default-level`            | 1   |  —  | 新用户默认会员等级  |
+| `mall.user.points.signin-base`              | 5   |  分  | 每日签到基础积分   |
+| `mall.user.points.signin-consecutive`       | 10  |  分  | 连续签到上限积分   |
+| `mall.user.points.signin-consecutive-bonus` | 1   | 分/天 | 每连续一天额外加积分 |
+| `mall.user.points.review`                   | 10  |  分  | 评价奖励积分     |
+| `mall.user.points.review-with-photo`        | 20  |  分  | 带图评价积分     |
 
----
+***
 
 ## 7 错误码汇总
 
-| 错误码 | HTTP | userTip | 说明 |
-|--------|:----:|---------|------|
-| 00000 | 200 | — | 成功 |
-| A0301 | 401 | 请先登录 | 未登录 |
-| A0320 | 403 | 无权限访问 | 权限不足 |
-| A0401 | 400 | 请完整填写信息 | 必填参数为空 |
-| A0402 | 400 | 参数格式错误 | 参数格式不符合要求 |
-| A0501 | 404 | 资源不存在 | 用户/地址/成员不存在 |
-| A0502 | 400 | 资源已存在 | 等级数值已存在 |
-| A0503 | 400 | 资源不可操作 | 用户已注销不可操作 |
-| A0511 | 400 | 地址数量已达上限 | 地址簿已满 20 条 |
-| B0001 | 500 | 系统繁忙，请稍后再试 | 未预期异常 |
-| C0110 | 500 | 服务暂时不可用 | Redis 连接失败 |
-| C0120 | 500 | 数据库异常 | MySQL 连接失败 |
+| 错误码   | HTTP | userTip    | 说明          |
+| ----- | :--: | ---------- | ----------- |
+| 00000 |  200 | —          | 成功          |
+| A0301 |  401 | 请先登录       | 未登录         |
+| A0320 |  403 | 无权限访问      | 权限不足        |
+| A0401 |  400 | 请完整填写信息    | 必填参数为空      |
+| A0402 |  400 | 参数格式错误     | 参数格式不符合要求   |
+| A0501 |  404 | 资源不存在      | 用户/地址/成员不存在 |
+| A0502 |  400 | 资源已存在      | 等级数值已存在     |
+| A0503 |  400 | 资源不可操作     | 用户已注销不可操作   |
+| A0511 |  400 | 地址数量已达上限   | 地址簿已满 20 条  |
+| B0001 |  500 | 系统繁忙，请稍后再试 | 未预期异常       |
+| C0110 |  500 | 服务暂时不可用    | Redis 连接失败  |
+| C0120 |  500 | 数据库异常      | MySQL 连接失败  |
 
 > 全部错误码来自系统设计第二章。
 
----
+***
+
