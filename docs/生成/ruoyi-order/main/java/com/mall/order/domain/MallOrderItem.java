@@ -1,4 +1,4 @@
-package com.mall.order.domain;
+package com.mall.order.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 订单项对象 mall_order_item
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -66,120 +66,120 @@ public class MallOrderItem extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
-    public void setOrderId(String orderId) 
+    public void setOrderId(String orderId)
     {
         this.orderId = orderId;
     }
 
-    public String getOrderId() 
+    public String getOrderId()
     {
         return orderId;
     }
-    public void setSpuId(String spuId) 
+    public void setSpuId(String spuId)
     {
         this.spuId = spuId;
     }
 
-    public String getSpuId() 
+    public String getSpuId()
     {
         return spuId;
     }
-    public void setSkuId(String skuId) 
+    public void setSkuId(String skuId)
     {
         this.skuId = skuId;
     }
 
-    public String getSkuId() 
+    public String getSkuId()
     {
         return skuId;
     }
-    public void setSkuCode(String skuCode) 
+    public void setSkuCode(String skuCode)
     {
         this.skuCode = skuCode;
     }
 
-    public String getSkuCode() 
+    public String getSkuCode()
     {
         return skuCode;
     }
-    public void setSkuName(String skuName) 
+    public void setSkuName(String skuName)
     {
         this.skuName = skuName;
     }
 
-    public String getSkuName() 
+    public String getSkuName()
     {
         return skuName;
     }
-    public void setSpuName(String spuName) 
+    public void setSpuName(String spuName)
     {
         this.spuName = spuName;
     }
 
-    public String getSpuName() 
+    public String getSpuName()
     {
         return spuName;
     }
-    public void setMainImage(String mainImage) 
+    public void setMainImage(String mainImage)
     {
         this.mainImage = mainImage;
     }
 
-    public String getMainImage() 
+    public String getMainImage()
     {
         return mainImage;
     }
-    public void setAttrsJson(String attrsJson) 
+    public void setAttrsJson(String attrsJson)
     {
         this.attrsJson = attrsJson;
     }
 
-    public String getAttrsJson() 
+    public String getAttrsJson()
     {
         return attrsJson;
     }
-    public void setQuantity(String quantity) 
+    public void setQuantity(String quantity)
     {
         this.quantity = quantity;
     }
 
-    public String getQuantity() 
+    public String getQuantity()
     {
         return quantity;
     }
-    public void setPrice(String price) 
+    public void setPrice(String price)
     {
         this.price = price;
     }
 
-    public String getPrice() 
+    public String getPrice()
     {
         return price;
     }
-    public void setTotalPrice(String totalPrice) 
+    public void setTotalPrice(String totalPrice)
     {
         this.totalPrice = totalPrice;
     }
 
-    public String getTotalPrice() 
+    public String getTotalPrice()
     {
         return totalPrice;
     }
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

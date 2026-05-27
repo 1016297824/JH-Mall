@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.user.DO;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 用户会员信息对象 mall_user_member
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -55,92 +55,92 @@ public class MallUserMember extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setLevelId(String levelId) 
+    public void setLevelId(String levelId)
     {
         this.levelId = levelId;
     }
 
-    public String getLevelId() 
+    public String getLevelId()
     {
         return levelId;
     }
 
-    public void setGrowth(String growth) 
+    public void setGrowth(String growth)
     {
         this.growth = growth;
     }
 
-    public String getGrowth() 
+    public String getGrowth()
     {
         return growth;
     }
 
-    public void setTotalGrowth(String totalGrowth) 
+    public void setTotalGrowth(String totalGrowth)
     {
         this.totalGrowth = totalGrowth;
     }
 
-    public String getTotalGrowth() 
+    public String getTotalGrowth()
     {
         return totalGrowth;
     }
 
-    public void setLevelStartTime(Date levelStartTime) 
+    public void setLevelStartTime(Date levelStartTime)
     {
         this.levelStartTime = levelStartTime;
     }
 
-    public Date getLevelStartTime() 
+    public Date getLevelStartTime()
     {
         return levelStartTime;
     }
 
-    public void setLevelEndTime(Date levelEndTime) 
+    public void setLevelEndTime(Date levelEndTime)
     {
         this.levelEndTime = levelEndTime;
     }
 
-    public Date getLevelEndTime() 
+    public Date getLevelEndTime()
     {
         return levelEndTime;
     }
 
-    public void setBecomeTime(Date becomeTime) 
+    public void setBecomeTime(Date becomeTime)
     {
         this.becomeTime = becomeTime;
     }
 
-    public Date getBecomeTime() 
+    public Date getBecomeTime()
     {
         return becomeTime;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

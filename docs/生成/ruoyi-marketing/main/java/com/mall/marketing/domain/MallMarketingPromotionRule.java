@@ -1,4 +1,4 @@
-package com.mall.marketing.domain;
+package com.mall.marketing.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 促销规则对象 mall_marketing_promotion_rule
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -50,84 +50,84 @@ public class MallMarketingPromotionRule extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
-    public void setPromotionId(String promotionId) 
+    public void setPromotionId(String promotionId)
     {
         this.promotionId = promotionId;
     }
 
-    public String getPromotionId() 
+    public String getPromotionId()
     {
         return promotionId;
     }
-    public void setRuleType(String ruleType) 
+    public void setRuleType(String ruleType)
     {
         this.ruleType = ruleType;
     }
 
-    public String getRuleType() 
+    public String getRuleType()
     {
         return ruleType;
     }
-    public void setThresholdAmount(String thresholdAmount) 
+    public void setThresholdAmount(String thresholdAmount)
     {
         this.thresholdAmount = thresholdAmount;
     }
 
-    public String getThresholdAmount() 
+    public String getThresholdAmount()
     {
         return thresholdAmount;
     }
-    public void setBenefitAmount(String benefitAmount) 
+    public void setBenefitAmount(String benefitAmount)
     {
         this.benefitAmount = benefitAmount;
     }
 
-    public String getBenefitAmount() 
+    public String getBenefitAmount()
     {
         return benefitAmount;
     }
-    public void setBenefitRate(String benefitRate) 
+    public void setBenefitRate(String benefitRate)
     {
         this.benefitRate = benefitRate;
     }
 
-    public String getBenefitRate() 
+    public String getBenefitRate()
     {
         return benefitRate;
     }
-    public void setIsExclusive(String isExclusive) 
+    public void setIsExclusive(String isExclusive)
     {
         this.isExclusive = isExclusive;
     }
 
-    public String getIsExclusive() 
+    public String getIsExclusive()
     {
         return isExclusive;
     }
-    public void setSortOrder(String sortOrder) 
+    public void setSortOrder(String sortOrder)
     {
         this.sortOrder = sortOrder;
     }
 
-    public String getSortOrder() 
+    public String getSortOrder()
     {
         return sortOrder;
     }
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

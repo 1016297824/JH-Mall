@@ -22,7 +22,7 @@ server/mall/mall-user/src/main/java/com/mall/user/
 ├── config/
 │   └── MallUserConfigProperties.java         # 改造：追加签到配置项
 │
-├── domain/     # 7 个实体，不变
+├── DO/         # 7 个实体（已改为 DO 后缀，符合阿里规约 §1.4）
 ├── mapper/     # 7 个 Mapper，追加少量 C 端查询方法
 │
 ├── service/                                   # 管理端 Service（已有）

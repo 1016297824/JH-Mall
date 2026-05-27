@@ -47,11 +47,11 @@ server/mall/mall-payment/
     │   └── api/
     │       ├── PaymentApiController.java    # /api/payment/**
     │       └── PaymentCallbackController.java # /callback/payment/**
-    ├── domain/
-    │   ├── MallPayment.java                 # 对应 mall_payment 表
-    │   ├── MallRefund.java                  # 对应 mall_payment_refund 表
-    │   ├── MallPaymentChannel.java          # 对应 mall_payment_channel 表
-    │   └── MallPaymentCallbackLog.java      # 对应 mall_payment_callback_log 表
+    ├── DO/
+    │   ├── MallPaymentDO.java                 # 对应 mall_payment 表
+    │   ├── MallRefundDO.java                  # 对应 mall_payment_refund 表
+    │   ├── MallPaymentChannelDO.java          # 对应 mall_payment_channel 表
+    │   └── MallPaymentCallbackLogDO.java      # 对应 mall_payment_callback_log 表
     ├── service/
     │   ├── PaymentService.java              # 接口
     │   ├── impl/
@@ -519,7 +519,7 @@ spring:
           password: 138992
 
 mybatis-plus:
-  typeAliasesPackage: com.mall.payment.**.domain
+  typeAliasesPackage: com.mall.payment.**.DO
   mapperLocations: classpath:mapper/**/*.xml
 
 springdoc:

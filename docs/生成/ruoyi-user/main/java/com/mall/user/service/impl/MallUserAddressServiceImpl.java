@@ -5,24 +5,24 @@ import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mall.user.mapper.MallUserAddressMapper;
-import com.mall.user.domain.MallUserAddress;
+import com.mall.user.DO.MallUserAddress;
 import com.mall.user.service.IMallUserAddressService;
 
 /**
  * 地址簿Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
 @Service
-public class MallUserAddressServiceImpl implements IMallUserAddressService 
+public class MallUserAddressServiceImpl implements IMallUserAddressService
 {
     @Autowired
     private MallUserAddressMapper mallUserAddressMapper;
 
     /**
      * 查询地址簿
-     * 
+     *
      * @param id 地址簿主键
      * @return 地址簿
      */
@@ -34,7 +34,7 @@ public class MallUserAddressServiceImpl implements IMallUserAddressService
 
     /**
      * 查询地址簿列表
-     * 
+     *
      * @param mallUserAddress 地址簿
      * @return 地址簿
      */
@@ -46,7 +46,7 @@ public class MallUserAddressServiceImpl implements IMallUserAddressService
 
     /**
      * 新增地址簿
-     * 
+     *
      * @param mallUserAddress 地址簿
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallUserAddressServiceImpl implements IMallUserAddressService
 
     /**
      * 修改地址簿
-     * 
+     *
      * @param mallUserAddress 地址簿
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallUserAddressServiceImpl implements IMallUserAddressService
 
     /**
      * 批量删除地址簿
-     * 
+     *
      * @param ids 需要删除的地址簿主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallUserAddressServiceImpl implements IMallUserAddressService
 
     /**
      * 删除地址簿信息
-     * 
+     *
      * @param id 地址簿主键
      * @return 结果
      */

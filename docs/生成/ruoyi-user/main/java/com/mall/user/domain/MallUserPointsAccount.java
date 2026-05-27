@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.user.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 积分账户对象 mall_user_points_account
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -42,72 +42,72 @@ public class MallUserPointsAccount extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setTotalPoints(String totalPoints) 
+    public void setTotalPoints(String totalPoints)
     {
         this.totalPoints = totalPoints;
     }
 
-    public String getTotalPoints() 
+    public String getTotalPoints()
     {
         return totalPoints;
     }
 
-    public void setAvailablePoints(String availablePoints) 
+    public void setAvailablePoints(String availablePoints)
     {
         this.availablePoints = availablePoints;
     }
 
-    public String getAvailablePoints() 
+    public String getAvailablePoints()
     {
         return availablePoints;
     }
 
-    public void setUsedPoints(String usedPoints) 
+    public void setUsedPoints(String usedPoints)
     {
         this.usedPoints = usedPoints;
     }
 
-    public String getUsedPoints() 
+    public String getUsedPoints()
     {
         return usedPoints;
     }
 
-    public void setExpiredPoints(String expiredPoints) 
+    public void setExpiredPoints(String expiredPoints)
     {
         this.expiredPoints = expiredPoints;
     }
 
-    public String getExpiredPoints() 
+    public String getExpiredPoints()
     {
         return expiredPoints;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

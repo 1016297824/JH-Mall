@@ -1,4 +1,4 @@
-package com.mall.product.domain;
+package com.mall.product.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 品牌管理对象 mall_product_brand
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -38,62 +38,62 @@ public class MallProductBrand extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
 
-    public String getName() 
+    public String getName()
     {
         return name;
     }
 
-    public void setLogo(String logo) 
+    public void setLogo(String logo)
     {
         this.logo = logo;
     }
 
-    public String getLogo() 
+    public String getLogo()
     {
         return logo;
     }
 
-    public void setDescription(String description) 
+    public void setDescription(String description)
     {
         this.description = description;
     }
 
-    public String getDescription() 
+    public String getDescription()
     {
         return description;
     }
 
-    public void setSortOrder(String sortOrder) 
+    public void setSortOrder(String sortOrder)
     {
         this.sortOrder = sortOrder;
     }
 
-    public String getSortOrder() 
+    public String getSortOrder()
     {
         return sortOrder;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

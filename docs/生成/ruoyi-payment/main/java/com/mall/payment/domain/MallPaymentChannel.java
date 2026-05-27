@@ -1,4 +1,4 @@
-package com.mall.payment.domain;
+package com.mall.payment.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 支付渠道对象 mall_payment_channel
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -46,82 +46,82 @@ public class MallPaymentChannel extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setChannelCode(String channelCode) 
+    public void setChannelCode(String channelCode)
     {
         this.channelCode = channelCode;
     }
 
-    public String getChannelCode() 
+    public String getChannelCode()
     {
         return channelCode;
     }
 
-    public void setChannelName(String channelName) 
+    public void setChannelName(String channelName)
     {
         this.channelName = channelName;
     }
 
-    public String getChannelName() 
+    public String getChannelName()
     {
         return channelName;
     }
 
-    public void setChannelType(String channelType) 
+    public void setChannelType(String channelType)
     {
         this.channelType = channelType;
     }
 
-    public String getChannelType() 
+    public String getChannelType()
     {
         return channelType;
     }
 
-    public void setConfigJson(String configJson) 
+    public void setConfigJson(String configJson)
     {
         this.configJson = configJson;
     }
 
-    public String getConfigJson() 
+    public String getConfigJson()
     {
         return configJson;
     }
 
-    public void setIsEnabled(String isEnabled) 
+    public void setIsEnabled(String isEnabled)
     {
         this.isEnabled = isEnabled;
     }
 
-    public String getIsEnabled() 
+    public String getIsEnabled()
     {
         return isEnabled;
     }
 
-    public void setSortOrder(String sortOrder) 
+    public void setSortOrder(String sortOrder)
     {
         this.sortOrder = sortOrder;
     }
 
-    public String getSortOrder() 
+    public String getSortOrder()
     {
         return sortOrder;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

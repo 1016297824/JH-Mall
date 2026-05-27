@@ -1,4 +1,4 @@
-package com.mall.marketing.domain;
+package com.mall.marketing.DO;
 
 import java.util.List;
 import java.util.Date;
@@ -10,7 +10,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 活动管理对象 mall_marketing_promotion
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -62,102 +62,102 @@ public class MallMarketingPromotion extends BaseEntity
     /** 促销规则信息 */
     private List<MallMarketingPromotionRule> mallMarketingPromotionRuleList;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setPromotionName(String promotionName) 
+    public void setPromotionName(String promotionName)
     {
         this.promotionName = promotionName;
     }
 
-    public String getPromotionName() 
+    public String getPromotionName()
     {
         return promotionName;
     }
 
-    public void setPromotionType(String promotionType) 
+    public void setPromotionType(String promotionType)
     {
         this.promotionType = promotionType;
     }
 
-    public String getPromotionType() 
+    public String getPromotionType()
     {
         return promotionType;
     }
 
-    public void setStartTime(Date startTime) 
+    public void setStartTime(Date startTime)
     {
         this.startTime = startTime;
     }
 
-    public Date getStartTime() 
+    public Date getStartTime()
     {
         return startTime;
     }
 
-    public void setEndTime(Date endTime) 
+    public void setEndTime(Date endTime)
     {
         this.endTime = endTime;
     }
 
-    public Date getEndTime() 
+    public Date getEndTime()
     {
         return endTime;
     }
 
-    public void setPromotionStatus(String promotionStatus) 
+    public void setPromotionStatus(String promotionStatus)
     {
         this.promotionStatus = promotionStatus;
     }
 
-    public String getPromotionStatus() 
+    public String getPromotionStatus()
     {
         return promotionStatus;
     }
 
-    public void setDescription(String description) 
+    public void setDescription(String description)
     {
         this.description = description;
     }
 
-    public String getDescription() 
+    public String getDescription()
     {
         return description;
     }
 
-    public void setBannerImage(String bannerImage) 
+    public void setBannerImage(String bannerImage)
     {
         this.bannerImage = bannerImage;
     }
 
-    public String getBannerImage() 
+    public String getBannerImage()
     {
         return bannerImage;
     }
 
-    public void setSortOrder(String sortOrder) 
+    public void setSortOrder(String sortOrder)
     {
         this.sortOrder = sortOrder;
     }
 
-    public String getSortOrder() 
+    public String getSortOrder()
     {
         return sortOrder;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

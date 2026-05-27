@@ -1,19 +1,19 @@
 package com.mall.user.mapper;
 
 import java.util.List;
-import com.mall.user.domain.MallUserAddress;
+import com.mall.user.DO.MallUserAddress;
 
 /**
  * 地址簿Mapper接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
-public interface MallUserAddressMapper 
+public interface MallUserAddressMapper
 {
     /**
      * 查询地址簿
-     * 
+     *
      * @param id 地址簿主键
      * @return 地址簿
      */
@@ -21,7 +21,7 @@ public interface MallUserAddressMapper
 
     /**
      * 查询地址簿列表
-     * 
+     *
      * @param mallUserAddress 地址簿
      * @return 地址簿集合
      */
@@ -29,7 +29,7 @@ public interface MallUserAddressMapper
 
     /**
      * 新增地址簿
-     * 
+     *
      * @param mallUserAddress 地址簿
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface MallUserAddressMapper
 
     /**
      * 修改地址簿
-     * 
+     *
      * @param mallUserAddress 地址簿
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface MallUserAddressMapper
 
     /**
      * 删除地址簿
-     * 
+     *
      * @param id 地址簿主键
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface MallUserAddressMapper
 
     /**
      * 批量删除地址簿
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */

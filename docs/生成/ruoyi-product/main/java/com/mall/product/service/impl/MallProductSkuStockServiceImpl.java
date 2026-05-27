@@ -5,24 +5,24 @@ import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mall.product.mapper.MallProductSkuStockMapper;
-import com.mall.product.domain.MallProductSkuStock;
+import com.mall.product.DO.MallProductSkuStock;
 import com.mall.product.service.IMallProductSkuStockService;
 
 /**
  * 库存管理Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
 @Service
-public class MallProductSkuStockServiceImpl implements IMallProductSkuStockService 
+public class MallProductSkuStockServiceImpl implements IMallProductSkuStockService
 {
     @Autowired
     private MallProductSkuStockMapper mallProductSkuStockMapper;
 
     /**
      * 查询库存管理
-     * 
+     *
      * @param id 库存管理主键
      * @return 库存管理
      */
@@ -34,7 +34,7 @@ public class MallProductSkuStockServiceImpl implements IMallProductSkuStockServi
 
     /**
      * 查询库存管理列表
-     * 
+     *
      * @param mallProductSkuStock 库存管理
      * @return 库存管理
      */
@@ -46,7 +46,7 @@ public class MallProductSkuStockServiceImpl implements IMallProductSkuStockServi
 
     /**
      * 新增库存管理
-     * 
+     *
      * @param mallProductSkuStock 库存管理
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallProductSkuStockServiceImpl implements IMallProductSkuStockServi
 
     /**
      * 修改库存管理
-     * 
+     *
      * @param mallProductSkuStock 库存管理
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallProductSkuStockServiceImpl implements IMallProductSkuStockServi
 
     /**
      * 批量删除库存管理
-     * 
+     *
      * @param ids 需要删除的库存管理主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallProductSkuStockServiceImpl implements IMallProductSkuStockServi
 
     /**
      * 删除库存管理信息
-     * 
+     *
      * @param id 库存管理主键
      * @return 结果
      */

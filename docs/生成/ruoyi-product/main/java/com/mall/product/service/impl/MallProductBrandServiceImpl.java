@@ -5,24 +5,24 @@ import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mall.product.mapper.MallProductBrandMapper;
-import com.mall.product.domain.MallProductBrand;
+import com.mall.product.DO.MallProductBrand;
 import com.mall.product.service.IMallProductBrandService;
 
 /**
  * 品牌管理Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
 @Service
-public class MallProductBrandServiceImpl implements IMallProductBrandService 
+public class MallProductBrandServiceImpl implements IMallProductBrandService
 {
     @Autowired
     private MallProductBrandMapper mallProductBrandMapper;
 
     /**
      * 查询品牌管理
-     * 
+     *
      * @param id 品牌管理主键
      * @return 品牌管理
      */
@@ -34,7 +34,7 @@ public class MallProductBrandServiceImpl implements IMallProductBrandService
 
     /**
      * 查询品牌管理列表
-     * 
+     *
      * @param mallProductBrand 品牌管理
      * @return 品牌管理
      */
@@ -46,7 +46,7 @@ public class MallProductBrandServiceImpl implements IMallProductBrandService
 
     /**
      * 新增品牌管理
-     * 
+     *
      * @param mallProductBrand 品牌管理
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallProductBrandServiceImpl implements IMallProductBrandService
 
     /**
      * 修改品牌管理
-     * 
+     *
      * @param mallProductBrand 品牌管理
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallProductBrandServiceImpl implements IMallProductBrandService
 
     /**
      * 批量删除品牌管理
-     * 
+     *
      * @param ids 需要删除的品牌管理主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallProductBrandServiceImpl implements IMallProductBrandService
 
     /**
      * 删除品牌管理信息
-     * 
+     *
      * @param id 品牌管理主键
      * @return 结果
      */

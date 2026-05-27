@@ -5,24 +5,24 @@ import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mall.product.mapper.MallProductCategoryMapper;
-import com.mall.product.domain.MallProductCategory;
+import com.mall.product.DO.MallProductCategory;
 import com.mall.product.service.IMallProductCategoryService;
 
 /**
  * 商品类目Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
 @Service
-public class MallProductCategoryServiceImpl implements IMallProductCategoryService 
+public class MallProductCategoryServiceImpl implements IMallProductCategoryService
 {
     @Autowired
     private MallProductCategoryMapper mallProductCategoryMapper;
 
     /**
      * 查询商品类目
-     * 
+     *
      * @param id 商品类目主键
      * @return 商品类目
      */
@@ -34,7 +34,7 @@ public class MallProductCategoryServiceImpl implements IMallProductCategoryServi
 
     /**
      * 查询商品类目列表
-     * 
+     *
      * @param mallProductCategory 商品类目
      * @return 商品类目
      */
@@ -46,7 +46,7 @@ public class MallProductCategoryServiceImpl implements IMallProductCategoryServi
 
     /**
      * 新增商品类目
-     * 
+     *
      * @param mallProductCategory 商品类目
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallProductCategoryServiceImpl implements IMallProductCategoryServi
 
     /**
      * 修改商品类目
-     * 
+     *
      * @param mallProductCategory 商品类目
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallProductCategoryServiceImpl implements IMallProductCategoryServi
 
     /**
      * 批量删除商品类目
-     * 
+     *
      * @param ids 需要删除的商品类目主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallProductCategoryServiceImpl implements IMallProductCategoryServi
 
     /**
      * 删除商品类目信息
-     * 
+     *
      * @param id 商品类目主键
      * @return 结果
      */

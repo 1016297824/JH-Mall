@@ -1,19 +1,19 @@
 package com.mall.order.mapper;
 
 import java.util.List;
-import com.mall.order.domain.MallOrderAfterSale;
+import com.mall.order.DO.MallOrderAfterSale;
 
 /**
  * 售后管理Mapper接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
-public interface MallOrderAfterSaleMapper 
+public interface MallOrderAfterSaleMapper
 {
     /**
      * 查询售后管理
-     * 
+     *
      * @param id 售后管理主键
      * @return 售后管理
      */
@@ -21,7 +21,7 @@ public interface MallOrderAfterSaleMapper
 
     /**
      * 查询售后管理列表
-     * 
+     *
      * @param mallOrderAfterSale 售后管理
      * @return 售后管理集合
      */
@@ -29,7 +29,7 @@ public interface MallOrderAfterSaleMapper
 
     /**
      * 新增售后管理
-     * 
+     *
      * @param mallOrderAfterSale 售后管理
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface MallOrderAfterSaleMapper
 
     /**
      * 修改售后管理
-     * 
+     *
      * @param mallOrderAfterSale 售后管理
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface MallOrderAfterSaleMapper
 
     /**
      * 删除售后管理
-     * 
+     *
      * @param id 售后管理主键
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface MallOrderAfterSaleMapper
 
     /**
      * 批量删除售后管理
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */

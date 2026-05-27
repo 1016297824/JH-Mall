@@ -1,4 +1,4 @@
-package com.mall.payment.domain;
+package com.mall.payment.DO;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 退款单对象 mall_payment_refund
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -81,147 +81,147 @@ public class MallPaymentRefund extends BaseEntity
     @Excel(name = "乐观锁版本号")
     private String version;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
-    public void setRefundNo(String refundNo) 
+    public void setRefundNo(String refundNo)
     {
         this.refundNo = refundNo;
     }
 
-    public String getRefundNo() 
+    public String getRefundNo()
     {
         return refundNo;
     }
-    public void setPaymentId(String paymentId) 
+    public void setPaymentId(String paymentId)
     {
         this.paymentId = paymentId;
     }
 
-    public String getPaymentId() 
+    public String getPaymentId()
     {
         return paymentId;
     }
-    public void setOrderNo(String orderNo) 
+    public void setOrderNo(String orderNo)
     {
         this.orderNo = orderNo;
     }
 
-    public String getOrderNo() 
+    public String getOrderNo()
     {
         return orderNo;
     }
-    public void setAfterSaleNo(String afterSaleNo) 
+    public void setAfterSaleNo(String afterSaleNo)
     {
         this.afterSaleNo = afterSaleNo;
     }
 
-    public String getAfterSaleNo() 
+    public String getAfterSaleNo()
     {
         return afterSaleNo;
     }
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
-    public void setRefundAmount(String refundAmount) 
+    public void setRefundAmount(String refundAmount)
     {
         this.refundAmount = refundAmount;
     }
 
-    public String getRefundAmount() 
+    public String getRefundAmount()
     {
         return refundAmount;
     }
-    public void setRefundReason(String refundReason) 
+    public void setRefundReason(String refundReason)
     {
         this.refundReason = refundReason;
     }
 
-    public String getRefundReason() 
+    public String getRefundReason()
     {
         return refundReason;
     }
-    public void setChannelCode(String channelCode) 
+    public void setChannelCode(String channelCode)
     {
         this.channelCode = channelCode;
     }
 
-    public String getChannelCode() 
+    public String getChannelCode()
     {
         return channelCode;
     }
-    public void setChannelRefundNo(String channelRefundNo) 
+    public void setChannelRefundNo(String channelRefundNo)
     {
         this.channelRefundNo = channelRefundNo;
     }
 
-    public String getChannelRefundNo() 
+    public String getChannelRefundNo()
     {
         return channelRefundNo;
     }
-    public void setChannelRefundStatus(String channelRefundStatus) 
+    public void setChannelRefundStatus(String channelRefundStatus)
     {
         this.channelRefundStatus = channelRefundStatus;
     }
 
-    public String getChannelRefundStatus() 
+    public String getChannelRefundStatus()
     {
         return channelRefundStatus;
     }
-    public void setRefundStatus(String refundStatus) 
+    public void setRefundStatus(String refundStatus)
     {
         this.refundStatus = refundStatus;
     }
 
-    public String getRefundStatus() 
+    public String getRefundStatus()
     {
         return refundStatus;
     }
-    public void setRefundSuccessTime(Date refundSuccessTime) 
+    public void setRefundSuccessTime(Date refundSuccessTime)
     {
         this.refundSuccessTime = refundSuccessTime;
     }
 
-    public Date getRefundSuccessTime() 
+    public Date getRefundSuccessTime()
     {
         return refundSuccessTime;
     }
-    public void setIdempotentKey(String idempotentKey) 
+    public void setIdempotentKey(String idempotentKey)
     {
         this.idempotentKey = idempotentKey;
     }
 
-    public String getIdempotentKey() 
+    public String getIdempotentKey()
     {
         return idempotentKey;
     }
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.user.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 成长值流水对象 mall_user_growth_log
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -50,92 +50,92 @@ public class MallUserGrowthLog extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setBizType(String bizType) 
+    public void setBizType(String bizType)
     {
         this.bizType = bizType;
     }
 
-    public String getBizType() 
+    public String getBizType()
     {
         return bizType;
     }
 
-    public void setBizNo(String bizNo) 
+    public void setBizNo(String bizNo)
     {
         this.bizNo = bizNo;
     }
 
-    public String getBizNo() 
+    public String getBizNo()
     {
         return bizNo;
     }
 
-    public void setChangeType(String changeType) 
+    public void setChangeType(String changeType)
     {
         this.changeType = changeType;
     }
 
-    public String getChangeType() 
+    public String getChangeType()
     {
         return changeType;
     }
 
-    public void setGrowth(String growth) 
+    public void setGrowth(String growth)
     {
         this.growth = growth;
     }
 
-    public String getGrowth() 
+    public String getGrowth()
     {
         return growth;
     }
 
-    public void setBeforeGrowth(String beforeGrowth) 
+    public void setBeforeGrowth(String beforeGrowth)
     {
         this.beforeGrowth = beforeGrowth;
     }
 
-    public String getBeforeGrowth() 
+    public String getBeforeGrowth()
     {
         return beforeGrowth;
     }
 
-    public void setAfterGrowth(String afterGrowth) 
+    public void setAfterGrowth(String afterGrowth)
     {
         this.afterGrowth = afterGrowth;
     }
 
-    public String getAfterGrowth() 
+    public String getAfterGrowth()
     {
         return afterGrowth;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

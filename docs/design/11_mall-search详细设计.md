@@ -50,7 +50,7 @@ server/mall/mall-search/
     ├── vo/
     │   ├── SearchItemVO.java                # 搜索结果单条（spuId/name/price/image）
     │   └── AggregationVO.java               # 聚合统计（类目/品牌/价格区间各 count）
-    ├── domain/
+    ├── DO/
     │   └── ProductIndex.java                # ES 索引实体（非 MySQL DO，使用 @Document）
     ├── service/
     │   ├── search/
@@ -87,7 +87,7 @@ server/mall/mall-search/
 
 ### 3.1 ProductIndex — ES 索引实体
 
-位于 `domain/ProductIndex.java`，使用 `@Document(indexName = "mall_product")` 通过别名读写。
+位于 `DO/ProductIndex.java`，使用 `@Document(indexName = "mall_product")` 通过别名读写。
 
 | 字段         | ES 类型               | 说明                           |
 | ------------ | --------------------- | ------------------------------ |

@@ -7,26 +7,26 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
-import com.mall.marketing.domain.MallMarketingCouponRecord;
+import com.mall.marketing.DO.MallMarketingCouponRecord;
 import com.mall.marketing.mapper.MallMarketingCouponMapper;
-import com.mall.marketing.domain.MallMarketingCoupon;
+import com.mall.marketing.DO.MallMarketingCoupon;
 import com.mall.marketing.service.IMallMarketingCouponService;
 
 /**
  * 优惠券定义Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
 @Service
-public class MallMarketingCouponServiceImpl implements IMallMarketingCouponService 
+public class MallMarketingCouponServiceImpl implements IMallMarketingCouponService
 {
     @Autowired
     private MallMarketingCouponMapper mallMarketingCouponMapper;
 
     /**
      * 查询优惠券定义
-     * 
+     *
      * @param id 优惠券定义主键
      * @return 优惠券定义
      */
@@ -38,7 +38,7 @@ public class MallMarketingCouponServiceImpl implements IMallMarketingCouponServi
 
     /**
      * 查询优惠券定义列表
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义
      * @return 优惠券定义
      */
@@ -50,7 +50,7 @@ public class MallMarketingCouponServiceImpl implements IMallMarketingCouponServi
 
     /**
      * 新增优惠券定义
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义
      * @return 结果
      */
@@ -66,7 +66,7 @@ public class MallMarketingCouponServiceImpl implements IMallMarketingCouponServi
 
     /**
      * 修改优惠券定义
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义
      * @return 结果
      */
@@ -82,7 +82,7 @@ public class MallMarketingCouponServiceImpl implements IMallMarketingCouponServi
 
     /**
      * 批量删除优惠券定义
-     * 
+     *
      * @param ids 需要删除的优惠券定义主键
      * @return 结果
      */
@@ -96,7 +96,7 @@ public class MallMarketingCouponServiceImpl implements IMallMarketingCouponServi
 
     /**
      * 删除优惠券定义信息
-     * 
+     *
      * @param id 优惠券定义主键
      * @return 结果
      */
@@ -110,7 +110,7 @@ public class MallMarketingCouponServiceImpl implements IMallMarketingCouponServi
 
     /**
      * 新增用户优惠券记录信息
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义对象
      */
     public void insertMallMarketingCouponRecord(MallMarketingCoupon mallMarketingCoupon)

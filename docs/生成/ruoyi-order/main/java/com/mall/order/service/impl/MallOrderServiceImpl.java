@@ -7,26 +7,26 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
-import com.mall.order.domain.MallOrderItem;
+import com.mall.order.DO.MallOrderItem;
 import com.mall.order.mapper.MallOrderMapper;
-import com.mall.order.domain.MallOrder;
+import com.mall.order.DO.MallOrder;
 import com.mall.order.service.IMallOrderService;
 
 /**
  * 订单管理Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
 @Service
-public class MallOrderServiceImpl implements IMallOrderService 
+public class MallOrderServiceImpl implements IMallOrderService
 {
     @Autowired
     private MallOrderMapper mallOrderMapper;
 
     /**
      * 查询订单管理
-     * 
+     *
      * @param id 订单管理主键
      * @return 订单管理
      */
@@ -38,7 +38,7 @@ public class MallOrderServiceImpl implements IMallOrderService
 
     /**
      * 查询订单管理列表
-     * 
+     *
      * @param mallOrder 订单管理
      * @return 订单管理
      */
@@ -50,7 +50,7 @@ public class MallOrderServiceImpl implements IMallOrderService
 
     /**
      * 新增订单管理
-     * 
+     *
      * @param mallOrder 订单管理
      * @return 结果
      */
@@ -66,7 +66,7 @@ public class MallOrderServiceImpl implements IMallOrderService
 
     /**
      * 修改订单管理
-     * 
+     *
      * @param mallOrder 订单管理
      * @return 结果
      */
@@ -82,7 +82,7 @@ public class MallOrderServiceImpl implements IMallOrderService
 
     /**
      * 批量删除订单管理
-     * 
+     *
      * @param ids 需要删除的订单管理主键
      * @return 结果
      */
@@ -96,7 +96,7 @@ public class MallOrderServiceImpl implements IMallOrderService
 
     /**
      * 删除订单管理信息
-     * 
+     *
      * @param id 订单管理主键
      * @return 结果
      */
@@ -110,7 +110,7 @@ public class MallOrderServiceImpl implements IMallOrderService
 
     /**
      * 新增订单项信息
-     * 
+     *
      * @param mallOrder 订单管理对象
      */
     public void insertMallOrderItem(MallOrder mallOrder)

@@ -53,11 +53,11 @@ server/mall/mall-marketing/
     │   ├── request/                         → CouponClaimReq, CreateCouponReq, CreatePromotionReq,
     │   │                                       CreateRuleReq, CalculationReq
     │   └── response/                        → CouponDefResp, CouponRecordResp, CalculationResp
-    ├── domain/
-    │   ├── MallCoupon.java                  # 对应 mall_marketing_coupon 表
-    │   ├── MallCouponRecord.java            # 对应 mall_marketing_coupon_record 表
-    │   ├── MallPromotion.java               # 对应 mall_marketing_promotion 表
-    │   └── MallPromotionRule.java           # 对应 mall_marketing_promotion_rule 表
+    ├── DO/
+    │   ├── MallCouponDO.java                  # 对应 mall_marketing_coupon 表
+    │   ├── MallCouponRecordDO.java            # 对应 mall_marketing_coupon_record 表
+    │   ├── MallPromotionDO.java               # 对应 mall_marketing_promotion 表
+    │   └── MallPromotionRuleDO.java           # 对应 mall_marketing_promotion_rule 表
     ├── service/
     │   ├── coupon/
     │   │   ├── CouponDefService.java        # 接口
@@ -348,7 +348,7 @@ spring:
           password: 138992
 
 mybatis-plus:
-  typeAliasesPackage: com.mall.marketing.**.domain
+  typeAliasesPackage: com.mall.marketing.**.DO
   mapperLocations: classpath:mapper/**/*.xml
 
 springdoc:

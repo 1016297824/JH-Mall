@@ -1,4 +1,4 @@
-package com.mall.marketing.domain;
+package com.mall.marketing.DO;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 用户优惠券记录对象 mall_marketing_coupon_record
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -67,111 +67,111 @@ public class MallMarketingCouponRecord extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
-    public void setCouponId(String couponId) 
+    public void setCouponId(String couponId)
     {
         this.couponId = couponId;
     }
 
-    public String getCouponId() 
+    public String getCouponId()
     {
         return couponId;
     }
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
-    public void setCouponCode(String couponCode) 
+    public void setCouponCode(String couponCode)
     {
         this.couponCode = couponCode;
     }
 
-    public String getCouponCode() 
+    public String getCouponCode()
     {
         return couponCode;
     }
-    public void setRecordStatus(String recordStatus) 
+    public void setRecordStatus(String recordStatus)
     {
         this.recordStatus = recordStatus;
     }
 
-    public String getRecordStatus() 
+    public String getRecordStatus()
     {
         return recordStatus;
     }
-    public void setOrderNo(String orderNo) 
+    public void setOrderNo(String orderNo)
     {
         this.orderNo = orderNo;
     }
 
-    public String getOrderNo() 
+    public String getOrderNo()
     {
         return orderNo;
     }
-    public void setFaceValue(String faceValue) 
+    public void setFaceValue(String faceValue)
     {
         this.faceValue = faceValue;
     }
 
-    public String getFaceValue() 
+    public String getFaceValue()
     {
         return faceValue;
     }
-    public void setLockTime(Date lockTime) 
+    public void setLockTime(Date lockTime)
     {
         this.lockTime = lockTime;
     }
 
-    public Date getLockTime() 
+    public Date getLockTime()
     {
         return lockTime;
     }
-    public void setUseTime(Date useTime) 
+    public void setUseTime(Date useTime)
     {
         this.useTime = useTime;
     }
 
-    public Date getUseTime() 
+    public Date getUseTime()
     {
         return useTime;
     }
-    public void setReleaseTime(Date releaseTime) 
+    public void setReleaseTime(Date releaseTime)
     {
         this.releaseTime = releaseTime;
     }
 
-    public Date getReleaseTime() 
+    public Date getReleaseTime()
     {
         return releaseTime;
     }
-    public void setExpireTime(Date expireTime) 
+    public void setExpireTime(Date expireTime)
     {
         this.expireTime = expireTime;
     }
 
-    public Date getExpireTime() 
+    public Date getExpireTime()
     {
         return expireTime;
     }
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

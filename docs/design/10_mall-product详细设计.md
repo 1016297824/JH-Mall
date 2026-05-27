@@ -60,12 +60,12 @@ server/mall/mall-product/
     │   ├── request/                         → CreateCategoryReq, CreateBrandReq, CreateSpuReq,
     │   │                                       UpdateSpuStatusReq, AdjustStockReq ...
     │   └── response/                        → CategoryResp, BrandResp, SpuResp, SkuResp, StockResp
-    ├── domain/
-    │   ├── MallCategory.java                # 对应 mall_product_category 表
-    │   ├── MallBrand.java                   # 对应 mall_product_brand 表
-    │   ├── MallProductSpu.java              # 对应 mall_product_spu 表
-    │   ├── MallProductSku.java              # 对应 mall_product_sku 表
-    │   └── MallSkuStock.java                # 对应 mall_product_sku_stock 表
+    ├── DO/
+    │   ├── MallCategoryDO.java                # 对应 mall_product_category 表
+    │   ├── MallBrandDO.java                   # 对应 mall_product_brand 表
+    │   ├── MallProductSpuDO.java              # 对应 mall_product_spu 表
+    │   ├── MallProductSkuDO.java              # 对应 mall_product_sku 表
+    │   └── MallSkuStockDO.java                # 对应 mall_product_sku_stock 表
     ├── service/
     │   ├── category/
     │   │   ├── CategoryService.java
@@ -98,11 +98,11 @@ server/mall/mall-product/
     │   └── feign/
     │       └── RemoteSearchAdapter.java      # 调 mall-search 实时同步索引
     ├── convert/                             # 纯转换器（Entity↔DTO↔VO 字段映射）
-    │   ├── CategoryConvert.java            # MallCategory → CategoryTreeVO
-    │   ├── BrandConvert.java               # MallBrand → BrandVO
-    │   ├── SpuConvert.java                 # MallProductSpu → SpuVO / SpuDetailVO / SpuAdminVO
-    │   ├── SkuConvert.java                 # MallProductSku → SkuVO (attrsJson 展开)
-    │   └── StockConvert.java               # MallSkuStock → StockVO
+    │   ├── CategoryConvert.java            # MallCategoryDO → CategoryTreeVO
+    │   ├── BrandConvert.java               # MallBrandDO → BrandVO
+    │   ├── SpuConvert.java                 # MallProductSpuDO → SpuVO / SpuDetailVO / SpuAdminVO
+    │   ├── SkuConvert.java                 # MallProductSkuDO → SkuVO (attrsJson 展开)
+    │   └── StockConvert.java               # MallSkuStockDO → StockVO
     └── vo/                                  # 视图对象，前端展示（与 DO 字段不同，需转换）
         ├── CategoryTreeVO.java              # 类目树（嵌套 children），与 DO 扁平行不同
         ├── BrandVO.java                     # 品牌展示
@@ -364,7 +364,7 @@ spring:
           password: 138992
 
 mybatis-plus:
-  typeAliasesPackage: com.mall.product.**.domain
+  typeAliasesPackage: com.mall.product.**.DO
   mapperLocations: classpath:mapper/**/*.xml
 
 springdoc:

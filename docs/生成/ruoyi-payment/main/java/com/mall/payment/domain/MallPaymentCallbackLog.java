@@ -1,4 +1,4 @@
-package com.mall.payment.domain;
+package com.mall.payment.DO;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 回调日志对象 mall_payment_callback_log
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -65,122 +65,122 @@ public class MallPaymentCallbackLog extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setPaymentNo(String paymentNo) 
+    public void setPaymentNo(String paymentNo)
     {
         this.paymentNo = paymentNo;
     }
 
-    public String getPaymentNo() 
+    public String getPaymentNo()
     {
         return paymentNo;
     }
 
-    public void setRefundNo(String refundNo) 
+    public void setRefundNo(String refundNo)
     {
         this.refundNo = refundNo;
     }
 
-    public String getRefundNo() 
+    public String getRefundNo()
     {
         return refundNo;
     }
 
-    public void setChannelCode(String channelCode) 
+    public void setChannelCode(String channelCode)
     {
         this.channelCode = channelCode;
     }
 
-    public String getChannelCode() 
+    public String getChannelCode()
     {
         return channelCode;
     }
 
-    public void setCallbackType(String callbackType) 
+    public void setCallbackType(String callbackType)
     {
         this.callbackType = callbackType;
     }
 
-    public String getCallbackType() 
+    public String getCallbackType()
     {
         return callbackType;
     }
 
-    public void setRawBody(String rawBody) 
+    public void setRawBody(String rawBody)
     {
         this.rawBody = rawBody;
     }
 
-    public String getRawBody() 
+    public String getRawBody()
     {
         return rawBody;
     }
 
-    public void setIsVerified(String isVerified) 
+    public void setIsVerified(String isVerified)
     {
         this.isVerified = isVerified;
     }
 
-    public String getIsVerified() 
+    public String getIsVerified()
     {
         return isVerified;
     }
 
-    public void setProcessStatus(String processStatus) 
+    public void setProcessStatus(String processStatus)
     {
         this.processStatus = processStatus;
     }
 
-    public String getProcessStatus() 
+    public String getProcessStatus()
     {
         return processStatus;
     }
 
-    public void setProcessTime(Date processTime) 
+    public void setProcessTime(Date processTime)
     {
         this.processTime = processTime;
     }
 
-    public Date getProcessTime() 
+    public Date getProcessTime()
     {
         return processTime;
     }
 
-    public void setProcessResult(String processResult) 
+    public void setProcessResult(String processResult)
     {
         this.processResult = processResult;
     }
 
-    public String getProcessResult() 
+    public String getProcessResult()
     {
         return processResult;
     }
 
-    public void setNonce(String nonce) 
+    public void setNonce(String nonce)
     {
         this.nonce = nonce;
     }
 
-    public String getNonce() 
+    public String getNonce()
     {
         return nonce;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

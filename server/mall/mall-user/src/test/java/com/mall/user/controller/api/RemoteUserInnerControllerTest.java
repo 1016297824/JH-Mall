@@ -1,9 +1,9 @@
 package com.mall.user.controller.api;
 
 import com.mall.common.enums.user.UserStatusEnum;
-import com.mall.common.dto.user.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
-import com.mall.user.domain.MallUser;
+import com.mall.user.DO.MallUserDO;
+import com.mall.user.controller.RemoteUserInnerController;
 import com.mall.user.service.IMallUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,9 +38,9 @@ class RemoteUserInnerControllerTest {
         objectMapper = new ObjectMapper();
     }
 
-    private MallUser buildMockUser() {
-        MallUser user = new MallUser();
-        user.setId("12345");
+    private MallUserDO buildMockUser() {
+        MallUserDO user = new MallUserDO();
+        user.setId(12345L);
         user.setPhone("13800138000");
         user.setPhoneHash("abc123hash");
         user.setPassword("$2a$10$encodedhash");
@@ -50,22 +48,22 @@ class RemoteUserInnerControllerTest {
         user.setAvatar("https://example.com/avatar.png");
         user.setEmail("test@example.com");
         user.setEmailHash("email123hash");
-        user.setGender("1");
-        user.setUserStatus(String.valueOf(UserStatusEnum.NORMAL.getCode()));
+        user.setGender(1);
+        user.setUserStatus(UserStatusEnum.NORMAL.getCode());
         user.setRegisterType("phone");
         user.setRegisterIp("127.0.0.1");
-        user.setIsPrivacyAgreed("1");
+        user.setIsPrivacyAgreed(1);
         return user;
     }
 
     @Test
     void testFindByPhone_ShouldReturnDTO() throws Exception {
-        MallUser mockUser = buildMockUser();
+        MallUserDO mockUser = buildMockUser();
         when(mallUserService.selectByPhone("13800138000")).thenReturn(mockUser);
 
-        String responseBody = mockMvc.perform(get("/inner/user/phone/13800138000"))
+        mockMvc.perform(get("/inner/user/phone/13800138000"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("12345"))
+                .andExpect(jsonPath("$.id").value(12345))
                 .andExpect(jsonPath("$.phone").value("13800138000"))
                 .andExpect(jsonPath("$.phoneHash").value("abc123hash"))
                 .andExpect(jsonPath("$.password").doesNotExist())
@@ -73,12 +71,11 @@ class RemoteUserInnerControllerTest {
                 .andExpect(jsonPath("$.avatar").value("https://example.com/avatar.png"))
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.emailHash").value("email123hash"))
-                .andExpect(jsonPath("$.gender").value("1"))
-                .andExpect(jsonPath("$.userStatus").value(String.valueOf(UserStatusEnum.NORMAL.getCode())))
+                .andExpect(jsonPath("$.gender").value(1))
+                .andExpect(jsonPath("$.userStatus").value(UserStatusEnum.NORMAL.getCode()))
                 .andExpect(jsonPath("$.registerType").value("phone"))
                 .andExpect(jsonPath("$.registerIp").value("127.0.0.1"))
-                .andExpect(jsonPath("$.privacyAgreed").value("1"))
-                .andReturn().getResponse().getContentAsString();
+                .andExpect(jsonPath("$.privacyAgreed").value("1"));
 
         verify(mallUserService).selectByPhone("13800138000");
     }
@@ -120,7 +117,7 @@ class RemoteUserInnerControllerTest {
         RemoteUserService.PasswordUpdateRequest request = new RemoteUserService.PasswordUpdateRequest();
         request.setNewPassword("$2a$10$newhash");
 
-        when(mallUserService.updatePasswordById("12345", "$2a$10$newhash")).thenReturn(1);
+        doNothing().when(mallUserService).updatePasswordById("12345", "$2a$10$newhash");
 
         mockMvc.perform(put("/inner/user/12345/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +133,7 @@ class RemoteUserInnerControllerTest {
         request.setNewPhone("13900139000");
         request.setNewPhoneHash("newPhoneHash456");
 
-        when(mallUserService.updatePhoneById("12345", "13900139000", "newPhoneHash456")).thenReturn(1);
+        doNothing().when(mallUserService).updatePhoneById("12345", "13900139000", "newPhoneHash456");
 
         mockMvc.perform(put("/inner/user/12345/phone")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,7 +145,7 @@ class RemoteUserInnerControllerTest {
 
     @Test
     void testDeactivateAccount_ShouldCallUpdateUserStatusById() throws Exception {
-        when(mallUserService.updateUserStatusById("12345", String.valueOf(UserStatusEnum.DELETED.getCode()))).thenReturn(1);
+        doNothing().when(mallUserService).updateUserStatusById("12345", String.valueOf(UserStatusEnum.DELETED.getCode()));
 
         mockMvc.perform(delete("/inner/user/12345/account"))
                 .andExpect(status().isOk());

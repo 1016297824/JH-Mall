@@ -5,24 +5,24 @@ import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mall.user.mapper.MallUserMapper;
-import com.mall.user.domain.MallUser;
+import com.mall.user.DO.MallUser;
 import com.mall.user.service.IMallUserService;
 
 /**
  * 用户账号Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
 @Service
-public class MallUserServiceImpl implements IMallUserService 
+public class MallUserServiceImpl implements IMallUserService
 {
     @Autowired
     private MallUserMapper mallUserMapper;
 
     /**
      * 查询用户账号
-     * 
+     *
      * @param id 用户账号主键
      * @return 用户账号
      */
@@ -34,7 +34,7 @@ public class MallUserServiceImpl implements IMallUserService
 
     /**
      * 查询用户账号列表
-     * 
+     *
      * @param mallUser 用户账号
      * @return 用户账号
      */
@@ -46,7 +46,7 @@ public class MallUserServiceImpl implements IMallUserService
 
     /**
      * 新增用户账号
-     * 
+     *
      * @param mallUser 用户账号
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallUserServiceImpl implements IMallUserService
 
     /**
      * 修改用户账号
-     * 
+     *
      * @param mallUser 用户账号
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallUserServiceImpl implements IMallUserService
 
     /**
      * 批量删除用户账号
-     * 
+     *
      * @param ids 需要删除的用户账号主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallUserServiceImpl implements IMallUserService
 
     /**
      * 删除用户账号信息
-     * 
+     *
      * @param id 用户账号主键
      * @return 结果
      */

@@ -44,12 +44,12 @@ mall-order/src/main/java/com/mall/order/
 ├─ dto/               # 接口进出 DTO
 │  ├─ request/        → CreateOrderRequest, AddCartRequest, SubmitAfterSaleRequest ...
 │  └─ response/       → OrderDetailResponse, CartListResponse ...
-├─ domain/            # 数据库实体（DO）
-│  ├─ MallCart.java
-│  ├─ MallOrder.java
-│  ├─ MallOrderItem.java
-│  ├─ MallOrderAmount.java
-│  └─ MallAfterSale.java
+├─ DO/            # 数据库实体（DO）
+│  ├─ MallCartDO.java
+│  ├─ MallOrderDO.java
+│  ├─ MallOrderItemDO.java
+│  ├─ MallOrderAmountDO.java
+│  └─ MallAfterSaleDO.java
 ├─ service/           # 业务逻辑
 │  ├─ cart/           → CartService, CartServiceImpl
 │  ├─ order/          → OrderService, OrderServiceImpl
@@ -536,7 +536,7 @@ spring:
           password: 138992
 
 mybatis-plus:
-  typeAliasesPackage: com.mall.order.**.domain
+  typeAliasesPackage: com.mall.order.**.DO
   mapperLocations: classpath:mapper/**/*.xml
 
 springdoc:

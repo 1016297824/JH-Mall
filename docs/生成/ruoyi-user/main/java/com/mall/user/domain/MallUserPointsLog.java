@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.user.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 积分流水对象 mall_user_points_log
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -50,92 +50,92 @@ public class MallUserPointsLog extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setBizType(String bizType) 
+    public void setBizType(String bizType)
     {
         this.bizType = bizType;
     }
 
-    public String getBizType() 
+    public String getBizType()
     {
         return bizType;
     }
 
-    public void setBizNo(String bizNo) 
+    public void setBizNo(String bizNo)
     {
         this.bizNo = bizNo;
     }
 
-    public String getBizNo() 
+    public String getBizNo()
     {
         return bizNo;
     }
 
-    public void setChangeType(String changeType) 
+    public void setChangeType(String changeType)
     {
         this.changeType = changeType;
     }
 
-    public String getChangeType() 
+    public String getChangeType()
     {
         return changeType;
     }
 
-    public void setPoints(String points) 
+    public void setPoints(String points)
     {
         this.points = points;
     }
 
-    public String getPoints() 
+    public String getPoints()
     {
         return points;
     }
 
-    public void setBeforePoints(String beforePoints) 
+    public void setBeforePoints(String beforePoints)
     {
         this.beforePoints = beforePoints;
     }
 
-    public String getBeforePoints() 
+    public String getBeforePoints()
     {
         return beforePoints;
     }
 
-    public void setAfterPoints(String afterPoints) 
+    public void setAfterPoints(String afterPoints)
     {
         this.afterPoints = afterPoints;
     }
 
-    public String getAfterPoints() 
+    public String getAfterPoints()
     {
         return afterPoints;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

@@ -1,19 +1,19 @@
 package com.mall.marketing.service;
 
 import java.util.List;
-import com.mall.marketing.domain.MallMarketingCoupon;
+import com.mall.marketing.DO.MallMarketingCoupon;
 
 /**
  * 优惠券定义Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
-public interface IMallMarketingCouponService 
+public interface IMallMarketingCouponService
 {
     /**
      * 查询优惠券定义
-     * 
+     *
      * @param id 优惠券定义主键
      * @return 优惠券定义
      */
@@ -21,7 +21,7 @@ public interface IMallMarketingCouponService
 
     /**
      * 查询优惠券定义列表
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义
      * @return 优惠券定义集合
      */
@@ -29,7 +29,7 @@ public interface IMallMarketingCouponService
 
     /**
      * 新增优惠券定义
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IMallMarketingCouponService
 
     /**
      * 修改优惠券定义
-     * 
+     *
      * @param mallMarketingCoupon 优惠券定义
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IMallMarketingCouponService
 
     /**
      * 批量删除优惠券定义
-     * 
+     *
      * @param ids 需要删除的优惠券定义主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IMallMarketingCouponService
 
     /**
      * 删除优惠券定义信息
-     * 
+     *
      * @param id 优惠券定义主键
      * @return 结果
      */

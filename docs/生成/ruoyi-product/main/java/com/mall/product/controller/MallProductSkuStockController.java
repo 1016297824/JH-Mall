@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.security.annotation.RequiresPermissions;
-import com.mall.product.domain.MallProductSkuStock;
+import com.mall.product.DO.MallProductSkuStock;
 import com.mall.product.service.IMallProductSkuStockService;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -23,7 +23,7 @@ import com.ruoyi.common.core.web.page.TableDataInfo;
 
 /**
  * 库存管理Controller
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */

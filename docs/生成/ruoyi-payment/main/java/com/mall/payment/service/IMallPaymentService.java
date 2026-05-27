@@ -1,19 +1,19 @@
 package com.mall.payment.service;
 
 import java.util.List;
-import com.mall.payment.domain.MallPayment;
+import com.mall.payment.DO.MallPayment;
 
 /**
  * 支付单Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
-public interface IMallPaymentService 
+public interface IMallPaymentService
 {
     /**
      * 查询支付单
-     * 
+     *
      * @param id 支付单主键
      * @return 支付单
      */
@@ -21,7 +21,7 @@ public interface IMallPaymentService
 
     /**
      * 查询支付单列表
-     * 
+     *
      * @param mallPayment 支付单
      * @return 支付单集合
      */
@@ -29,7 +29,7 @@ public interface IMallPaymentService
 
     /**
      * 新增支付单
-     * 
+     *
      * @param mallPayment 支付单
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IMallPaymentService
 
     /**
      * 修改支付单
-     * 
+     *
      * @param mallPayment 支付单
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IMallPaymentService
 
     /**
      * 批量删除支付单
-     * 
+     *
      * @param ids 需要删除的支付单主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IMallPaymentService
 
     /**
      * 删除支付单信息
-     * 
+     *
      * @param id 支付单主键
      * @return 结果
      */

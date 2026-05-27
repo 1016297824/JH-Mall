@@ -5,24 +5,24 @@ import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mall.user.mapper.MallUserMemberLevelMapper;
-import com.mall.user.domain.MallUserMemberLevel;
+import com.mall.user.DO.MallUserMemberLevel;
 import com.mall.user.service.IMallUserMemberLevelService;
 
 /**
  * 会员等级定义Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
 @Service
-public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelService 
+public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelService
 {
     @Autowired
     private MallUserMemberLevelMapper mallUserMemberLevelMapper;
 
     /**
      * 查询会员等级定义
-     * 
+     *
      * @param id 会员等级定义主键
      * @return 会员等级定义
      */
@@ -34,7 +34,7 @@ public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelServi
 
     /**
      * 查询会员等级定义列表
-     * 
+     *
      * @param mallUserMemberLevel 会员等级定义
      * @return 会员等级定义
      */
@@ -46,7 +46,7 @@ public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelServi
 
     /**
      * 新增会员等级定义
-     * 
+     *
      * @param mallUserMemberLevel 会员等级定义
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelServi
 
     /**
      * 修改会员等级定义
-     * 
+     *
      * @param mallUserMemberLevel 会员等级定义
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelServi
 
     /**
      * 批量删除会员等级定义
-     * 
+     *
      * @param ids 需要删除的会员等级定义主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallUserMemberLevelServiceImpl implements IMallUserMemberLevelServi
 
     /**
      * 删除会员等级定义信息
-     * 
+     *
      * @param id 会员等级定义主键
      * @return 结果
      */

@@ -676,7 +676,7 @@ package com.mall.user.controller.api;
 
 import com.mall.api.dto.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
-import com.mall.user.domain.MallUser;
+import com.mall.user.DO.MallUserDO;
 import com.mall.user.service.IMallUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

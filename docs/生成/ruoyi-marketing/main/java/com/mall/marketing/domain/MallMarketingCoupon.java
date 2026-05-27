@@ -1,4 +1,4 @@
-package com.mall.marketing.domain;
+package com.mall.marketing.DO;
 
 import java.util.List;
 import java.util.Date;
@@ -10,7 +10,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 优惠券定义对象 mall_marketing_coupon
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -82,152 +82,152 @@ public class MallMarketingCoupon extends BaseEntity
     /** 用户优惠券记录信息 */
     private List<MallMarketingCouponRecord> mallMarketingCouponRecordList;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setCouponName(String couponName) 
+    public void setCouponName(String couponName)
     {
         this.couponName = couponName;
     }
 
-    public String getCouponName() 
+    public String getCouponName()
     {
         return couponName;
     }
 
-    public void setCouponType(String couponType) 
+    public void setCouponType(String couponType)
     {
         this.couponType = couponType;
     }
 
-    public String getCouponType() 
+    public String getCouponType()
     {
         return couponType;
     }
 
-    public void setFaceValue(String faceValue) 
+    public void setFaceValue(String faceValue)
     {
         this.faceValue = faceValue;
     }
 
-    public String getFaceValue() 
+    public String getFaceValue()
     {
         return faceValue;
     }
 
-    public void setDiscountRate(String discountRate) 
+    public void setDiscountRate(String discountRate)
     {
         this.discountRate = discountRate;
     }
 
-    public String getDiscountRate() 
+    public String getDiscountRate()
     {
         return discountRate;
     }
 
-    public void setDiscountLimit(String discountLimit) 
+    public void setDiscountLimit(String discountLimit)
     {
         this.discountLimit = discountLimit;
     }
 
-    public String getDiscountLimit() 
+    public String getDiscountLimit()
     {
         return discountLimit;
     }
 
-    public void setMinOrderAmount(String minOrderAmount) 
+    public void setMinOrderAmount(String minOrderAmount)
     {
         this.minOrderAmount = minOrderAmount;
     }
 
-    public String getMinOrderAmount() 
+    public String getMinOrderAmount()
     {
         return minOrderAmount;
     }
 
-    public void setTotalCount(String totalCount) 
+    public void setTotalCount(String totalCount)
     {
         this.totalCount = totalCount;
     }
 
-    public String getTotalCount() 
+    public String getTotalCount()
     {
         return totalCount;
     }
 
-    public void setRemainCount(String remainCount) 
+    public void setRemainCount(String remainCount)
     {
         this.remainCount = remainCount;
     }
 
-    public String getRemainCount() 
+    public String getRemainCount()
     {
         return remainCount;
     }
 
-    public void setPerUserLimit(String perUserLimit) 
+    public void setPerUserLimit(String perUserLimit)
     {
         this.perUserLimit = perUserLimit;
     }
 
-    public String getPerUserLimit() 
+    public String getPerUserLimit()
     {
         return perUserLimit;
     }
 
-    public void setUseStartTime(Date useStartTime) 
+    public void setUseStartTime(Date useStartTime)
     {
         this.useStartTime = useStartTime;
     }
 
-    public Date getUseStartTime() 
+    public Date getUseStartTime()
     {
         return useStartTime;
     }
 
-    public void setUseEndTime(Date useEndTime) 
+    public void setUseEndTime(Date useEndTime)
     {
         this.useEndTime = useEndTime;
     }
 
-    public Date getUseEndTime() 
+    public Date getUseEndTime()
     {
         return useEndTime;
     }
 
-    public void setCouponStatus(String couponStatus) 
+    public void setCouponStatus(String couponStatus)
     {
         this.couponStatus = couponStatus;
     }
 
-    public String getCouponStatus() 
+    public String getCouponStatus()
     {
         return couponStatus;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
 
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

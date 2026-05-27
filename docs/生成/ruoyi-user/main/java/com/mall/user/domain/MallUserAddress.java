@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.user.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 地址簿对象 mall_user_address
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -62,122 +62,122 @@ public class MallUserAddress extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setReceiverName(String receiverName) 
+    public void setReceiverName(String receiverName)
     {
         this.receiverName = receiverName;
     }
 
-    public String getReceiverName() 
+    public String getReceiverName()
     {
         return receiverName;
     }
 
-    public void setReceiverPhone(String receiverPhone) 
+    public void setReceiverPhone(String receiverPhone)
     {
         this.receiverPhone = receiverPhone;
     }
 
-    public String getReceiverPhone() 
+    public String getReceiverPhone()
     {
         return receiverPhone;
     }
 
-    public void setProvince(String province) 
+    public void setProvince(String province)
     {
         this.province = province;
     }
 
-    public String getProvince() 
+    public String getProvince()
     {
         return province;
     }
 
-    public void setCity(String city) 
+    public void setCity(String city)
     {
         this.city = city;
     }
 
-    public String getCity() 
+    public String getCity()
     {
         return city;
     }
 
-    public void setDistrict(String district) 
+    public void setDistrict(String district)
     {
         this.district = district;
     }
 
-    public String getDistrict() 
+    public String getDistrict()
     {
         return district;
     }
 
-    public void setDetailAddress(String detailAddress) 
+    public void setDetailAddress(String detailAddress)
     {
         this.detailAddress = detailAddress;
     }
 
-    public String getDetailAddress() 
+    public String getDetailAddress()
     {
         return detailAddress;
     }
 
-    public void setZipCode(String zipCode) 
+    public void setZipCode(String zipCode)
     {
         this.zipCode = zipCode;
     }
 
-    public String getZipCode() 
+    public String getZipCode()
     {
         return zipCode;
     }
 
-    public void setIsDefault(String isDefault) 
+    public void setIsDefault(String isDefault)
     {
         this.isDefault = isDefault;
     }
 
-    public String getIsDefault() 
+    public String getIsDefault()
     {
         return isDefault;
     }
 
-    public void setLabel(String label) 
+    public void setLabel(String label)
     {
         this.label = label;
     }
 
-    public String getLabel() 
+    public String getLabel()
     {
         return label;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

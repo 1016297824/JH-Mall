@@ -1,19 +1,19 @@
 package com.mall.order.mapper;
 
 import java.util.List;
-import com.mall.order.domain.MallOrderAmount;
+import com.mall.order.DO.MallOrderAmount;
 
 /**
  * 金额快照Mapper接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
-public interface MallOrderAmountMapper 
+public interface MallOrderAmountMapper
 {
     /**
      * 查询金额快照
-     * 
+     *
      * @param id 金额快照主键
      * @return 金额快照
      */
@@ -21,7 +21,7 @@ public interface MallOrderAmountMapper
 
     /**
      * 查询金额快照列表
-     * 
+     *
      * @param mallOrderAmount 金额快照
      * @return 金额快照集合
      */
@@ -29,7 +29,7 @@ public interface MallOrderAmountMapper
 
     /**
      * 新增金额快照
-     * 
+     *
      * @param mallOrderAmount 金额快照
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface MallOrderAmountMapper
 
     /**
      * 修改金额快照
-     * 
+     *
      * @param mallOrderAmount 金额快照
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface MallOrderAmountMapper
 
     /**
      * 删除金额快照
-     * 
+     *
      * @param id 金额快照主键
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface MallOrderAmountMapper
 
     /**
      * 批量删除金额快照
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */

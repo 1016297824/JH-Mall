@@ -1,4 +1,4 @@
-package com.mall.product.domain;
+package com.mall.product.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 库存管理对象 mall_product_sku_stock
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -50,92 +50,92 @@ public class MallProductSkuStock extends BaseEntity
     @Excel(name = "乐观锁版本号，库存扣减防超卖")
     private String version;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setSkuId(String skuId) 
+    public void setSkuId(String skuId)
     {
         this.skuId = skuId;
     }
 
-    public String getSkuId() 
+    public String getSkuId()
     {
         return skuId;
     }
 
-    public void setTotalStock(String totalStock) 
+    public void setTotalStock(String totalStock)
     {
         this.totalStock = totalStock;
     }
 
-    public String getTotalStock() 
+    public String getTotalStock()
     {
         return totalStock;
     }
 
-    public void setAvailableStock(String availableStock) 
+    public void setAvailableStock(String availableStock)
     {
         this.availableStock = availableStock;
     }
 
-    public String getAvailableStock() 
+    public String getAvailableStock()
     {
         return availableStock;
     }
 
-    public void setLockedStock(String lockedStock) 
+    public void setLockedStock(String lockedStock)
     {
         this.lockedStock = lockedStock;
     }
 
-    public String getLockedStock() 
+    public String getLockedStock()
     {
         return lockedStock;
     }
 
-    public void setSoldStock(String soldStock) 
+    public void setSoldStock(String soldStock)
     {
         this.soldStock = soldStock;
     }
 
-    public String getSoldStock() 
+    public String getSoldStock()
     {
         return soldStock;
     }
 
-    public void setFrozenStock(String frozenStock) 
+    public void setFrozenStock(String frozenStock)
     {
         this.frozenStock = frozenStock;
     }
 
-    public String getFrozenStock() 
+    public String getFrozenStock()
     {
         return frozenStock;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
 
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

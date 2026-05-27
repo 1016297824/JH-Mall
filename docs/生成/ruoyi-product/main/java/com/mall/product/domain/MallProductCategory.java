@@ -1,4 +1,4 @@
-package com.mall.product.domain;
+package com.mall.product.DO;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.TreeEntity;
 
 /**
  * 商品类目对象 mall_product_category
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -46,82 +46,82 @@ public class MallProductCategory extends TreeEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
 
-    public String getName() 
+    public String getName()
     {
         return name;
     }
 
-    public void setLevel(String level) 
+    public void setLevel(String level)
     {
         this.level = level;
     }
 
-    public String getLevel() 
+    public String getLevel()
     {
         return level;
     }
 
-    public void setIcon(String icon) 
+    public void setIcon(String icon)
     {
         this.icon = icon;
     }
 
-    public String getIcon() 
+    public String getIcon()
     {
         return icon;
     }
 
-    public void setSortOrder(String sortOrder) 
+    public void setSortOrder(String sortOrder)
     {
         this.sortOrder = sortOrder;
     }
 
-    public String getSortOrder() 
+    public String getSortOrder()
     {
         return sortOrder;
     }
 
-    public void setIsVisible(String isVisible) 
+    public void setIsVisible(String isVisible)
     {
         this.isVisible = isVisible;
     }
 
-    public String getIsVisible() 
+    public String getIsVisible()
     {
         return isVisible;
     }
 
-    public void setPath(String path) 
+    public void setPath(String path)
     {
         this.path = path;
     }
 
-    public String getPath() 
+    public String getPath()
     {
         return path;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
