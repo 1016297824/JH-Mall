@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.user.mapper.MallUserMemberLevelMapper">
+    
+    <resultMap type="MallUserMemberLevel" id="MallUserMemberLevelResult">
+        <result property="id"    column="id"    />
+        <result property="levelName"    column="level_name"    />
+        <result property="levelValue"    column="level_value"    />
+        <result property="minGrowth"    column="min_growth"    />
+        <result property="maxGrowth"    column="max_growth"    />
+        <result property="icon"    column="icon"    />
+        <result property="benefitsJson"    column="benefits_json"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallUserMemberLevelVo">
+        select id, level_name, level_value, min_growth, max_growth, icon, benefits_json, is_deleted, create_time, update_time from mall_user_member_level
+    </sql>
+
+    <select id="selectMallUserMemberLevelList" parameterType="MallUserMemberLevel" resultMap="MallUserMemberLevelResult">
+        <include refid="selectMallUserMemberLevelVo"/>
+        <where>  
+            <if test="levelName != null  and levelName != ''"> and level_name like concat('%', #{levelName}, '%')</if>
+            <if test="levelValue != null  and levelValue != ''"> and level_value = #{levelValue}</if>
+            <if test="minGrowth != null  and minGrowth != ''"> and min_growth = #{minGrowth}</if>
+            <if test="maxGrowth != null  and maxGrowth != ''"> and max_growth = #{maxGrowth}</if>
+            <if test="icon != null  and icon != ''"> and icon = #{icon}</if>
+            <if test="benefitsJson != null  and benefitsJson != ''"> and benefits_json = #{benefitsJson}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallUserMemberLevelById" parameterType="String" resultMap="MallUserMemberLevelResult">
+        <include refid="selectMallUserMemberLevelVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMallUserMemberLevel" parameterType="MallUserMemberLevel" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_user_member_level
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="levelName != null and levelName != ''">level_name,</if>
+            <if test="levelValue != null and levelValue != ''">level_value,</if>
+            <if test="minGrowth != null and minGrowth != ''">min_growth,</if>
+            <if test="maxGrowth != null and maxGrowth != ''">max_growth,</if>
+            <if test="icon != null">icon,</if>
+            <if test="benefitsJson != null">benefits_json,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="levelName != null and levelName != ''">#{levelName},</if>
+            <if test="levelValue != null and levelValue != ''">#{levelValue},</if>
+            <if test="minGrowth != null and minGrowth != ''">#{minGrowth},</if>
+            <if test="maxGrowth != null and maxGrowth != ''">#{maxGrowth},</if>
+            <if test="icon != null">#{icon},</if>
+            <if test="benefitsJson != null">#{benefitsJson},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallUserMemberLevel" parameterType="MallUserMemberLevel">
+        update mall_user_member_level
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="levelName != null and levelName != ''">level_name = #{levelName},</if>
+            <if test="levelValue != null and levelValue != ''">level_value = #{levelValue},</if>
+            <if test="minGrowth != null and minGrowth != ''">min_growth = #{minGrowth},</if>
+            <if test="maxGrowth != null and maxGrowth != ''">max_growth = #{maxGrowth},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="benefitsJson != null">benefits_json = #{benefitsJson},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallUserMemberLevelById" parameterType="String">
+        delete from mall_user_member_level where id = #{id}
+    </delete>
+
+    <delete id="deleteMallUserMemberLevelByIds" parameterType="String">
+        delete from mall_user_member_level where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

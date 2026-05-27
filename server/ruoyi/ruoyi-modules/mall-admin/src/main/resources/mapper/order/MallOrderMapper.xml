@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.order.mapper.MallOrderMapper">
+    
+    <resultMap type="MallOrder" id="MallOrderResult">
+        <result property="id"    column="id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="userId"    column="user_id"    />
+        <result property="orderStatus"    column="order_status"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="discountAmount"    column="discount_amount"    />
+        <result property="freightAmount"    column="freight_amount"    />
+        <result property="payAmount"    column="pay_amount"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="deliveryTime"    column="delivery_time"    />
+        <result property="completeTime"    column="complete_time"    />
+        <result property="cancelTime"    column="cancel_time"    />
+        <result property="cancelType"    column="cancel_type"    />
+        <result property="cancelReason"    column="cancel_reason"    />
+        <result property="payExpireTime"    column="pay_expire_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="idempotentKey"    column="idempotent_key"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <resultMap id="MallOrderMallOrderItemResult" type="MallOrder" extends="MallOrderResult">
+        <collection property="mallOrderItemList" ofType="MallOrderItem" column="id" select="selectMallOrderItemList" />
+    </resultMap>
+
+    <resultMap type="MallOrderItem" id="MallOrderItemResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="spuId"    column="spu_id"    />
+        <result property="skuId"    column="sku_id"    />
+        <result property="skuCode"    column="sku_code"    />
+        <result property="skuName"    column="sku_name"    />
+        <result property="spuName"    column="spu_name"    />
+        <result property="mainImage"    column="main_image"    />
+        <result property="attrsJson"    column="attrs_json"    />
+        <result property="quantity"    column="quantity"    />
+        <result property="price"    column="price"    />
+        <result property="totalPrice"    column="total_price"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMallOrderVo">
+        select id, order_no, user_id, order_status, total_amount, discount_amount, freight_amount, pay_amount, pay_time, delivery_time, complete_time, cancel_time, cancel_type, cancel_reason, pay_expire_time, remark, idempotent_key, is_deleted, create_by, update_by, create_time, update_time, version from mall_order
+    </sql>
+
+    <select id="selectMallOrderList" parameterType="MallOrder" resultMap="MallOrderResult">
+        <include refid="selectMallOrderVo"/>
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="userId != null  and userId != ''"> and user_id = #{userId}</if>
+            <if test="orderStatus != null  and orderStatus != ''"> and order_status = #{orderStatus}</if>
+            <if test="totalAmount != null  and totalAmount != ''"> and total_amount = #{totalAmount}</if>
+            <if test="discountAmount != null  and discountAmount != ''"> and discount_amount = #{discountAmount}</if>
+            <if test="freightAmount != null  and freightAmount != ''"> and freight_amount = #{freightAmount}</if>
+            <if test="payAmount != null  and payAmount != ''"> and pay_amount = #{payAmount}</if>
+            <if test="payTime != null "> and pay_time = #{payTime}</if>
+            <if test="deliveryTime != null "> and delivery_time = #{deliveryTime}</if>
+            <if test="completeTime != null "> and complete_time = #{completeTime}</if>
+            <if test="cancelTime != null "> and cancel_time = #{cancelTime}</if>
+            <if test="cancelType != null  and cancelType != ''"> and cancel_type = #{cancelType}</if>
+            <if test="cancelReason != null  and cancelReason != ''"> and cancel_reason = #{cancelReason}</if>
+            <if test="payExpireTime != null "> and pay_expire_time = #{payExpireTime}</if>
+            <if test="idempotentKey != null  and idempotentKey != ''"> and idempotent_key = #{idempotentKey}</if>
+            <if test="isDeleted != null  and isDeleted != ''"> and is_deleted = #{isDeleted}</if>
+            <if test="version != null  and version != ''"> and version = #{version}</if>
+        </where>
+    </select>
+    
+    <select id="selectMallOrderById" parameterType="String" resultMap="MallOrderMallOrderItemResult">
+        select id, order_no, user_id, order_status, total_amount, discount_amount, freight_amount, pay_amount, pay_time, delivery_time, complete_time, cancel_time, cancel_type, cancel_reason, pay_expire_time, remark, idempotent_key, is_deleted, create_by, update_by, create_time, update_time, version
+        from mall_order
+        where id = #{id}
+    </select>
+
+    <select id="selectMallOrderItemList" resultMap="MallOrderItemResult">
+        select id, order_id, spu_id, sku_id, sku_code, sku_name, spu_name, main_image, attrs_json, quantity, price, total_price, is_deleted, create_time, update_time
+        from mall_order_item
+        where order_id = #{order_id}
+    </select>
+
+    <insert id="insertMallOrder" parameterType="MallOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into mall_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="userId != null and userId != ''">user_id,</if>
+            <if test="orderStatus != null and orderStatus != ''">order_status,</if>
+            <if test="totalAmount != null and totalAmount != ''">total_amount,</if>
+            <if test="discountAmount != null">discount_amount,</if>
+            <if test="freightAmount != null">freight_amount,</if>
+            <if test="payAmount != null and payAmount != ''">pay_amount,</if>
+            <if test="payTime != null">pay_time,</if>
+            <if test="deliveryTime != null">delivery_time,</if>
+            <if test="completeTime != null">complete_time,</if>
+            <if test="cancelTime != null">cancel_time,</if>
+            <if test="cancelType != null">cancel_type,</if>
+            <if test="cancelReason != null">cancel_reason,</if>
+            <if test="payExpireTime != null">pay_expire_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="idempotentKey != null">idempotent_key,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="version != null">version,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="orderStatus != null and orderStatus != ''">#{orderStatus},</if>
+            <if test="totalAmount != null and totalAmount != ''">#{totalAmount},</if>
+            <if test="discountAmount != null">#{discountAmount},</if>
+            <if test="freightAmount != null">#{freightAmount},</if>
+            <if test="payAmount != null and payAmount != ''">#{payAmount},</if>
+            <if test="payTime != null">#{payTime},</if>
+            <if test="deliveryTime != null">#{deliveryTime},</if>
+            <if test="completeTime != null">#{completeTime},</if>
+            <if test="cancelTime != null">#{cancelTime},</if>
+            <if test="cancelType != null">#{cancelType},</if>
+            <if test="cancelReason != null">#{cancelReason},</if>
+            <if test="payExpireTime != null">#{payExpireTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="idempotentKey != null">#{idempotentKey},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="version != null">#{version},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMallOrder" parameterType="MallOrder">
+        update mall_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="orderStatus != null and orderStatus != ''">order_status = #{orderStatus},</if>
+            <if test="totalAmount != null and totalAmount != ''">total_amount = #{totalAmount},</if>
+            <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+            <if test="freightAmount != null">freight_amount = #{freightAmount},</if>
+            <if test="payAmount != null and payAmount != ''">pay_amount = #{payAmount},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="cancelTime != null">cancel_time = #{cancelTime},</if>
+            <if test="cancelType != null">cancel_type = #{cancelType},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
+            <if test="payExpireTime != null">pay_expire_time = #{payExpireTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="idempotentKey != null">idempotent_key = #{idempotentKey},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="version != null">version = #{version},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMallOrderById" parameterType="String">
+        delete from mall_order where id = #{id}
+    </delete>
+
+    <delete id="deleteMallOrderByIds" parameterType="String">
+        delete from mall_order where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteMallOrderItemByOrderIds" parameterType="String">
+        delete from mall_order_item where order_id in 
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMallOrderItemByOrderId" parameterType="String">
+        delete from mall_order_item where order_id = #{orderId}
+    </delete>
+
+    <insert id="batchMallOrderItem">
+        insert into mall_order_item( id, order_id, spu_id, sku_id, sku_code, sku_name, spu_name, main_image, attrs_json, quantity, price, total_price, is_deleted, create_time, update_time) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.orderId}, #{item.spuId}, #{item.skuId}, #{item.skuCode}, #{item.skuName}, #{item.spuName}, #{item.mainImage}, #{item.attrsJson}, #{item.quantity}, #{item.price}, #{item.totalPrice}, #{item.isDeleted}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
+</mapper>
