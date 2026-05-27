@@ -14,7 +14,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-order:amount:add']"
+          v-hasPermi="['mall-admin:amount:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -24,7 +24,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-order:amount:edit']"
+          v-hasPermi="['mall-admin:amount:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -34,7 +34,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-order:amount:remove']"
+          v-hasPermi="['mall-admin:amount:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -43,7 +43,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-order:amount:export']"
+          v-hasPermi="['mall-admin:amount:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -62,8 +62,8 @@
       <el-table-column label="实付金额" align="center" prop="payAmount" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:amount:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-order:amount:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:amount:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:amount:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -274,7 +274,7 @@ function handleDelete(row: MallOrderAmount) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-order/amount/export', {
+  proxy.download('mall-admin/amount/export', {
     ...queryParams.value
   }, `amount_${new Date().getTime()}.xlsx`)
 }

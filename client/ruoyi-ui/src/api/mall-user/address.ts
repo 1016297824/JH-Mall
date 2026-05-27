@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, AddressQueryParams, MallUserAddress } f
 // 查询地址簿列表
 export function listAddress(query: AddressQueryParams): Promise<TableDataInfo<MallUserAddress[]>> {
   return request({
-    url: '/mall-user/address/list',
+    url: '/mall-admin/address/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listAddress(query: AddressQueryParams): Promise<TableDataInfo<Ma
 // 查询地址簿详细
 export function getAddress(id: number): Promise<AjaxResult<MallUserAddress>> {
   return request({
-    url: '/mall-user/address/' + id,
+    url: '/mall-admin/address/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getAddress(id: number): Promise<AjaxResult<MallUserAddress>> {
 // 新增地址簿
 export function addAddress(data: MallUserAddress): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/address',
+    url: '/mall-admin/address',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addAddress(data: MallUserAddress): Promise<AjaxResult> {
 // 修改地址簿
 export function updateAddress(data: MallUserAddress): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/address',
+    url: '/mall-admin/address',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateAddress(data: MallUserAddress): Promise<AjaxResult> {
 // 删除地址簿
 export function delAddress(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/address/' + id,
+    url: '/mall-admin/address/' + id,
     method: 'delete'
   })
 }

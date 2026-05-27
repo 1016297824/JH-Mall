@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, LevelQueryParams, MallUserMemberLevel }
 // 查询会员等级定义列表
 export function listLevel(query: LevelQueryParams): Promise<TableDataInfo<MallUserMemberLevel[]>> {
   return request({
-    url: '/mall-user/level/list',
+    url: '/mall-admin/level/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listLevel(query: LevelQueryParams): Promise<TableDataInfo<MallUs
 // 查询会员等级定义详细
 export function getLevel(id: number): Promise<AjaxResult<MallUserMemberLevel>> {
   return request({
-    url: '/mall-user/level/' + id,
+    url: '/mall-admin/level/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getLevel(id: number): Promise<AjaxResult<MallUserMemberLevel>> {
 // 新增会员等级定义
 export function addLevel(data: MallUserMemberLevel): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/level',
+    url: '/mall-admin/level',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addLevel(data: MallUserMemberLevel): Promise<AjaxResult> {
 // 修改会员等级定义
 export function updateLevel(data: MallUserMemberLevel): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/level',
+    url: '/mall-admin/level',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateLevel(data: MallUserMemberLevel): Promise<AjaxResult> {
 // 删除会员等级定义
 export function delLevel(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/level/' + id,
+    url: '/mall-admin/level/' + id,
     method: 'delete'
   })
 }

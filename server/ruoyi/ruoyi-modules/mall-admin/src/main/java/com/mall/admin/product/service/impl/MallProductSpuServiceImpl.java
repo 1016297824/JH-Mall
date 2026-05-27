@@ -1,4 +1,4 @@
-package com.mall.product.service.impl;
+package com.mall.admin.product.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
@@ -7,26 +7,26 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
-import com.mall.product.domain.MallProductSku;
-import com.mall.product.mapper.MallProductSpuMapper;
-import com.mall.product.domain.MallProductSpu;
-import com.mall.product.service.IMallProductSpuService;
+import com.mall.admin.product.domain.MallProductSku;
+import com.mall.admin.product.mapper.MallProductSpuMapper;
+import com.mall.admin.product.domain.MallProductSpu;
+import com.mall.admin.product.service.IMallProductSpuService;
 
 /**
  * SPU 管理Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
 @Service
-public class MallProductSpuServiceImpl implements IMallProductSpuService 
+public class MallProductSpuServiceImpl implements IMallProductSpuService
 {
     @Autowired
     private MallProductSpuMapper mallProductSpuMapper;
 
     /**
      * 查询SPU 管理
-     * 
+     *
      * @param id SPU 管理主键
      * @return SPU 管理
      */
@@ -38,7 +38,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
 
     /**
      * 查询SPU 管理列表
-     * 
+     *
      * @param mallProductSpu SPU 管理
      * @return SPU 管理
      */
@@ -50,7 +50,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
 
     /**
      * 新增SPU 管理
-     * 
+     *
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
@@ -66,7 +66,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
 
     /**
      * 修改SPU 管理
-     * 
+     *
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
@@ -82,7 +82,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
 
     /**
      * 批量删除SPU 管理
-     * 
+     *
      * @param ids 需要删除的SPU 管理主键
      * @return 结果
      */
@@ -96,7 +96,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
 
     /**
      * 删除SPU 管理信息
-     * 
+     *
      * @param id SPU 管理主键
      * @return 结果
      */
@@ -110,7 +110,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
 
     /**
      * 新增SKU 管理信息
-     * 
+     *
      * @param mallProductSpu SPU 管理对象
      */
     public void insertMallProductSku(MallProductSpu mallProductSpu)

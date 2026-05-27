@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, StockQueryParams, MallProductSkuStock }
 // 查询库存管理列表
 export function listStock(query: StockQueryParams): Promise<TableDataInfo<MallProductSkuStock[]>> {
   return request({
-    url: '/mall-product/stock/list',
+    url: '/mall-admin/stock/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listStock(query: StockQueryParams): Promise<TableDataInfo<MallPr
 // 查询库存管理详细
 export function getStock(id: number): Promise<AjaxResult<MallProductSkuStock>> {
   return request({
-    url: '/mall-product/stock/' + id,
+    url: '/mall-admin/stock/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getStock(id: number): Promise<AjaxResult<MallProductSkuStock>> {
 // 新增库存管理
 export function addStock(data: MallProductSkuStock): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/stock',
+    url: '/mall-admin/stock',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addStock(data: MallProductSkuStock): Promise<AjaxResult> {
 // 修改库存管理
 export function updateStock(data: MallProductSkuStock): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/stock',
+    url: '/mall-admin/stock',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateStock(data: MallProductSkuStock): Promise<AjaxResult> {
 // 删除库存管理
 export function delStock(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/stock/' + id,
+    url: '/mall-admin/stock/' + id,
     method: 'delete'
   })
 }

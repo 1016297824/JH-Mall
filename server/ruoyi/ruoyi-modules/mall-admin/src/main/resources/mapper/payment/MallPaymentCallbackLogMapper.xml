@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.mall.payment.mapper.MallPaymentCallbackLogMapper">
+<mapper namespace="com.mall.admin.payment.mapper.MallPaymentCallbackLogMapper">
     
     <resultMap type="MallPaymentCallbackLog" id="MallPaymentCallbackLogResult">
         <result property="id"    column="id"    />

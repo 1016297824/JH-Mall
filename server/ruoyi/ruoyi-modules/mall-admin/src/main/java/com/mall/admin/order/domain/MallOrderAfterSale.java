@@ -1,4 +1,4 @@
-package com.mall.order.domain;
+package com.mall.admin.order.domain;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 售后管理对象 mall_order_after_sale
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -83,162 +83,162 @@ public class MallOrderAfterSale extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setAfterSaleNo(String afterSaleNo) 
+    public void setAfterSaleNo(String afterSaleNo)
     {
         this.afterSaleNo = afterSaleNo;
     }
 
-    public String getAfterSaleNo() 
+    public String getAfterSaleNo()
     {
         return afterSaleNo;
     }
 
-    public void setOrderId(String orderId) 
+    public void setOrderId(String orderId)
     {
         this.orderId = orderId;
     }
 
-    public String getOrderId() 
+    public String getOrderId()
     {
         return orderId;
     }
 
-    public void setOrderItemId(String orderItemId) 
+    public void setOrderItemId(String orderItemId)
     {
         this.orderItemId = orderItemId;
     }
 
-    public String getOrderItemId() 
+    public String getOrderItemId()
     {
         return orderItemId;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setAfterSaleType(String afterSaleType) 
+    public void setAfterSaleType(String afterSaleType)
     {
         this.afterSaleType = afterSaleType;
     }
 
-    public String getAfterSaleType() 
+    public String getAfterSaleType()
     {
         return afterSaleType;
     }
 
-    public void setReason(String reason) 
+    public void setReason(String reason)
     {
         this.reason = reason;
     }
 
-    public String getReason() 
+    public String getReason()
     {
         return reason;
     }
 
-    public void setAmount(String amount) 
+    public void setAmount(String amount)
     {
         this.amount = amount;
     }
 
-    public String getAmount() 
+    public String getAmount()
     {
         return amount;
     }
 
-    public void setAfterSaleStatus(String afterSaleStatus) 
+    public void setAfterSaleStatus(String afterSaleStatus)
     {
         this.afterSaleStatus = afterSaleStatus;
     }
 
-    public String getAfterSaleStatus() 
+    public String getAfterSaleStatus()
     {
         return afterSaleStatus;
     }
 
-    public void setApplyTime(Date applyTime) 
+    public void setApplyTime(Date applyTime)
     {
         this.applyTime = applyTime;
     }
 
-    public Date getApplyTime() 
+    public Date getApplyTime()
     {
         return applyTime;
     }
 
-    public void setApproveTime(Date approveTime) 
+    public void setApproveTime(Date approveTime)
     {
         this.approveTime = approveTime;
     }
 
-    public Date getApproveTime() 
+    public Date getApproveTime()
     {
         return approveTime;
     }
 
-    public void setApproveRemark(String approveRemark) 
+    public void setApproveRemark(String approveRemark)
     {
         this.approveRemark = approveRemark;
     }
 
-    public String getApproveRemark() 
+    public String getApproveRemark()
     {
         return approveRemark;
     }
 
-    public void setReturnExpressCompany(String returnExpressCompany) 
+    public void setReturnExpressCompany(String returnExpressCompany)
     {
         this.returnExpressCompany = returnExpressCompany;
     }
 
-    public String getReturnExpressCompany() 
+    public String getReturnExpressCompany()
     {
         return returnExpressCompany;
     }
 
-    public void setReturnExpressNo(String returnExpressNo) 
+    public void setReturnExpressNo(String returnExpressNo)
     {
         this.returnExpressNo = returnExpressNo;
     }
 
-    public String getReturnExpressNo() 
+    public String getReturnExpressNo()
     {
         return returnExpressNo;
     }
 
-    public void setReceiptTime(Date receiptTime) 
+    public void setReceiptTime(Date receiptTime)
     {
         this.receiptTime = receiptTime;
     }
 
-    public Date getReceiptTime() 
+    public Date getReceiptTime()
     {
         return receiptTime;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

@@ -1,4 +1,4 @@
-package com.mall.product.domain;
+package com.mall.admin.product.domain;
 
 import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -8,7 +8,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * SPU 管理对象 mall_product_spu
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -78,152 +78,152 @@ public class MallProductSpu extends BaseEntity
     /** SKU 管理信息 */
     private List<MallProductSku> mallProductSkuList;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setCategoryId(String categoryId) 
+    public void setCategoryId(String categoryId)
     {
         this.categoryId = categoryId;
     }
 
-    public String getCategoryId() 
+    public String getCategoryId()
     {
         return categoryId;
     }
 
-    public void setBrandId(String brandId) 
+    public void setBrandId(String brandId)
     {
         this.brandId = brandId;
     }
 
-    public String getBrandId() 
+    public String getBrandId()
     {
         return brandId;
     }
 
-    public void setSpuName(String spuName) 
+    public void setSpuName(String spuName)
     {
         this.spuName = spuName;
     }
 
-    public String getSpuName() 
+    public String getSpuName()
     {
         return spuName;
     }
 
-    public void setSpuDescription(String spuDescription) 
+    public void setSpuDescription(String spuDescription)
     {
         this.spuDescription = spuDescription;
     }
 
-    public String getSpuDescription() 
+    public String getSpuDescription()
     {
         return spuDescription;
     }
 
-    public void setMainImage(String mainImage) 
+    public void setMainImage(String mainImage)
     {
         this.mainImage = mainImage;
     }
 
-    public String getMainImage() 
+    public String getMainImage()
     {
         return mainImage;
     }
 
-    public void setImagesJson(String imagesJson) 
+    public void setImagesJson(String imagesJson)
     {
         this.imagesJson = imagesJson;
     }
 
-    public String getImagesJson() 
+    public String getImagesJson()
     {
         return imagesJson;
     }
 
-    public void setPriceMin(String priceMin) 
+    public void setPriceMin(String priceMin)
     {
         this.priceMin = priceMin;
     }
 
-    public String getPriceMin() 
+    public String getPriceMin()
     {
         return priceMin;
     }
 
-    public void setPriceMax(String priceMax) 
+    public void setPriceMax(String priceMax)
     {
         this.priceMax = priceMax;
     }
 
-    public String getPriceMax() 
+    public String getPriceMax()
     {
         return priceMax;
     }
 
-    public void setSalesCount(String salesCount) 
+    public void setSalesCount(String salesCount)
     {
         this.salesCount = salesCount;
     }
 
-    public String getSalesCount() 
+    public String getSalesCount()
     {
         return salesCount;
     }
 
-    public void setReviewCount(String reviewCount) 
+    public void setReviewCount(String reviewCount)
     {
         this.reviewCount = reviewCount;
     }
 
-    public String getReviewCount() 
+    public String getReviewCount()
     {
         return reviewCount;
     }
 
-    public void setPublishStatus(String publishStatus) 
+    public void setPublishStatus(String publishStatus)
     {
         this.publishStatus = publishStatus;
     }
 
-    public String getPublishStatus() 
+    public String getPublishStatus()
     {
         return publishStatus;
     }
 
-    public void setVerifyStatus(String verifyStatus) 
+    public void setVerifyStatus(String verifyStatus)
     {
         this.verifyStatus = verifyStatus;
     }
 
-    public String getVerifyStatus() 
+    public String getVerifyStatus()
     {
         return verifyStatus;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
 
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

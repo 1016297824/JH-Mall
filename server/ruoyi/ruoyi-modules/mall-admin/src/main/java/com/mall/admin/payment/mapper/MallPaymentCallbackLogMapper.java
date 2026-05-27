@@ -1,19 +1,19 @@
-package com.mall.payment.mapper;
+package com.mall.admin.payment.mapper;
 
 import java.util.List;
-import com.mall.payment.domain.MallPaymentCallbackLog;
+import com.mall.admin.payment.domain.MallPaymentCallbackLog;
 
 /**
  * 回调日志Mapper接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
-public interface MallPaymentCallbackLogMapper 
+public interface MallPaymentCallbackLogMapper
 {
     /**
      * 查询回调日志
-     * 
+     *
      * @param id 回调日志主键
      * @return 回调日志
      */
@@ -21,7 +21,7 @@ public interface MallPaymentCallbackLogMapper
 
     /**
      * 查询回调日志列表
-     * 
+     *
      * @param mallPaymentCallbackLog 回调日志
      * @return 回调日志集合
      */
@@ -29,7 +29,7 @@ public interface MallPaymentCallbackLogMapper
 
     /**
      * 新增回调日志
-     * 
+     *
      * @param mallPaymentCallbackLog 回调日志
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface MallPaymentCallbackLogMapper
 
     /**
      * 修改回调日志
-     * 
+     *
      * @param mallPaymentCallbackLog 回调日志
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface MallPaymentCallbackLogMapper
 
     /**
      * 删除回调日志
-     * 
+     *
      * @param id 回调日志主键
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface MallPaymentCallbackLogMapper
 
     /**
      * 批量删除回调日志
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */

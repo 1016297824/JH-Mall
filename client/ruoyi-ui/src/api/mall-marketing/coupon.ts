@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, CouponQueryParams, MallMarketingCoupon 
 // 查询优惠券定义列表
 export function listCoupon(query: CouponQueryParams): Promise<TableDataInfo<MallMarketingCoupon[]>> {
   return request({
-    url: '/mall-marketing/coupon/list',
+    url: '/mall-admin/coupon/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listCoupon(query: CouponQueryParams): Promise<TableDataInfo<Mall
 // 查询优惠券定义详细
 export function getCoupon(id: number): Promise<AjaxResult<MallMarketingCoupon>> {
   return request({
-    url: '/mall-marketing/coupon/' + id,
+    url: '/mall-admin/coupon/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getCoupon(id: number): Promise<AjaxResult<MallMarketingCoupon>> 
 // 新增优惠券定义
 export function addCoupon(data: MallMarketingCoupon): Promise<AjaxResult> {
   return request({
-    url: '/mall-marketing/coupon',
+    url: '/mall-admin/coupon',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addCoupon(data: MallMarketingCoupon): Promise<AjaxResult> {
 // 修改优惠券定义
 export function updateCoupon(data: MallMarketingCoupon): Promise<AjaxResult> {
   return request({
-    url: '/mall-marketing/coupon',
+    url: '/mall-admin/coupon',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateCoupon(data: MallMarketingCoupon): Promise<AjaxResult> {
 // 删除优惠券定义
 export function delCoupon(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-marketing/coupon/' + id,
+    url: '/mall-admin/coupon/' + id,
     method: 'delete'
   })
 }

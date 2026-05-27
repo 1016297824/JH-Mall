@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.admin.user.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 会员等级定义对象 mall_user_member_level
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -46,82 +46,82 @@ public class MallUserMemberLevel extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setLevelName(String levelName) 
+    public void setLevelName(String levelName)
     {
         this.levelName = levelName;
     }
 
-    public String getLevelName() 
+    public String getLevelName()
     {
         return levelName;
     }
 
-    public void setLevelValue(String levelValue) 
+    public void setLevelValue(String levelValue)
     {
         this.levelValue = levelValue;
     }
 
-    public String getLevelValue() 
+    public String getLevelValue()
     {
         return levelValue;
     }
 
-    public void setMinGrowth(String minGrowth) 
+    public void setMinGrowth(String minGrowth)
     {
         this.minGrowth = minGrowth;
     }
 
-    public String getMinGrowth() 
+    public String getMinGrowth()
     {
         return minGrowth;
     }
 
-    public void setMaxGrowth(String maxGrowth) 
+    public void setMaxGrowth(String maxGrowth)
     {
         this.maxGrowth = maxGrowth;
     }
 
-    public String getMaxGrowth() 
+    public String getMaxGrowth()
     {
         return maxGrowth;
     }
 
-    public void setIcon(String icon) 
+    public void setIcon(String icon)
     {
         this.icon = icon;
     }
 
-    public String getIcon() 
+    public String getIcon()
     {
         return icon;
     }
 
-    public void setBenefitsJson(String benefitsJson) 
+    public void setBenefitsJson(String benefitsJson)
     {
         this.benefitsJson = benefitsJson;
     }
 
-    public String getBenefitsJson() 
+    public String getBenefitsJson()
     {
         return benefitsJson;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

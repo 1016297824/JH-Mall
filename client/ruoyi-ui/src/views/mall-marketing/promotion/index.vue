@@ -38,7 +38,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-marketing:promotion:add']"
+          v-hasPermi="['mall-admin:promotion:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -48,7 +48,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-marketing:promotion:edit']"
+          v-hasPermi="['mall-admin:promotion:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -58,7 +58,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-marketing:promotion:remove']"
+          v-hasPermi="['mall-admin:promotion:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -67,7 +67,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-marketing:promotion:export']"
+          v-hasPermi="['mall-admin:promotion:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -97,8 +97,8 @@
       <el-table-column label="排序值" align="center" prop="sortOrder" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-marketing:promotion:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-marketing:promotion:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:promotion:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:promotion:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -385,7 +385,7 @@ function handleMallMarketingPromotionRuleSelectionChange(selection: any[]) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-marketing/promotion/export', {
+  proxy.download('mall-admin/promotion/export', {
     ...queryParams.value
   }, `promotion_${new Date().getTime()}.xlsx`)
 }

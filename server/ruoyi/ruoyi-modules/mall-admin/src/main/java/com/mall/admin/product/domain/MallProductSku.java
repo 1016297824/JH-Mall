@@ -1,4 +1,4 @@
-package com.mall.product.domain;
+package com.mall.admin.product.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * SKU 管理对象 mall_product_sku
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -31,7 +31,7 @@ public class MallProductSku extends BaseEntity
     private String skuName;
 
     /** 销售属性 JSON：[{"k":"颜色","v":"蓝色"}] */
-    @Excel(name = "销售属性 JSON：[{"k":"颜色","v":"蓝色"}]")
+    @Excel(name = "销售属性 JSON：[{\"k\":\"颜色\",\"v\":\"蓝色\"}]")
     private String attrsJson;
 
     /** 销售价（单位：分） */
@@ -62,111 +62,111 @@ public class MallProductSku extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
-    public void setSpuId(String spuId) 
+    public void setSpuId(String spuId)
     {
         this.spuId = spuId;
     }
 
-    public String getSpuId() 
+    public String getSpuId()
     {
         return spuId;
     }
-    public void setSkuCode(String skuCode) 
+    public void setSkuCode(String skuCode)
     {
         this.skuCode = skuCode;
     }
 
-    public String getSkuCode() 
+    public String getSkuCode()
     {
         return skuCode;
     }
-    public void setSkuName(String skuName) 
+    public void setSkuName(String skuName)
     {
         this.skuName = skuName;
     }
 
-    public String getSkuName() 
+    public String getSkuName()
     {
         return skuName;
     }
-    public void setAttrsJson(String attrsJson) 
+    public void setAttrsJson(String attrsJson)
     {
         this.attrsJson = attrsJson;
     }
 
-    public String getAttrsJson() 
+    public String getAttrsJson()
     {
         return attrsJson;
     }
-    public void setPrice(String price) 
+    public void setPrice(String price)
     {
         this.price = price;
     }
 
-    public String getPrice() 
+    public String getPrice()
     {
         return price;
     }
-    public void setMarketPrice(String marketPrice) 
+    public void setMarketPrice(String marketPrice)
     {
         this.marketPrice = marketPrice;
     }
 
-    public String getMarketPrice() 
+    public String getMarketPrice()
     {
         return marketPrice;
     }
-    public void setCostPrice(String costPrice) 
+    public void setCostPrice(String costPrice)
     {
         this.costPrice = costPrice;
     }
 
-    public String getCostPrice() 
+    public String getCostPrice()
     {
         return costPrice;
     }
-    public void setImage(String image) 
+    public void setImage(String image)
     {
         this.image = image;
     }
 
-    public String getImage() 
+    public String getImage()
     {
         return image;
     }
-    public void setWeight(String weight) 
+    public void setWeight(String weight)
     {
         this.weight = weight;
     }
 
-    public String getWeight() 
+    public String getWeight()
     {
         return weight;
     }
-    public void setSalesCount(String salesCount) 
+    public void setSalesCount(String salesCount)
     {
         this.salesCount = salesCount;
     }
 
-    public String getSalesCount() 
+    public String getSalesCount()
     {
         return salesCount;
     }
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

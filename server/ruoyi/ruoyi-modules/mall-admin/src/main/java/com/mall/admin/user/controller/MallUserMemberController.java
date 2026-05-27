@@ -1,4 +1,4 @@
-package com.mall.user.controller;
+package com.mall.admin.user.controller;
 
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.security.annotation.RequiresPermissions;
-import com.mall.user.domain.MallUserMember;
-import com.mall.user.service.IMallUserMemberService;
+import com.mall.admin.user.domain.MallUserMember;
+import com.mall.admin.user.service.IMallUserMemberService;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
@@ -23,7 +23,7 @@ import com.ruoyi.common.core.web.page.TableDataInfo;
 
 /**
  * 用户会员信息Controller
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */

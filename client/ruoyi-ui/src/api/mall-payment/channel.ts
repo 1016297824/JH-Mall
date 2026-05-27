@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, ChannelQueryParams, MallPaymentChannel 
 // 查询支付渠道列表
 export function listChannel(query: ChannelQueryParams): Promise<TableDataInfo<MallPaymentChannel[]>> {
   return request({
-    url: '/mall-payment/channel/list',
+    url: '/mall-admin/channel/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listChannel(query: ChannelQueryParams): Promise<TableDataInfo<Ma
 // 查询支付渠道详细
 export function getChannel(id: number): Promise<AjaxResult<MallPaymentChannel>> {
   return request({
-    url: '/mall-payment/channel/' + id,
+    url: '/mall-admin/channel/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getChannel(id: number): Promise<AjaxResult<MallPaymentChannel>> 
 // 新增支付渠道
 export function addChannel(data: MallPaymentChannel): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/channel',
+    url: '/mall-admin/channel',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addChannel(data: MallPaymentChannel): Promise<AjaxResult> {
 // 修改支付渠道
 export function updateChannel(data: MallPaymentChannel): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/channel',
+    url: '/mall-admin/channel',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateChannel(data: MallPaymentChannel): Promise<AjaxResult> {
 // 删除支付渠道
 export function delChannel(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/channel/' + id,
+    url: '/mall-admin/channel/' + id,
     method: 'delete'
   })
 }

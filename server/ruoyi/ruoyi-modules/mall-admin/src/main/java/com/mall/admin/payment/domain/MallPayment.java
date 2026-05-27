@@ -1,8 +1,9 @@
-package com.mall.payment.domain;
+package com.mall.admin.payment.domain;
 
 import java.util.List;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mall.admin.payment.domain.MallPaymentRefund;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
@@ -10,7 +11,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 支付单对象 mall_payment
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
@@ -82,152 +83,152 @@ public class MallPayment extends BaseEntity
     /** 退款单信息 */
     private List<MallPaymentRefund> mallPaymentRefundList;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setPaymentNo(String paymentNo) 
+    public void setPaymentNo(String paymentNo)
     {
         this.paymentNo = paymentNo;
     }
 
-    public String getPaymentNo() 
+    public String getPaymentNo()
     {
         return paymentNo;
     }
 
-    public void setOrderNo(String orderNo) 
+    public void setOrderNo(String orderNo)
     {
         this.orderNo = orderNo;
     }
 
-    public String getOrderNo() 
+    public String getOrderNo()
     {
         return orderNo;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setPayAmount(String payAmount) 
+    public void setPayAmount(String payAmount)
     {
         this.payAmount = payAmount;
     }
 
-    public String getPayAmount() 
+    public String getPayAmount()
     {
         return payAmount;
     }
 
-    public void setChannelCode(String channelCode) 
+    public void setChannelCode(String channelCode)
     {
         this.channelCode = channelCode;
     }
 
-    public String getChannelCode() 
+    public String getChannelCode()
     {
         return channelCode;
     }
 
-    public void setChannelPaymentNo(String channelPaymentNo) 
+    public void setChannelPaymentNo(String channelPaymentNo)
     {
         this.channelPaymentNo = channelPaymentNo;
     }
 
-    public String getChannelPaymentNo() 
+    public String getChannelPaymentNo()
     {
         return channelPaymentNo;
     }
 
-    public void setChannelPayStatus(String channelPayStatus) 
+    public void setChannelPayStatus(String channelPayStatus)
     {
         this.channelPayStatus = channelPayStatus;
     }
 
-    public String getChannelPayStatus() 
+    public String getChannelPayStatus()
     {
         return channelPayStatus;
     }
 
-    public void setPaymentStatus(String paymentStatus) 
+    public void setPaymentStatus(String paymentStatus)
     {
         this.paymentStatus = paymentStatus;
     }
 
-    public String getPaymentStatus() 
+    public String getPaymentStatus()
     {
         return paymentStatus;
     }
 
-    public void setPaySuccessTime(Date paySuccessTime) 
+    public void setPaySuccessTime(Date paySuccessTime)
     {
         this.paySuccessTime = paySuccessTime;
     }
 
-    public Date getPaySuccessTime() 
+    public Date getPaySuccessTime()
     {
         return paySuccessTime;
     }
 
-    public void setExpireTime(Date expireTime) 
+    public void setExpireTime(Date expireTime)
     {
         this.expireTime = expireTime;
     }
 
-    public Date getExpireTime() 
+    public Date getExpireTime()
     {
         return expireTime;
     }
 
-    public void setNotifyUrl(String notifyUrl) 
+    public void setNotifyUrl(String notifyUrl)
     {
         this.notifyUrl = notifyUrl;
     }
 
-    public String getNotifyUrl() 
+    public String getNotifyUrl()
     {
         return notifyUrl;
     }
 
-    public void setIdempotentKey(String idempotentKey) 
+    public void setIdempotentKey(String idempotentKey)
     {
         this.idempotentKey = idempotentKey;
     }
 
-    public String getIdempotentKey() 
+    public String getIdempotentKey()
     {
         return idempotentKey;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
 
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

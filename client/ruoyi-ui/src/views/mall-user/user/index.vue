@@ -126,7 +126,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-user:user:add']"
+          v-hasPermi="['mall-admin:user:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -136,7 +136,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-user:user:edit']"
+          v-hasPermi="['mall-admin:user:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -146,7 +146,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-user:user:remove']"
+          v-hasPermi="['mall-admin:user:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -155,7 +155,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-user:user:export']"
+          v-hasPermi="['mall-admin:user:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -204,8 +204,8 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-user:user:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-user:user:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:user:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:user:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -519,7 +519,7 @@ function handleDelete(row: MallUser) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-user/user/export', {
+  proxy.download('mall-admin/user/export', {
     ...queryParams.value
   }, `user_${new Date().getTime()}.xlsx`)
 }

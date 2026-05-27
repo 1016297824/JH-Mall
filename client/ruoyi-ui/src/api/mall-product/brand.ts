@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, BrandQueryParams, MallProductBrand } fr
 // 查询品牌管理列表
 export function listBrand(query: BrandQueryParams): Promise<TableDataInfo<MallProductBrand[]>> {
   return request({
-    url: '/mall-product/brand/list',
+    url: '/mall-admin/brand/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listBrand(query: BrandQueryParams): Promise<TableDataInfo<MallPr
 // 查询品牌管理详细
 export function getBrand(id: number): Promise<AjaxResult<MallProductBrand>> {
   return request({
-    url: '/mall-product/brand/' + id,
+    url: '/mall-admin/brand/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getBrand(id: number): Promise<AjaxResult<MallProductBrand>> {
 // 新增品牌管理
 export function addBrand(data: MallProductBrand): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/brand',
+    url: '/mall-admin/brand',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addBrand(data: MallProductBrand): Promise<AjaxResult> {
 // 修改品牌管理
 export function updateBrand(data: MallProductBrand): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/brand',
+    url: '/mall-admin/brand',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateBrand(data: MallProductBrand): Promise<AjaxResult> {
 // 删除品牌管理
 export function delBrand(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/brand/' + id,
+    url: '/mall-admin/brand/' + id,
     method: 'delete'
   })
 }

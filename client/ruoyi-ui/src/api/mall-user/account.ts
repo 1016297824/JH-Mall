@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, AccountQueryParams, MallUserPointsAccou
 // 查询积分账户列表
 export function listAccount(query: AccountQueryParams): Promise<TableDataInfo<MallUserPointsAccount[]>> {
   return request({
-    url: '/mall-user/account/list',
+    url: '/mall-admin/account/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listAccount(query: AccountQueryParams): Promise<TableDataInfo<Ma
 // 查询积分账户详细
 export function getAccount(id: number): Promise<AjaxResult<MallUserPointsAccount>> {
   return request({
-    url: '/mall-user/account/' + id,
+    url: '/mall-admin/account/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getAccount(id: number): Promise<AjaxResult<MallUserPointsAccount
 // 新增积分账户
 export function addAccount(data: MallUserPointsAccount): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/account',
+    url: '/mall-admin/account',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addAccount(data: MallUserPointsAccount): Promise<AjaxResult> {
 // 修改积分账户
 export function updateAccount(data: MallUserPointsAccount): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/account',
+    url: '/mall-admin/account',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateAccount(data: MallUserPointsAccount): Promise<AjaxResult> 
 // 删除积分账户
 export function delAccount(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/account/' + id,
+    url: '/mall-admin/account/' + id,
     method: 'delete'
   })
 }

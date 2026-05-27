@@ -1,19 +1,19 @@
-package com.mall.user.service;
+package com.mall.admin.user.service;
 
 import java.util.List;
-import com.mall.user.domain.MallUserMember;
+import com.mall.admin.user.domain.MallUserMember;
 
 /**
  * 用户会员信息Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
-public interface IMallUserMemberService 
+public interface IMallUserMemberService
 {
     /**
      * 查询用户会员信息
-     * 
+     *
      * @param id 用户会员信息主键
      * @return 用户会员信息
      */
@@ -21,7 +21,7 @@ public interface IMallUserMemberService
 
     /**
      * 查询用户会员信息列表
-     * 
+     *
      * @param mallUserMember 用户会员信息
      * @return 用户会员信息集合
      */
@@ -29,7 +29,7 @@ public interface IMallUserMemberService
 
     /**
      * 新增用户会员信息
-     * 
+     *
      * @param mallUserMember 用户会员信息
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IMallUserMemberService
 
     /**
      * 修改用户会员信息
-     * 
+     *
      * @param mallUserMember 用户会员信息
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IMallUserMemberService
 
     /**
      * 批量删除用户会员信息
-     * 
+     *
      * @param ids 需要删除的用户会员信息主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IMallUserMemberService
 
     /**
      * 删除用户会员信息信息
-     * 
+     *
      * @param id 用户会员信息主键
      * @return 结果
      */

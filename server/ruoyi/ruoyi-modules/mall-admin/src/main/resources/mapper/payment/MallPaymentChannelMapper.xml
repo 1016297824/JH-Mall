@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.mall.payment.mapper.MallPaymentChannelMapper">
+<mapper namespace="com.mall.admin.payment.mapper.MallPaymentChannelMapper">
     
     <resultMap type="MallPaymentChannel" id="MallPaymentChannelResult">
         <result property="id"    column="id"    />

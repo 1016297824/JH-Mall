@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, LogQueryParams, MallPaymentCallbackLog 
 // 查询回调日志列表
 export function listLog(query: LogQueryParams): Promise<TableDataInfo<MallPaymentCallbackLog[]>> {
   return request({
-    url: '/mall-payment/log/list',
+    url: '/mall-admin/log/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listLog(query: LogQueryParams): Promise<TableDataInfo<MallPaymen
 // 查询回调日志详细
 export function getLog(id: number): Promise<AjaxResult<MallPaymentCallbackLog>> {
   return request({
-    url: '/mall-payment/log/' + id,
+    url: '/mall-admin/log/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getLog(id: number): Promise<AjaxResult<MallPaymentCallbackLog>> 
 // 新增回调日志
 export function addLog(data: MallPaymentCallbackLog): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/log',
+    url: '/mall-admin/log',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addLog(data: MallPaymentCallbackLog): Promise<AjaxResult> {
 // 修改回调日志
 export function updateLog(data: MallPaymentCallbackLog): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/log',
+    url: '/mall-admin/log',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateLog(data: MallPaymentCallbackLog): Promise<AjaxResult> {
 // 删除回调日志
 export function delLog(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/log/' + id,
+    url: '/mall-admin/log/' + id,
     method: 'delete'
   })
 }

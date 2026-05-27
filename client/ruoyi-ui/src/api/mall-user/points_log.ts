@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, Points_logQueryParams, MallUserPointsLo
 // 查询积分流水列表
 export function listPoints_log(query: Points_logQueryParams): Promise<TableDataInfo<MallUserPointsLog[]>> {
   return request({
-    url: '/mall-user/points_log/list',
+    url: '/mall-admin/points_log/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listPoints_log(query: Points_logQueryParams): Promise<TableDataI
 // 查询积分流水详细
 export function getPoints_log(id: number): Promise<AjaxResult<MallUserPointsLog>> {
   return request({
-    url: '/mall-user/points_log/' + id,
+    url: '/mall-admin/points_log/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getPoints_log(id: number): Promise<AjaxResult<MallUserPointsLog>
 // 新增积分流水
 export function addPoints_log(data: MallUserPointsLog): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/points_log',
+    url: '/mall-admin/points_log',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addPoints_log(data: MallUserPointsLog): Promise<AjaxResult> {
 // 修改积分流水
 export function updatePoints_log(data: MallUserPointsLog): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/points_log',
+    url: '/mall-admin/points_log',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updatePoints_log(data: MallUserPointsLog): Promise<AjaxResult> {
 // 删除积分流水
 export function delPoints_log(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/points_log/' + id,
+    url: '/mall-admin/points_log/' + id,
     method: 'delete'
   })
 }

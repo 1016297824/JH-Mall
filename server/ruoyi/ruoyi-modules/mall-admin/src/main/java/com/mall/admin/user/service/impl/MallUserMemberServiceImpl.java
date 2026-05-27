@@ -1,28 +1,28 @@
-package com.mall.user.service.impl;
+package com.mall.admin.user.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.mall.user.mapper.MallUserMemberMapper;
-import com.mall.user.domain.MallUserMember;
-import com.mall.user.service.IMallUserMemberService;
+import com.mall.admin.user.mapper.MallUserMemberMapper;
+import com.mall.admin.user.domain.MallUserMember;
+import com.mall.admin.user.service.IMallUserMemberService;
 
 /**
  * 用户会员信息Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
 @Service
-public class MallUserMemberServiceImpl implements IMallUserMemberService 
+public class MallUserMemberServiceImpl implements IMallUserMemberService
 {
     @Autowired
     private MallUserMemberMapper mallUserMemberMapper;
 
     /**
      * 查询用户会员信息
-     * 
+     *
      * @param id 用户会员信息主键
      * @return 用户会员信息
      */
@@ -34,7 +34,7 @@ public class MallUserMemberServiceImpl implements IMallUserMemberService
 
     /**
      * 查询用户会员信息列表
-     * 
+     *
      * @param mallUserMember 用户会员信息
      * @return 用户会员信息
      */
@@ -46,7 +46,7 @@ public class MallUserMemberServiceImpl implements IMallUserMemberService
 
     /**
      * 新增用户会员信息
-     * 
+     *
      * @param mallUserMember 用户会员信息
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallUserMemberServiceImpl implements IMallUserMemberService
 
     /**
      * 修改用户会员信息
-     * 
+     *
      * @param mallUserMember 用户会员信息
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallUserMemberServiceImpl implements IMallUserMemberService
 
     /**
      * 批量删除用户会员信息
-     * 
+     *
      * @param ids 需要删除的用户会员信息主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallUserMemberServiceImpl implements IMallUserMemberService
 
     /**
      * 删除用户会员信息信息
-     * 
+     *
      * @param id 用户会员信息主键
      * @return 结果
      */

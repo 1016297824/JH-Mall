@@ -1,4 +1,4 @@
-package com.mall.order.domain;
+package com.mall.admin.order.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 金额快照对象 mall_order_amount
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -58,112 +58,112 @@ public class MallOrderAmount extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setOrderId(String orderId) 
+    public void setOrderId(String orderId)
     {
         this.orderId = orderId;
     }
 
-    public String getOrderId() 
+    public String getOrderId()
     {
         return orderId;
     }
 
-    public void setItemsJson(String itemsJson) 
+    public void setItemsJson(String itemsJson)
     {
         this.itemsJson = itemsJson;
     }
 
-    public String getItemsJson() 
+    public String getItemsJson()
     {
         return itemsJson;
     }
 
-    public void setCouponSnapshotJson(String couponSnapshotJson) 
+    public void setCouponSnapshotJson(String couponSnapshotJson)
     {
         this.couponSnapshotJson = couponSnapshotJson;
     }
 
-    public String getCouponSnapshotJson() 
+    public String getCouponSnapshotJson()
     {
         return couponSnapshotJson;
     }
 
-    public void setPromotionSnapshotJson(String promotionSnapshotJson) 
+    public void setPromotionSnapshotJson(String promotionSnapshotJson)
     {
         this.promotionSnapshotJson = promotionSnapshotJson;
     }
 
-    public String getPromotionSnapshotJson() 
+    public String getPromotionSnapshotJson()
     {
         return promotionSnapshotJson;
     }
 
-    public void setPointsDiscount(String pointsDiscount) 
+    public void setPointsDiscount(String pointsDiscount)
     {
         this.pointsDiscount = pointsDiscount;
     }
 
-    public String getPointsDiscount() 
+    public String getPointsDiscount()
     {
         return pointsDiscount;
     }
 
-    public void setTotalAmount(String totalAmount) 
+    public void setTotalAmount(String totalAmount)
     {
         this.totalAmount = totalAmount;
     }
 
-    public String getTotalAmount() 
+    public String getTotalAmount()
     {
         return totalAmount;
     }
 
-    public void setDiscountAmount(String discountAmount) 
+    public void setDiscountAmount(String discountAmount)
     {
         this.discountAmount = discountAmount;
     }
 
-    public String getDiscountAmount() 
+    public String getDiscountAmount()
     {
         return discountAmount;
     }
 
-    public void setFreightAmount(String freightAmount) 
+    public void setFreightAmount(String freightAmount)
     {
         this.freightAmount = freightAmount;
     }
 
-    public String getFreightAmount() 
+    public String getFreightAmount()
     {
         return freightAmount;
     }
 
-    public void setPayAmount(String payAmount) 
+    public void setPayAmount(String payAmount)
     {
         this.payAmount = payAmount;
     }
 
-    public String getPayAmount() 
+    public String getPayAmount()
     {
         return payAmount;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

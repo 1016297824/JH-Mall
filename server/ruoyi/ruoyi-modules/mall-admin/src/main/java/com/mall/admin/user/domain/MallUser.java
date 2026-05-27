@@ -1,4 +1,4 @@
-package com.mall.user.domain;
+package com.mall.admin.user.domain;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 用户账号对象 mall_user
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
@@ -108,222 +108,222 @@ public class MallUser extends BaseEntity
     @Excel(name = "乐观锁版本号")
     private String version;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setPhone(String phone) 
+    public void setPhone(String phone)
     {
         this.phone = phone;
     }
 
-    public String getPhone() 
+    public String getPhone()
     {
         return phone;
     }
 
-    public void setPhoneHash(String phoneHash) 
+    public void setPhoneHash(String phoneHash)
     {
         this.phoneHash = phoneHash;
     }
 
-    public String getPhoneHash() 
+    public String getPhoneHash()
     {
         return phoneHash;
     }
 
-    public void setPassword(String password) 
+    public void setPassword(String password)
     {
         this.password = password;
     }
 
-    public String getPassword() 
+    public String getPassword()
     {
         return password;
     }
 
-    public void setNickname(String nickname) 
+    public void setNickname(String nickname)
     {
         this.nickname = nickname;
     }
 
-    public String getNickname() 
+    public String getNickname()
     {
         return nickname;
     }
 
-    public void setAvatar(String avatar) 
+    public void setAvatar(String avatar)
     {
         this.avatar = avatar;
     }
 
-    public String getAvatar() 
+    public String getAvatar()
     {
         return avatar;
     }
 
-    public void setEmail(String email) 
+    public void setEmail(String email)
     {
         this.email = email;
     }
 
-    public String getEmail() 
+    public String getEmail()
     {
         return email;
     }
 
-    public void setEmailHash(String emailHash) 
+    public void setEmailHash(String emailHash)
     {
         this.emailHash = emailHash;
     }
 
-    public String getEmailHash() 
+    public String getEmailHash()
     {
         return emailHash;
     }
 
-    public void setGender(String gender) 
+    public void setGender(String gender)
     {
         this.gender = gender;
     }
 
-    public String getGender() 
+    public String getGender()
     {
         return gender;
     }
 
-    public void setBirthday(Date birthday) 
+    public void setBirthday(Date birthday)
     {
         this.birthday = birthday;
     }
 
-    public Date getBirthday() 
+    public Date getBirthday()
     {
         return birthday;
     }
 
-    public void setUserStatus(String userStatus) 
+    public void setUserStatus(String userStatus)
     {
         this.userStatus = userStatus;
     }
 
-    public String getUserStatus() 
+    public String getUserStatus()
     {
         return userStatus;
     }
 
-    public void setRegisterType(String registerType) 
+    public void setRegisterType(String registerType)
     {
         this.registerType = registerType;
     }
 
-    public String getRegisterType() 
+    public String getRegisterType()
     {
         return registerType;
     }
 
-    public void setRegisterIp(String registerIp) 
+    public void setRegisterIp(String registerIp)
     {
         this.registerIp = registerIp;
     }
 
-    public String getRegisterIp() 
+    public String getRegisterIp()
     {
         return registerIp;
     }
 
-    public void setRegisterTime(Date registerTime) 
+    public void setRegisterTime(Date registerTime)
     {
         this.registerTime = registerTime;
     }
 
-    public Date getRegisterTime() 
+    public Date getRegisterTime()
     {
         return registerTime;
     }
 
-    public void setLastLoginTime(Date lastLoginTime) 
+    public void setLastLoginTime(Date lastLoginTime)
     {
         this.lastLoginTime = lastLoginTime;
     }
 
-    public Date getLastLoginTime() 
+    public Date getLastLoginTime()
     {
         return lastLoginTime;
     }
 
-    public void setLastLoginIp(String lastLoginIp) 
+    public void setLastLoginIp(String lastLoginIp)
     {
         this.lastLoginIp = lastLoginIp;
     }
 
-    public String getLastLoginIp() 
+    public String getLastLoginIp()
     {
         return lastLoginIp;
     }
 
-    public void setIsPrivacyAgreed(String isPrivacyAgreed) 
+    public void setIsPrivacyAgreed(String isPrivacyAgreed)
     {
         this.isPrivacyAgreed = isPrivacyAgreed;
     }
 
-    public String getIsPrivacyAgreed() 
+    public String getIsPrivacyAgreed()
     {
         return isPrivacyAgreed;
     }
 
-    public void setPrivacyAgreedTime(Date privacyAgreedTime) 
+    public void setPrivacyAgreedTime(Date privacyAgreedTime)
     {
         this.privacyAgreedTime = privacyAgreedTime;
     }
 
-    public Date getPrivacyAgreedTime() 
+    public Date getPrivacyAgreedTime()
     {
         return privacyAgreedTime;
     }
 
-    public void setWechatOpenid(String wechatOpenid) 
+    public void setWechatOpenid(String wechatOpenid)
     {
         this.wechatOpenid = wechatOpenid;
     }
 
-    public String getWechatOpenid() 
+    public String getWechatOpenid()
     {
         return wechatOpenid;
     }
 
-    public void setWechatUnionid(String wechatUnionid) 
+    public void setWechatUnionid(String wechatUnionid)
     {
         this.wechatUnionid = wechatUnionid;
     }
 
-    public String getWechatUnionid() 
+    public String getWechatUnionid()
     {
         return wechatUnionid;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
 
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

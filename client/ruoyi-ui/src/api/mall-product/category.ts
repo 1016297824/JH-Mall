@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, CategoryQueryParams, MallProductCategor
 // 查询商品类目列表
 export function listCategory(query?: CategoryQueryParams): Promise<AjaxResult<MallProductCategory[]>> {
   return request({
-    url: '/mall-product/category/list',
+    url: '/mall-admin/category/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listCategory(query?: CategoryQueryParams): Promise<AjaxResult<Ma
 // 查询商品类目详细
 export function getCategory(id: number): Promise<AjaxResult<MallProductCategory>> {
   return request({
-    url: '/mall-product/category/' + id,
+    url: '/mall-admin/category/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getCategory(id: number): Promise<AjaxResult<MallProductCategory>
 // 新增商品类目
 export function addCategory(data: MallProductCategory): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/category',
+    url: '/mall-admin/category',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addCategory(data: MallProductCategory): Promise<AjaxResult> {
 // 修改商品类目
 export function updateCategory(data: MallProductCategory): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/category',
+    url: '/mall-admin/category',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateCategory(data: MallProductCategory): Promise<AjaxResult> {
 // 删除商品类目
 export function delCategory(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-product/category/' + id,
+    url: '/mall-admin/category/' + id,
     method: 'delete'
   })
 }

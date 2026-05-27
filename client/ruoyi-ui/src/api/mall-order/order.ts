@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, OrderQueryParams, MallOrder } from '@/t
 // 查询订单管理列表
 export function listOrder(query: OrderQueryParams): Promise<TableDataInfo<MallOrder[]>> {
   return request({
-    url: '/mall-order/order/list',
+    url: '/mall-admin/order/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listOrder(query: OrderQueryParams): Promise<TableDataInfo<MallOr
 // 查询订单管理详细
 export function getOrder(id: number): Promise<AjaxResult<MallOrder>> {
   return request({
-    url: '/mall-order/order/' + id,
+    url: '/mall-admin/order/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getOrder(id: number): Promise<AjaxResult<MallOrder>> {
 // 新增订单管理
 export function addOrder(data: MallOrder): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/order',
+    url: '/mall-admin/order',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addOrder(data: MallOrder): Promise<AjaxResult> {
 // 修改订单管理
 export function updateOrder(data: MallOrder): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/order',
+    url: '/mall-admin/order',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateOrder(data: MallOrder): Promise<AjaxResult> {
 // 删除订单管理
 export function delOrder(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/order/' + id,
+    url: '/mall-admin/order/' + id,
     method: 'delete'
   })
 }

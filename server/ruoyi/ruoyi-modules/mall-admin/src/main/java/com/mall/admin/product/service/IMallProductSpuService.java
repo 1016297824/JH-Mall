@@ -1,19 +1,19 @@
-package com.mall.product.service;
+package com.mall.admin.product.service;
 
 import java.util.List;
-import com.mall.product.domain.MallProductSpu;
+import com.mall.admin.product.domain.MallProductSpu;
 
 /**
  * SPU 管理Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
-public interface IMallProductSpuService 
+public interface IMallProductSpuService
 {
     /**
      * 查询SPU 管理
-     * 
+     *
      * @param id SPU 管理主键
      * @return SPU 管理
      */
@@ -21,7 +21,7 @@ public interface IMallProductSpuService
 
     /**
      * 查询SPU 管理列表
-     * 
+     *
      * @param mallProductSpu SPU 管理
      * @return SPU 管理集合
      */
@@ -29,7 +29,7 @@ public interface IMallProductSpuService
 
     /**
      * 新增SPU 管理
-     * 
+     *
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IMallProductSpuService
 
     /**
      * 修改SPU 管理
-     * 
+     *
      * @param mallProductSpu SPU 管理
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IMallProductSpuService
 
     /**
      * 批量删除SPU 管理
-     * 
+     *
      * @param ids 需要删除的SPU 管理主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IMallProductSpuService
 
     /**
      * 删除SPU 管理信息
-     * 
+     *
      * @param id SPU 管理主键
      * @return 结果
      */

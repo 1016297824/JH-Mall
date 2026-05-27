@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, PaymentQueryParams, MallPayment } from 
 // 查询支付单列表
 export function listPayment(query: PaymentQueryParams): Promise<TableDataInfo<MallPayment[]>> {
   return request({
-    url: '/mall-payment/payment/list',
+    url: '/mall-admin/payment/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listPayment(query: PaymentQueryParams): Promise<TableDataInfo<Ma
 // 查询支付单详细
 export function getPayment(id: number): Promise<AjaxResult<MallPayment>> {
   return request({
-    url: '/mall-payment/payment/' + id,
+    url: '/mall-admin/payment/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getPayment(id: number): Promise<AjaxResult<MallPayment>> {
 // 新增支付单
 export function addPayment(data: MallPayment): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/payment',
+    url: '/mall-admin/payment',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addPayment(data: MallPayment): Promise<AjaxResult> {
 // 修改支付单
 export function updatePayment(data: MallPayment): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/payment',
+    url: '/mall-admin/payment',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updatePayment(data: MallPayment): Promise<AjaxResult> {
 // 删除支付单
 export function delPayment(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-payment/payment/' + id,
+    url: '/mall-admin/payment/' + id,
     method: 'delete'
   })
 }

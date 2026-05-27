@@ -6,7 +6,7 @@ import type { UserQueryParams, MallUser } from '@/types/api/mall-user/user'
 // 查询用户账号列表
 export function listUser(query: UserQueryParams): Promise<TableDataInfo<MallUser[]>> {
   return request({
-    url: '/mall-user/user/list',
+    url: '/mall-admin/user/list',
     method: 'get',
     params: query
   })
@@ -15,7 +15,7 @@ export function listUser(query: UserQueryParams): Promise<TableDataInfo<MallUser
 // 查询用户账号详细
 export function getUser(id: number): Promise<AjaxResult<MallUser>> {
   return request({
-    url: '/mall-user/user/' + id,
+    url: '/mall-admin/user/' + id,
     method: 'get'
   })
 }
@@ -23,7 +23,7 @@ export function getUser(id: number): Promise<AjaxResult<MallUser>> {
 // 新增用户账号
 export function addUser(data: MallUser): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/user',
+    url: '/mall-admin/user',
     method: 'post',
     data: data
   })
@@ -32,7 +32,7 @@ export function addUser(data: MallUser): Promise<AjaxResult> {
 // 修改用户账号
 export function updateUser(data: MallUser): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/user',
+    url: '/mall-admin/user',
     method: 'put',
     data: data
   })
@@ -41,7 +41,7 @@ export function updateUser(data: MallUser): Promise<AjaxResult> {
 // 删除用户账号
 export function delUser(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-user/user/' + id,
+    url: '/mall-admin/user/' + id,
     method: 'delete'
   })
 }

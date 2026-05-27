@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.mall.user.mapper.MallUserPointsAccountMapper">
+<mapper namespace="com.mall.admin.user.mapper.MallUserPointsAccountMapper">
     
     <resultMap type="MallUserPointsAccount" id="MallUserPointsAccountResult">
         <result property="id"    column="id"    />

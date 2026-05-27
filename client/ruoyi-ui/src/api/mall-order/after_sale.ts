@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, After_saleQueryParams, MallOrderAfterSa
 // 查询售后管理列表
 export function listAfter_sale(query: After_saleQueryParams): Promise<TableDataInfo<MallOrderAfterSale[]>> {
   return request({
-    url: '/mall-order/after_sale/list',
+    url: '/mall-admin/after_sale/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listAfter_sale(query: After_saleQueryParams): Promise<TableDataI
 // 查询售后管理详细
 export function getAfter_sale(id: number): Promise<AjaxResult<MallOrderAfterSale>> {
   return request({
-    url: '/mall-order/after_sale/' + id,
+    url: '/mall-admin/after_sale/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getAfter_sale(id: number): Promise<AjaxResult<MallOrderAfterSale
 // 新增售后管理
 export function addAfter_sale(data: MallOrderAfterSale): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/after_sale',
+    url: '/mall-admin/after_sale',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addAfter_sale(data: MallOrderAfterSale): Promise<AjaxResult> {
 // 修改售后管理
 export function updateAfter_sale(data: MallOrderAfterSale): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/after_sale',
+    url: '/mall-admin/after_sale',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateAfter_sale(data: MallOrderAfterSale): Promise<AjaxResult> 
 // 删除售后管理
 export function delAfter_sale(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/after_sale/' + id,
+    url: '/mall-admin/after_sale/' + id,
     method: 'delete'
   })
 }

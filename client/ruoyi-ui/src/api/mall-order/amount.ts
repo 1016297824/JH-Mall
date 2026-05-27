@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, AmountQueryParams, MallOrderAmount } fr
 // 查询金额快照列表
 export function listAmount(query: AmountQueryParams): Promise<TableDataInfo<MallOrderAmount[]>> {
   return request({
-    url: '/mall-order/amount/list',
+    url: '/mall-admin/amount/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listAmount(query: AmountQueryParams): Promise<TableDataInfo<Mall
 // 查询金额快照详细
 export function getAmount(id: number): Promise<AjaxResult<MallOrderAmount>> {
   return request({
-    url: '/mall-order/amount/' + id,
+    url: '/mall-admin/amount/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getAmount(id: number): Promise<AjaxResult<MallOrderAmount>> {
 // 新增金额快照
 export function addAmount(data: MallOrderAmount): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/amount',
+    url: '/mall-admin/amount',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addAmount(data: MallOrderAmount): Promise<AjaxResult> {
 // 修改金额快照
 export function updateAmount(data: MallOrderAmount): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/amount',
+    url: '/mall-admin/amount',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updateAmount(data: MallOrderAmount): Promise<AjaxResult> {
 // 删除金额快照
 export function delAmount(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-order/amount/' + id,
+    url: '/mall-admin/amount/' + id,
     method: 'delete'
   })
 }

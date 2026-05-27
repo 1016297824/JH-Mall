@@ -4,7 +4,7 @@ import type { AjaxResult, TableDataInfo, PromotionQueryParams, MallMarketingProm
 // 查询活动管理列表
 export function listPromotion(query: PromotionQueryParams): Promise<TableDataInfo<MallMarketingPromotion[]>> {
   return request({
-    url: '/mall-marketing/promotion/list',
+    url: '/mall-admin/promotion/list',
     method: 'get',
     params: query
   })
@@ -13,7 +13,7 @@ export function listPromotion(query: PromotionQueryParams): Promise<TableDataInf
 // 查询活动管理详细
 export function getPromotion(id: number): Promise<AjaxResult<MallMarketingPromotion>> {
   return request({
-    url: '/mall-marketing/promotion/' + id,
+    url: '/mall-admin/promotion/' + id,
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getPromotion(id: number): Promise<AjaxResult<MallMarketingPromot
 // 新增活动管理
 export function addPromotion(data: MallMarketingPromotion): Promise<AjaxResult> {
   return request({
-    url: '/mall-marketing/promotion',
+    url: '/mall-admin/promotion',
     method: 'post',
     data: data
   })
@@ -30,7 +30,7 @@ export function addPromotion(data: MallMarketingPromotion): Promise<AjaxResult> 
 // 修改活动管理
 export function updatePromotion(data: MallMarketingPromotion): Promise<AjaxResult> {
   return request({
-    url: '/mall-marketing/promotion',
+    url: '/mall-admin/promotion',
     method: 'put',
     data: data
   })
@@ -39,7 +39,7 @@ export function updatePromotion(data: MallMarketingPromotion): Promise<AjaxResul
 // 删除活动管理
 export function delPromotion(id: number | number[]): Promise<AjaxResult> {
   return request({
-    url: '/mall-marketing/promotion/' + id,
+    url: '/mall-admin/promotion/' + id,
     method: 'delete'
   })
 }

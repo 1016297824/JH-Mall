@@ -22,7 +22,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-user:level:add']"
+          v-hasPermi="['mall-admin:level:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -32,7 +32,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-user:level:edit']"
+          v-hasPermi="['mall-admin:level:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -42,7 +42,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-user:level:remove']"
+          v-hasPermi="['mall-admin:level:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -51,7 +51,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-user:level:export']"
+          v-hasPermi="['mall-admin:level:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -69,8 +69,8 @@
       <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-user:level:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-user:level:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:level:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:level:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -271,7 +271,7 @@ function handleDelete(row: MallUserMemberLevel) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-user/level/export', {
+  proxy.download('mall-admin/level/export', {
     ...queryParams.value
   }, `level_${new Date().getTime()}.xlsx`)
 }

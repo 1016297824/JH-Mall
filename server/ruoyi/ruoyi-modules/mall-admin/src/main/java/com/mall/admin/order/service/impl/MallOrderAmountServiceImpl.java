@@ -1,28 +1,28 @@
-package com.mall.order.service.impl;
+package com.mall.admin.order.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.mall.order.mapper.MallOrderAmountMapper;
-import com.mall.order.domain.MallOrderAmount;
-import com.mall.order.service.IMallOrderAmountService;
+import com.mall.admin.order.mapper.MallOrderAmountMapper;
+import com.mall.admin.order.domain.MallOrderAmount;
+import com.mall.admin.order.service.IMallOrderAmountService;
 
 /**
  * 金额快照Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
 @Service
-public class MallOrderAmountServiceImpl implements IMallOrderAmountService 
+public class MallOrderAmountServiceImpl implements IMallOrderAmountService
 {
     @Autowired
     private MallOrderAmountMapper mallOrderAmountMapper;
 
     /**
      * 查询金额快照
-     * 
+     *
      * @param id 金额快照主键
      * @return 金额快照
      */
@@ -34,7 +34,7 @@ public class MallOrderAmountServiceImpl implements IMallOrderAmountService
 
     /**
      * 查询金额快照列表
-     * 
+     *
      * @param mallOrderAmount 金额快照
      * @return 金额快照
      */
@@ -46,7 +46,7 @@ public class MallOrderAmountServiceImpl implements IMallOrderAmountService
 
     /**
      * 新增金额快照
-     * 
+     *
      * @param mallOrderAmount 金额快照
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallOrderAmountServiceImpl implements IMallOrderAmountService
 
     /**
      * 修改金额快照
-     * 
+     *
      * @param mallOrderAmount 金额快照
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallOrderAmountServiceImpl implements IMallOrderAmountService
 
     /**
      * 批量删除金额快照
-     * 
+     *
      * @param ids 需要删除的金额快照主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallOrderAmountServiceImpl implements IMallOrderAmountService
 
     /**
      * 删除金额快照信息
-     * 
+     *
      * @param id 金额快照主键
      * @return 结果
      */

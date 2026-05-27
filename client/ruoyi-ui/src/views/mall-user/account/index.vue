@@ -14,7 +14,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-user:account:add']"
+          v-hasPermi="['mall-admin:account:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -24,7 +24,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-user:account:edit']"
+          v-hasPermi="['mall-admin:account:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -34,7 +34,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-user:account:remove']"
+          v-hasPermi="['mall-admin:account:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -43,7 +43,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-user:account:export']"
+          v-hasPermi="['mall-admin:account:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -60,8 +60,8 @@
       <el-table-column label="逻辑删除标志" align="center" prop="isDeleted" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-user:account:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-user:account:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:account:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:account:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -236,7 +236,7 @@ function handleDelete(row: MallUserPointsAccount) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-user/account/export', {
+  proxy.download('mall-admin/account/export', {
     ...queryParams.value
   }, `account_${new Date().getTime()}.xlsx`)
 }

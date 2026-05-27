@@ -1,19 +1,19 @@
-package com.mall.user.service;
+package com.mall.admin.user.service;
 
 import java.util.List;
-import com.mall.user.domain.MallUserPointsAccount;
+import com.mall.admin.user.domain.MallUserPointsAccount;
 
 /**
  * 积分账户Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-18
  */
-public interface IMallUserPointsAccountService 
+public interface IMallUserPointsAccountService
 {
     /**
      * 查询积分账户
-     * 
+     *
      * @param id 积分账户主键
      * @return 积分账户
      */
@@ -21,7 +21,7 @@ public interface IMallUserPointsAccountService
 
     /**
      * 查询积分账户列表
-     * 
+     *
      * @param mallUserPointsAccount 积分账户
      * @return 积分账户集合
      */
@@ -29,7 +29,7 @@ public interface IMallUserPointsAccountService
 
     /**
      * 新增积分账户
-     * 
+     *
      * @param mallUserPointsAccount 积分账户
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IMallUserPointsAccountService
 
     /**
      * 修改积分账户
-     * 
+     *
      * @param mallUserPointsAccount 积分账户
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IMallUserPointsAccountService
 
     /**
      * 批量删除积分账户
-     * 
+     *
      * @param ids 需要删除的积分账户主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IMallUserPointsAccountService
 
     /**
      * 删除积分账户信息
-     * 
+     *
      * @param id 积分账户主键
      * @return 结果
      */

@@ -1,19 +1,19 @@
-package com.mall.product.service;
+package com.mall.admin.product.service;
 
 import java.util.List;
-import com.mall.product.domain.MallProductBrand;
+import com.mall.admin.product.domain.MallProductBrand;
 
 /**
  * 品牌管理Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
-public interface IMallProductBrandService 
+public interface IMallProductBrandService
 {
     /**
      * 查询品牌管理
-     * 
+     *
      * @param id 品牌管理主键
      * @return 品牌管理
      */
@@ -21,7 +21,7 @@ public interface IMallProductBrandService
 
     /**
      * 查询品牌管理列表
-     * 
+     *
      * @param mallProductBrand 品牌管理
      * @return 品牌管理集合
      */
@@ -29,7 +29,7 @@ public interface IMallProductBrandService
 
     /**
      * 新增品牌管理
-     * 
+     *
      * @param mallProductBrand 品牌管理
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IMallProductBrandService
 
     /**
      * 修改品牌管理
-     * 
+     *
      * @param mallProductBrand 品牌管理
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IMallProductBrandService
 
     /**
      * 批量删除品牌管理
-     * 
+     *
      * @param ids 需要删除的品牌管理主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IMallProductBrandService
 
     /**
      * 删除品牌管理信息
-     * 
+     *
      * @param id 品牌管理主键
      * @return 结果
      */

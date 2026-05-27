@@ -78,7 +78,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-order:order:add']"
+          v-hasPermi="['mall-admin:order:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -88,7 +88,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-order:order:edit']"
+          v-hasPermi="['mall-admin:order:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -98,7 +98,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-order:order:remove']"
+          v-hasPermi="['mall-admin:order:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -107,7 +107,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-order:order:export']"
+          v-hasPermi="['mall-admin:order:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -153,8 +153,8 @@
       <el-table-column label="幂等键" align="center" prop="idempotentKey" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:order:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-order:order:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:order:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:order:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -532,7 +532,7 @@ function handleMallOrderItemSelectionChange(selection: any[]) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-order/order/export', {
+  proxy.download('mall-admin/order/export', {
     ...queryParams.value
   }, `order_${new Date().getTime()}.xlsx`)
 }

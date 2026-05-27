@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.mall.marketing.mapper.MallMarketingPromotionMapper">
+<mapper namespace="com.mall.admin.marketing.mapper.MallMarketingPromotionMapper">
     
     <resultMap type="MallMarketingPromotion" id="MallMarketingPromotionResult">
         <result property="id"    column="id"    />

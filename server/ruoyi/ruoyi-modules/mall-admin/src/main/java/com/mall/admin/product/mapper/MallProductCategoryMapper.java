@@ -1,19 +1,19 @@
-package com.mall.product.mapper;
+package com.mall.admin.product.mapper;
 
 import java.util.List;
-import com.mall.product.domain.MallProductCategory;
+import com.mall.admin.product.domain.MallProductCategory;
 
 /**
  * 商品类目Mapper接口
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
-public interface MallProductCategoryMapper 
+public interface MallProductCategoryMapper
 {
     /**
      * 查询商品类目
-     * 
+     *
      * @param id 商品类目主键
      * @return 商品类目
      */
@@ -21,7 +21,7 @@ public interface MallProductCategoryMapper
 
     /**
      * 查询商品类目列表
-     * 
+     *
      * @param mallProductCategory 商品类目
      * @return 商品类目集合
      */
@@ -29,7 +29,7 @@ public interface MallProductCategoryMapper
 
     /**
      * 新增商品类目
-     * 
+     *
      * @param mallProductCategory 商品类目
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface MallProductCategoryMapper
 
     /**
      * 修改商品类目
-     * 
+     *
      * @param mallProductCategory 商品类目
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface MallProductCategoryMapper
 
     /**
      * 删除商品类目
-     * 
+     *
      * @param id 商品类目主键
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface MallProductCategoryMapper
 
     /**
      * 批量删除商品类目
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */

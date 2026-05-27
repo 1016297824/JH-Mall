@@ -1,28 +1,28 @@
-package com.mall.payment.service.impl;
+package com.mall.admin.payment.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.mall.payment.mapper.MallPaymentChannelMapper;
-import com.mall.payment.domain.MallPaymentChannel;
-import com.mall.payment.service.IMallPaymentChannelService;
+import com.mall.admin.payment.mapper.MallPaymentChannelMapper;
+import com.mall.admin.payment.domain.MallPaymentChannel;
+import com.mall.admin.payment.service.IMallPaymentChannelService;
 
 /**
  * 支付渠道Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
 @Service
-public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService 
+public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService
 {
     @Autowired
     private MallPaymentChannelMapper mallPaymentChannelMapper;
 
     /**
      * 查询支付渠道
-     * 
+     *
      * @param id 支付渠道主键
      * @return 支付渠道
      */
@@ -34,7 +34,7 @@ public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService
 
     /**
      * 查询支付渠道列表
-     * 
+     *
      * @param mallPaymentChannel 支付渠道
      * @return 支付渠道
      */
@@ -46,7 +46,7 @@ public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService
 
     /**
      * 新增支付渠道
-     * 
+     *
      * @param mallPaymentChannel 支付渠道
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService
 
     /**
      * 修改支付渠道
-     * 
+     *
      * @param mallPaymentChannel 支付渠道
      * @return 结果
      */
@@ -72,7 +72,7 @@ public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService
 
     /**
      * 批量删除支付渠道
-     * 
+     *
      * @param ids 需要删除的支付渠道主键
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class MallPaymentChannelServiceImpl implements IMallPaymentChannelService
 
     /**
      * 删除支付渠道信息
-     * 
+     *
      * @param id 支付渠道主键
      * @return 结果
      */

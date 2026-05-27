@@ -1,4 +1,4 @@
-package com.mall.marketing.controller;
+package com.mall.admin.marketing.controller;
 
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.security.annotation.RequiresPermissions;
-import com.mall.marketing.domain.MallMarketingCoupon;
-import com.mall.marketing.service.IMallMarketingCouponService;
+import com.mall.admin.marketing.domain.MallMarketingCoupon;
+import com.mall.admin.marketing.service.IMallMarketingCouponService;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
@@ -23,7 +23,7 @@ import com.ruoyi.common.core.web.page.TableDataInfo;
 
 /**
  * 优惠券定义Controller
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */

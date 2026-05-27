@@ -1,4 +1,4 @@
-package com.mall.order.domain;
+package com.mall.admin.order.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 购物车对象 mall_order_cart
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -58,112 +58,112 @@ public class MallOrderCart extends BaseEntity
     @Excel(name = "逻辑删除标志")
     private String isDeleted;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setSkuId(String skuId) 
+    public void setSkuId(String skuId)
     {
         this.skuId = skuId;
     }
 
-    public String getSkuId() 
+    public String getSkuId()
     {
         return skuId;
     }
 
-    public void setSpuId(String spuId) 
+    public void setSpuId(String spuId)
     {
         this.spuId = spuId;
     }
 
-    public String getSpuId() 
+    public String getSpuId()
     {
         return spuId;
     }
 
-    public void setSkuCode(String skuCode) 
+    public void setSkuCode(String skuCode)
     {
         this.skuCode = skuCode;
     }
 
-    public String getSkuCode() 
+    public String getSkuCode()
     {
         return skuCode;
     }
 
-    public void setSkuName(String skuName) 
+    public void setSkuName(String skuName)
     {
         this.skuName = skuName;
     }
 
-    public String getSkuName() 
+    public String getSkuName()
     {
         return skuName;
     }
 
-    public void setMainImage(String mainImage) 
+    public void setMainImage(String mainImage)
     {
         this.mainImage = mainImage;
     }
 
-    public String getMainImage() 
+    public String getMainImage()
     {
         return mainImage;
     }
 
-    public void setPrice(String price) 
+    public void setPrice(String price)
     {
         this.price = price;
     }
 
-    public String getPrice() 
+    public String getPrice()
     {
         return price;
     }
 
-    public void setQuantity(String quantity) 
+    public void setQuantity(String quantity)
     {
         this.quantity = quantity;
     }
 
-    public String getQuantity() 
+    public String getQuantity()
     {
         return quantity;
     }
 
-    public void setIsSelected(String isSelected) 
+    public void setIsSelected(String isSelected)
     {
         this.isSelected = isSelected;
     }
 
-    public String getIsSelected() 
+    public String getIsSelected()
     {
         return isSelected;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }

@@ -1,8 +1,9 @@
-package com.mall.order.domain;
+package com.mall.admin.order.domain;
 
 import java.util.List;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mall.admin.order.domain.MallOrderItem;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
@@ -10,7 +11,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 订单管理对象 mall_order
- * 
+ *
  * @author ruoyi
  * @date 2026-05-19
  */
@@ -97,182 +98,182 @@ public class MallOrder extends BaseEntity
     /** 订单项信息 */
     private List<MallOrderItem> mallOrderItemList;
 
-    public void setId(String id) 
+    public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getId() 
+    public String getId()
     {
         return id;
     }
 
-    public void setOrderNo(String orderNo) 
+    public void setOrderNo(String orderNo)
     {
         this.orderNo = orderNo;
     }
 
-    public String getOrderNo() 
+    public String getOrderNo()
     {
         return orderNo;
     }
 
-    public void setUserId(String userId) 
+    public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
-    public String getUserId() 
+    public String getUserId()
     {
         return userId;
     }
 
-    public void setOrderStatus(String orderStatus) 
+    public void setOrderStatus(String orderStatus)
     {
         this.orderStatus = orderStatus;
     }
 
-    public String getOrderStatus() 
+    public String getOrderStatus()
     {
         return orderStatus;
     }
 
-    public void setTotalAmount(String totalAmount) 
+    public void setTotalAmount(String totalAmount)
     {
         this.totalAmount = totalAmount;
     }
 
-    public String getTotalAmount() 
+    public String getTotalAmount()
     {
         return totalAmount;
     }
 
-    public void setDiscountAmount(String discountAmount) 
+    public void setDiscountAmount(String discountAmount)
     {
         this.discountAmount = discountAmount;
     }
 
-    public String getDiscountAmount() 
+    public String getDiscountAmount()
     {
         return discountAmount;
     }
 
-    public void setFreightAmount(String freightAmount) 
+    public void setFreightAmount(String freightAmount)
     {
         this.freightAmount = freightAmount;
     }
 
-    public String getFreightAmount() 
+    public String getFreightAmount()
     {
         return freightAmount;
     }
 
-    public void setPayAmount(String payAmount) 
+    public void setPayAmount(String payAmount)
     {
         this.payAmount = payAmount;
     }
 
-    public String getPayAmount() 
+    public String getPayAmount()
     {
         return payAmount;
     }
 
-    public void setPayTime(Date payTime) 
+    public void setPayTime(Date payTime)
     {
         this.payTime = payTime;
     }
 
-    public Date getPayTime() 
+    public Date getPayTime()
     {
         return payTime;
     }
 
-    public void setDeliveryTime(Date deliveryTime) 
+    public void setDeliveryTime(Date deliveryTime)
     {
         this.deliveryTime = deliveryTime;
     }
 
-    public Date getDeliveryTime() 
+    public Date getDeliveryTime()
     {
         return deliveryTime;
     }
 
-    public void setCompleteTime(Date completeTime) 
+    public void setCompleteTime(Date completeTime)
     {
         this.completeTime = completeTime;
     }
 
-    public Date getCompleteTime() 
+    public Date getCompleteTime()
     {
         return completeTime;
     }
 
-    public void setCancelTime(Date cancelTime) 
+    public void setCancelTime(Date cancelTime)
     {
         this.cancelTime = cancelTime;
     }
 
-    public Date getCancelTime() 
+    public Date getCancelTime()
     {
         return cancelTime;
     }
 
-    public void setCancelType(String cancelType) 
+    public void setCancelType(String cancelType)
     {
         this.cancelType = cancelType;
     }
 
-    public String getCancelType() 
+    public String getCancelType()
     {
         return cancelType;
     }
 
-    public void setCancelReason(String cancelReason) 
+    public void setCancelReason(String cancelReason)
     {
         this.cancelReason = cancelReason;
     }
 
-    public String getCancelReason() 
+    public String getCancelReason()
     {
         return cancelReason;
     }
 
-    public void setPayExpireTime(Date payExpireTime) 
+    public void setPayExpireTime(Date payExpireTime)
     {
         this.payExpireTime = payExpireTime;
     }
 
-    public Date getPayExpireTime() 
+    public Date getPayExpireTime()
     {
         return payExpireTime;
     }
 
-    public void setIdempotentKey(String idempotentKey) 
+    public void setIdempotentKey(String idempotentKey)
     {
         this.idempotentKey = idempotentKey;
     }
 
-    public String getIdempotentKey() 
+    public String getIdempotentKey()
     {
         return idempotentKey;
     }
 
-    public void setIsDeleted(String isDeleted) 
+    public void setIsDeleted(String isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public String getIsDeleted() 
+    public String getIsDeleted()
     {
         return isDeleted;
     }
 
-    public void setVersion(String version) 
+    public void setVersion(String version)
     {
         this.version = version;
     }
 
-    public String getVersion() 
+    public String getVersion()
     {
         return version;
     }

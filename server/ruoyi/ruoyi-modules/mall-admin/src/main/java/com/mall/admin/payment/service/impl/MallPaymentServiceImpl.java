@@ -1,4 +1,4 @@
-package com.mall.payment.service.impl;
+package com.mall.admin.payment.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
@@ -7,26 +7,26 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
-import com.mall.payment.domain.MallPaymentRefund;
-import com.mall.payment.mapper.MallPaymentMapper;
-import com.mall.payment.domain.MallPayment;
-import com.mall.payment.service.IMallPaymentService;
+import com.mall.admin.payment.domain.MallPaymentRefund;
+import com.mall.admin.payment.mapper.MallPaymentMapper;
+import com.mall.admin.payment.domain.MallPayment;
+import com.mall.admin.payment.service.IMallPaymentService;
 
 /**
  * 支付单Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-05-21
  */
 @Service
-public class MallPaymentServiceImpl implements IMallPaymentService 
+public class MallPaymentServiceImpl implements IMallPaymentService
 {
     @Autowired
     private MallPaymentMapper mallPaymentMapper;
 
     /**
      * 查询支付单
-     * 
+     *
      * @param id 支付单主键
      * @return 支付单
      */
@@ -38,7 +38,7 @@ public class MallPaymentServiceImpl implements IMallPaymentService
 
     /**
      * 查询支付单列表
-     * 
+     *
      * @param mallPayment 支付单
      * @return 支付单
      */
@@ -50,7 +50,7 @@ public class MallPaymentServiceImpl implements IMallPaymentService
 
     /**
      * 新增支付单
-     * 
+     *
      * @param mallPayment 支付单
      * @return 结果
      */
@@ -66,7 +66,7 @@ public class MallPaymentServiceImpl implements IMallPaymentService
 
     /**
      * 修改支付单
-     * 
+     *
      * @param mallPayment 支付单
      * @return 结果
      */
@@ -82,7 +82,7 @@ public class MallPaymentServiceImpl implements IMallPaymentService
 
     /**
      * 批量删除支付单
-     * 
+     *
      * @param ids 需要删除的支付单主键
      * @return 结果
      */
@@ -96,7 +96,7 @@ public class MallPaymentServiceImpl implements IMallPaymentService
 
     /**
      * 删除支付单信息
-     * 
+     *
      * @param id 支付单主键
      * @return 结果
      */
@@ -110,7 +110,7 @@ public class MallPaymentServiceImpl implements IMallPaymentService
 
     /**
      * 新增退款单信息
-     * 
+     *
      * @param mallPayment 支付单对象
      */
     public void insertMallPaymentRefund(MallPayment mallPayment)

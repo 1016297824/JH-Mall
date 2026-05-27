@@ -30,7 +30,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['mall-order:cart:add']"
+          v-hasPermi="['mall-admin:cart:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -40,7 +40,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mall-order:cart:edit']"
+          v-hasPermi="['mall-admin:cart:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -50,7 +50,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mall-order:cart:remove']"
+          v-hasPermi="['mall-admin:cart:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -59,7 +59,7 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['mall-order:cart:export']"
+          v-hasPermi="['mall-admin:cart:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -82,8 +82,8 @@
       <el-table-column label="是否选中" align="center" prop="isSelected" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-order:cart:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-order:cart:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:cart:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:cart:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -294,7 +294,7 @@ function handleDelete(row: MallOrderCart) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('mall-order/cart/export', {
+  proxy.download('mall-admin/cart/export', {
     ...queryParams.value
   }, `cart_${new Date().getTime()}.xlsx`)
 }
