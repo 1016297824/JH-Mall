@@ -53,15 +53,13 @@ server/mall/mall-search/
     ├── DO/
     │   └── ProductIndex.java                # ES 索引实体（非 MySQL DO，使用 @Document）
     ├── service/
-    │   ├── search/
-    │   │   ├── SearchService.java           # 接口
-    │   │   └── impl/SearchServiceImpl.java  # 搜索查询（全文/筛选/排序/分页/高亮/聚合）
-    │   ├── index/
-    │   │   ├── IndexService.java            # 接口
-    │   │   └── impl/IndexServiceImpl.java   # 全量重建/增量同步/别名切换/回滚
-    │   └── suggest/
-    │       ├── SuggestService.java          # 接口
-    │       └── impl/SuggestServiceImpl.java # 搜索补全建议
+    │   ├── SearchService.java
+    │   ├── IndexService.java
+    │   ├── SuggestService.java
+    │   └── impl/
+    │       ├── SearchServiceImpl.java
+    │       ├── IndexServiceImpl.java
+    │       └── SuggestServiceImpl.java
     ├── repository/
     │   └── ProductIndexRepository.java      # Spring Data ES Repository
     ├── infrastructure/
@@ -124,7 +122,7 @@ server/mall/mall-search/
 
 ### 3.2 SearchServiceImpl
 
-位于 `service/search/impl/SearchServiceImpl.java`，ES 查询核心。
+位于 `service/impl/SearchServiceImpl.java`，ES 查询核心。
 
 **search(req)**：
 
@@ -141,7 +139,7 @@ server/mall/mall-search/
 
 ### 3.3 IndexServiceImpl
 
-位于 `service/index/impl/IndexServiceImpl.java`，索引生命周期管理。
+位于 `service/impl/IndexServiceImpl.java`，索引生命周期管理。
 
 **rebuildIndex()**：
 
@@ -170,7 +168,7 @@ server/mall/mall-search/
 
 ### 3.4 SuggestServiceImpl
 
-位于 `service/suggest/impl/SuggestServiceImpl.java`，搜索补全。
+位于 `service/impl/SuggestServiceImpl.java`，搜索补全。
 
 - 基于 ES `completion` suggester + `ik_max_word` 分词
 - 商品上架/改名时更新 `suggest` 字段

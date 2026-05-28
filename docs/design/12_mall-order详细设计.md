@@ -54,9 +54,13 @@ mall-order/src/main/java/com/mall/order/
 │  ├─ MallOrderAmountDO.java
 │  └─ MallAfterSaleDO.java
 ├─ service/           # 业务逻辑
-│  ├─ cart/           → CartService, CartServiceImpl
-│  ├─ order/          → OrderService, OrderServiceImpl
-│  └─ aftersale/      → AfterSaleService, AfterSaleServiceImpl
+│  ├─ CartService.java
+│  ├─ OrderService.java
+│  ├─ AfterSaleService.java
+│  └─ impl/
+│     ├─ CartServiceImpl.java
+│     ├─ OrderServiceImpl.java
+│     └─ AfterSaleServiceImpl.java
 ├─ mapper/            # MyBatis 数据访问
 │  ├─ MallCartMapper.java
 │  ├─ MallOrderMapper.java

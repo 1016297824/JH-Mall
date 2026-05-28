@@ -72,26 +72,21 @@ server/mall/mall-user/
     │   ├── MallPointsLogDO.java            # 对应 mall_user_points_log 表
     │   └── MallGrowthLogDO.java            # 对应 mall_user_growth_log 表
     ├── service/
-    │   ├── IMallUserService.java            # 已有：管理端/内部共用接口
-    │   ├── impl/MallUserServiceImpl.java    # 已有：用户 CRUD + 状态管理
-    │   ├── user/
-    │   │   ├── UserProfileService.java     # C 端用户资料查询+修改（含 Redis 缓存）
-    │   │   └── impl/UserProfileServiceImpl.java
-    │   ├── address/
-    │   │   ├── AddressService.java
-    │   │   └── impl/AddressServiceImpl.java
-    │   ├── member/
-    │   │   ├── MemberService.java
-    │   │   └── impl/MemberServiceImpl.java # 会员等级+成长值
-    │   ├── points/
-    │   │   ├── PointsService.java
-    │   │   └── impl/PointsServiceImpl.java # 积分账户+流水
-    │   ├── signin/
-    │   │   ├── SignInService.java
-    │   │   └── impl/SignInServiceImpl.java # Redis Bitmap 签到
-    │   └── growth/
-    │       ├── GrowthService.java
-    │       └── impl/GrowthServiceImpl.java # 成长值流水
+    │   ├── IMallUserService.java              # 内部接口（RemoteUserInnerController 调用）
+    │   ├── UserProfileService.java            # C 端用户资料查询+修改（含 Redis 缓存）
+    │   ├── AddressService.java                # C 端地址簿 CRUD
+    │   ├── MemberService.java                 # C 端会员等级+成长值
+    │   ├── PointsService.java                 # C 端积分账户+流水
+    │   ├── SignInService.java                 # C 端签到（Redis Bitmap）
+    │   ├── GrowthService.java                 # C 端成长值流水
+    │   └── impl/
+    │       ├── MallUserServiceImpl.java       # 内部实现：用户 CRUD + 状态管理
+    │       ├── UserProfileServiceImpl.java
+    │       ├── AddressServiceImpl.java
+    │       ├── MemberServiceImpl.java
+    │       ├── PointsServiceImpl.java
+    │       ├── SignInServiceImpl.java
+    │       └── GrowthServiceImpl.java
     ├── mapper/
     │   ├── MallUserMapper.java
     │   ├── MallMemberLevelMapper.java
@@ -140,7 +135,7 @@ server/mall/mall-user/
 
 ### 3.1 UserServiceImpl
 
-位于 `service/user/impl/UserServiceImpl.java`，用户账号管理。
+位于 `service/UserProfileService.java`，用户账号管理。
 
 **getProfile(userId)**：
 
@@ -166,7 +161,7 @@ server/mall/mall-user/
 
 ### 3.2 AddressServiceImpl
 
-位于 `service/address/impl/AddressServiceImpl.java`，地址簿管理。
+位于 `service/AddressService.java`，地址簿管理。
 
 - `list(userId)`：查默认地址排在首位，phone 脱敏返回
 - `create(userId, req)`：地址数检查（≤20），`is_default=true` 时先取消其他默认
@@ -176,7 +171,7 @@ server/mall/mall-user/
 
 ### 3.3 MemberServiceImpl
 
-位于 `service/member/impl/MemberServiceImpl.java`，会员成长值。
+位于 `service/MemberService.java`，会员成长值。
 
 **getMembership(userId)**：查 `mall_user_member` + `mall_user_member_level`，返回当前等级、权益、到下一级的进度
 
@@ -190,7 +185,7 @@ server/mall/mall-user/
 
 ### 3.4 PointsServiceImpl
 
-位于 `service/points/impl/PointsServiceImpl.java`，积分管理。
+位于 `service/PointsService.java`，积分管理。
 
 **addPoints(userId, points, bizType, bizNo)**：
 

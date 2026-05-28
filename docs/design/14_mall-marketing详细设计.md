@@ -57,22 +57,16 @@ server/mall/mall-marketing/
     │   ├── MallPromotionDO.java               # 对应 mall_marketing_promotion 表
     │   └── MallPromotionRuleDO.java           # 对应 mall_marketing_promotion_rule 表
     ├── service/
-    │   ├── coupon/
-    │   │   ├── CouponDefService.java        # 接口
-    │   │   ├── impl/
-    │   │   │   └── CouponDefServiceImpl.java # 优惠券定义 CRUD
-    │   │   ├── CouponClaimService.java      # 接口
-    │   │   ├── impl/
-    │   │   │   └── CouponClaimServiceImpl.java # 领取/锁定/核销/释放
-    │   ├── promotion/
-    │   │   ├── PromotionService.java        # 接口
-    │   │   ├── impl/
-    │   │   │   └── PromotionServiceImpl.java # 活动+规则 CRUD
-    │   │   └── PromotionRuleMatcher.java    # 促销规则匹配引擎
-    │   └── calculation/
-    │       ├── CalculationService.java      # 接口
-    │       └── impl/
-    │           └── CalculationServiceImpl.java # 优惠试算核心
+    │   ├── CouponDefService.java
+    │   ├── CouponClaimService.java
+    │   ├── PromotionService.java
+    │   ├── PromotionRuleMatcher.java
+    │   ├── CalculationService.java
+    │   └── impl/
+    │       ├── CouponDefServiceImpl.java
+    │       ├── CouponClaimServiceImpl.java
+    │       ├── PromotionServiceImpl.java
+    │       └── CalculationServiceImpl.java
     ├── mapper/
     │   ├── MallCouponMapper.java
     │   ├── MallCouponRecordMapper.java
@@ -110,7 +104,7 @@ server/mall/mall-marketing/
 
 ### 3.1 CouponDefServiceImpl
 
-位于 `service/coupon/impl/CouponDefServiceImpl.java`，优惠券定义管理。
+位于 `service/impl/CouponDefServiceImpl.java`，优惠券定义管理。
 
 - `listAvailableCoupons()`：查 `coupon_status=1`（已发布）+ 未到 `use_end_time` + `remain_count>0`，按 `sort_order` 排序
 - `createCouponDef(req)`：校验参数（满减券 face_value>0，折扣券 discount_rate 1~99），初始 `coupon_status=0`（未发布），发布需独立操作
@@ -119,7 +113,7 @@ server/mall/mall-marketing/
 
 ### 3.2 CouponClaimServiceImpl
 
-位于 `service/coupon/impl/CouponClaimServiceImpl.java`，用户优惠券全生命周期。
+位于 `service/impl/CouponClaimServiceImpl.java`，用户优惠券全生命周期。
 
 **claimCoupon(couponDefId, userId)**：领取优惠券
 - ①查 `mall_marketing_coupon` → coupon_status≠1 `A0610`，`use_end_time < NOW()` → `A0610`
@@ -177,7 +171,7 @@ server/mall/mall-marketing/
 
 ### 3.4 CalculationServiceImpl
 
-位于 `service/calculation/impl/CalculationServiceImpl.java`，优惠试算引擎。
+位于 `service/impl/CalculationServiceImpl.java`，优惠试算引擎。
 
 **calculate(req)**：下单前调用，不锁定任何资源，只计算最优优惠组合。
 
@@ -207,7 +201,7 @@ server/mall/mall-marketing/
 
 ### 3.5 PromotionRuleMatcher
 
-位于 `service/promotion/PromotionRuleMatcher.java`，促销规则匹配引擎。
+位于 `service/PromotionRuleMatcher.java`，促销规则匹配引擎。
 
 按优先级排序（`sort_order ASC`），逐条匹配：
 1. 订单总金额 ≥ `threshold_amount`

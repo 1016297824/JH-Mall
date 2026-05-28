@@ -62,24 +62,21 @@ server/mall/mall-product/
     │   ├── MallProductSkuDO.java              # 对应 mall_product_sku 表
     │   └── MallSkuStockDO.java                # 对应 mall_product_sku_stock 表
     ├── service/
-    │   ├── category/
-    │   │   ├── CategoryService.java
-    │   │   └── impl/CategoryServiceImpl.java # 类目树 CRUD
-    │   ├── brand/
-    │   │   ├── BrandService.java
-    │   │   └── impl/BrandServiceImpl.java    # 品牌 CRUD
-    │   ├── spu/
-    │   │   ├── SpuService.java
-    │   │   └── impl/SpuServiceImpl.java      # SPU CRUD + 上下架
-    │   ├── sku/
-    │   │   ├── SkuService.java
-    │   │   └── impl/SkuServiceImpl.java      # SKU CRUD + 批量查询
-    │   ├── stock/
-    │   │   ├── StockService.java
-    │   │   └── impl/StockServiceImpl.java    # 库存扣减/锁定/释放/回补
-    │   └── cache/
-    │       ├── SkuCacheService.java          # SKU Redis 缓存
-    │       └── CategoryCacheService.java     # 类目树 Redis 缓存
+    │   ├── CategoryService.java
+    │   ├── BrandService.java
+    │   ├── SpuService.java
+    │   ├── SkuService.java
+    │   ├── StockService.java
+    │   ├── SkuCacheService.java
+    │   ├── CategoryCacheService.java
+    │   └── impl/
+    │       ├── CategoryServiceImpl.java
+    │       ├── BrandServiceImpl.java
+    │       ├── SpuServiceImpl.java
+    │       ├── SkuServiceImpl.java
+    │       ├── StockServiceImpl.java
+    │       ├── SkuCacheServiceImpl.java
+    │       └── CategoryCacheServiceImpl.java
     ├── mapper/
     │   ├── MallCategoryMapper.java
     │   ├── MallBrandMapper.java
@@ -128,7 +125,7 @@ server/mall/mall-product/
 
 ### 3.1 CategoryServiceImpl
 
-位于 `service/category/impl/CategoryServiceImpl.java`，类目树管理。
+位于 `service/impl/CategoryServiceImpl.java`，类目树管理。
 
 - `tree()`：查 `is_visible=1` 的全部类目，内存中构建三级树。Redis 缓存 30 分钟（`mall:product:category:tree`），管理端增删改后主动刷新缓存
 - `create(req)`：校验 parentId 存在性。自动计算 `level=parent.level+1`，生成 `path=parent.path/id`。同级 name 不重复
@@ -137,7 +134,7 @@ server/mall/mall-product/
 
 ### 3.2 SpuServiceImpl
 
-位于 `service/spu/impl/SpuServiceImpl.java`，SPU 管理 + 上下架。
+位于 `service/impl/SpuServiceImpl.java`，SPU 管理 + 上下架。
 
 - `listC(params)`：`WHERE publish_status=1 AND is_deleted=0`，支持按类目/品牌/关键词/排序分页。C 端不返回 `cost_price` 和 `verify_status`
 - `detailC(spuId)`：含 SKU 列表（`publish_status` 过滤下架 SKU）。C 端不返回 `cost_price`
@@ -148,7 +145,7 @@ server/mall/mall-product/
 
 ### 3.3 StockServiceImpl
 
-位于 `service/stock/impl/StockServiceImpl.java`，库存核心操作。
+位于 `service/impl/StockServiceImpl.java`，库存核心操作。
 
 **四段库存模型**：
 
@@ -179,7 +176,7 @@ server/mall/mall-product/
 
 ### 3.4 SkuCacheService
 
-位于 `service/cache/SkuCacheService.java`，SKU 信息 Redis 缓存。
+位于 `service/SkuCacheService.java`，SKU 信息 Redis 缓存。
 
 **Key**：`mall:product:sku:{skuId}`
 
@@ -203,7 +200,7 @@ server/mall/mall-product/
 
 ### 3.5 CategoryCacheService
 
-位于 `service/cache/CategoryCacheService.java`，类目树 Redis 缓存。
+位于 `service/CategoryCacheService.java`，类目树 Redis 缓存。
 
 - Key：`mall:product:category:tree`，TTL 30min
 - 应用启动时预热 + 类目变更时刷新
