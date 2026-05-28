@@ -378,3 +378,15 @@ spring:
 
 ***
 
+## 8 /inner/ 接口签名校验（接收方）
+
+mall-user 的 `RemoteUserInnerController`（`/inner/user/**`）接收来自 mall-auth 的内部调用，由 `mall-api` 共享的 `InnerSignatureFilter`（`com.mall.api.infrastructure.security`）验签。
+
+- `InnerSignatureFilter` 通过 `@Component` 自动注册，拦截 `/inner/**`，无需额外配置
+- 白名单：`/actuator/health`、`/actuator/info`
+- 新增错误码 `A0311`/`A0312`（见 `ErrorCode` 枚举）
+
+签名算法详见 [03_系统详细设计.md §7.3](file:///e:/Workspace/AI/JH-Mall/docs/design/03_系统详细设计.md#L4346)。
+
+***
+

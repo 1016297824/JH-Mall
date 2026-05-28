@@ -337,10 +337,9 @@ springdoc:
     # 访问前缀
     prefix:
 
-# C 端安全配置
+# C 端安全配置（jwt-secret 从 application-dev.yml 共享配置继承，网关不再单独配置）
 mall:
   security:
-    jwt-secret: 7COWPc0I1OG/8Cby86JRsZhk6+kR3tNbKXgxwr45O1mPSZm1SqfRmXyekGo1UojKSEnjVDUSSI7a0HEVKLZcoQ==
     anonymous-paths:
       - /api/auth/login
       - /api/auth/register

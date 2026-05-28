@@ -91,6 +91,14 @@ public class CacheConstants {
         }
     }
 
+    /** 内部签名 Redis Key */
+    public static final class Internal {
+        public static final String NONCE = "mall:internal:nonce:";
+
+        private Internal() {
+        }
+    }
+
     /** MQ 基础设施 Redis Key */
     public static final class MQ {
         public static final String DEDUP = "mall:mq:dedup:";

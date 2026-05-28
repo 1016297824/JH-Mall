@@ -562,7 +562,17 @@ mall:
 ```
 
 > 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
-> 配置项通过 `MallOrderConfigProperties`（`@ConfigurationProperties(prefix = "mall.order")` + `@RefreshScope`）注入，各 Service/Controller 通过构造注入获取，禁止使用 `@Value`。
+
+---
+
+## 11 Feign 内部签名
+
+mall-order 同时作为**调用方**（调 product/marketing/payment）和**接收方**（接收 payment 回调通知），两个角色由 `mall-api` 共享类覆盖：
+
+- **加签：** 引入 `mall-api` 后 `InnerFeignRequestInterceptor` 自动生效
+- **验签：** `InnerSignatureFilter` 通过 `@Component` 自动注册，拦截 `/inner/**`，白名单 `/actuator/health`，无需额外配置
+
+签名算法详见 [03_系统详细设计.md §7.3](file:///e:/Workspace/AI/JH-Mall/docs/design/03_系统详细设计.md#L4346)。
 
 ### 9.2 本地配置文件 `bootstrap.yml`
 

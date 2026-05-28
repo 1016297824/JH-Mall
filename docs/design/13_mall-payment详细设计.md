@@ -630,3 +630,13 @@ spring:
 > 回调验签失败 → HTTP 400（无业务错误码），回调处理异常 → callback_log 记录 + 日志告警，不产生 errorCode。
 
 ---
+
+## 13 服务间 Feign 安全（接收方）
+
+mall-payment 供 mall-order 通过 Feign 内部调用，由 `mall-api` 共享的 `InnerSignatureFilter`（`com.mall.api.infrastructure.security`）验签。
+
+- `InnerSignatureFilter` 通过 `@Component` 自动注册，拦截 `/inner/**`，无需额外配置
+- 白名单：`/actuator/health`、`/callback/payment/**`（支付平台走自身验签）
+- 错误码 `A0311`/`A0312`
+
+签名算法详见 [03_系统详细设计.md §7.3](file:///e:/Workspace/AI/JH-Mall/docs/design/03_系统详细设计.md#L4346)。

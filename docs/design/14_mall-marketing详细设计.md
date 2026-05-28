@@ -436,3 +436,13 @@ spring:
 > 全部错误码来自系统设计第二章。
 
 ---
+
+## 11 服务间 Feign 安全（接收方）
+
+mall-marketing 供 mall-order 通过 Feign 内部调用（优惠计算/领券/锁券/核销等 `/inner/` 接口），由 `mall-api` 共享的 `InnerSignatureFilter`（`com.mall.api.infrastructure.security`）验签。
+
+- `InnerSignatureFilter` 通过 `@Component` 自动注册，拦截 `/inner/**`，无需额外配置
+- 白名单：`/actuator/health`
+- 错误码 `A0311`/`A0312`
+
+签名算法详见 [03_系统详细设计.md §7.3](file:///e:/Workspace/AI/JH-Mall/docs/design/03_系统详细设计.md#L4346)。

@@ -75,6 +75,7 @@ public class TokenServiceImpl implements TokenService {
                 .setIssuedAt(now)
                 .setExpiration(accessExp)
                 .claim("type", "access")
+                .claim("userId", userId)
                 .setIssuer("mall-auth")
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
@@ -85,6 +86,7 @@ public class TokenServiceImpl implements TokenService {
                 .setIssuedAt(now)
                 .setExpiration(refreshExp)
                 .claim("type", "refresh")
+                .claim("userId", userId)
                 .setIssuer("mall-auth")
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
