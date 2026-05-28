@@ -31,12 +31,27 @@ public class GrowthController {
 
     private final IGrowthLogService growthService;
 
+    /**
+     * 查询成长值
+     *
+     * @param request HTTP 请求
+     * @return 成长值信息
+     */
     @GetMapping("/growth")
     public MallResult<GrowthVO> getGrowth(HttpServletRequest request) {
         String userId = request.getHeader(X_USER_ID);
         return MallResult.success(memberService.getGrowth(Long.parseLong(userId)));
     }
 
+    /**
+     * 分页查询成长值流水
+     *
+     * @param page    页码
+     * @param size    每页数量
+     * @param bizType 业务类型
+     * @param request HTTP 请求
+     * @return 分页结果
+     */
     @GetMapping("/growth/records")
     public MallResult<IPage<GrowthRecordVO>> getGrowthRecords(
             @RequestParam(defaultValue = "1") int page,

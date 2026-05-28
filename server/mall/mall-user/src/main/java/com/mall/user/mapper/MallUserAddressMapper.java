@@ -15,6 +15,12 @@ import org.apache.ibatis.annotations.Update;
 @Mapper
 public interface MallUserAddressMapper extends BaseMapper<MallUserAddressDO> {
 
+    /**
+     * 清除用户所有默认地址标记
+     *
+     * @param userId 用户ID
+     * @return 影响行数
+     */
     @Update("update mall_user_address set is_default = 0, update_time = now() where user_id = #{userId}")
     int clearDefault(@Param("userId") Long userId);
 }

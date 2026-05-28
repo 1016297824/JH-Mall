@@ -21,7 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 积分过期定时任务
  *
- * <p>分批将用户可用积分清零，每批 500 条</p>
+ * <p>每年 12 月 31 日 00:00 执行，分批将用户可用积分清零，每批 {PAGE_SIZE} 条，
+ * 逐条记录过期流水日志</p>
  *
  * @author JH-Mall
  * @date 2026/05/28
@@ -31,12 +32,19 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PointsExpireTask {
 
+    /** 每批处理的记录数 */
     private static final int PAGE_SIZE = 500;
 
     private final MallPointsAccountMapper pointsAccountMapper;
 
     private final MallUserPointsLogMapper pointsLogMapper;
 
+    /**
+     * 执行年度积分清零
+     *
+     * <p>分页查询所有可用积分大于 0 的账户，逐条清零并写入过期日志，
+     * 直到没有更多数据为止</p>
+     */
     @Scheduled(cron = "0 0 0 31 12 ?")
     public void execute() {
         log.info("开始年度积分清零");

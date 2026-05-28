@@ -32,6 +32,9 @@ import java.util.List;
 /**
  * 会员服务实现类
  *
+ * <p>提供会员信息查询、成长值管理、等级自动升级、成长值流水分页查询等功能。
+ * 成长值增加后自动检测是否满足升级条件</p>
+ *
  * @author JH-Mall
  * @date 2026/05/28
  */
@@ -46,8 +49,17 @@ public class MemberServiceImpl implements IMemberService {
 
     private final MallUserGrowthLogMapper mallUserGrowthLogMapper;
 
+    /** JSON 解析器，用于解析会员权益配置 */
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    /**
+     * 查询用户会员信息
+     *
+     * <p>包含当前成长值、当前等级、下一等级及等级权益</p>
+     *
+     * @param userId 用户 ID
+     * @return 会员信息 VO
+     */
     @Override
     public MembershipVO getMembership(Long userId) {
         MallUserMemberDO member = getMemberByUserId(userId);
@@ -64,6 +76,14 @@ public class MemberServiceImpl implements IMemberService {
         return vo;
     }
 
+    /**
+     * 查询用户成长值信息
+     *
+     * <p>包含当前成长值、累计成长值、当前等级、下一等级及升级进度百分比</p>
+     *
+     * @param userId 用户 ID
+     * @return 成长值信息 VO
+     */
     @Override
     public GrowthVO getGrowth(Long userId) {
         MallUserMemberDO member = getMemberByUserId(userId);
@@ -88,6 +108,16 @@ public class MemberServiceImpl implements IMemberService {
         return vo;
     }
 
+    /**
+     * 为用户增加成长值
+     *
+     * <p>先增加成长值，再写入流水日志，最后检测是否可升级</p>
+     *
+     * @param userId  用户 ID
+     * @param growth  增加的成长值
+     * @param bizType 业务类型枚举
+     * @param bizNo   业务流水号，可为 null
+     */
     @Override
     public void addGrowth(Long userId, int growth, BizTypeEnum bizType, String bizNo) {
         MallUserMemberDO member = getMemberByUserId(userId);
@@ -113,6 +143,15 @@ public class MemberServiceImpl implements IMemberService {
         log.info("成长值增加成功, userId={}, growth={}, bizType={}, bizNo={}", userId, growth, bizType.getCode(), bizNo);
     }
 
+    /**
+     * 分页查询用户成长值流水记录
+     *
+     * @param userId  用户 ID
+     * @param bizType 业务类型编码，为空则查全部
+     * @param page    页码，最小为 1
+     * @param size    每页条数，最大 100
+     * @return 成长值流水记录分页结果
+     */
     @Override
     public IPage<GrowthRecordVO> getGrowthRecords(Long userId, String bizType, int page, int size) {
         int safePage = Math.max(page, 1);
@@ -128,6 +167,13 @@ public class MemberServiceImpl implements IMemberService {
         return logPage.convert(this::toGrowthRecordVO);
     }
 
+    /**
+     * 根据用户 ID 查询会员信息
+     *
+     * @param userId 用户 ID
+     * @return 会员 DO
+     * @throws BusinessException 会员不存在时抛出 ACCOUNT_NOT_FOUND
+     */
     private MallUserMemberDO getMemberByUserId(Long userId) {
         LambdaQueryWrapper<MallUserMemberDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(MallUserMemberDO::getUserId, userId)
@@ -139,6 +185,13 @@ public class MemberServiceImpl implements IMemberService {
         return member;
     }
 
+    /**
+     * 根据等级 ID 查找等级信息
+     *
+     * @param levels  全部等级列表
+     * @param levelId 等级 ID
+     * @return 匹配的等级 DO，未找到返回 null
+     */
     private MallUserMemberLevelDO findLevelById(List<MallUserMemberLevelDO> levels, Long levelId) {
         return levels.stream()
                 .filter(l -> l.getId().equals(levelId))
@@ -146,6 +199,15 @@ public class MemberServiceImpl implements IMemberService {
                 .orElse(null);
     }
 
+    /**
+     * 查找当前等级对应的下一等级
+     *
+     * <p>按成长值升序排列，取第一个 minGrowth 大于当前等级 maxGrowth 的等级</p>
+     *
+     * @param levels         全部等级列表
+     * @param currentLevelId 当前等级 ID
+     * @return 下一等级 DO，已是最高等级则返回 null
+     */
     private MallUserMemberLevelDO findNextLevel(List<MallUserMemberLevelDO> levels, Long currentLevelId) {
         MallUserMemberLevelDO current = findLevelById(levels, currentLevelId);
         if (current == null) {
@@ -158,6 +220,15 @@ public class MemberServiceImpl implements IMemberService {
                 .orElse(null);
     }
 
+    /**
+     * 检测会员是否可升级
+     *
+     * <p>若当前成长值达到下一等级最低门槛，自动升级并记录日志</p>
+     *
+     * @param userId    用户 ID
+     * @param newGrowth 新的成长值
+     * @param levels    全部等级列表
+     */
     private void checkUpgrade(Long userId, int newGrowth, List<MallUserMemberLevelDO> levels) {
         MallUserMemberDO member = getMemberByUserId(userId);
         MallUserMemberLevelDO currentLevel = findLevelById(levels, member.getLevelId());
@@ -171,6 +242,12 @@ public class MemberServiceImpl implements IMemberService {
         }
     }
 
+    /**
+     * 将等级 DO 转换为等级 VO
+     *
+     * @param level 等级 DO
+     * @return 等级 VO
+     */
     private MemberLevelVO toMemberLevelVO(MallUserMemberLevelDO level) {
         MemberLevelVO vo = new MemberLevelVO();
         if (level != null) {
@@ -181,6 +258,12 @@ public class MemberServiceImpl implements IMemberService {
         return vo;
     }
 
+    /**
+     * 解析等级权益 JSON 为字符串列表
+     *
+     * @param level 等级 DO
+     * @return 权益名称列表，解析失败返回空列表
+     */
     @SuppressWarnings("unchecked")
     private List<String> parseBenefits(MallUserMemberLevelDO level) {
         if (level == null || level.getBenefitsJson() == null) {
@@ -194,6 +277,12 @@ public class MemberServiceImpl implements IMemberService {
         }
     }
 
+    /**
+     * 将成长值流水 DO 转换为 VO
+     *
+     * @param logDO 成长值流水 DO
+     * @return 成长值流水 VO
+     */
     private GrowthRecordVO toGrowthRecordVO(MallUserGrowthLogDO logDO) {
         GrowthRecordVO vo = new GrowthRecordVO();
         vo.setId(logDO.getId());
@@ -205,6 +294,7 @@ public class MemberServiceImpl implements IMemberService {
         vo.setBeforeGrowth(logDO.getBeforeGrowth());
         vo.setAfterGrowth(logDO.getAfterGrowth());
         vo.setRemark(logDO.getRemark());
+        // 将 LocalDateTime 转为 Date 供前端展示
         if (logDO.getCreateTime() != null) {
             vo.setCreateTime(Date.from(logDO.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
         }

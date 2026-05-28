@@ -22,9 +22,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * C 端签到服务实现
+ * C 端签到服务实现类
  *
- * <p>基于 Redis Bitmap + Lua 脚本实现原子签到，支持连续签到积分递增（5~10），幂等防重</p>
+ * <p>基于 Redis Bitmap + Lua 脚本实现原子签到，支持连续签到积分递增（5~10），幂等防重。
+ * 签到后自动调用积分服务发放积分</p>
  *
  * @author JH-Mall
  * @date 2026/05/28
@@ -34,9 +35,15 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class SignInServiceImpl implements ISignInService {
 
+    /** 月份格式化器：yyyyMM */
     private static final DateTimeFormatter YM_FORMATTER = DateTimeFormatter.ofPattern("yyyyMM");
 
-    /** Lua 脚本：原子检查并设置签到位，0=已签到，1=签到成功 */
+    /**
+     * Lua 脚本：原子检查并设置签到位
+     *
+     * <p>ARGS[1] = offset（日偏移量），KEYS[1] = Redis key。
+     * 返回值：0 = 已签到，1 = 签到成功</p>
+     */
     private static final DefaultRedisScript<Long> SIGN_IN_SCRIPT;
 
     static {
@@ -55,6 +62,24 @@ public class SignInServiceImpl implements ISignInService {
 
     private final IPointsService pointsService;
 
+    /**
+     * 执行签到
+     *
+     * <p>执行流程：
+     * <ol>
+     *   <li>Lua 原子检查并设置当天的签到位</li>
+     *   <li>已签到则抛出 RESOURCE_EXISTS 异常（幂等防重）</li>
+     *   <li>计算连续签到天数，按规则计算积分（基础 5 + 连续加成，上限 10）</li>
+     *   <li>设置 Redis key 过期时间为 60 天</li>
+     *   <li>调用积分服务发放积分</li>
+     *   <li>构建当月签到日历返回</li>
+     * </ol>
+     * </p>
+     *
+     * @param userId 用户 ID
+     * @return 签到结果 VO，包含本次积分、连续天数、签到日历
+     * @throws BusinessException 当天已签到时抛出 RESOURCE_EXISTS
+     */
     @Override
     public SignInVO signIn(Long userId) {
         LocalDate today = LocalDate.now();
@@ -85,7 +110,14 @@ public class SignInServiceImpl implements ISignInService {
     }
 
     /**
-     * 计算连续签到天数（从昨天向前倒推）
+     * 计算连续签到天数
+     *
+     * <p>从昨天开始向前倒推，统计连续为 1 的 bit 位数，遇 0 或跨月则停止</p>
+     *
+     * @param key    Redis 签到 key
+     * @param offset 今天的日偏移量
+     * @param today  当天日期
+     * @return 连续签到天数（不含今天）
      */
     private int calcConsecutiveDays(String key, int offset, LocalDate today) {
         int consecutive = 0;
@@ -103,7 +135,12 @@ public class SignInServiceImpl implements ISignInService {
     }
 
     /**
-     * 计算签到积分：基础5 + 每连续一天加1，上限10
+     * 计算签到所得积分
+     *
+     * <p>规则：基础积分 + 连续天数 × 加成积分，上限为连续签到最大积分</p>
+     *
+     * @param consecutiveDays 连续签到天数（不含今天）
+     * @return 本次签到积分
      */
     private int calcPoints(int consecutiveDays) {
         MallUserConfigProperties.Points pointsConfig = configProperties.getPoints();
@@ -115,6 +152,12 @@ public class SignInServiceImpl implements ISignInService {
 
     /**
      * 构建当月签到日历
+     *
+     * <p>遍历当月每一天，已签到的日期加入列表，确保当天一定在列表中</p>
+     *
+     * @param key   Redis 签到 key
+     * @param today 当天日期
+     * @return 当月已签到日期列表
      */
     private List<Integer> buildCalendar(String key, LocalDate today) {
         List<Integer> calendar = new ArrayList<>();
@@ -125,6 +168,7 @@ public class SignInServiceImpl implements ISignInService {
                 calendar.add(d);
             }
         }
+        // 确保今天一定在日历中
         if (!calendar.contains(today.getDayOfMonth())) {
             calendar.add(today.getDayOfMonth());
         }

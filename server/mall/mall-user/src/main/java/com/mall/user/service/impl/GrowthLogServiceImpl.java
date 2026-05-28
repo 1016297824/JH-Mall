@@ -16,7 +16,9 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
- * 成长值流水服务 — 仅操作 mall_user_growth_log 表
+ * 成长值流水服务实现类
+ *
+ * <p>仅操作 mall_user_growth_log 表，提供成长值流水分页查询及 DO-VO 转换</p>
  *
  * @author JH-Mall
  * @date 2026/05/28
@@ -28,6 +30,15 @@ public class GrowthLogServiceImpl implements IGrowthLogService {
 
     private final MallUserGrowthLogMapper mallUserGrowthLogMapper;
 
+    /**
+     * 分页查询用户成长值流水记录
+     *
+     * @param userId  用户 ID
+     * @param bizType 业务类型编码，为空则查全部
+     * @param page    页码，最小为 1
+     * @param size    每页条数，最大 100
+     * @return 成长值流水记录分页结果
+     */
     @Override
     public IPage<GrowthRecordVO> getGrowthRecords(Long userId, String bizType, int page, int size) {
         int safePage = Math.max(page, 1);
@@ -43,6 +54,12 @@ public class GrowthLogServiceImpl implements IGrowthLogService {
         return logPage.convert(this::toGrowthRecordVO);
     }
 
+    /**
+     * 将成长值流水 DO 转换为 VO
+     *
+     * @param logDO 成长值流水 DO
+     * @return 成长值流水 VO
+     */
     private GrowthRecordVO toGrowthRecordVO(MallUserGrowthLogDO logDO) {
         GrowthRecordVO vo = new GrowthRecordVO();
         vo.setId(logDO.getId());
@@ -54,6 +71,7 @@ public class GrowthLogServiceImpl implements IGrowthLogService {
         vo.setBeforeGrowth(logDO.getBeforeGrowth());
         vo.setAfterGrowth(logDO.getAfterGrowth());
         vo.setRemark(logDO.getRemark());
+        // 将 LocalDateTime 转为 Date 供前端展示
         if (logDO.getCreateTime() != null) {
             vo.setCreateTime(Date.from(logDO.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
         }

@@ -25,6 +25,9 @@ import java.util.Date;
 /**
  * 积分服务实现类
  *
+ * <p>提供积分账户查询、积分流水查询、积分增加等功能。
+ * 积分增加采用乐观锁重试机制，最多重试 {MAX_RETRY} 次，避免并发冲突</p>
+ *
  * @author JH-Mall
  * @date 2026/05/28
  */
@@ -33,12 +36,20 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class PointsServiceImpl implements IPointsService {
 
+    /** 乐观锁最大重试次数 */
     private static final int MAX_RETRY = 3;
 
     private final MallPointsAccountMapper mallPointsAccountMapper;
 
     private final MallUserPointsLogMapper mallUserPointsLogMapper;
 
+    /**
+     * 查询用户积分信息
+     *
+     * @param userId 用户 ID
+     * @return 积分信息 VO
+     * @throws BusinessException 积分账户不存在时抛出 ACCOUNT_NOT_FOUND
+     */
     @Override
     public PointsVO getPoints(Long userId) {
         LambdaQueryWrapper<MallPointsAccountDO> wrapper = new LambdaQueryWrapper<>();
@@ -56,6 +67,15 @@ public class PointsServiceImpl implements IPointsService {
         return vo;
     }
 
+    /**
+     * 分页查询用户积分流水记录
+     *
+     * @param userId  用户 ID
+     * @param bizType 业务类型编码，为空则查全部
+     * @param page    页码，最小为 1
+     * @param size    每页条数，最大 100
+     * @return 积分流水分页结果
+     */
     @Override
     public IPage<PointsRecordVO> getPointsRecords(Long userId, String bizType, int page, int size) {
         int safePage = Math.max(page, 1);
@@ -71,6 +91,18 @@ public class PointsServiceImpl implements IPointsService {
         return logPage.convert(this::toPointsRecordVO);
     }
 
+    /**
+     * 为用户增加积分
+     *
+     * <p>使用乐观锁（version 字段）保证并发安全，失败时最多重试 {MAX_RETRY} 次，
+     * 全部失败则抛出 SYSTEM_ERROR</p>
+     *
+     * @param userId  用户 ID
+     * @param points  增加的积分
+     * @param bizType 业务类型枚举
+     * @param bizNo   业务流水号，可为 null
+     * @throws BusinessException 积分账户不存在或乐观锁重试耗尽
+     */
     @Override
     public void addPoints(Long userId, int points, BizTypeEnum bizType, String bizNo) {
         for (int i = 0; i < MAX_RETRY; i++) {
@@ -85,6 +117,7 @@ public class PointsServiceImpl implements IPointsService {
             int beforePoints = account.getAvailablePoints();
             int rows = mallPointsAccountMapper.addPoints(userId, points, currentVersion);
             if (rows > 0) {
+                // 乐观锁成功，写入积分流水日志
                 MallUserPointsLogDO logDO = new MallUserPointsLogDO();
                 logDO.setUserId(userId);
                 logDO.setBizType(bizType.getCode());
@@ -107,6 +140,12 @@ public class PointsServiceImpl implements IPointsService {
         throw new BusinessException(ErrorCode.SYSTEM_ERROR);
     }
 
+    /**
+     * 将积分流水 DO 转换为 VO
+     *
+     * @param logDO 积分流水 DO
+     * @return 积分流水 VO
+     */
     private PointsRecordVO toPointsRecordVO(MallUserPointsLogDO logDO) {
         PointsRecordVO vo = new PointsRecordVO();
         vo.setId(logDO.getId());
@@ -118,6 +157,7 @@ public class PointsServiceImpl implements IPointsService {
         vo.setBeforePoints(logDO.getBeforePoints());
         vo.setAfterPoints(logDO.getAfterPoints());
         vo.setRemark(logDO.getRemark());
+        // 将 LocalDateTime 转为 Date 供前端展示
         if (logDO.getCreateTime() != null) {
             vo.setCreateTime(Date.from(logDO.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
         }

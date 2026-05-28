@@ -17,7 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 订单完成事件消费者
  *
- * <p>消费订单完成 MQ 消息，为用户增加积分和成长值</p>
+ * <p>消费订单完成 MQ 消息，为用户增加积分和成长值。
+ * 消息体 JSON 示例：{"userId":1,"orderNo":"ORD001","orderAmount":10000,"points":100}</p>
  *
  * @author JH-Mall
  * @date 2026/05/28
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserOrderCompletedConsumer implements RocketMQListener<String> {
 
+    /** JSON 解析器 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final IPointsService pointsService;
@@ -37,9 +39,14 @@ public class UserOrderCompletedConsumer implements RocketMQListener<String> {
     /**
      * 消费订单完成事件
      *
-     * <p>消息体: {"userId":1,"orderNo":"ORD001","orderAmount":10000,"points":100}</p>
+     * <p>解析消息中的 userId、orderNo、points、orderAmount 字段：
+     * <ul>
+     *   <li>points 大于 0 时调用积分服务增加积分</li>
+     *   <li>orderAmount 大于 0 时按 100:1 折算成长值并增加</li>
+     * </ul>
+     * </p>
      *
-     * @param message JSON 消息字符串
+     * @param message JSON 格式的消息字符串
      */
     @Override
     public void onMessage(String message) {
@@ -55,12 +62,14 @@ public class UserOrderCompletedConsumer implements RocketMQListener<String> {
                 return;
             }
 
+            // 消费积分：points 大于 0 才增加
             if (pointsNode != null && !pointsNode.isNull()) {
                 int points = pointsNode.asInt();
                 if (points > 0) {
                     pointsService.addPoints(userId, points, BizTypeEnum.ORDER, orderNo);
                 }
             }
+            // 消费成长值：按订单金额 100:1 折算
             if (orderAmountNode != null && !orderAmountNode.isNull()) {
                 long orderAmount = orderAmountNode.asLong();
                 if (orderAmount > 0) {

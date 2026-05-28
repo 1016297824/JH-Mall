@@ -24,7 +24,8 @@ import java.time.LocalDateTime;
 /**
  * 用户服务实现类
  *
- * <p>提供用户注册、查询、密码更新、手机号更新、状态管理等核心功能</p>
+ * <p>提供用户注册、查询、密码更新、手机号更新、状态管理等核心功能。
+ * 手机号存储前做 SHA-256 哈希，注册时同步初始化会员信息和积分账户</p>
  *
  * @author JH-Mall
  * @date 2026/05/26
@@ -38,12 +39,26 @@ public class MallUserServiceImpl implements IMallUserService {
     private final MallUserMemberMapper mallUserMemberMapper;
     private final MallPointsAccountMapper mallPointsAccountMapper;
 
+    /**
+     * 根据手机号查询用户
+     *
+     * <p>先将手机号做 SHA-256 哈希，再查 phone_hash 字段</p>
+     *
+     * @param phone 明文手机号
+     * @return 用户 DO，未找到返回 null
+     */
     @Override
     public MallUserDO selectByPhone(String phone) {
         String phoneHash = sha256(phone);
         return selectByPhoneHash(phoneHash);
     }
 
+    /**
+     * 根据手机号哈希查询用户
+     *
+     * @param phoneHash SHA-256 哈希后的手机号
+     * @return 用户 DO，未找到返回 null
+     */
     @Override
     public MallUserDO selectByPhoneHash(String phoneHash) {
         LambdaQueryWrapper<MallUserDO> wrapper = new LambdaQueryWrapper<>();
@@ -52,11 +67,27 @@ public class MallUserServiceImpl implements IMallUserService {
         return mallUserMapper.selectOne(wrapper);
     }
 
+    /**
+     * 根据用户 ID 查询用户
+     *
+     * @param userId 用户 ID
+     * @return 用户 DO，未找到返回 null
+     */
     @Override
     public MallUserDO selectById(Long userId) {
         return mallUserMapper.selectById(userId);
     }
 
+    /**
+     * 手机号注册新用户
+     *
+     * <p>在一个事务内完成：插入用户记录 → 初始化会员信息 → 初始化积分账户</p>
+     *
+     * @param phone     明文手机号
+     * @param phoneHash SHA-256 哈希后的手机号
+     * @param password  加密后的密码
+     * @return 新用户 ID 字符串
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String registerByPhone(String phone, String phoneHash, String password) {
@@ -82,6 +113,13 @@ public class MallUserServiceImpl implements IMallUserService {
         return String.valueOf(userId);
     }
 
+    /**
+     * 初始化会员信息
+     *
+     * <p>创建默认会员记录，等级 ID 为 1（普通会员），成长值为 0</p>
+     *
+     * @param userId 用户 ID
+     */
     private void initMemberInfo(Long userId) {
         MallUserMemberDO member = new MallUserMemberDO();
         member.setUserId(userId);
@@ -98,6 +136,13 @@ public class MallUserServiceImpl implements IMallUserService {
         log.info("初始化会员信息成功, userId={}", userId);
     }
 
+    /**
+     * 初始化积分账户
+     *
+     * <p>创建积分账户记录，各项积分数值均为 0</p>
+     *
+     * @param userId 用户 ID
+     */
     private void initPointsAccount(Long userId) {
         MallPointsAccountDO account = new MallPointsAccountDO();
         account.setUserId(userId);
@@ -113,6 +158,12 @@ public class MallUserServiceImpl implements IMallUserService {
         log.info("初始化积分账户成功, userId={}", userId);
     }
 
+    /**
+     * 更新用户密码
+     *
+     * @param userId      用户 ID 字符串
+     * @param newPassword 新密码（加密后）
+     */
     @Override
     public void updatePasswordById(String userId, String newPassword) {
         MallUserDO user = mallUserMapper.selectById(Long.parseLong(userId));
@@ -124,6 +175,13 @@ public class MallUserServiceImpl implements IMallUserService {
         }
     }
 
+    /**
+     * 更新用户手机号
+     *
+     * @param userId       用户 ID 字符串
+     * @param newPhone     新手机号明文
+     * @param newPhoneHash 新手机号 SHA-256 哈希
+     */
     @Override
     public void updatePhoneById(String userId, String newPhone, String newPhoneHash) {
         MallUserDO user = mallUserMapper.selectById(Long.parseLong(userId));
@@ -136,6 +194,12 @@ public class MallUserServiceImpl implements IMallUserService {
         }
     }
 
+    /**
+     * 更新用户状态
+     *
+     * @param userId     用户 ID 字符串
+     * @param userStatus 目标状态编码
+     */
     @Override
     public void updateUserStatusById(String userId, String userStatus) {
         MallUserDO user = mallUserMapper.selectById(Long.parseLong(userId));
@@ -147,6 +211,12 @@ public class MallUserServiceImpl implements IMallUserService {
         }
     }
 
+    /**
+     * SHA-256 哈希
+     *
+     * @param input 待哈希的原始字符串
+     * @return 哈希后的十六进制小写字符串
+     */
     private String sha256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
