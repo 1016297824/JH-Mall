@@ -3,7 +3,7 @@ package com.mall.auth.service.impl;
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.config.MallSecurityConfigProperties;
 import com.mall.auth.DTO.response.TokenResponse;
-import com.mall.auth.service.TokenService;
+import com.mall.auth.service.ITokenService;
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.TokenException;
@@ -13,6 +13,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -32,26 +33,12 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/05/26
  */
 @Service
-public class TokenServiceImpl implements TokenService {
+@RequiredArgsConstructor
+public class TokenServiceImpl implements ITokenService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final MallAuthConfigProperties authProperties;
     private final MallSecurityConfigProperties securityProperties;
-
-    /**
-     * 构造 Token 服务
-     *
-     * @param redisTemplate      Redis 模板
-     * @param authProperties     认证配置属性
-     * @param securityProperties 安全配置属性
-     */
-    public TokenServiceImpl(RedisTemplate<String, Object> redisTemplate,
-                            MallAuthConfigProperties authProperties,
-                            MallSecurityConfigProperties securityProperties) {
-        this.redisTemplate = redisTemplate;
-        this.authProperties = authProperties;
-        this.securityProperties = securityProperties;
-    }
 
     /**
      * 签发 Token（同时生成 accessToken 和 refreshToken）

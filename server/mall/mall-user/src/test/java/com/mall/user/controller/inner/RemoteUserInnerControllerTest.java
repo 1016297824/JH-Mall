@@ -68,7 +68,7 @@ class RemoteUserInnerControllerTest {
 
         mockMvc.perform(get("/inner/user/phone/13800138000"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(12345))
+                .andExpect(jsonPath("$.id").value("12345"))
                 .andExpect(jsonPath("$.phone").value("13800138000"))
                 .andExpect(jsonPath("$.phoneHash").value("abc123hash"))
                 .andExpect(jsonPath("$.password").doesNotExist())
@@ -76,8 +76,8 @@ class RemoteUserInnerControllerTest {
                 .andExpect(jsonPath("$.avatar").value("https://example.com/avatar.png"))
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.emailHash").value("email123hash"))
-                .andExpect(jsonPath("$.gender").value(1))
-                .andExpect(jsonPath("$.userStatus").value(UserStatusEnum.NORMAL.getCode()))
+                .andExpect(jsonPath("$.gender").value("1"))
+                .andExpect(jsonPath("$.userStatus").value(String.valueOf(UserStatusEnum.NORMAL.getCode())))
                 .andExpect(jsonPath("$.registerType").value("phone"))
                 .andExpect(jsonPath("$.registerIp").value("127.0.0.1"))
                 .andExpect(jsonPath("$.privacyAgreed").value("1"));

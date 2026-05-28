@@ -1,11 +1,12 @@
 package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
-import com.mall.auth.service.CaptchaService;
+import com.mall.auth.service.ICaptchaService;
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.CaptchaException;
 import com.wf.captcha.SpecCaptcha;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,21 +25,11 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/05/26
  */
 @Service
-public class CaptchaServiceImpl implements CaptchaService {
+@RequiredArgsConstructor
+public class CaptchaServiceImpl implements ICaptchaService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final MallAuthConfigProperties authProperties;
-
-    /**
-     * 构造验证码服务
-     *
-     * @param redisTemplate  Redis 模板
-     * @param authProperties 认证配置属性
-     */
-    public CaptchaServiceImpl(RedisTemplate<String, Object> redisTemplate, MallAuthConfigProperties authProperties) {
-        this.redisTemplate = redisTemplate;
-        this.authProperties = authProperties;
-    }
 
     /**
      * 生成图形验证码

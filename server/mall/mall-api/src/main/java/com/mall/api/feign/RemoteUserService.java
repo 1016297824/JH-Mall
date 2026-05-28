@@ -1,6 +1,8 @@
 package com.mall.api.feign;
 
 import com.mall.common.DTO.user.response.MallUserDTO;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,6 +69,8 @@ public interface RemoteUserService {
     /**
      * 注册请求
      */
+    @Data
+    @NoArgsConstructor
     class RegisterRequest {
 
         /** 手机号 */
@@ -78,153 +82,31 @@ public interface RemoteUserService {
         /** 注册方式 */
         private String registerType;
 
-        /**
-         * 获取手机号
-         *
-         * @return 手机号
-         */
-        public String getPhone() {
-            return phone;
-        }
-
-        /**
-         * 设置手机号
-         *
-         * @param phone 手机号
-         */
-        public void setPhone(String phone) {
-            this.phone = phone;
-        }
-
-        /**
-         * 获取手机号哈希
-         *
-         * @return 手机号 SHA-256 哈希
-         */
-        public String getPhoneHash() {
-            return phoneHash;
-        }
-
-        /**
-         * 设置手机号哈希
-         *
-         * @param phoneHash 手机号 SHA-256 哈希
-         */
-        public void setPhoneHash(String phoneHash) {
-            this.phoneHash = phoneHash;
-        }
-
-        /**
-         * 获取密码 BCrypt 哈希
-         *
-         * @return 密码 BCrypt 哈希
-         */
-        public String getPassword() {
-            return password;
-        }
-
-        /**
-         * 设置密码 BCrypt 哈希
-         *
-         * @param password 密码 BCrypt 哈希
-         */
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        /**
-         * 获取注册方式
-         *
-         * @return 注册方式
-         */
-        public String getRegisterType() {
-            return registerType;
-        }
-
-        /**
-         * 设置注册方式
-         *
-         * @param registerType 注册方式
-         */
-        public void setRegisterType(String registerType) {
-            this.registerType = registerType;
-        }
-
     }
 
     /**
      * 密码更新请求
      */
+    @Data
+    @NoArgsConstructor
     class PasswordUpdateRequest {
 
         /** 新密码 BCrypt 哈希 */
         private String newPassword;
-
-        /**
-         * 获取新密码 BCrypt 哈希
-         *
-         * @return 新密码 BCrypt 哈希
-         */
-        public String getNewPassword() {
-            return newPassword;
-        }
-
-        /**
-         * 设置新密码 BCrypt 哈希
-         *
-         * @param newPassword 新密码 BCrypt 哈希
-         */
-        public void setNewPassword(String newPassword) {
-            this.newPassword = newPassword;
-        }
 
     }
 
     /**
      * 手机号更新请求
      */
+    @Data
+    @NoArgsConstructor
     class PhoneUpdateRequest {
 
         /** 新手机号 */
         private String newPhone;
         /** 新手机号 SHA-256 哈希 */
         private String newPhoneHash;
-
-        /**
-         * 获取新手机号
-         *
-         * @return 新手机号
-         */
-        public String getNewPhone() {
-            return newPhone;
-        }
-
-        /**
-         * 设置新手机号
-         *
-         * @param newPhone 新手机号
-         */
-        public void setNewPhone(String newPhone) {
-            this.newPhone = newPhone;
-        }
-
-        /**
-         * 获取新手机号哈希
-         *
-         * @return 新手机号 SHA-256 哈希
-         */
-        public String getNewPhoneHash() {
-            return newPhoneHash;
-        }
-
-        /**
-         * 设置新手机号哈希
-         *
-         * @param newPhoneHash 新手机号 SHA-256 哈希
-         */
-        public void setNewPhoneHash(String newPhoneHash) {
-            this.newPhoneHash = newPhoneHash;
-        }
 
     }
 

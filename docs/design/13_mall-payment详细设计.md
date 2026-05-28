@@ -110,6 +110,22 @@ server/mall/mall-payment/
 | 10 | POST | `/callback/payment/{channel}` | PaymentCallbackController | `payCallback(channel, body)` | 无(验签) | — |
 | 11 | POST | `/callback/payment/{channel}/refund` | PaymentCallbackController | `refundCallback(channel, body)` | 无(验签) | — |
 
+### 2.3 Lombok 使用约定
+
+| 类层级 | 注解 | 说明 |
+|--------|------|------|
+| `DO/` | `@Data` + `@Builder` | MallPaymentDO / MallRefundDO 等 |
+| `dto/request/` | `@Data` + `@NoArgsConstructor` | PayRequestDTO 等 |
+| `dto/response/` | `@Data` | PayResultDTO 等 |
+| `vo/` | `@Data` | PayParamsVO / PaymentVO 等 |
+| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
+| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
+| `statemachine/` | `@Slf4j` | PaymentStateMachine |
+| `infrastructure/channel/` | `@Slf4j` | 支付渠道适配器 |
+| `convert/` | 无 Lombok | 静态转换方法 |
+
+详见 `AGENTS.md` §Lombok 使用规范。
+
 ---
 
 ## 3 核心类设计

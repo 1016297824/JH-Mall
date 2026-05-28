@@ -5,11 +5,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * mall-user 用户服务
- * 端口：9301
+ * 端口：9302
  */
+@EnableScheduling
 @EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.user.mapper")
 @EnableDiscoveryClient

@@ -8,7 +8,7 @@ package com.mall.auth.service;
  * @author JH-Mall
  * @date 2026/05/26
  */
-public interface AuthService {
+public interface IAuthService {
 
     /**
      * 手机号注册

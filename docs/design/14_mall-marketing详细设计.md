@@ -98,6 +98,20 @@ server/mall/mall-marketing/
 
 管理端接口由若依代码生成器自动生成（优惠券定义/领取记录、活动/规则管理），权限码无需手动维护。
 
+### 2.3 Lombok 使用约定
+
+| 类层级 | 注解 | 说明 |
+|--------|------|------|
+| `DO/` | `@Data` + `@Builder` | MallCouponDO / MallPromotionDO 等 |
+| `dto/request/` | `@Data` + `@NoArgsConstructor` | CouponClaimReq / CalculationReq 等 |
+| `dto/response/` | `@Data` | CalculationResp 等 |
+| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
+| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
+| `statemachine/` | `@Slf4j` | CouponStateMachine |
+| `convert/` | 无 Lombok | 静态转换方法 |
+
+详见 `AGENTS.md` §Lombok 使用规范。
+
 ---
 
 ## 3 核心类设计

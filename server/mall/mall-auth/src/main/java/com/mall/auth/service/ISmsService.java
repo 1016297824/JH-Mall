@@ -8,7 +8,7 @@ package com.mall.auth.service;
  * @author JH-Mall
  * @date 2026/05/26
  */
-public interface SmsService {
+public interface ISmsService {
 
     /**
      * 发送短信验证码

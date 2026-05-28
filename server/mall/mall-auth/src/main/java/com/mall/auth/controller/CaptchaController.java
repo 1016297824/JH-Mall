@@ -11,8 +11,8 @@ import com.mall.auth.DTO.request.CaptchaRegisterReq;
 import com.mall.auth.DTO.request.CaptchaResetPasswordReq;
 import com.mall.auth.DTO.response.CaptchaResponse;
 import com.mall.auth.DTO.response.TokenResponse;
-import com.mall.auth.service.CaptchaService;
-import com.mall.auth.service.TokenService;
+import com.mall.auth.service.ICaptchaService;
+import com.mall.auth.service.ITokenService;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.RegisterTypeEnum;
 import com.mall.common.exception.BusinessException;
@@ -33,6 +33,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.constant.HeaderConstants;
 import com.mall.common.enums.user.UserStatusEnum;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -49,15 +50,16 @@ import java.util.regex.Pattern;
  */
 @RestController
 @RequestMapping("/api/auth/captcha")
+@RequiredArgsConstructor
 public class CaptchaController {
 
     /** 密码正则：必须包含字母和数字 */
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d).+$");
 
     /** 验证码服务 */
-    private final CaptchaService captchaService;
+    private final ICaptchaService captchaService;
     /** Token 服务 */
-    private final TokenService tokenService;
+    private final ITokenService tokenService;
     /** 用户服务 Feign 接口 */
     private final RemoteUserService remoteUserService;
     /** Redis 模板 */
@@ -66,27 +68,6 @@ public class CaptchaController {
     private final BCryptPasswordEncoder passwordEncoder;
     /** 认证配置属性 */
     private final MallAuthConfigProperties authProperties;
-
-    /**
-     * 构造认证控制器
-     *
-     * @param captchaService    验证码服务
-     * @param tokenService      Token 服务
-     * @param remoteUserService 用户服务 Feign 接口
-     * @param redisTemplate     Redis 模板
-     * @param passwordEncoder   密码编码器
-     * @param authProperties    认证配置属性
-     */
-    public CaptchaController(CaptchaService captchaService, TokenService tokenService,
-                             RemoteUserService remoteUserService, RedisTemplate<String, Object> redisTemplate,
-                             BCryptPasswordEncoder passwordEncoder, MallAuthConfigProperties authProperties) {
-        this.captchaService = captchaService;
-        this.tokenService = tokenService;
-        this.remoteUserService = remoteUserService;
-        this.redisTemplate = redisTemplate;
-        this.passwordEncoder = passwordEncoder;
-        this.authProperties = authProperties;
-    }
 
     /**
      * 获取图形验证码

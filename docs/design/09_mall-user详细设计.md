@@ -73,12 +73,12 @@ server/mall/mall-user/
     │   └── MallGrowthLogDO.java            # 对应 mall_user_growth_log 表
     ├── service/
     │   ├── IMallUserService.java              # 内部接口（RemoteUserInnerController 调用）
-    │   ├── UserProfileService.java            # C 端用户资料查询+修改（含 Redis 缓存）
-    │   ├── AddressService.java                # C 端地址簿 CRUD
-    │   ├── MemberService.java                 # C 端会员等级+成长值
-    │   ├── PointsService.java                 # C 端积分账户+流水
-    │   ├── SignInService.java                 # C 端签到（Redis Bitmap）
-    │   ├── GrowthService.java                 # C 端成长值流水
+    │   ├── IUserProfileService.java            # C 端用户资料查询+修改（含 Redis 缓存）
+    │   ├── IAddressService.java                # C 端地址簿 CRUD
+    │   ├── IMemberService.java                 # C 端会员等级+成长值
+    │   ├── IPointsService.java                 # C 端积分账户+流水
+    │   ├── ISignInService.java                 # C 端签到（Redis Bitmap）
+    │   ├── IGrowthService.java                 # C 端成长值流水
     │   └── impl/
     │       ├── MallUserServiceImpl.java       # 内部实现：用户 CRUD + 状态管理
     │       ├── UserProfileServiceImpl.java
@@ -129,13 +129,31 @@ server/mall/mall-user/
 | 12 | GET    | `/api/user/growth/records`                | GrowthController     | `listRecords(params)`    |  是  | —   |
 | 13 | POST   | `/api/user/sign-in`                       | SignInController     | `signIn()`               |  是  | —   |
 
+### 2.3 Lombok 使用约定
+
+本模块类层级与 Lombok 注解映射：
+
+| 类层级 | 注解 | 说明 |
+|--------|------|------|
+| `DO/` | `@Data` + `@Builder` | 数据库实体，禁止 `@EqualsAndHashCode` |
+| `dto/request/` | `@Data` + `@NoArgsConstructor` | Jackson 反序列化需要无参构造 |
+| `dto/response/` | `@Data` | 响应 DTO |
+| `vo/` | `@Data` | 视图对象 |
+| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 + 日志 |
+| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | 同上 |
+| `convert/` | 无 Lombok | 纯转换器，手写 `static` 方法 |
+
+禁止使用：`@EqualsAndHashCode`（继承场景语义不清）、`@ToString`（统一 `ToStringBuilder`）、`@Value`（不采用不可变模式）。
+
+详见 `AGENTS.md` §Lombok 使用规范。
+
 ***
 
 ## 3 核心类设计
 
 ### 3.1 UserServiceImpl
 
-位于 `service/UserProfileService.java`，用户账号管理。
+位于 `service/IUserProfileService.java`，用户账号管理。
 
 **getProfile(userId)**：
 
@@ -161,7 +179,7 @@ server/mall/mall-user/
 
 ### 3.2 AddressServiceImpl
 
-位于 `service/AddressService.java`，地址簿管理。
+位于 `service/IAddressService.java`，地址簿管理。
 
 - `list(userId)`：查默认地址排在首位，phone 脱敏返回
 - `create(userId, req)`：地址数检查（≤20），`is_default=true` 时先取消其他默认
@@ -171,7 +189,7 @@ server/mall/mall-user/
 
 ### 3.3 MemberServiceImpl
 
-位于 `service/MemberService.java`，会员成长值。
+位于 `service/IMemberService.java`，会员成长值。
 
 **getMembership(userId)**：查 `mall_user_member` + `mall_user_member_level`，返回当前等级、权益、到下一级的进度
 
@@ -185,7 +203,7 @@ server/mall/mall-user/
 
 ### 3.4 PointsServiceImpl
 
-位于 `service/PointsService.java`，积分管理。
+位于 `service/IPointsService.java`，积分管理。
 
 **addPoints(userId, points, bizType, bizNo)**：
 

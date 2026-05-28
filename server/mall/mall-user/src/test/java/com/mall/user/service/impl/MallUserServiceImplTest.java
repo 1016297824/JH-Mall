@@ -77,8 +77,8 @@ class MallUserServiceImplTest {
     @Test
     void testRegisterByPhone_ShouldCreateUserAndReturnId() {
         when(mallUserMapper.insert(any(MallUserDO.class))).thenReturn(1);
-        when(mallUserMemberMapper.insert(any())).thenReturn(1);
-        when(mallPointsAccountMapper.insert(any())).thenReturn(1);
+        when(mallUserMemberMapper.insert(any(MallUserMemberDO.class))).thenReturn(1);
+        when(mallPointsAccountMapper.insert(any(MallPointsAccountDO.class))).thenReturn(1);
 
         String userId = mallUserService.registerByPhone("13800138000", "hash456", "$2a$10$encoded");
 

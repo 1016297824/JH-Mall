@@ -36,6 +36,9 @@ public class MallPointsAccountDO {
     @TableField("expired_points")
     private Integer expiredPoints;
 
+    @TableField("version")
+    private Integer version;
+
     @TableField("is_deleted")
     private Integer isDeleted;
 
@@ -91,6 +94,14 @@ public class MallPointsAccountDO {
 
     public void setExpiredPoints(Integer expiredPoints) {
         this.expiredPoints = expiredPoints;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     public Integer getIsDeleted() {

@@ -5,8 +5,8 @@ import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.DTO.response.TokenResponse;
-import com.mall.auth.service.CaptchaService;
-import com.mall.auth.service.TokenService;
+import com.mall.auth.service.ICaptchaService;
+import com.mall.auth.service.ITokenService;
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.common.exception.CaptchaException;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,8 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CaptchaControllerTest {
 
     private MockMvc mockMvc;
-    private CaptchaService captchaService;
-    private TokenService tokenService;
+    private ICaptchaService captchaService;
+    private ITokenService tokenService;
     private RemoteUserService remoteUserService;
     private RedisTemplate<String, Object> redisTemplate;
     private ValueOperations<String, Object> valueOperations;
@@ -48,8 +48,8 @@ class CaptchaControllerTest {
     @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
-        captchaService = mock(CaptchaService.class);
-        tokenService = mock(TokenService.class);
+        captchaService = mock(ICaptchaService.class);
+        tokenService = mock(ITokenService.class);
         remoteUserService = mock(RemoteUserService.class);
         redisTemplate = mock(RedisTemplate.class);
         valueOperations = mock(ValueOperations.class);

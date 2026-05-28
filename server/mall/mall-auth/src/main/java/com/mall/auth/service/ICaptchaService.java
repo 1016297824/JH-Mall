@@ -10,7 +10,7 @@ import java.util.Map;
  * @author JH-Mall
  * @date 2026/05/26
  */
-public interface CaptchaService {
+public interface ICaptchaService {
 
     /**
      * 生成图形验证码

@@ -66,6 +66,9 @@ public class RemoteUserInnerController {
     private MallUserDTO toDTO(MallUserDO user) {
         MallUserDTO dto = new MallUserDTO();
         BeanUtils.copyProperties(user, dto);
+        dto.setId(String.valueOf(user.getId()));
+        dto.setGender(String.valueOf(user.getGender()));
+        dto.setUserStatus(String.valueOf(user.getUserStatus()));
         dto.setPassword(null);
         dto.setPrivacyAgreed(String.valueOf(user.getIsPrivacyAgreed()));
         return dto;

@@ -141,6 +141,7 @@ server/ruoyi/ruoyi-modules/mall-admin/
 | 响应体          | `AjaxResult` + `TableDataInfo`（`ruoyi-common-core`）                 |
 | Controller 基类 | `BaseController`（`ruoyi-common-core`）                                 |
 | Excel 导入导出  | `ExcelUtil`（`ruoyi-common-core`，基于 poi-ooxml）                      |
+| 样板代码        | Lombok（管理端 domain 类使用 `@Data` / `@Slf4j` 减少 getter/setter 样板，Lombok 为编译时依赖无运行时耦合） |
 
 ---
 

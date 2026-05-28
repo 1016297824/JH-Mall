@@ -119,6 +119,22 @@ server/mall/mall-product/
 
 管理端接口由若依代码生成器自动生成（类目/品牌/SPU/SKU/库存 CRUD + 上下架），权限码无需手动维护。
 
+### 2.3 Lombok 使用约定
+
+本模块类层级与 Lombok 注解映射（与 mall-user 一致）：
+
+| 类层级 | 注解 | 说明 |
+|--------|------|------|
+| `DO/` | `@Data` + `@Builder` | 数据库实体（MallCategoryDO 等） |
+| `dto/request/` | `@Data` + `@NoArgsConstructor` | Jackson 反序列化 |
+| `dto/response/` | `@Data` | 响应 DTO |
+| `vo/` | `@Data` | 视图对象（CategoryTreeVO 等） |
+| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
+| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
+| `convert/` | 无 Lombok | 纯静态转换方法 |
+
+详见 `AGENTS.md` §Lombok 使用规范。
+
 ---
 
 ## 3 核心类设计

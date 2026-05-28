@@ -8,7 +8,7 @@ package com.mall.auth.service;
  * @author JH-Mall
  * @date 2026/05/26
  */
-public interface DecryptService {
+public interface IDecryptService {
 
     /**
      * 解密加密数据

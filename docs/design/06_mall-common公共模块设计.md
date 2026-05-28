@@ -31,7 +31,8 @@ C 端各模块（auth/user/product/order/payment/marketing/search）存在以下
 mall-common (共享基础层)
   ├── 被依赖方：mall-api + 所有 mall-* 业务模块
   ├── 依赖：
-  │   └── Spring Boot Web（@RestControllerAdvice）
+  │   ├── Spring Boot Web（@RestControllerAdvice）
+  │   └── Lombok（`@Data` / `@Slf4j` 等，传递到所有依赖方）
   └── 独立部署：否（JAR 包供各服务引用）
 
 依赖链：mall-* → mall-api → mall-common

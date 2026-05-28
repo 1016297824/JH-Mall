@@ -1,6 +1,7 @@
 package com.mall.common.DTO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @author JH-Mall
  * @date 2026/05/26
  */
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MallResult<T> {
 
@@ -75,96 +77,6 @@ public class MallResult<T> {
         MallResult<T> result = error(errorCode, errorMessage);
         result.userTip = userTip;
         return result;
-    }
-
-    /**
-     * 获取错误码
-     *
-     * @return 错误码
-     */
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    /**
-     * 设置错误码
-     *
-     * @param errorCode 错误码
-     */
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    /**
-     * 获取错误消息
-     *
-     * @return 错误消息
-     */
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    /**
-     * 设置错误消息
-     *
-     * @param errorMessage 错误消息
-     */
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    /**
-     * 获取用户提示
-     *
-     * @return 用户提示
-     */
-    public String getUserTip() {
-        return userTip;
-    }
-
-    /**
-     * 设置用户提示
-     *
-     * @param userTip 用户提示
-     */
-    public void setUserTip(String userTip) {
-        this.userTip = userTip;
-    }
-
-    /**
-     * 获取响应数据
-     *
-     * @return 响应数据
-     */
-    public T getData() {
-        return data;
-    }
-
-    /**
-     * 设置响应数据
-     *
-     * @param data 响应数据
-     */
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    /**
-     * 获取请求 ID
-     *
-     * @return 请求 ID
-     */
-    public String getRequestId() {
-        return requestId;
-    }
-
-    /**
-     * 设置请求 ID
-     *
-     * @param requestId 请求 ID
-     */
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
     }
 
     @Override

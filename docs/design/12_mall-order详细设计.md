@@ -106,6 +106,21 @@ mall-order/src/main/java/com/mall/order/
 
 管理端接口由若依代码生成器自动生成（CRUD + 发货/审核售后等），权限码无需手动维护。
 
+### 2.3 Lombok 使用约定
+
+| 类层级 | 注解 | 说明 |
+|--------|------|------|
+| `DO/` | `@Data` + `@Builder` | MallOrderDO 等，禁止 `@EqualsAndHashCode` |
+| `dto/request/` | `@Data` + `@NoArgsConstructor` | CreateOrderRequest 等 |
+| `dto/response/` | `@Data` | OrderDetailResponse 等 |
+| `vo/` | `@Data` | CartVO / OrderVO 等 |
+| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
+| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
+| `statemachine/` | `@Slf4j` | 状态机为无状态单例，仅需日志 |
+| `convert/` | 无 Lombok | 静态转换方法 |
+
+详见 `AGENTS.md` §Lombok 使用规范。
+
 ---
 
 ## 3 核心类设计

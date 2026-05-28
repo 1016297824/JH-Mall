@@ -77,7 +77,24 @@ server/mall/mall-search/
 | - | ---- | ------------------------------------ | -------------------- | :----: | -------------------------------- |
 | 1 | GET  | `/api/search`                      | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合） |
 | 2 | GET  | `/api/search/suggest`              | `suggest(keyword)` |   否   | 搜索补全建议                     |
-| 3 | POST | `/mall-search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建                     |
+| 3 | POST | `/mall-search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建     |
+
+### 2.3 Lombok 使用约定
+
+本模块与其它 C 端模块不同：**无 MySQL DO 类**，仅有 ES `@Document` 索引实体。
+
+| 类层级 | 注解 | 说明 |
+|--------|------|------|
+| `DO/ProductIndex.java` | `@Data` | ES 索引实体（`@Document`），非 JPA Entity，`@Data` 可用 |
+| `dto/request/`, `dto/response/` | `@Data` + `@NoArgsConstructor` | — |
+| `vo/` | `@Data` | 视图对象 |
+| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
+| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
+| `convert/` | 无 Lombok | 静态转换方法 |
+
+> `ProductIndex` 是 ES 实体（Spring Data Elasticsearch），非 JPA Entity，`@Data` 不违反"禁止用于 JPA Entity"约束。
+
+详见 `AGENTS.md` §Lombok 使用规范。
 
 ---
 

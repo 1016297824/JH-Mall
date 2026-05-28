@@ -1,0 +1,69 @@
+package com.mall.user.schedule;
+
+import com.mall.user.DO.MallPointsAccountDO;
+import com.mall.user.DO.MallUserPointsLogDO;
+import com.mall.user.mapper.MallPointsAccountMapper;
+import com.mall.user.mapper.MallUserPointsLogMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * PointsExpireTask 单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/28
+ */
+@ExtendWith(MockitoExtension.class)
+class PointsExpireTaskTest {
+
+    @Mock
+    private MallPointsAccountMapper pointsAccountMapper;
+
+    @Mock
+    private MallUserPointsLogMapper pointsLogMapper;
+
+    @InjectMocks
+    private PointsExpireTask task;
+
+    @Test
+    void execute_shouldExpirePointsInBatches() {
+        MallPointsAccountDO account = new MallPointsAccountDO();
+        account.setUserId(1L);
+        account.setAvailablePoints(100);
+
+        when(pointsAccountMapper.selectAvailablePoints(0, 500)).thenReturn(List.of(account));
+        when(pointsAccountMapper.selectAvailablePoints(500, 500)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> task.execute());
+
+        verify(pointsAccountMapper).expirePoints(eq(1L));
+        verify(pointsLogMapper).insert(any(MallUserPointsLogDO.class));
+    }
+
+    @Test
+    void execute_shouldSkipZeroAvailablePoints() {
+        MallPointsAccountDO account = new MallPointsAccountDO();
+        account.setUserId(1L);
+        account.setAvailablePoints(0);
+
+        when(pointsAccountMapper.selectAvailablePoints(0, 500)).thenReturn(List.of(account));
+        when(pointsAccountMapper.selectAvailablePoints(500, 500)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> task.execute());
+
+        verify(pointsAccountMapper, never()).expirePoints(eq(1L));
+        verify(pointsLogMapper, never()).insert(any(MallUserPointsLogDO.class));
+    }
+}

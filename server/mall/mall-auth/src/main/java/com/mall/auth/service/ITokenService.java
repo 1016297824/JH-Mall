@@ -10,7 +10,7 @@ import com.mall.auth.DTO.response.TokenResponse;
  * @author JH-Mall
  * @date 2026/05/26
  */
-public interface TokenService {
+public interface ITokenService {
 
     /**
      * 签发 Token（同时生成 accessToken 和 refreshToken）
