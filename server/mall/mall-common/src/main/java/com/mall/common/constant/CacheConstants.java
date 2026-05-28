@@ -94,6 +94,7 @@ public class CacheConstants {
     /** 内部签名 Redis Key */
     public static final class Internal {
         public static final String NONCE = "mall:internal:nonce:";
+        public static final String NONCE_VALUE = "1";
 
         private Internal() {
         }

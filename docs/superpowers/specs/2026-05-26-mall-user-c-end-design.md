@@ -12,7 +12,7 @@
 | 签到 | Redis Bitmap，幂等，基础5分 + 连续递增加成（上限10） |
 | 积分过期 | 年末清零定时任务（12月31日 00:00） |
 | 会员升级 | MQ 事件驱动（消费 `mall:order:completed`） |
-| 代码质量 | Service 构造注入改造 + 魔法值消除 + ErrorCodeConstants + RemoteAuthAdapter |
+| 代码质量 | Service 构造注入改造 + 魔法值消除 + ErrorCode 枚举 + RemoteAuthAdapter |
 
 ## 2. 包结构
 

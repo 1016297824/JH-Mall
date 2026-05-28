@@ -5,12 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.HexFormat;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.constant.HeaderConstants;
@@ -26,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -41,14 +37,21 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class InnerSignatureFilter extends OncePerRequestFilter {
 
+    /** 内部签名密钥 */
     @Value("${mall.security.internal-secret}")
     private String secret;
 
+    /** 时间戳容差秒数 */
     @Value("${mall.security.internal-timestamp-tolerance-seconds:300}")
     private long timestampToleranceSeconds;
 
     private final StringRedisTemplate redisTemplate;
 
+    /**
+     * 构造注入
+     *
+     * @param redisTemplate Redis 操作模板
+     */
     public InnerSignatureFilter(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
@@ -74,7 +77,8 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
 
         String method = request.getMethod();
         CachedBodyRequestWrapper wrapper = new CachedBodyRequestWrapper(request);
-        String body = method.equals("GET") || method.equals("DELETE") ? "" : wrapper.getBodyAsString();
+        String body = HttpMethod.GET.name().equals(method) || HttpMethod.DELETE.name().equals(method)
+                ? "" : wrapper.getBodyAsString();
 
         validateSignature(timestamp, nonce, body, signature);
 
@@ -82,7 +86,9 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 校验时间戳偏差（±5 分钟）
+     * 校验时间戳偏差
+     *
+     * @param timestamp 请求头中的 Unix 秒级时间戳
      */
     private void validateTimestamp(String timestamp) {
         long now = System.currentTimeMillis() / 1000;
@@ -94,10 +100,13 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
 
     /**
      * 校验 nonce 是否已使用（Redis SETNX 防重放）
+     *
+     * @param nonce 请求头中的一次性随机数
      */
     private void validateNonce(String nonce) {
         String key = CacheConstants.Internal.NONCE + nonce;
-        Boolean success = redisTemplate.opsForValue().setIfAbsent(key, "1", Duration.ofMinutes(5));
+        Boolean success = redisTemplate.opsForValue()
+                .setIfAbsent(key, CacheConstants.Internal.NONCE_VALUE, Duration.ofSeconds(timestampToleranceSeconds));
         if (Boolean.FALSE.equals(success)) {
             throw new BusinessException(ErrorCode.INTERNAL_SIGN_INVALID);
         }
@@ -105,6 +114,11 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
 
     /**
      * 校验签名
+     *
+     * @param timestamp         时间戳
+     * @param nonce             随机数
+     * @param body              请求体
+     * @param expectedSignature 期望的签名
      */
     private void validateSignature(String timestamp, String nonce, String body, String expectedSignature) {
         String payload = timestamp + SecurityConstants.SIGN_PAYLOAD_SEPARATOR + nonce;
@@ -112,39 +126,39 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
             payload += SecurityConstants.SIGN_PAYLOAD_SEPARATOR + body;
         }
 
-        String calculated = hmacSha256(payload);
+        String calculated = HmacUtils.sign(payload, secret);
         if (!calculated.equals(expectedSignature)) {
             throw new BusinessException(ErrorCode.INTERNAL_SIGN_INVALID);
         }
     }
 
     /**
-     * HMAC-SHA256 签名计算
-     */
-    private String hmacSha256(String payload) {
-        try {
-            Mac mac = Mac.getInstance(SecurityConstants.HMAC_SHA256_ALGORITHM);
-            SecretKeySpec keySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SecurityConstants.HMAC_SHA256_ALGORITHM);
-            mac.init(keySpec);
-            byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("HMAC-SHA256 签名计算失败", e);
-        }
-    }
-
-    /**
      * 缓存请求体，使 InputStream 可重复读取
+     *
+     * @author AI
+     * @date 2026/05/28
      */
     private static class CachedBodyRequestWrapper extends HttpServletRequestWrapper {
 
+        /** 缓存的请求体字节 */
         private final byte[] body;
 
+        /**
+         * 构造时一次性读取请求体
+         *
+         * @param request 原始请求
+         * @throws IOException 读取失败
+         */
         CachedBodyRequestWrapper(HttpServletRequest request) throws IOException {
             super(request);
             this.body = request.getInputStream().readAllBytes();
         }
 
+        /**
+         * 将缓存的字节转为字符串
+         *
+         * @return 请求体字符串
+         */
         String getBodyAsString() {
             return new String(body, StandardCharsets.UTF_8);
         }

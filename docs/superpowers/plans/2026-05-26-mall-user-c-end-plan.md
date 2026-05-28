@@ -1,4 +1,4 @@
-﻿# mall-user C 端 API 完整开发计划
+# mall-user C 端 API 完整开发计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -1962,7 +1962,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 端口：9302
  */
 @EnableScheduling
-@EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
+@EnableFeignClients(basePackages = "com.mall.api")
 @MapperScan("com.mall.user.mapper")
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {"com.mall.user", "com.mall.common"})
