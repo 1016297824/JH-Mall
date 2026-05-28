@@ -1,4 +1,4 @@
-package com.mall.common.DTO.user;
+package com.mall.common.DTO.user.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;

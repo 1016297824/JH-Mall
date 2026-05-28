@@ -6,7 +6,7 @@ package com.mall.user.DTO.request;
  * @author system
  * @date 2026/05/28
  */
-public class UpdateProfileRequest {
+public class UpdateProfileDTO {
 
     /** 昵称 */
     private String nickname;

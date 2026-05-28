@@ -1,6 +1,6 @@
 package com.mall.auth.controller;
 
-import com.mall.common.DTO.user.MallUserDTO;
+import com.mall.common.DTO.user.response.MallUserDTO;
 import com.mall.common.DTO.MallResult;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.config.MallAuthConfigProperties;

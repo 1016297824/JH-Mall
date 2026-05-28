@@ -1,6 +1,6 @@
 package com.mall.auth.infrastructure.feign;
 
-import com.mall.common.DTO.user.MallUserDTO;
+import com.mall.common.DTO.user.response.MallUserDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.common.exception.BusinessException;

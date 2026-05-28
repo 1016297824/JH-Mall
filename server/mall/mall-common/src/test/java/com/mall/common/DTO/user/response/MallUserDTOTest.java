@@ -1,4 +1,4 @@
-package com.mall.common.DTO.user;
+package com.mall.common.DTO.user.response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
