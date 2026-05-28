@@ -4,34 +4,38 @@ import com.mall.api.feign.RemoteUserService;
 import com.mall.common.DTO.user.response.MallUserDTO;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.user.DO.MallUserDO;
+import com.mall.user.schedule.PointsExpireTask;
 import com.mall.user.service.IMallUserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * C 端用户内部接口（供 RemoteUserService Feign 调用）
+ * C 端用户内部接口（供 RemoteUserService Feign 和 ruoyi-job 调用）
  *
  * <p>无鉴权，仅限服务间内网调用，禁止暴露到网关</p>
  *
  * @author JH-Mall
  * @date 2026/05/26
  */
+@Slf4j
 @RestController
 @RequestMapping("/inner/user")
+@RequiredArgsConstructor
 public class RemoteUserInnerController {
 
     private final IMallUserService mallUserService;
 
-    public RemoteUserInnerController(IMallUserService mallUserService) {
-        this.mallUserService = mallUserService;
-    }
+    private final PointsExpireTask pointsExpireTask;
 
-    /**
-     * 根据手机号查询用户
-     *
-     * @param phone 手机号
-     * @return 用户 DTO，不存在时返回 null
-     */
     @GetMapping("/phone/{phone}")
     public MallUserDTO findByPhone(@PathVariable("phone") String phone) {
         MallUserDO user = mallUserService.selectByPhone(phone);
@@ -41,12 +45,6 @@ public class RemoteUserInnerController {
         return toDTO(user);
     }
 
-    /**
-     * 注册新用户
-     *
-     * @param request 注册请求（含手机号、手机号哈希和密码）
-     * @return 新用户 userId
-     */
     @PostMapping("/register")
     public String register(@RequestBody RemoteUserService.RegisterRequest request) {
         return mallUserService.registerByPhone(
@@ -56,12 +54,6 @@ public class RemoteUserInnerController {
         );
     }
 
-    /**
-     * 修改密码
-     *
-     * @param userId  用户 ID
-     * @param request 密码更新请求
-     */
     @PutMapping("/{userId}/password")
     public void updatePassword(
             @PathVariable("userId") String userId,
@@ -69,12 +61,6 @@ public class RemoteUserInnerController {
         mallUserService.updatePasswordById(userId, request.getNewPassword());
     }
 
-    /**
-     * 修改手机号
-     *
-     * @param userId  用户 ID
-     * @param request 手机号更新请求
-     */
     @PutMapping("/{userId}/phone")
     public void updatePhone(
             @PathVariable("userId") String userId,
@@ -82,14 +68,19 @@ public class RemoteUserInnerController {
         mallUserService.updatePhoneById(userId, request.getNewPhone(), request.getNewPhoneHash());
     }
 
-    /**
-     * 注销用户账号
-     *
-     * @param userId 用户 ID
-     */
     @DeleteMapping("/{userId}/account")
     public void deactivateAccount(@PathVariable("userId") String userId) {
         mallUserService.updateUserStatusById(userId, String.valueOf(UserStatusEnum.DELETED.getCode()));
+    }
+
+    /**
+     * 年度积分清零（ruoyi-job 调此端点）
+     *
+     * @return 共清零的积分总数
+     */
+    @PostMapping("/points/expire")
+    public int expirePoints() {
+        return pointsExpireTask.execute();
     }
 
     // DO 转 DTO，脱敏移除密码

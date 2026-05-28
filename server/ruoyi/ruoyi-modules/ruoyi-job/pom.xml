@@ -64,6 +64,13 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-swagger</artifactId>
         </dependency>
+
+        <!-- mall-api Feign 契约（定时任务调 mall-user） -->
+        <dependency>
+            <groupId>com.mall</groupId>
+            <artifactId>mall-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         
     </dependencies>
 

@@ -43,7 +43,7 @@ server/mall/mall-user/
     ├── MallUserApplication.java            # Spring Boot 启动类
     ├── controller/
     │   ├── inner/
-    │   │   └── RemoteUserInnerController.java  # /inner/user/** 内部 Feign 端点
+    │   │   └── RemoteUserInnerController.java  # /inner/user/** 内部 Feign + ruoyi-job 端点
     │   ├── ProfileController.java              # /api/user/profile
     │   ├── AddressController.java              # /api/user/addresses/**
     │   ├── MembershipController.java           # /api/user/membership
@@ -99,7 +99,7 @@ server/mall/mall-user/
     │   └── consumer/
     │       └── UserOrderCompletedConsumer.java  # 消费 mall:order:completed
     ├── schedule/
-    │   └── PointsExpireTask.java              # 年度积分清零
+    │   └── PointsExpireTask.java              # 积分清零（ruoyi-job 调度）
     ├── infrastructure/
     │   └── feign/
     │       └── RemoteAuthAdapter.java       # 调 mall-auth 解密手机号

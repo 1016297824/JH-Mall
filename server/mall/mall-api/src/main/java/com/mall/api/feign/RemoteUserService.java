@@ -67,6 +67,14 @@ public interface RemoteUserService {
     void deactivateAccount(@PathVariable("userId") String userId);
 
     /**
+     * 年度积分清零（ruoyi-job 调用）
+     *
+     * @return 共清零的积分总数
+     */
+    @PostMapping("/inner/user/points/expire")
+    int expirePoints();
+
+    /**
      * 注册请求
      */
     @Data

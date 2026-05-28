@@ -3,7 +3,6 @@ package com.mall.user.schedule;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -21,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 积分过期定时任务
  *
- * <p>每年 12 月 31 日 00:00 执行，分批将用户可用积分清零，每批 {PAGE_SIZE} 条，
- * 逐条记录过期流水日志</p>
+ * <p>由 ruoyi-job 调度，通过 {@code /inner/user/points/expire} 端点调用。
+ * 分批将用户可用积分清零，逐条记录过期流水日志</p>
  *
  * @author JH-Mall
  * @date 2026/05/28
@@ -44,9 +43,10 @@ public class PointsExpireTask {
      *
      * <p>分页查询所有可用积分大于 0 的账户，逐条清零并写入过期日志，
      * 直到没有更多数据为止</p>
+     *
+     * @return 共清零的积分总数
      */
-    @Scheduled(cron = "0 0 0 31 12 ?")
-    public void execute() {
+    public int execute() {
         log.info("开始年度积分清零");
         int page = 1;
         int totalExpired = 0;
@@ -83,5 +83,6 @@ public class PointsExpireTask {
             page++;
         }
         log.info("年度积分清零完成，共清零 {} 积分", totalExpired);
+        return totalExpired;
     }
 }
