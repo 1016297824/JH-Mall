@@ -13,7 +13,7 @@ import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserMapper;
 import com.mall.user.mapper.MallUserMemberLevelMapper;
 import com.mall.user.mapper.MallUserMemberMapper;
-import com.mall.user.vo.UserProfileVO;
+import com.mall.user.VO.UserProfileVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -2,23 +2,14 @@ package com.mall.user.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mall.user.vo.GrowthRecordVO;
-import com.mall.user.vo.GrowthVO;
 
 /**
- * 成长值服务接口
+ * 成长值流水服务接口 — 仅操作 mall_user_growth_log 表
  *
  * @author JH-Mall
  * @date 2026/05/28
  */
 public interface IGrowthService {
-
-    /**
-     * 查询成长值
-     *
-     * @param userId 用户ID
-     * @return 成长值VO
-     */
-    GrowthVO getGrowth(Long userId);
 
     /**
      * 分页查询成长值流水

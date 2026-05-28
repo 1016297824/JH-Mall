@@ -2,7 +2,7 @@ package com.mall.user.controller;
 
 import com.mall.user.dto.request.UpdateProfileRequest;
 import com.mall.user.service.IUserProfileService;
-import com.mall.user.vo.UserProfileVO;
+import com.mall.user.VO.UserProfileVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class UserProfileControllerTest {
     private IUserProfileService userProfileService;
 
     @InjectMocks
-    private UserProfileController controller;
+    private ProfileController controller;
 
     private MockMvc mockMvc;
 
