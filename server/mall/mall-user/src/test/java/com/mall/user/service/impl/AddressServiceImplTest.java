@@ -5,13 +5,14 @@ import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallUserAddressDO;
 import com.mall.user.config.MallUserConfigProperties;
 import com.mall.user.mapper.MallUserAddressMapper;
-import com.mall.user.vo.AddressVO;
+import com.mall.user.VO.AddressVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -92,20 +93,19 @@ class AddressServiceImplTest {
         when(mallUserAddressMapper.insert(any(MallUserAddressDO.class))).thenReturn(1);
 
         AddressVO request = buildAddressRequest();
-        AddressVO result = addressService.addAddress(1L, request);
-
+        AddressVO result = addressService.createAddress(1L, request);
         assertNotNull(result);
         verify(mallUserAddressMapper).insert(any(MallUserAddressDO.class));
     }
 
     @Test
-    void addAddressShouldThrowWhenExceedLimit() {
+    void createAddressShouldThrowWhenExceedLimit() {
         MallUserConfigProperties.Address addrConfig = new MallUserConfigProperties.Address();
         when(mallUserConfigProperties.getAddress()).thenReturn(addrConfig);
         when(mallUserAddressMapper.selectCount(any())).thenReturn(20L);
 
         AddressVO request = buildAddressRequest();
-        assertThrows(BusinessException.class, () -> addressService.addAddress(1L, request));
+        assertThrows(BusinessException.class, () -> addressService.createAddress(1L, request));
     }
 
     @Test
@@ -162,5 +162,12 @@ class AddressServiceImplTest {
 
         verify(mallUserAddressMapper).clearDefault(1L);
         verify(mallUserAddressMapper).updateById(any(MallUserAddressDO.class));
+    }
+
+    @Test
+    void setDefault_shouldBeTransactional() throws Exception {
+        Method method = AddressServiceImpl.class.getMethod("setDefault", Long.class, Long.class);
+        assertTrue(method.isAnnotationPresent(org.springframework.transaction.annotation.Transactional.class),
+                "setDefault 方法缺少 @Transactional 注解");
     }
 }

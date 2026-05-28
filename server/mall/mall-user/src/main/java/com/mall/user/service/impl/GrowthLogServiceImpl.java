@@ -1,12 +1,13 @@
 package com.mall.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.common.enums.user.BizTypeEnum;
 import com.mall.user.DO.MallUserGrowthLogDO;
 import com.mall.user.mapper.MallUserGrowthLogMapper;
-import com.mall.user.service.IGrowthService;
-import com.mall.user.vo.GrowthRecordVO;
+import com.mall.user.service.IGrowthLogService;
+import com.mall.user.VO.GrowthRecordVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.Date;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GrowthServiceImpl implements IGrowthService {
+public class GrowthLogServiceImpl implements IGrowthLogService {
 
     private final MallUserGrowthLogMapper mallUserGrowthLogMapper;
 
@@ -32,7 +33,13 @@ public class GrowthServiceImpl implements IGrowthService {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(size, 100);
         Page<MallUserGrowthLogDO> pageParam = new Page<>(safePage, safeSize);
-        IPage<MallUserGrowthLogDO> logPage = mallUserGrowthLogMapper.selectByUserIdPage(pageParam, userId, bizType);
+        LambdaQueryWrapper<MallUserGrowthLogDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MallUserGrowthLogDO::getUserId, userId);
+        if (bizType != null && !bizType.isEmpty()) {
+            wrapper.eq(MallUserGrowthLogDO::getBizType, bizType);
+        }
+        wrapper.orderByDesc(MallUserGrowthLogDO::getCreateTime);
+        IPage<MallUserGrowthLogDO> logPage = mallUserGrowthLogMapper.selectPage(pageParam, wrapper);
         return logPage.convert(this::toGrowthRecordVO);
     }
 

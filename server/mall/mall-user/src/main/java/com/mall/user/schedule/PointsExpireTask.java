@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.common.enums.user.BizTypeEnum;
 import com.mall.common.enums.user.GrowthChangeTypeEnum;
 import com.mall.user.DO.MallPointsAccountDO;
@@ -29,25 +31,23 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PointsExpireTask {
 
-    /** 每批处理条数 */
     private static final int PAGE_SIZE = 500;
 
     private final MallPointsAccountMapper pointsAccountMapper;
 
     private final MallUserPointsLogMapper pointsLogMapper;
 
-    /**
-     * 执行年度积分清零
-     *
-     * <p>分批处理，每批 {@value #PAGE_SIZE} 条，跳过无可用积分的账户</p>
-     */
     @Scheduled(cron = "0 0 0 31 12 ?")
     public void execute() {
         log.info("开始年度积分清零");
-        int offset = 0;
+        int page = 1;
         int totalExpired = 0;
         while (true) {
-            List<MallPointsAccountDO> batch = pointsAccountMapper.selectAvailablePoints(offset, PAGE_SIZE);
+            Page<MallPointsAccountDO> pageParam = new Page<>(page, PAGE_SIZE);
+            LambdaQueryWrapper<MallPointsAccountDO> wrapper = new LambdaQueryWrapper<>();
+            wrapper.gt(MallPointsAccountDO::getAvailablePoints, 0);
+            Page<MallPointsAccountDO> result = pointsAccountMapper.selectPage(pageParam, wrapper);
+            List<MallPointsAccountDO> batch = result.getRecords();
             if (batch.isEmpty()) {
                 break;
             }
@@ -72,7 +72,7 @@ public class PointsExpireTask {
 
                 totalExpired += available;
             }
-            offset += PAGE_SIZE;
+            page++;
         }
         log.info("年度积分清零完成，共清零 {} 积分", totalExpired);
     }

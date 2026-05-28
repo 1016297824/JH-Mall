@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
-import com.mall.user.service.IGrowthService;
-import com.mall.user.vo.GrowthRecordVO;
-import com.mall.user.vo.GrowthVO;
+import com.mall.user.service.IGrowthLogService;
+import com.mall.user.service.IMemberService;
+import com.mall.user.VO.GrowthRecordVO;
+import com.mall.user.VO.GrowthVO;
 
 /**
  * C 端成长值控制器
@@ -26,29 +27,16 @@ import com.mall.user.vo.GrowthVO;
 @RequiredArgsConstructor
 public class GrowthController {
 
-    private final IGrowthService growthService;
+    private final IMemberService memberService;
 
-    /**
-     * 查询成长值信息
-     *
-     * @param request HTTP 请求
-     * @return 成长值信息
-     */
+    private final IGrowthLogService growthService;
+
     @GetMapping("/growth")
     public MallResult<GrowthVO> getGrowth(HttpServletRequest request) {
         String userId = request.getHeader(X_USER_ID);
-        return MallResult.success(growthService.getGrowth(Long.parseLong(userId)));
+        return MallResult.success(memberService.getGrowth(Long.parseLong(userId)));
     }
 
-    /**
-     * 分页查询成长值流水
-     *
-     * @param page    页码
-     * @param size    每页数量
-     * @param bizType 业务类型
-     * @param request HTTP 请求
-     * @return 分页结果
-     */
     @GetMapping("/growth/records")
     public MallResult<IPage<GrowthRecordVO>> getGrowthRecords(
             @RequestParam(defaultValue = "1") int page,

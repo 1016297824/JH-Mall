@@ -1,8 +1,8 @@
 package com.mall.user.controller;
 
 import com.mall.user.service.IMemberService;
-import com.mall.user.vo.MemberLevelVO;
-import com.mall.user.vo.MembershipVO;
+import com.mall.user.VO.MemberLevelVO;
+import com.mall.user.VO.MembershipVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ class MemberControllerTest {
     private IMemberService memberService;
 
     @InjectMocks
-    private MemberController controller;
+    private MembershipController controller;
 
     private MockMvc mockMvc;
 

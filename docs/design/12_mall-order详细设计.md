@@ -123,6 +123,19 @@ mall-order/src/main/java/com/mall/order/
 
 ---
 
+### 2.4 Mapper 层编码规范
+
+本模块 Mapper 层遵循项目统一规范：
+
+| 操作 | 用什么 | 说明 |
+| --- | --- | --- |
+| **SELECT** | `LambdaQueryWrapper` + `BaseMapper.selectPage()` | 类型安全，字段变更 IDE 即时感知 |
+| **UPDATE** | `@Update` 注解 | 简洁直读，算术运算 `SET field = field + #{value}` 必须用 |
+| **INSERT** | `BaseMapper.insert()` | MyBatis-Plus 内置 |
+| **DELETE** | `BaseMapper.update()` 软删除 | 统一逻辑删除 `set is_deleted = 1` |
+
+---
+
 ## 3 核心类设计
 
 ### 3.1 OrderStateMachine

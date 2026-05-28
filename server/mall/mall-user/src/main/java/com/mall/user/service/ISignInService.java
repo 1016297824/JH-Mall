@@ -1,6 +1,6 @@
 package com.mall.user.service;
 
-import com.mall.user.vo.SignInVO;
+import com.mall.user.VO.SignInVO;
 
 /**
  * C 端签到服务接口

@@ -1,7 +1,7 @@
 package com.mall.user.service;
 
-import com.mall.user.dto.request.UpdateProfileRequest;
-import com.mall.user.vo.UserProfileVO;
+import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.VO.UserProfileVO;
 
 /**
  * 用户资料服务接口

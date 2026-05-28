@@ -1,5 +1,6 @@
 package com.mall.user.schedule;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserPointsLogDO;
 import com.mall.user.mapper.MallPointsAccountMapper;
@@ -37,14 +38,22 @@ class PointsExpireTaskTest {
     @InjectMocks
     private PointsExpireTask task;
 
+    private Page<MallPointsAccountDO> buildPage(List<MallPointsAccountDO> records) {
+        Page<MallPointsAccountDO> page = new Page<>(1, 500);
+        page.setRecords(records);
+        page.setTotal(records.size());
+        return page;
+    }
+
     @Test
     void execute_shouldExpirePointsInBatches() {
         MallPointsAccountDO account = new MallPointsAccountDO();
         account.setUserId(1L);
         account.setAvailablePoints(100);
 
-        when(pointsAccountMapper.selectAvailablePoints(0, 500)).thenReturn(List.of(account));
-        when(pointsAccountMapper.selectAvailablePoints(500, 500)).thenReturn(List.of());
+        when(pointsAccountMapper.selectPage(any(), any()))
+                .thenReturn(buildPage(List.of(account)))
+                .thenReturn(buildPage(List.of()));
 
         assertDoesNotThrow(() -> task.execute());
 
@@ -58,8 +67,9 @@ class PointsExpireTaskTest {
         account.setUserId(1L);
         account.setAvailablePoints(0);
 
-        when(pointsAccountMapper.selectAvailablePoints(0, 500)).thenReturn(List.of(account));
-        when(pointsAccountMapper.selectAvailablePoints(500, 500)).thenReturn(List.of());
+        when(pointsAccountMapper.selectPage(any(), any()))
+                .thenReturn(buildPage(List.of(account)))
+                .thenReturn(buildPage(List.of()));
 
         assertDoesNotThrow(() -> task.execute());
 

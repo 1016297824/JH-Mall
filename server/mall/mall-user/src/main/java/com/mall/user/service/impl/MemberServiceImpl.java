@@ -14,10 +14,10 @@ import com.mall.user.mapper.MallUserGrowthLogMapper;
 import com.mall.user.mapper.MallUserMemberLevelMapper;
 import com.mall.user.mapper.MallUserMemberMapper;
 import com.mall.user.service.IMemberService;
-import com.mall.user.vo.GrowthRecordVO;
-import com.mall.user.vo.GrowthVO;
-import com.mall.user.vo.MemberLevelVO;
-import com.mall.user.vo.MembershipVO;
+import com.mall.user.VO.GrowthRecordVO;
+import com.mall.user.VO.GrowthVO;
+import com.mall.user.VO.MemberLevelVO;
+import com.mall.user.VO.MembershipVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public class MemberServiceImpl implements IMemberService {
 
     private final MallUserGrowthLogMapper mallUserGrowthLogMapper;
 
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public MembershipVO getMembership(Long userId) {
@@ -108,14 +108,23 @@ public class MemberServiceImpl implements IMemberService {
         logDO.setUpdateTime(LocalDateTime.now());
         mallUserGrowthLogMapper.insert(logDO);
 
-        checkUpgrade(userId, beforeGrowth + growth);
+        List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
+        checkUpgrade(userId, beforeGrowth + growth, levels);
         log.info("成长值增加成功, userId={}, growth={}, bizType={}, bizNo={}", userId, growth, bizType.getCode(), bizNo);
     }
 
     @Override
     public IPage<GrowthRecordVO> getGrowthRecords(Long userId, String bizType, int page, int size) {
-        Page<MallUserGrowthLogDO> pageParam = new Page<>(page, size);
-        IPage<MallUserGrowthLogDO> logPage = mallUserGrowthLogMapper.selectByUserIdPage(pageParam, userId, bizType);
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(size, 100);
+        Page<MallUserGrowthLogDO> pageParam = new Page<>(safePage, safeSize);
+        LambdaQueryWrapper<MallUserGrowthLogDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MallUserGrowthLogDO::getUserId, userId);
+        if (bizType != null && !bizType.isEmpty()) {
+            wrapper.eq(MallUserGrowthLogDO::getBizType, bizType);
+        }
+        wrapper.orderByDesc(MallUserGrowthLogDO::getCreateTime);
+        IPage<MallUserGrowthLogDO> logPage = mallUserGrowthLogMapper.selectPage(pageParam, wrapper);
         return logPage.convert(this::toGrowthRecordVO);
     }
 
@@ -149,8 +158,7 @@ public class MemberServiceImpl implements IMemberService {
                 .orElse(null);
     }
 
-    private void checkUpgrade(Long userId, int newGrowth) {
-        List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
+    private void checkUpgrade(Long userId, int newGrowth, List<MallUserMemberLevelDO> levels) {
         MallUserMemberDO member = getMemberByUserId(userId);
         MallUserMemberLevelDO currentLevel = findLevelById(levels, member.getLevelId());
         if (currentLevel == null || currentLevel.getMaxGrowth() == null) {
@@ -179,7 +187,7 @@ public class MemberServiceImpl implements IMemberService {
             return Collections.emptyList();
         }
         try {
-            return objectMapper.readValue(level.getBenefitsJson(), List.class);
+            return OBJECT_MAPPER.readValue(level.getBenefitsJson(), List.class);
         } catch (Exception e) {
             log.warn("解析会员权益JSON失败, levelId={}", level.getId(), e);
             return Collections.emptyList();

@@ -1,7 +1,7 @@
 package com.mall.user.controller;
 
 import com.mall.user.service.ISignInService;
-import com.mall.user.vo.SignInVO;
+import com.mall.user.VO.SignInVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

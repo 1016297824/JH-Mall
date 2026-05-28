@@ -7,10 +7,11 @@ import com.mall.user.DO.MallUserAddressDO;
 import com.mall.user.config.MallUserConfigProperties;
 import com.mall.user.mapper.MallUserAddressMapper;
 import com.mall.user.service.IAddressService;
-import com.mall.user.vo.AddressVO;
+import com.mall.user.VO.AddressVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,7 +44,7 @@ public class AddressServiceImpl implements IAddressService {
     }
 
     @Override
-    public AddressVO addAddress(Long userId, AddressVO request) {
+    public AddressVO createAddress(Long userId, AddressVO request) {
         int maxCount = mallUserConfigProperties.getAddress().getMaxCount();
         Long count = mallUserAddressMapper.selectCount(
                 new LambdaQueryWrapper<MallUserAddressDO>()
@@ -92,6 +93,7 @@ public class AddressServiceImpl implements IAddressService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void setDefault(Long userId, Long addressId) {
         MallUserAddressDO addressDO = getAddressById(addressId);
         checkOwnership(addressDO, userId);

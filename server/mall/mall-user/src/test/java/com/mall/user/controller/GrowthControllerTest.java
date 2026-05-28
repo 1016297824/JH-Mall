@@ -2,10 +2,11 @@ package com.mall.user.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mall.user.service.IGrowthService;
-import com.mall.user.vo.GrowthRecordVO;
-import com.mall.user.vo.GrowthVO;
-import com.mall.user.vo.MemberLevelVO;
+import com.mall.user.service.IGrowthLogService;
+import com.mall.user.service.IMemberService;
+import com.mall.user.VO.GrowthRecordVO;
+import com.mall.user.VO.GrowthVO;
+import com.mall.user.VO.MemberLevelVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class GrowthControllerTest {
 
     @Mock
-    private IGrowthService memberService;
+    private IMemberService memberService;
+
+    @Mock
+    private IGrowthLogService growthService;
 
     @InjectMocks
     private GrowthController controller;
@@ -98,7 +102,7 @@ class GrowthControllerTest {
         IPage<GrowthRecordVO> mockPage = new Page<>(1, 20);
         mockPage.setRecords(Arrays.asList(record1));
         mockPage.setTotal(1);
-        when(memberService.getGrowthRecords(eq(1L), eq("order"), anyInt(), anyInt())).thenReturn(mockPage);
+        when(growthService.getGrowthRecords(eq(1L), eq("order"), anyInt(), anyInt())).thenReturn(mockPage);
 
         mockMvc.perform(get("/api/user/growth/records")
                         .header(X_USER_ID, "1")
@@ -117,7 +121,7 @@ class GrowthControllerTest {
         IPage<GrowthRecordVO> mockPage = new Page<>(1, 20);
         mockPage.setRecords(Arrays.asList());
         mockPage.setTotal(0);
-        when(memberService.getGrowthRecords(eq(1L), isNull(), anyInt(), anyInt())).thenReturn(mockPage);
+        when(growthService.getGrowthRecords(eq(1L), isNull(), anyInt(), anyInt())).thenReturn(mockPage);
 
         mockMvc.perform(get("/api/user/growth/records")
                         .header(X_USER_ID, "1"))

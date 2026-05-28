@@ -1,7 +1,7 @@
 package com.mall.user.controller;
 
 import com.mall.user.service.IAddressService;
-import com.mall.user.vo.AddressVO;
+import com.mall.user.VO.AddressVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AddressControllerTest {
 
     @Mock
-    private IAddressService addressBookService;
+    private IAddressService addressService;
 
     @InjectMocks
     private AddressController controller;
@@ -82,7 +82,7 @@ class AddressControllerTest {
         addr2.setDetailAddress("望京路200号");
         addr2.setIsDefault(false);
         List<AddressVO> addressList = Arrays.asList(addr1, addr2);
-        when(addressBookService.listAddresses(1L)).thenReturn(addressList);
+        when(addressService.listAddresses(1L)).thenReturn(addressList);
 
         mockMvc.perform(get("/api/user/addresses")
                         .header(X_USER_ID, "1"))
@@ -98,7 +98,7 @@ class AddressControllerTest {
         AddressVO request = buildMockAddress();
         AddressVO mockVO = buildMockAddress();
         mockVO.setAddressId("200");
-        when(addressBookService.addAddress(eq(1L), any(AddressVO.class))).thenReturn(mockVO);
+        when(addressService.createAddress(eq(1L), any(AddressVO.class))).thenReturn(mockVO);
 
         mockMvc.perform(post("/api/user/addresses")
                         .header(X_USER_ID, "1")
@@ -114,7 +114,7 @@ class AddressControllerTest {
         AddressVO request = buildMockAddress();
         AddressVO mockVO = buildMockAddress();
         mockVO.setReceiverName("张三改");
-        when(addressBookService.updateAddress(eq(1L), eq(100L), any(AddressVO.class))).thenReturn(mockVO);
+        when(addressService.updateAddress(eq(1L), eq(100L), any(AddressVO.class))).thenReturn(mockVO);
 
         mockMvc.perform(put("/api/user/addresses/100")
                         .header(X_USER_ID, "1")
@@ -126,7 +126,7 @@ class AddressControllerTest {
 
     @Test
     void delete_shouldReturnSuccess() throws Exception {
-        doNothing().when(addressBookService).deleteAddress(1L, 100L);
+        doNothing().when(addressService).deleteAddress(1L, 100L);
 
         mockMvc.perform(delete("/api/user/addresses/100")
                         .header(X_USER_ID, "1"))
@@ -135,7 +135,7 @@ class AddressControllerTest {
 
     @Test
     void setDefault_shouldReturnSuccess() throws Exception {
-        doNothing().when(addressBookService).setDefault(1L, 100L);
+        doNothing().when(addressService).setDefault(1L, 100L);
 
         mockMvc.perform(put("/api/user/addresses/100/default")
                         .header(X_USER_ID, "1"))

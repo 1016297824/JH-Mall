@@ -1,6 +1,6 @@
 package com.mall.user.service;
 
-import com.mall.user.vo.AddressVO;
+import com.mall.user.VO.AddressVO;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public interface IAddressService {
      * @param request 地址信息
      * @return 新增后的地址VO
      */
-    AddressVO addAddress(Long userId, AddressVO request);
+    AddressVO createAddress(Long userId, AddressVO request);
 
     /**
      * 修改地址

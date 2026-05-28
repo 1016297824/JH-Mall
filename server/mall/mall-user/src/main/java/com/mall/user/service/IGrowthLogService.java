@@ -1,7 +1,7 @@
 package com.mall.user.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.mall.user.vo.GrowthRecordVO;
+import com.mall.user.VO.GrowthRecordVO;
 
 /**
  * 成长值流水服务接口 — 仅操作 mall_user_growth_log 表
@@ -9,7 +9,7 @@ import com.mall.user.vo.GrowthRecordVO;
  * @author JH-Mall
  * @date 2026/05/28
  */
-public interface IGrowthService {
+public interface IGrowthLogService {
 
     /**
      * 分页查询成长值流水

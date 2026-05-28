@@ -2,8 +2,8 @@ package com.mall.user.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mall.common.enums.user.BizTypeEnum;
-import com.mall.user.vo.PointsRecordVO;
-import com.mall.user.vo.PointsVO;
+import com.mall.user.VO.PointsRecordVO;
+import com.mall.user.VO.PointsVO;
 
 /**
  * 积分服务接口

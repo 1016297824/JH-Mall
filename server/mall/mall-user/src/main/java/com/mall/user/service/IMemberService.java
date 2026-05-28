@@ -2,9 +2,9 @@ package com.mall.user.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mall.common.enums.user.BizTypeEnum;
-import com.mall.user.vo.GrowthRecordVO;
-import com.mall.user.vo.GrowthVO;
-import com.mall.user.vo.MembershipVO;
+import com.mall.user.VO.GrowthRecordVO;
+import com.mall.user.VO.GrowthVO;
+import com.mall.user.VO.MembershipVO;
 
 /**
  * 会员服务接口

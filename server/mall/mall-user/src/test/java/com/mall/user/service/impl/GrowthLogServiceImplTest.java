@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.user.DO.MallUserGrowthLogDO;
 import com.mall.user.mapper.MallUserGrowthLogMapper;
-import com.mall.user.vo.GrowthRecordVO;
+import com.mall.user.VO.GrowthRecordVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
  * @date 2026/05/28
  */
 @ExtendWith(MockitoExtension.class)
-class GrowthServiceImplTest {
+class GrowthLogServiceImplTest {
 
     @Mock
     private MallUserGrowthLogMapper mallUserGrowthLogMapper;
@@ -51,7 +51,7 @@ class GrowthServiceImplTest {
         logPage.setRecords(Collections.singletonList(logDO));
         logPage.setTotal(1);
 
-        when(mallUserGrowthLogMapper.selectByUserIdPage(any(), eq(1L), eq("order"))).thenReturn(logPage);
+        when(mallUserGrowthLogMapper.selectPage(any(), any())).thenReturn(logPage);
 
         IPage<GrowthRecordVO> result = growthService.getGrowthRecords(1L, "order", 1, 10);
 

@@ -1,13 +1,12 @@
 package com.mall.user.service.impl;
 
-import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserDO;
 import com.mall.user.DO.MallUserMemberDO;
 import com.mall.user.DO.MallUserMemberLevelDO;
 import com.mall.user.config.MallUserConfigProperties;
-import com.mall.user.dto.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileRequest;
 import com.mall.user.infrastructure.feign.RemoteAuthAdapter;
 import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserMapper;
@@ -22,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.time.Duration;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +34,7 @@ import static org.mockito.Mockito.*;
  * @date 2026/05/28
  */
 @ExtendWith(MockitoExtension.class)
-class UserProfileServiceImplTest {
+class ProfileServiceImplTest {
 
     @Mock
     private MallUserMapper mallUserMapper;

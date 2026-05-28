@@ -50,6 +50,11 @@ public class UserOrderCompletedConsumer implements RocketMQListener<String> {
             JsonNode orderAmountNode = json.get("orderAmount");
             JsonNode pointsNode = json.get("points");
 
+            if (userId == null) {
+                log.warn("订单完成事件缺少 userId, message={}", message);
+                return;
+            }
+
             if (pointsNode != null && !pointsNode.isNull()) {
                 int points = pointsNode.asInt();
                 if (points > 0) {

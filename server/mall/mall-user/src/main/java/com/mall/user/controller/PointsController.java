@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
 import com.mall.user.service.IPointsService;
-import com.mall.user.vo.PointsRecordVO;
-import com.mall.user.vo.PointsVO;
+import com.mall.user.VO.PointsRecordVO;
+import com.mall.user.VO.PointsVO;
 
 /**
  * C 端积分控制器

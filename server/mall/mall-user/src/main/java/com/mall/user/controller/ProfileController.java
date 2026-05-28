@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
-import com.mall.user.dto.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileRequest;
 import com.mall.user.service.IUserProfileService;
-import com.mall.user.vo.UserProfileVO;
+import com.mall.user.VO.UserProfileVO;
 
 /**
  * C 端用户资料控制器
@@ -24,7 +24,7 @@ import com.mall.user.vo.UserProfileVO;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-public class UserProfileController {
+public class ProfileController {
 
     private final IUserProfileService userProfileService;
 

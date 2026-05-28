@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
 import com.mall.user.service.IAddressService;
-import com.mall.user.vo.AddressVO;
+import com.mall.user.VO.AddressVO;
 
 /**
  * C 端地址控制器
@@ -52,9 +52,9 @@ public class AddressController {
      * @return 新增后的地址
      */
     @PostMapping("/addresses")
-    public MallResult<AddressVO> add(@RequestBody AddressVO addressVO, HttpServletRequest request) {
+    public MallResult<AddressVO> create(@RequestBody AddressVO addressVO, HttpServletRequest request) {
         String userId = request.getHeader(X_USER_ID);
-        return MallResult.success(addressService.addAddress(Long.parseLong(userId), addressVO));
+        return MallResult.success(addressService.createAddress(Long.parseLong(userId), addressVO));
     }
 
     /**

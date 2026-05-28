@@ -1,6 +1,6 @@
 package com.mall.user.controller;
 
-import com.mall.user.dto.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileRequest;
 import com.mall.user.service.IUserProfileService;
 import com.mall.user.VO.UserProfileVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @date 2026/05/28
  */
 @ExtendWith(MockitoExtension.class)
-class UserProfileControllerTest {
+class ProfileControllerTest {
 
     @Mock
     private IUserProfileService userProfileService;

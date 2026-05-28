@@ -108,7 +108,41 @@ server/mall/mall-user/
         ├── AddressConvert.java             # MallUserAddressDO → AddressVO
         ├── MemberConvert.java              # MallUserMemberDO → MembershipVO
         ├── PointsConvert.java              # MallPointsLogDO → PointsRecordVO
-        └── GrowthConvert.java              # MallGrowthLogDO → GrowthRecordVO
+ │       └── GrowthConvert.java              # MallGrowthLogDO → GrowthRecordVO
+```
+
+### 2.1.1 Mapper 层编码规范
+
+| 操作 | 用什么 | 说明 |
+| --- | --- | --- |
+| **SELECT** | `LambdaQueryWrapper` + `BaseMapper.selectPage()` | 类型安全，字段变更 IDE 即时感知，不需要 XML |
+| **UPDATE** | `@Update` 注解 | 简洁直读，尤其 `SET field = field + #{value}` 算术运算必须用 |
+| **INSERT** | `BaseMapper.insert()` | MyBatis-Plus 内置，无需手写 |
+| **DELETE** | `BaseMapper.update()` 软删除 | 本项目统一逻辑删除 `set is_deleted = 1` |
+
+示例：
+
+```java
+// ✅ SELECT — Wrapper 风格
+LambdaQueryWrapper<MallUserGrowthLogDO> wrapper = new LambdaQueryWrapper<>();
+wrapper.eq(MallUserGrowthLogDO::getUserId, userId)
+       .orderByDesc(MallUserGrowthLogDO::getCreateTime);
+mallUserGrowthLogMapper.selectPage(pageParam, wrapper);
+
+// ✅ UPDATE — @Update 注解（算术运算）
+@Update("update mall_user_member set growth = growth + #{growth} where user_id = #{userId}")
+int addGrowth(@Param("userId") Long userId, @Param("growth") Integer growth);
+
+// ✅ UPDATE — @Update 注解（简单设值）
+@Update("update mall_user_address set is_default = 0 where user_id = #{userId}")
+int clearDefault(@Param("userId") Long userId);
+
+// ✅ INSERT — BaseMapper 自带
+mallUserMapper.insert(user);
+
+// ✅ DELETE — BaseMapper 软删除
+addressDO.setIsDeleted(1);
+mallUserAddressMapper.updateById(addressDO);
 ```
 
 ### 2.2 接口 → Controller 映射
@@ -184,7 +218,7 @@ server/mall/mall-user/
 - `list(userId)`：查默认地址排在首位，phone 脱敏返回
 - `create(userId, req)`：地址数检查（≤20），`is_default=true` 时先取消其他默认
 - `update(userId, addressId, req)`：校验地址归属
-- `delete(userId, addressId)`：若删除默认地址，自动指定最早创建的地址为默认
+- `delete(userId, addressId)`：若删除的是默认地址，前端提示用户重新设置默认
 - `setDefault(userId, addressId)`：原子操作，先取消旧默认再设新默认（同一事务）
 
 ### 3.3 MemberServiceImpl

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
 import com.mall.user.service.ISignInService;
-import com.mall.user.vo.SignInVO;
+import com.mall.user.VO.SignInVO;
 
 /**
  * C 端签到控制器

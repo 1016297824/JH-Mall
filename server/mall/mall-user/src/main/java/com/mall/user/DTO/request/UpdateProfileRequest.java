@@ -1,4 +1,4 @@
-package com.mall.user.dto.request;
+package com.mall.user.DTO.request;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -12,8 +12,8 @@ import com.mall.user.DO.MallUserPointsLogDO;
 import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserPointsLogMapper;
 import com.mall.user.service.IPointsService;
-import com.mall.user.vo.PointsRecordVO;
-import com.mall.user.vo.PointsVO;
+import com.mall.user.VO.PointsRecordVO;
+import com.mall.user.VO.PointsVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,8 +58,16 @@ public class PointsServiceImpl implements IPointsService {
 
     @Override
     public IPage<PointsRecordVO> getPointsRecords(Long userId, String bizType, int page, int size) {
-        Page<MallUserPointsLogDO> pageParam = new Page<>(page, size);
-        IPage<MallUserPointsLogDO> logPage = mallUserPointsLogMapper.selectByUserIdPage(pageParam, userId, bizType);
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(size, 100);
+        Page<MallUserPointsLogDO> pageParam = new Page<>(safePage, safeSize);
+        LambdaQueryWrapper<MallUserPointsLogDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MallUserPointsLogDO::getUserId, userId);
+        if (bizType != null && !bizType.isEmpty()) {
+            wrapper.eq(MallUserPointsLogDO::getBizType, bizType);
+        }
+        wrapper.orderByDesc(MallUserPointsLogDO::getCreateTime);
+        IPage<MallUserPointsLogDO> logPage = mallUserPointsLogMapper.selectPage(pageParam, wrapper);
         return logPage.convert(this::toPointsRecordVO);
     }
 

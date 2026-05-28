@@ -10,8 +10,8 @@ import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserPointsLogDO;
 import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserPointsLogMapper;
-import com.mall.user.vo.PointsRecordVO;
-import com.mall.user.vo.PointsVO;
+import com.mall.user.VO.PointsRecordVO;
+import com.mall.user.VO.PointsVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,7 +98,7 @@ class PointsServiceImplTest {
         logPage.setRecords(Collections.singletonList(logDO));
         logPage.setTotal(1);
 
-        lenient().when(mallUserPointsLogMapper.selectByUserIdPage(any(), eq(1L), eq("order"))).thenReturn(logPage);
+        lenient().when(mallUserPointsLogMapper.selectPage(any(), any())).thenReturn(logPage);
 
         IPage<PointsRecordVO> result = pointsService.getPointsRecords(1L, "order", 1, 10);
 
@@ -108,7 +108,7 @@ class PointsServiceImplTest {
         PointsRecordVO vo = result.getRecords().get(0);
         assertEquals("order", vo.getBizType());
         assertEquals(100, vo.getPoints());
-        verify(mallUserPointsLogMapper).selectByUserIdPage(any(), eq(1L), eq("order"));
+        verify(mallUserPointsLogMapper).selectPage(any(), any());
     }
 
     @Test

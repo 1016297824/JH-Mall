@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
 import com.mall.user.service.IMemberService;
-import com.mall.user.vo.MembershipVO;
+import com.mall.user.VO.MembershipVO;
 
 /**
  * C 端会员控制器
@@ -21,7 +21,7 @@ import com.mall.user.vo.MembershipVO;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-public class MemberController {
+public class MembershipController {
 
     private final IMemberService memberService;
 

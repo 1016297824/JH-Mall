@@ -1,7 +1,9 @@
 package com.mall.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
+import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserDO;
 import com.mall.user.DO.MallUserMemberDO;
@@ -9,8 +11,8 @@ import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserMapper;
 import com.mall.user.mapper.MallUserMemberMapper;
 import com.mall.user.service.IMallUserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,22 +29,14 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/26
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class MallUserServiceImpl implements IMallUserService {
-
-    private static final Logger log = LoggerFactory.getLogger(MallUserServiceImpl.class);
 
     private final MallUserMapper mallUserMapper;
     private final MallUserMemberMapper mallUserMemberMapper;
     private final MallPointsAccountMapper mallPointsAccountMapper;
-
-    public MallUserServiceImpl(MallUserMapper mallUserMapper,
-                               MallUserMemberMapper mallUserMemberMapper,
-                               MallPointsAccountMapper mallPointsAccountMapper) {
-        this.mallUserMapper = mallUserMapper;
-        this.mallUserMemberMapper = mallUserMemberMapper;
-        this.mallPointsAccountMapper = mallPointsAccountMapper;
-    }
 
     @Override
     public MallUserDO selectByPhone(String phone) {
@@ -167,7 +161,7 @@ public class MallUserServiceImpl implements IMallUserService {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
 }

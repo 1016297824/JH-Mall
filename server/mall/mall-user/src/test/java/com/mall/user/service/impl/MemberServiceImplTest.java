@@ -12,9 +12,9 @@ import com.mall.user.DO.MallUserMemberLevelDO;
 import com.mall.user.mapper.MallUserGrowthLogMapper;
 import com.mall.user.mapper.MallUserMemberLevelMapper;
 import com.mall.user.mapper.MallUserMemberMapper;
-import com.mall.user.vo.GrowthRecordVO;
-import com.mall.user.vo.GrowthVO;
-import com.mall.user.vo.MembershipVO;
+import com.mall.user.VO.GrowthRecordVO;
+import com.mall.user.VO.GrowthVO;
+import com.mall.user.VO.MembershipVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -155,7 +155,7 @@ class MemberServiceImplTest {
         logPage.setRecords(Collections.singletonList(logDO));
         logPage.setTotal(1);
 
-        when(mallUserGrowthLogMapper.selectByUserIdPage(any(), eq(1L), eq("order"))).thenReturn(logPage);
+        when(mallUserGrowthLogMapper.selectPage(any(), any())).thenReturn(logPage);
 
         IPage<GrowthRecordVO> result = memberService.getGrowthRecords(1L, "order", 1, 10);
 
