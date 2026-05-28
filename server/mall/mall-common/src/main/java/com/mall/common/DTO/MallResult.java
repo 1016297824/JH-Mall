@@ -1,4 +1,4 @@
-package com.mall.common.dto;
+package com.mall.common.DTO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.ToStringBuilder;

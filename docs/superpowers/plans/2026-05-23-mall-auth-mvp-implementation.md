@@ -29,30 +29,30 @@
 
 | # | 文件路径 | 用途 |
 |---|---------|------|
-| 1 | `server/mall/mall-api/src/main/java/com/mall/api/dto/MallResult.java` | C 端统一响应体 |
-| 2 | `server/mall/mall-api/src/main/java/com/mall/api/dto/MallUserDTO.java` | 用户数据传输对象 |
+| 1 | `server/mall/mall-api/src/main/java/com/mall/api/DTO/MallResult.java` | C 端统一响应体 |
+| 2 | `server/mall/mall-api/src/main/java/com/mall/api/DTO/MallUserDTO.java` | 用户数据传输对象 |
 | 3 | `server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteUserService.java` | 用户 Feign 契约（含内部请求类） |
 | 4 | `server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteAuthService.java` | 认证 Feign 契约（占位） |
 | 5 | `server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java` | 验证码异常类 |
 | 6 | `server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java` | Token 异常类（A0231） |
-| 7 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java` | 验证码响应（captchaKey + captchaImage） |
-| 8 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java` | Token 响应（accessToken/refreshToken/expiresIn） |
+| 7 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/response/CaptchaResponse.java` | 验证码响应（captchaKey + captchaImage） |
+| 8 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/response/TokenResponse.java` | Token 响应（accessToken/refreshToken/expiresIn） |
 | 9 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/TokenService.java` | Token 服务接口 |
 | 10 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/impl/TokenServiceImpl.java` | Token 服务实现（JWT + Redis） |
 | 11 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/CaptchaService.java` | 验证码服务接口 |
 | 12 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/impl/CaptchaServiceImpl.java` | 验证码服务实现（EasyCaptcha + Redis） |
-| 13 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaRegisterReq.java` | 注册请求 DTO |
-| 14 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaLoginReq.java` | 登录请求 DTO |
-| 15 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaResetPasswordReq.java` | 重置密码请求 DTO |
-| 16 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaChangePhoneReq.java` | 换绑手机请求 DTO |
-| 17 | `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaDeactivateReq.java` | 注销请求 DTO |
+| 13 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaRegisterReq.java` | 注册请求 DTO |
+| 14 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaLoginReq.java` | 登录请求 DTO |
+| 15 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaResetPasswordReq.java` | 重置密码请求 DTO |
+| 16 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaChangePhoneReq.java` | 换绑手机请求 DTO |
+| 17 | `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaDeactivateReq.java` | 注销请求 DTO |
 | 18 | `server/mall/mall-auth/src/main/java/com/mall/auth/controller/CaptchaController.java` | CAPTCHA 6 端点 Controller |
 | 19 | `server/mall/mall-auth/src/main/java/com/mall/auth/controller/AuthController.java` | 13 端点骨架占位 Controller |
 | 20 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/AuthService.java` | 认证服务接口（仅签名） |
 | 21 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/DecryptService.java` | 解密服务接口（仅签名） |
 | 22 | `server/mall/mall-auth/src/main/java/com/mall/auth/service/SmsService.java` | 短信服务接口（仅签名） |
 | 23 | `server/mall/mall-auth/src/main/java/com/mall/auth/infrastructure/feign/RemoteUserAdapter.java` | Feign 调用封装骨架 |
-| 24 | `server/mall/mall-user/src/main/java/com/mall/user/controller/api/RemoteUserInnerController.java` | mall-user 内部 Feign 入口 |
+| 24 | `server/mall/mall-user/src/main/java/com/mall/user/controller/inner/RemoteUserInnerController.java` | mall-user 内部 Feign 入口 |
 | **25** | `server/mall/mall-common/pom.xml` | mall-common 模块 POM |
 | **26** | `server/mall/mall-common/src/main/java/com/mall/common/handler/MallExceptionHandler.java` | 全局异常处理器（CaptchaException/TokenException/FeignException + 兜底） |
 
@@ -117,7 +117,7 @@
 ```java
 package com.mall.common.handler;
 
-import com.mall.api.dto.MallResult;
+import com.mall.api.DTO.MallResult;
 import com.mall.common.exception.CaptchaException;
 import com.mall.common.exception.TokenException;
 import feign.FeignException;
@@ -190,15 +190,15 @@ git commit -m "feat(mall-common): add C-end common module with MallExceptionHand
 **设计依据:** `05_mall-api契约层设计.md` §7（MallResult）+ §3.1（RemoteUserService）+ §8.1（MallUserDTO）+ spec §8
 
 **文件:**
-- Create: `server/mall/mall-api/src/main/java/com/mall/api/dto/MallResult.java`
-- Create: `server/mall/mall-api/src/main/java/com/mall/api/dto/MallUserDTO.java`
+- Create: `server/mall/mall-api/src/main/java/com/mall/api/DTO/MallResult.java`
+- Create: `server/mall/mall-api/src/main/java/com/mall/api/DTO/MallUserDTO.java`
 - Create: `server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteUserService.java`
 - Create: `server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteAuthService.java`
 
 - [ ] **Step 1: 编写 MallResult.java**
 
 ```java
-package com.mall.api.dto;
+package com.mall.api.DTO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -254,7 +254,7 @@ public class MallResult<T> {
 - [ ] **Step 2: 编写 MallUserDTO.java**
 
 ```java
-package com.mall.api.dto;
+package com.mall.api.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -312,7 +312,7 @@ public class MallUserDTO {
 ```java
 package com.mall.api.feign;
 
-import com.mall.api.dto.MallUserDTO;
+import com.mall.api.DTO.MallUserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -399,7 +399,7 @@ Expected: BUILD SUCCESS
 - [ ] **Step 6: 提交**
 
 ```bash
-git add server/mall/mall-api/src/main/java/com/mall/api/dto/MallResult.java server/mall/mall-api/src/main/java/com/mall/api/dto/MallUserDTO.java server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteUserService.java server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteAuthService.java
+git add server/mall/mall-api/src/main/java/com/mall/api/DTO/MallResult.java server/mall/mall-api/src/main/java/com/mall/api/DTO/MallUserDTO.java server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteUserService.java server/mall/mall-api/src/main/java/com/mall/api/feign/RemoteAuthService.java
 git commit -m "feat(mall-api): add MallResult, MallUserDTO, RemoteUserService Feign contract"
 ```
 
@@ -667,14 +667,14 @@ git commit -m "feat(mall-user): add C-end mapper methods and service extensions 
 **设计依据:** spec §9.3，路径前缀 `/inner/user`，Feign 直连不走网关
 
 **文件:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/RemoteUserInnerController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/inner/RemoteUserInnerController.java`
 
 - [ ] **Step 1: 创建 RemoteUserInnerController.java**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller.inner;
 
-import com.mall.api.dto.MallUserDTO;
+import com.mall.api.DTO.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.user.DO.MallUserDO;
 import com.mall.user.service.IMallUserService;
@@ -740,7 +740,7 @@ public class RemoteUserInnerController {
 }
 ```
 
-注意：需要新增 `com.mall.user.controller.api` 包。这个包是 C 端 Controller 包（物理隔离于管理端 `com.mall.user.controller`）。
+注意：需要新增 `com.mall.user.controller.inner` 包。这个包是内部 Feign Controller 包。
 
 - [ ] **Step 2: 编译验证**
 
@@ -752,7 +752,7 @@ Expected: BUILD SUCCESS
 - [ ] **Step 3: 提交**
 
 ```bash
-git add server/mall/mall-user/src/main/java/com/mall/user/controller/api/RemoteUserInnerController.java
+git add server/mall/mall-user/src/main/java/com/mall/user/controller/inner/RemoteUserInnerController.java
 git commit -m "feat(mall-user): add RemoteUserInnerController for Feign access to C-end user operations"
 ```
 
@@ -767,8 +767,8 @@ CaptchaException 和 TokenException 放 mall-common（避免循环依赖），Ca
 **文件:**
 - Create: `server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java`
 - Create: `server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java`
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java`
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/response/CaptchaResponse.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/response/TokenResponse.java`
 
 - [ ] **Step 1: 创建 CaptchaException.java（mall-common）**
 
@@ -827,31 +827,43 @@ public class TokenException extends RuntimeException {
 - [ ] **Step 2: 创建 CaptchaResponse.java（mall-auth）**
 
 ```java
-package com.mall.auth.dto.response;
+package com.mall.auth.DTO.response;
 
 public class CaptchaResponse {
 
     private String captchaKey;
     private String captchaImage;
 
-    public CaptchaResponse() {}
+    public CaptchaResponse() {
+    }
 
     public CaptchaResponse(String captchaKey, String captchaImage) {
         this.captchaKey = captchaKey;
         this.captchaImage = captchaImage;
     }
 
-    public String getCaptchaKey() { return captchaKey; }
-    public void setCaptchaKey(String captchaKey) { this.captchaKey = captchaKey; }
-    public String getCaptchaImage() { return captchaImage; }
-    public void setCaptchaImage(String captchaImage) { this.captchaImage = captchaImage; }
+    public String getCaptchaKey() {
+        return captchaKey;
+    }
+
+    public void setCaptchaKey(String captchaKey) {
+        this.captchaKey = captchaKey;
+    }
+
+    public String getCaptchaImage() {
+        return captchaImage;
+    }
+
+    public void setCaptchaImage(String captchaImage) {
+        this.captchaImage = captchaImage;
+    }
 }
 ```
 
 - [ ] **Step 3: 创建 TokenResponse.java（mall-auth）**
 
 ```java
-package com.mall.auth.dto.response;
+package com.mall.auth.DTO.response;
 
 public class TokenResponse {
 
@@ -859,7 +871,8 @@ public class TokenResponse {
     private String refreshToken;
     private long expiresIn;
 
-    public TokenResponse() {}
+    public TokenResponse() {
+    }
 
     public TokenResponse(String accessToken, String refreshToken, long expiresIn) {
         this.accessToken = accessToken;
@@ -867,12 +880,29 @@ public class TokenResponse {
         this.expiresIn = expiresIn;
     }
 
-    public String getAccessToken() { return accessToken; }
-    public void setAccessToken(String accessToken) { this.accessToken = accessToken; }
-    public String getRefreshToken() { return refreshToken; }
-    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
-    public long getExpiresIn() { return expiresIn; }
-    public void setExpiresIn(long expiresIn) { this.expiresIn = expiresIn; }
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
+    }
 }
 ```
 
@@ -889,7 +919,7 @@ Expected: BUILD SUCCESS
 - [ ] **Step 5: 提交**
 
 ```bash
-git add server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/CaptchaResponse.java server/mall/mall-auth/src/main/java/com/mall/auth/dto/response/TokenResponse.java
+git add server/mall/mall-common/src/main/java/com/mall/common/exception/CaptchaException.java server/mall/mall-common/src/main/java/com/mall/common/exception/TokenException.java server/mall/mall-auth/src/main/java/com/mall/auth/DTO/response/CaptchaResponse.java server/mall/mall-auth/src/main/java/com/mall/auth/DTO/response/TokenResponse.java
 git commit -m "feat(mall-common): add CaptchaException and TokenException; feat(mall-auth): add CaptchaResponse and TokenResponse"
 ```
 
@@ -920,7 +950,7 @@ git commit -m "feat(mall-common): add CaptchaException and TokenException; feat(
 ```java
 package com.mall.auth.service;
 
-import com.mall.auth.dto.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenResponse;
 
 public interface TokenService {
 
@@ -941,7 +971,7 @@ public interface TokenService {
 ```java
 package com.mall.auth.service.impl;
 
-import com.mall.auth.dto.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenResponse;
 import com.mall.auth.service.TokenService;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Claims;
@@ -949,14 +979,15 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -1323,18 +1354,19 @@ git commit -m "feat(mall-auth): add CaptchaService with EasyCaptcha generate/ver
 - `org.apache.commons.codec.digest.DigestUtils`（SHA256 phoneHash）
 
 **文件:**
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaRegisterReq.java`
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaLoginReq.java`
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaResetPasswordReq.java`
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaChangePhoneReq.java`
-- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/dto/request/CaptchaDeactivateReq.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaRegisterReq.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaLoginReq.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaResetPasswordReq.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaChangePhoneReq.java`
+- Create: `server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request/CaptchaDeactivateReq.java`
 - Create: `server/mall/mall-auth/src/main/java/com/mall/auth/controller/CaptchaController.java`
 
 - [ ] **Step 1: 创建 5 个 Request DTO**
 
 CaptchaRegisterReq.java:
+
 ```java
-package com.mall.auth.dto.request;
+package com.mall.auth.DTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -1357,22 +1389,52 @@ public class CaptchaRegisterReq {
     @NotNull(message = "请同意隐私协议")
     private Integer isPrivacyAgreed;
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getCaptchaKey() { return captchaKey; }
-    public void setCaptchaKey(String captchaKey) { this.captchaKey = captchaKey; }
-    public String getCaptchaCode() { return captchaCode; }
-    public void setCaptchaCode(String captchaCode) { this.captchaCode = captchaCode; }
-    public Integer getIsPrivacyAgreed() { return isPrivacyAgreed; }
-    public void setIsPrivacyAgreed(Integer isPrivacyAgreed) { this.isPrivacyAgreed = isPrivacyAgreed; }
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getCaptchaKey() {
+        return captchaKey;
+    }
+
+    public void setCaptchaKey(String captchaKey) {
+        this.captchaKey = captchaKey;
+    }
+
+    public String getCaptchaCode() {
+        return captchaCode;
+    }
+
+    public void setCaptchaCode(String captchaCode) {
+        this.captchaCode = captchaCode;
+    }
+
+    public Integer getIsPrivacyAgreed() {
+        return isPrivacyAgreed;
+    }
+
+    public void setIsPrivacyAgreed(Integer isPrivacyAgreed) {
+        this.isPrivacyAgreed = isPrivacyAgreed;
+    }
 }
 ```
 
 CaptchaLoginReq.java:
+
 ```java
-package com.mall.auth.dto.request;
+package com.mall.auth.DTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -1389,20 +1451,44 @@ public class CaptchaLoginReq {
     @NotBlank(message = "验证码不能为空")
     private String captchaCode;
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getCaptchaKey() { return captchaKey; }
-    public void setCaptchaKey(String captchaKey) { this.captchaKey = captchaKey; }
-    public String getCaptchaCode() { return captchaCode; }
-    public void setCaptchaCode(String captchaCode) { this.captchaCode = captchaCode; }
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getCaptchaKey() {
+        return captchaKey;
+    }
+
+    public void setCaptchaKey(String captchaKey) {
+        this.captchaKey = captchaKey;
+    }
+
+    public String getCaptchaCode() {
+        return captchaCode;
+    }
+
+    public void setCaptchaCode(String captchaCode) {
+        this.captchaCode = captchaCode;
+    }
 }
 ```
 
 CaptchaResetPasswordReq.java:
+
 ```java
-package com.mall.auth.dto.request;
+package com.mall.auth.DTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -1421,20 +1507,44 @@ public class CaptchaResetPasswordReq {
     @NotBlank(message = "验证码不能为空")
     private String captchaCode;
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public String getNewPassword() { return newPassword; }
-    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
-    public String getCaptchaKey() { return captchaKey; }
-    public void setCaptchaKey(String captchaKey) { this.captchaKey = captchaKey; }
-    public String getCaptchaCode() { return captchaCode; }
-    public void setCaptchaCode(String captchaCode) { this.captchaCode = captchaCode; }
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public String getCaptchaKey() {
+        return captchaKey;
+    }
+
+    public void setCaptchaKey(String captchaKey) {
+        this.captchaKey = captchaKey;
+    }
+
+    public String getCaptchaCode() {
+        return captchaCode;
+    }
+
+    public void setCaptchaCode(String captchaCode) {
+        this.captchaCode = captchaCode;
+    }
 }
 ```
 
 CaptchaChangePhoneReq.java:
+
 ```java
-package com.mall.auth.dto.request;
+package com.mall.auth.DTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -1448,18 +1558,36 @@ public class CaptchaChangePhoneReq {
     @NotBlank(message = "新手机号不能为空")
     private String newPhone;
 
-    public String getOldPhone() { return oldPhone; }
-    public void setOldPhone(String oldPhone) { this.oldPhone = oldPhone; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getNewPhone() { return newPhone; }
-    public void setNewPhone(String newPhone) { this.newPhone = newPhone; }
+    public String getOldPhone() {
+        return oldPhone;
+    }
+
+    public void setOldPhone(String oldPhone) {
+        this.oldPhone = oldPhone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getNewPhone() {
+        return newPhone;
+    }
+
+    public void setNewPhone(String newPhone) {
+        this.newPhone = newPhone;
+    }
 }
 ```
 
 CaptchaDeactivateReq.java:
+
 ```java
-package com.mall.auth.dto.request;
+package com.mall.auth.DTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -1470,10 +1598,21 @@ public class CaptchaDeactivateReq {
     @NotBlank(message = "密码不能为空")
     private String password;
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
 ```
 
@@ -1482,22 +1621,24 @@ public class CaptchaDeactivateReq {
 ```java
 package com.mall.auth.controller;
 
-import com.mall.api.dto.MallResult;
-import com.mall.api.dto.MallUserDTO;
+import com.mall.api.DTO.MallResult;
+import com.mall.api.DTO.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
-import com.mall.auth.dto.request.CaptchaChangePhoneReq;
-import com.mall.auth.dto.request.CaptchaDeactivateReq;
-import com.mall.auth.dto.request.CaptchaLoginReq;
-import com.mall.auth.dto.request.CaptchaRegisterReq;
-import com.mall.auth.dto.request.CaptchaResetPasswordReq;
-import com.mall.auth.dto.response.CaptchaResponse;
-import com.mall.auth.dto.response.TokenResponse;
+import com.mall.auth.DTO.request.CaptchaChangePhoneReq;
+import com.mall.auth.DTO.request.CaptchaDeactivateReq;
+import com.mall.auth.DTO.request.CaptchaLoginReq;
+import com.mall.auth.DTO.request.CaptchaRegisterReq;
+import com.mall.auth.DTO.request.CaptchaResetPasswordReq;
+import com.mall.auth.DTO.response.CaptchaResponse;
+import com.mall.auth.DTO.response.TokenResponse;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1557,7 +1698,7 @@ public class CaptchaController {
      */
     @PostMapping("/register")
     public MallResult<TokenResponse> register(@Valid @RequestBody CaptchaRegisterReq req,
-                                                HttpServletRequest request) {
+                                              HttpServletRequest request) {
         String clientIp = getClientIp(request);
 
         // ① 校验验证码
@@ -1605,7 +1746,7 @@ public class CaptchaController {
      */
     @PostMapping("/login")
     public MallResult<TokenResponse> login(@Valid @RequestBody CaptchaLoginReq req,
-                                            HttpServletRequest request) {
+                                           HttpServletRequest request) {
         String clientIp = getClientIp(request);
 
         // ① 校验验证码
@@ -1655,7 +1796,7 @@ public class CaptchaController {
      */
     @PostMapping("/password/reset")
     public MallResult<Void> resetPassword(@Valid @RequestBody CaptchaResetPasswordReq req,
-                                           HttpServletRequest request) {
+                                          HttpServletRequest request) {
         String clientIp = getClientIp(request);
 
         // ① 校验验证码
@@ -1798,7 +1939,7 @@ Expected: BUILD SUCCESS
 - [ ] **Step 4: 提交**
 
 ```bash
-git add server/mall/mall-auth/src/main/java/com/mall/auth/dto/request server/mall/mall-auth/src/main/java/com/mall/auth/controller/CaptchaController.java
+git add server/mall/mall-auth/src/main/java/com/mall/auth/DTO/request server/mall/mall-auth/src/main/java/com/mall/auth/controller/CaptchaController.java
 git commit -m "feat(mall-auth): add CaptchaController with 6 CAPTCHA endpoints and request DTOs"
 ```
 
@@ -1820,7 +1961,7 @@ git commit -m "feat(mall-auth): add CaptchaController with 6 CAPTCHA endpoints a
 ```java
 package com.mall.auth.controller;
 
-import com.mall.api.dto.MallResult;
+import com.mall.api.DTO.MallResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -1958,7 +2099,7 @@ public interface SmsService {
 ```java
 package com.mall.auth.infrastructure.feign;
 
-import com.mall.api.dto.MallUserDTO;
+import com.mall.api.DTO.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

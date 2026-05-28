@@ -42,26 +42,27 @@ server/mall/mall-user/
 └── src/main/java/com/mall/user/
     ├── MallUserApplication.java            # Spring Boot 启动类
     ├── controller/
-    │   ├── admin/
-    │   │   ├── UserAdminController.java    # /mall-user/users/**
-    │   │   ├── MemberAdminController.java  # /mall-user/members/**
-    │   │   └── PointsAdminController.java  # /mall-user/points/**
-    │   └── api/
-    │       ├── ProfileController.java      # /api/user/profile
-    │       ├── AddressController.java      # /api/user/addresses/**
-    │       ├── MembershipController.java   # /api/user/membership
-    │       ├── PointsController.java       # /api/user/points/**
-    │       └── GrowthController.java       # /api/user/growth/**
-    ├── dto/
-    │   ├── request/                        → UpdateProfileReq, CreateAddressReq, AdjustPointsReq,
-    │   │                                      CreateMemberLevelReq ...
+    │   ├── inner/
+    │   │   └── RemoteUserInnerController.java  # /inner/user/** 内部 Feign 端点
+    │   ├── ProfileController.java              # /api/user/profile
+    │   ├── AddressController.java              # /api/user/addresses/**
+    │   ├── MembershipController.java           # /api/user/membership
+    │   ├── PointsController.java               # /api/user/points/**
+    │   ├── GrowthController.java               # /api/user/growth/**
+    │   └── SignInController.java               # /api/user/sign-in
+    ├── DTO/
+    │   ├── request/                        → UpdateProfileRequest, CreateAddressReq
     │   └── response/                       → PointsResp, GrowthResp
-    ├── vo/                                  # 视图对象，前端展示（脱敏/单位转换）
+    ├── VO/                                  # 视图对象，前端展示（脱敏/单位转换）
     │   ├── UserProfileVO.java              # C 端资料（手机号/邮箱脱敏）
     │   ├── AddressVO.java                  # 地址展示（手机号脱敏）
     │   ├── MembershipVO.java               # 会员等级+权益+进度
+    │   ├── MemberLevelVO.java              # 会员等级信息
+    │   ├── PointsVO.java                   # 积分余额
     │   ├── PointsRecordVO.java             # 积分流水单条
-    │   └── UserAdminVO.java               # 管理端用户详情（全字段）
+    │   ├── GrowthVO.java                   # 成长值余额+进度
+    │   ├── GrowthRecordVO.java             # 成长值流水单条
+    │   └── SignInVO.java                   # 签到结果
     ├── DO/
     │   ├── MallUserDO.java                 # 对应 mall_user 表
     │   ├── MallMemberLevelDO.java          # 对应 mall_user_member_level 表
@@ -71,9 +72,11 @@ server/mall/mall-user/
     │   ├── MallPointsLogDO.java            # 对应 mall_user_points_log 表
     │   └── MallGrowthLogDO.java            # 对应 mall_user_growth_log 表
     ├── service/
+    │   ├── IMallUserService.java            # 已有：管理端/内部共用接口
+    │   ├── impl/MallUserServiceImpl.java    # 已有：用户 CRUD + 状态管理
     │   ├── user/
-    │   │   ├── UserService.java
-    │   │   └── impl/UserServiceImpl.java   # 用户 CRUD + 状态管理
+    │   │   ├── UserProfileService.java     # C 端用户资料查询+修改（含 Redis 缓存）
+    │   │   └── impl/UserProfileServiceImpl.java
     │   ├── address/
     │   │   ├── AddressService.java
     │   │   └── impl/AddressServiceImpl.java
@@ -83,6 +86,9 @@ server/mall/mall-user/
     │   ├── points/
     │   │   ├── PointsService.java
     │   │   └── impl/PointsServiceImpl.java # 积分账户+流水
+    │   ├── signin/
+    │   │   ├── SignInService.java
+    │   │   └── impl/SignInServiceImpl.java # Redis Bitmap 签到
     │   └── growth/
     │       ├── GrowthService.java
     │       └── impl/GrowthServiceImpl.java # 成长值流水
@@ -94,15 +100,20 @@ server/mall/mall-user/
     │   ├── MallPointsAccountMapper.java
     │   ├── MallPointsLogMapper.java
     │   └── MallGrowthLogMapper.java
+    ├── mq/
+    │   └── consumer/
+    │       └── UserOrderCompletedConsumer.java  # 消费 mall:order:completed
+    ├── schedule/
+    │   └── PointsExpireTask.java              # 年度积分清零
     ├── infrastructure/
     │   └── feign/
     │       └── RemoteAuthAdapter.java       # 调 mall-auth 解密手机号
     └── convert/
-        ├── UserConvert.java                # MallUserDO → UserProfileVO / UserAdminVO
+        ├── UserConvert.java                # MallUserDO → UserProfileVO
         ├── AddressConvert.java             # MallUserAddressDO → AddressVO
         ├── MemberConvert.java              # MallUserMemberDO → MembershipVO
         ├── PointsConvert.java              # MallPointsLogDO → PointsRecordVO
-        └── GrowthConvert.java
+        └── GrowthConvert.java              # MallGrowthLogDO → GrowthRecordVO
 ```
 
 ### 2.2 接口 → Controller 映射
@@ -121,8 +132,7 @@ server/mall/mall-user/
 | 10 | GET    | `/api/user/points/records`                | PointsController     | `listRecords(params)`    |  是  | —   |
 | 11 | GET    | `/api/user/growth`                        | GrowthController     | `getGrowth()`            |  是  | —   |
 | 12 | GET    | `/api/user/growth/records`                | GrowthController     | `listRecords(params)`    |  是  | —   |
-
-管理端接口由若依代码生成器自动生成（用户/会员/积分 CRUD + 冻结解冻、积分调整），权限码无需手动维护。
+| 13 | POST   | `/api/user/sign-in`                       | SignInController     | `signIn()`               |  是  | —   |
 
 ***
 

@@ -44,19 +44,14 @@ server/mall/mall-product/
 └── src/main/java/com/mall/product/
     ├── MallProductApplication.java          # Spring Boot 启动类
     ├── controller/
-    │   ├── admin/
-    │   │   ├── CategoryAdminController.java # /mall-product/categories/**
-    │   │   ├── BrandAdminController.java    # /mall-product/brands/**
-    │   │   ├── SpuAdminController.java      # /mall-product/spus/**
-    │   │   ├── SkuAdminController.java      # /mall-product/skus/**
-    │   │   └── StockAdminController.java    # /mall-product/stock/**
-    │   └── api/
-    │       ├── CategoryApiController.java   # /api/product/categories/**
-    │       ├── BrandApiController.java      # /api/product/brands
-    │       ├── SpuApiController.java        # /api/product/spus/**
-    │       ├── SkuApiController.java        # /api/product/skus/**
-    │       └── SearchFallbackController.java # /api/product/search/fallback
-    ├── dto/
+    │   ├── inner/
+    │   │   └── RemoteProductInnerController.java # /inner/product/** 内部 Feign 端点
+    │   ├── CategoryController.java           # /api/product/categories/**
+    │   ├── BrandController.java              # /api/product/brands
+    │   ├── SpuController.java                # /api/product/spus/**
+    │   ├── SkuController.java                # /api/product/skus/**
+    │   └── SearchFallbackController.java     # /api/product/search/fallback
+    ├── DTO/
     │   ├── request/                         → CreateCategoryReq, CreateBrandReq, CreateSpuReq,
     │   │                                       UpdateSpuStatusReq, AdjustStockReq ...
     │   └── response/                        → CategoryResp, BrandResp, SpuResp, SkuResp, StockResp
@@ -103,7 +98,7 @@ server/mall/mall-product/
     │   ├── SpuConvert.java                 # MallProductSpuDO → SpuVO / SpuDetailVO / SpuAdminVO
     │   ├── SkuConvert.java                 # MallProductSkuDO → SkuVO (attrsJson 展开)
     │   └── StockConvert.java               # MallSkuStockDO → StockVO
-    └── vo/                                  # 视图对象，前端展示（与 DO 字段不同，需转换）
+    └── VO/                                  # 视图对象，前端展示（与 DO 字段不同，需转换）
         ├── CategoryTreeVO.java              # 类目树（嵌套 children），与 DO 扁平行不同
         ├── BrandVO.java                     # 品牌展示
         ├── SpuVO.java                       # C 端 SPU 列表（隐藏 costPrice/verifyStatus）

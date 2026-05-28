@@ -1,6 +1,6 @@
 package com.mall.api.feign;
 
-import com.mall.common.dto.user.MallUserDTO;
+import com.mall.common.DTO.user.MallUserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

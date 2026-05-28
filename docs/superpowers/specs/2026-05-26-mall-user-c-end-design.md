@@ -41,7 +41,7 @@ server/mall/mall-user/src/main/java/com/mall/user/
 │   ├── PointsService                         # 积分查询+流水分页+增减+签到
 │   └── SignInService                         # 签到Bitmap+连续签到计算
 │
-├── controller/api/                            # 🆕 C 端 Controller
+├── controller/                                # 🆕 C 端 Controller
 │   ├── UserProfileController                 # GET/PUT /api/user/profile
 │   ├── AddressController                     # GET/POST/PUT/DELETE /api/user/addresses
 │   ├── MemberController                      # GET /api/user/membership

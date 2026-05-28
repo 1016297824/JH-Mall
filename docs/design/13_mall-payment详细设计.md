@@ -42,11 +42,10 @@ server/mall/mall-payment/
 └── src/main/java/com/mall/payment/
     ├── MallPaymentApplication.java          # Spring Boot 启动类
     ├── controller/
-    │   ├── admin/
-    │   │   └── PaymentAdminController.java  # /mall-payment/**
-    │   └── api/
-    │       ├── PaymentApiController.java    # /api/payment/**
-    │       └── PaymentCallbackController.java # /callback/payment/**
+    │   ├── inner/
+    │   │   └── RemotePaymentInnerController.java # /inner/payment/** 内部 Feign 端点
+    │   ├── PaymentController.java          # /api/payment/**
+    │   └── PaymentCallbackController.java   # /callback/payment/**
     ├── DO/
     │   ├── MallPaymentDO.java                 # 对应 mall_payment 表
     │   ├── MallRefundDO.java                  # 对应 mall_payment_refund 表
@@ -79,10 +78,10 @@ server/mall/mall-payment/
     │       ├── PaymentChannelAdapter.java   # 渠道统一接口
     │       ├── WechatPayAdapter.java        # 微信支付适配（JSAPI/小程序/H5/Native）
     │       └── AlipayAdapter.java           # 支付宝适配
-    ├── dto/                                   # 接口进出 DTO（请求/响应 JSON 契约）
+    ├── DTO/                                   # 接口进出 DTO（请求/响应 JSON 契约）
     │   ├── request/                           → PayRequestDTO, RefundRequestDTO, ChannelConfigRequestDTO ...
     │   └── response/                          → PayResultDTO, CallbackDTO ...
-    ├── vo/                                    # 视图对象，前端展示（与 DO 字段不同，需转换）
+    ├── VO/                                    # 视图对象，前端展示（与 DO 字段不同，需转换）
     │   ├── PayParamsVO.java                   # 支付 SDK 调用参数（appId/timeStamp/paySign 等，无 DO 对应）
     │   ├── PaymentVO.java                     # C 端支付单（金额分→元、status→文本）
     │   ├── PaymentDetailVO.java               # 管理端支付单详情（更多字段）
@@ -98,9 +97,9 @@ server/mall/mall-payment/
 
 | # | HTTP | 路径 | Controller | 方法名 | 认证 | 权限码 |
 |---|------|------|-----------|--------|:---:|--------|
-| 1 | POST | `/api/payment/payments` | PaymentApiController | `createPayment(payRequest)` | C端token | — |
-| 2 | GET | `/api/payment/payments/{paymentId}` | PaymentApiController | `getPayment(paymentId)` | C端token | — |
-| 3 | POST | `/api/payment/refunds` | PaymentApiController | `createRefund(refundRequest)` | C端token | — |
+| 1 | POST | `/api/payment/payments` | PaymentController | `createPayment(payRequest)` | C端token | — |
+| 2 | GET | `/api/payment/payments/{paymentId}` | PaymentController | `getPayment(paymentId)` | C端token | — |
+| 3 | POST | `/api/payment/refunds` | PaymentController | `createRefund(refundRequest)` | C端token | — |
 
 管理端接口由若依代码生成器自动生成（支付/退款查询、渠道配置），权限码无需手动维护。
 

@@ -1,7 +1,7 @@
 package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
-import com.mall.auth.dto.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenResponse;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Jwts;

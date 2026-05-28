@@ -1,6 +1,6 @@
 package com.mall.auth.service;
 
-import com.mall.auth.dto.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenResponse;
 
 /**
  * C 端 Token 服务接口

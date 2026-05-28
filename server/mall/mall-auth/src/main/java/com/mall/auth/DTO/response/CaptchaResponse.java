@@ -1,4 +1,4 @@
-package com.mall.auth.dto.response;
+package com.mall.auth.DTO.response;
 
 /**
  * 验证码响应

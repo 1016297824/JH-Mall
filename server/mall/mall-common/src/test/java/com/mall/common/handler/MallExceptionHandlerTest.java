@@ -1,6 +1,5 @@
 package com.mall.common.handler;
 
-import com.mall.common.dto.MallResult;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.common.exception.CaptchaException;

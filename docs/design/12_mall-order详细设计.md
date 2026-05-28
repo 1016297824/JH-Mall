@@ -39,9 +39,12 @@ mall-order
 ```
 mall-order/src/main/java/com/mall/order/
 ├─ controller/
-│  ├─ admin/          → AdminOrderController, AdminAfterSaleController
-│  └─ api/            → CartController, OrderController, AfterSaleController
-├─ dto/               # 接口进出 DTO
+│  ├─ inner/
+│  │  └─ RemoteOrderInnerController.java  # /inner/order/** 内部 Feign 端点
+│  ├─ CartController.java
+│  ├─ OrderController.java
+│  └─ AfterSaleController.java
+├─ DTO/               # 接口进出 DTO
 │  ├─ request/        → CreateOrderRequest, AddCartRequest, SubmitAfterSaleRequest ...
 │  └─ response/       → OrderDetailResponse, CartListResponse ...
 ├─ DO/            # 数据库实体（DO）
@@ -71,7 +74,7 @@ mall-order/src/main/java/com/mall/order/
 │  ├─ CartConvert.java
 │  ├─ OrderConvert.java
 │  └─ AfterSaleConvert.java
-└─ vo/                # 视图对象，前端展示
+└─ VO/                # 视图对象，前端展示
    ├─ CartVO.java
    ├─ OrderVO.java
    ├─ OrderItemVO.java

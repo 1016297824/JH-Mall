@@ -59,7 +59,7 @@ server/mall/mall-common/
 └── src/main/java/com/mall/common/
     ├── constant/                             # 跨服务共享常量（Redis Key 等）
     │   └── CacheConstants.java              # 商城统一 Redis Key 常量
-    ├── dto/                                  # 跨服务共享 DTO + 响应体
+    ├── DTO/                                  # 跨服务共享 DTO + 响应体
     │   ├── MallResult.java                  # C 端统一响应体（替代若依 AjaxResult）
     │   ├── user/
     │   │   └── MallUserDTO.java             # 用户数据传输对象
@@ -354,7 +354,7 @@ C 端全局异常兜底。用 `@Order(Ordered.HIGHEST_PRECEDENCE)` 确保优先�
 ```java
 package com.mall.common.handler;
 
-import com.mall.common.dto.MallResult;
+import com.mall.common.DTO.MallResult;
 import com.mall.common.exception.CaptchaException;
 import com.mall.common.exception.TokenException;
 import feign.FeignException;

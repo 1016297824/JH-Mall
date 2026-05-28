@@ -1,4 +1,4 @@
-package com.mall.auth.dto.request;
+package com.mall.auth.DTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 

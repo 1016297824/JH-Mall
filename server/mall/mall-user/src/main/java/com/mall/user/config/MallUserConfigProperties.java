@@ -98,6 +98,9 @@ public class MallUserConfigProperties {
         /** 带图评价积分 */
         private int reviewWithPhoto = 20;
 
+        /** 每连续一天额外加积分 */
+        private int signinConsecutiveBonus = 1;
+
         public int getSigninBase() {
             return signinBase;
         }
@@ -128,6 +131,14 @@ public class MallUserConfigProperties {
 
         public void setReviewWithPhoto(int reviewWithPhoto) {
             this.reviewWithPhoto = reviewWithPhoto;
+        }
+
+        public int getSigninConsecutiveBonus() {
+            return signinConsecutiveBonus;
+        }
+
+        public void setSigninConsecutiveBonus(int signinConsecutiveBonus) {
+            this.signinConsecutiveBonus = signinConsecutiveBonus;
         }
     }
 }

@@ -1,8 +1,12 @@
 package com.mall.user.service.impl;
 
 import com.mall.common.enums.user.UserStatusEnum;
+import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserDO;
+import com.mall.user.DO.MallUserMemberDO;
+import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserMapper;
+import com.mall.user.mapper.MallUserMemberMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,9 +76,9 @@ class MallUserServiceImplTest {
 
     @Test
     void testRegisterByPhone_ShouldCreateUserAndReturnId() {
-        doNothing().when(mallUserMapper).insert(any(MallUserDO.class));
-        doNothing().when(mallUserMemberMapper).insert(any());
-        doNothing().when(mallPointsAccountMapper).insert(any());
+        when(mallUserMapper.insert(any(MallUserDO.class))).thenReturn(1);
+        when(mallUserMemberMapper.insert(any())).thenReturn(1);
+        when(mallPointsAccountMapper.insert(any())).thenReturn(1);
 
         String userId = mallUserService.registerByPhone("13800138000", "hash456", "$2a$10$encoded");
 

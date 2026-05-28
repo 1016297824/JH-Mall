@@ -42,14 +42,12 @@ server/mall/mall-marketing/
 └── src/main/java/com/mall/marketing/
     ├── MallMarketingApplication.java        # Spring Boot 启动类
     ├── controller/
-    │   ├── admin/
-    │   │   ├── CouponAdminController.java   # /mall-marketing/coupons/**
-    │   │   └── PromotionAdminController.java # /mall-marketing/promotions/**
-    │   └── api/
-    │       ├── CouponApiController.java      # /api/marketing/coupons/**
-    │       ├── PromotionApiController.java   # /api/marketing/promotions
-    │       └── CalculationApiController.java # /api/marketing/calculations
-    ├── dto/
+    │   ├── inner/
+    │   │   └── RemoteMarketingInnerController.java # /inner/marketing/** 内部 Feign 端点
+    │   ├── CouponController.java           # /api/marketing/coupons/**
+    │   ├── PromotionController.java        # /api/marketing/promotions
+    │   └── CalculationController.java      # /api/marketing/calculations
+    ├── DTO/
     │   ├── request/                         → CouponClaimReq, CreateCouponReq, CreatePromotionReq,
     │   │                                       CreateRuleReq, CalculationReq
     │   └── response/                        → CouponDefResp, CouponRecordResp, CalculationResp
@@ -98,11 +96,11 @@ server/mall/mall-marketing/
 
 | # | 方法 | 路径 | Controller | 方法名 | 需登录 | 权限码 |
 |---|------|------|-----------|--------|:---:|--------|
-| 1 | GET | `/api/marketing/coupons` | CouponApiController | `listAvailableCoupons(params)` | 否 | — |
-| 2 | POST | `/api/marketing/coupons/{couponDefId}/claims` | CouponApiController | `claimCoupon(couponDefId)` | 是 | — |
-| 3 | GET | `/api/marketing/coupons/claims` | CouponApiController | `listMyCoupons(params)` | 是 | — |
-| 4 | GET | `/api/marketing/promotions` | PromotionApiController | `listActivePromotions()` | 否 | — |
-| 5 | POST | `/api/marketing/calculations` | CalculationApiController | `calculate(req)` | 是 | — |
+| 1 | GET | `/api/marketing/coupons` | CouponController | `listAvailableCoupons(params)` | 否 | — |
+| 2 | POST | `/api/marketing/coupons/{couponDefId}/claims` | CouponController | `claimCoupon(couponDefId)` | 是 | — |
+| 3 | GET | `/api/marketing/coupons/claims` | CouponController | `listMyCoupons(params)` | 是 | — |
+| 4 | GET | `/api/marketing/promotions` | PromotionController | `listActivePromotions()` | 否 | — |
+| 5 | POST | `/api/marketing/calculations` | CalculationController | `calculate(req)` | 是 | — |
 
 管理端接口由若依代码生成器自动生成（优惠券定义/领取记录、活动/规则管理），权限码无需手动维护。
 

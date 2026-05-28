@@ -50,7 +50,7 @@ server/mall/mall-auth/
     ├── controller/
     │   ├── AuthController.java              # 主 Controller，13 个认证接口
     │   └── CaptchaController.java           # MVP CAPTCHA 6 端点（独立实现）
-    ├── dto/
+    ├── DTO/
     │   ├── request/                         → RegisterReq, LoginReq, SmsLoginReq, SmsCodeReq,
     │   │                                       RefreshTokenReq, WechatLoginReq, PhoneBindReq,
     │   │                                       ChangePhoneReq, ResetPasswordReq, ChangePasswordReq,
@@ -60,7 +60,7 @@ server/mall/mall-auth/
     │   │                                       CaptchaDeactivateReq
     │   └── response/                        → TokenResp, SmsCodeResp, SessionInfoResp,
     │                                           CaptchaResponse
-    │                                           （MallResult<T> 在 mall-api/com.mall.api.dto，非本模块）
+    │                                           （MallResult<T> 在 mall-api/com.mall.api.DTO，非本模块）
     ├── service/
     │   ├── AuthService.java                 # 接口
     │   ├── impl/

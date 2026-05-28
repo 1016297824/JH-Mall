@@ -169,7 +169,7 @@ server/mall/mall-api/
 
 ## 6 C 端统一响应体 MallResult<T>
 
-所有 C 端模块使用 `MallResult<T>`（`com.mall.common.dto`）替代若依管理端的 `AjaxResult`。
+所有 C 端模块使用 `MallResult<T>`（`com.mall.common.DTO`）替代若依管理端的 `AjaxResult`。
 
 ```json
 {

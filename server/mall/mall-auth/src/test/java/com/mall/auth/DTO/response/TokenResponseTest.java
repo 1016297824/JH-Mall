@@ -1,4 +1,4 @@
-package com.mall.auth.dto.response;
+package com.mall.auth.DTO.response;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,11 +1,10 @@
 package com.mall.auth.controller;
 
-import com.mall.common.dto.user.MallUserDTO;
+import com.mall.common.DTO.user.MallUserDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
-import com.mall.auth.dto.response.CaptchaResponse;
-import com.mall.auth.dto.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenResponse;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
 import com.mall.auth.config.MallAuthConfigProperties;
@@ -26,7 +25,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;

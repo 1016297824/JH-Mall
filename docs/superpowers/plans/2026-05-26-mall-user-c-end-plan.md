@@ -40,15 +40,15 @@ mall-user 新建:
   server/mall/mall-user/src/main/java/com/mall/user/service/customer/MemberService.java
   server/mall/mall-user/src/main/java/com/mall/user/service/customer/PointsService.java
   server/mall/mall-user/src/main/java/com/mall/user/service/customer/SignInService.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/UserProfileController.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/AddressController.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/MemberController.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/PointsController.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/GrowthController.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/SignInController.java
+  server/mall/mall-user/src/main/java/com/mall/user/controller/UserProfileController.java
+  server/mall/mall-user/src/main/java/com/mall/user/controller/AddressController.java
+  server/mall/mall-user/src/main/java/com/mall/user/controller/MemberController.java
+  server/mall/mall-user/src/main/java/com/mall/user/controller/PointsController.java
+  server/mall/mall-user/src/main/java/com/mall/user/controller/GrowthController.java
+  server/mall/mall-user/src/main/java/com/mall/user/controller/SignInController.java
   server/mall/mall-user/src/main/java/com/mall/user/mq/consumer/UserOrderCompletedConsumer.java
   server/mall/mall-user/src/main/java/com/mall/user/schedule/PointsExpireTask.java
-  server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/*VO.java (9 个 VO)
+  server/mall/mall-user/src/main/java/com/mall/user/VO/*VO.java (9 个 VO)
 
 Nacos 控制台:
   mall-user-dev.yml 的 mall.user.points 段 +signin-consecutive-bonus: 1
@@ -503,20 +503,20 @@ public class RemoteAuthAdapter {
 ### Task 8: VO 类（9 个）
 
 **Files:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/UserProfileVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/AddressVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/MembershipVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/PointsVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/PointsRecordVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/GrowthVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/GrowthRecordVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/SignInVO.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/MemberLevelVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/UserProfileVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/AddressVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/MembershipVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/PointsVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/PointsRecordVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/GrowthVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/GrowthRecordVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/SignInVO.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/VO/MemberLevelVO.java`
 
 - [ ] **Step 1: UserProfileVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 public class UserProfileVO {
     private String userId;
@@ -540,7 +540,7 @@ public class UserProfileVO {
 - [ ] **Step 2: AddressVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 public class AddressVO {
     private String addressId;
@@ -560,7 +560,7 @@ public class AddressVO {
 - [ ] **Step 3: MemberLevelVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 public class MemberLevelVO {
     private String levelName;
@@ -573,7 +573,7 @@ public class MemberLevelVO {
 - [ ] **Step 4: MembershipVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 import java.util.List;
 
@@ -590,7 +590,7 @@ public class MembershipVO {
 - [ ] **Step 5: PointsVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 public class PointsVO {
     private Integer totalPoints;
@@ -604,7 +604,7 @@ public class PointsVO {
 - [ ] **Step 6: PointsRecordVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 import java.util.Date;
 
@@ -625,7 +625,7 @@ public class PointsRecordVO {
 - [ ] **Step 7: GrowthVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 public class GrowthVO {
     private Long growth;
@@ -641,7 +641,7 @@ public class GrowthVO {
 - [ ] **Step 8: GrowthRecordVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 import java.util.Date;
 
@@ -662,7 +662,7 @@ public class GrowthRecordVO {
 - [ ] **Step 9: SignInVO**
 
 ```java
-package com.mall.user.controller.api.vo;
+package com.mall.user.VO;
 
 import java.util.List;
 
@@ -688,8 +688,8 @@ package com.mall.user.service.customer;
 
 import com.mall.common.enums.user.GenderEnum;
 import com.mall.common.enums.user.UserStatusEnum;
-import com.mall.user.controller.api.vo.MemberLevelVO;
-import com.mall.user.controller.api.vo.UserProfileVO;
+import com.mall.user.vo.MemberLevelVO;
+import com.mall.user.vo.UserProfileVO;
 import com.mall.user.DO.MallUserDO;
 import com.mall.user.DO.MallUserMemberDO;
 import com.mall.user.DO.MallMemberLevelDO;
@@ -863,7 +863,7 @@ mvn clean compile -f server/mall/pom.xml -pl mall-user -DskipTests
 package com.mall.user.service.customer;
 
 import com.mall.user.config.MallUserConfigProperties;
-import com.mall.user.controller.api.vo.AddressVO;
+import com.mall.user.vo.AddressVO;
 import com.mall.user.DO.MallUserAddressDO;
 import com.mall.user.mapper.MallUserAddressMapper;
 import org.springframework.stereotype.Service;
@@ -999,8 +999,8 @@ public class AddressBookService {
 package com.mall.user.service.customer;
 
 import com.mall.common.enums.user.BizTypeEnum;
-import com.mall.user.controller.api.vo.MemberLevelVO;
-import com.mall.user.controller.api.vo.MembershipVO;
+import com.mall.user.vo.MemberLevelVO;
+import com.mall.user.vo.MembershipVO;
 import com.mall.user.DO.MallGrowthLogDO;
 import com.mall.user.DO.MallUserMemberDO;
 import com.mall.user.DO.MallMemberLevelDO;
@@ -1156,8 +1156,8 @@ package com.mall.user.service.customer;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.common.enums.user.BizTypeEnum;
-import com.mall.user.controller.api.vo.PointsRecordVO;
-import com.mall.user.controller.api.vo.PointsVO;
+import com.mall.user.vo.PointsRecordVO;
+import com.mall.user.vo.PointsVO;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallPointsLogDO;
 import com.mall.user.mapper.MallUserPointsAccountMapper;
@@ -1272,7 +1272,7 @@ package com.mall.user.service.customer;
 
 import com.mall.common.enums.user.BizTypeEnum;
 import com.mall.user.config.MallUserConfigProperties;
-import com.mall.user.controller.api.vo.SignInVO;
+import com.mall.user.vo.SignInVO;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -1365,15 +1365,15 @@ public class SignInService {
 ### Task 14: C 端 Controller — UserProfileController
 
 **Files:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/UserProfileController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/UserProfileController.java`
 
 - [ ] **Step 1: 编写 UserProfileController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.UserProfileVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.UserProfileVO;
 import com.mall.user.service.customer.UserProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1402,7 +1402,7 @@ public class UserProfileController {
 
     @PutMapping("/profile")
     public MallResult<UserProfileVO> updateProfile(HttpServletRequest request,
-                                                    @RequestBody UserProfileVO updateRequest) {
+                                                   @RequestBody UserProfileVO updateRequest) {
         String userId = request.getHeader(X_USER_ID);
         return MallResult.success(userProfileService.updateProfile(userId, updateRequest));
     }
@@ -1414,15 +1414,15 @@ public class UserProfileController {
 ### Task 15: C 端 Controller — AddressController
 
 **Files:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/AddressController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/AddressController.java`
 
 - [ ] **Step 1: 编写 AddressController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.AddressVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.AddressVO;
 import com.mall.user.service.customer.AddressBookService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -1462,8 +1462,8 @@ public class AddressController {
 
     @PutMapping("/{addressId}")
     public MallResult<AddressVO> update(HttpServletRequest request,
-                                         @PathVariable String addressId,
-                                         @RequestBody AddressVO addressVO) {
+                                        @PathVariable String addressId,
+                                        @RequestBody AddressVO addressVO) {
         String userId = request.getHeader(X_USER_ID);
         return MallResult.success(addressBookService.updateAddress(userId, addressId, addressVO));
     }
@@ -1489,15 +1489,15 @@ public class AddressController {
 ### Task 16: C 端 Controller — MemberController
 
 **Files:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/MemberController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/MemberController.java`
 
 - [ ] **Step 1: 编写 MemberController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.MembershipVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.MembershipVO;
 import com.mall.user.service.customer.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1529,18 +1529,18 @@ public class MemberController {
 ### Task 17: C 端 Controller — PointsController + GrowthController
 
 **Files:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/PointsController.java`
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/GrowthController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/PointsController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/GrowthController.java`
 
 - [ ] **Step 1: 编写 PointsController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.PointsRecordVO;
-import com.mall.user.controller.api.vo.PointsVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.PointsRecordVO;
+import com.mall.user.vo.PointsVO;
 import com.mall.user.service.customer.PointsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1581,19 +1581,17 @@ public class PointsController {
 - [ ] **Step 2: 编写 GrowthController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.GrowthRecordVO;
-import com.mall.user.controller.api.vo.GrowthVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.GrowthRecordVO;
+import com.mall.user.vo.GrowthVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Collections;
 
 import static com.mall.common.constant.HeaderConstants.X_USER_ID;
 
@@ -1640,15 +1638,15 @@ public class GrowthController {
 ### Task 20: C 端 Controller — SignInController
 
 **Files:**
-- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/api/SignInController.java`
+- Create: `server/mall/mall-user/src/main/java/com/mall/user/controller/SignInController.java`
 
 - [ ] **Step 1: 编写 SignInController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.SignInVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.SignInVO;
 import com.mall.user.service.customer.SignInService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -1808,20 +1806,20 @@ public IPage<GrowthRecordVO> getGrowthRecords(String userId, String bizType, int
 ```java
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mall.user.controller.api.vo.GrowthRecordVO;
-import com.mall.user.controller.api.vo.GrowthVO;
+import com.mall.user.vo.GrowthRecordVO;
+import com.mall.user.vo.GrowthVO;
 import com.mall.user.DO.MallGrowthLogDO;
 ```
 
 **Step 2: 重写 GrowthController**
 
 ```java
-package com.mall.user.controller.api;
+package com.mall.user.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.mall.common.dto.MallResult;
-import com.mall.user.controller.api.vo.GrowthRecordVO;
-import com.mall.user.controller.api.vo.GrowthVO;
+import com.mall.common.DTO.MallResult;
+import com.mall.user.vo.GrowthRecordVO;
+import com.mall.user.vo.GrowthVO;
 import com.mall.user.service.customer.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -2122,7 +2120,7 @@ redisTemplate.expire(key, 60, TimeUnit.DAYS);
 
 > 原 `UserProfileVO` 被同时用作 GET 响应和 PUT 请求体，请求中包含 userId/points/growth 等无法修改的字段。
 
-新建 `server/mall/mall-user/src/main/java/com/mall/user/controller/api/vo/UpdateProfileRequest.java`：
+新建 `server/mall/mall-user/src/main/java/com/mall/user/DTO/request/UpdateProfileRequest.java`：
 
 ```java
 public class UpdateProfileRequest {

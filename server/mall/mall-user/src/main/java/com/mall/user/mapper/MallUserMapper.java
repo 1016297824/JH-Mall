@@ -1,5 +1,6 @@
 package com.mall.user.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.mall.user.DO.MallUserDO;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,4 +15,16 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface MallUserMapper extends BaseMapper<MallUserDO> {
+
+    /**
+     * 根据手机号哈希查询用户
+     *
+     * @param phoneHash 手机号 SHA-256 哈希
+     * @return 用户实体，未找到返回 null
+     */
+    default MallUserDO selectByPhoneHash(String phoneHash) {
+        return selectOne(new LambdaQueryWrapper<MallUserDO>()
+                .eq(MallUserDO::getPhoneHash, phoneHash)
+                .eq(MallUserDO::getIsDeleted, 0));
+    }
 }

@@ -172,7 +172,7 @@ spring:
             - StripPrefix=0
 ```
 
-> C 端 Controller 放在 `controller/api/` 包下，`@RequestMapping` 路径**含 `/api` 前缀**（如 `/api/user/profile`）。
+> C 端 Controller 放在 `controller/` 包下，`@RequestMapping` 路径**含 `/api` 前缀**（如 `/api/user/profile`）。
 
 ---
 
@@ -355,4 +355,4 @@ mall:
 | `discovery.locator` 不可关闭    | 管理端前端依赖 `/{serviceId}/**` 自动路由                                                                  |
 | AuthFilter 与 MallAuthFilter 串行 | 两条过滤器不是二选一，MallAuthFilter 在前者通过后二次校验                                                    |
 | 白名单顺序                        | `/api/**` 必须放入 `security.ignore.whites`，否则 AuthFilter 拦截 C 端请求                               |
-| Controller 包路径                 | 管理端 `controller/admin/` + 不含 `/admin` 的路由前缀；C 端 `controller/api/` + 含 `/api` 的路由前缀 |
+| Controller 包路径                 | 管理端 `controller/admin/` + 不含 `/admin` 的路由前缀；C 端 `controller/` + 含 `/api` 的路由前缀 |

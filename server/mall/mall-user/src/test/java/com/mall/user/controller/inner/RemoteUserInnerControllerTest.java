@@ -1,9 +1,8 @@
-package com.mall.user.controller.api;
+package com.mall.user.controller.inner;
 
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.user.DO.MallUserDO;
-import com.mall.user.controller.RemoteUserInnerController;
 import com.mall.user.service.IMallUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +19,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * RemoteUserInnerController 单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 @ExtendWith(MockitoExtension.class)
 class RemoteUserInnerControllerTest {
 
