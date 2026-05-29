@@ -9,6 +9,12 @@ import com.mall.user.VO.UserProfileVO;
 
 import java.time.format.DateTimeFormatter;
 
+/**
+ * 用户 DO → VO 静态转换器（含聚合多表数据）
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 public class UserConvert {
 
     private static final DateTimeFormatter BIRTHDAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -16,6 +22,18 @@ public class UserConvert {
     private UserConvert() {
     }
 
+    /**
+     * 聚合用户多表数据为用户资料 VO
+     *
+     * <p>组装用户基本信息、会员等级、积分账户等数据，字段类型转换和脱敏在此完成</p>
+     *
+     * @param user        用户 DO
+     * @param maskedPhone 脱敏后的手机号
+     * @param member      会员 DO，可为 null
+     * @param level       会员等级 DO，可为 null
+     * @param account     积分账户 DO，可为 null
+     * @return 用户资料 VO
+     */
     public static UserProfileVO toUserProfileVO(
             MallUserDO user,
             String maskedPhone,

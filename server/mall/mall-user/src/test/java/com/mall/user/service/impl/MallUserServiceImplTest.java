@@ -20,6 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * MallUserServiceImpl 单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/28
+ */
 @ExtendWith(MockitoExtension.class)
 class MallUserServiceImplTest {
 

@@ -9,6 +9,12 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * 用户资料 Request 转换器（Request → DO）单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 class UserProfileRequestConvertTest {
 
     @Test

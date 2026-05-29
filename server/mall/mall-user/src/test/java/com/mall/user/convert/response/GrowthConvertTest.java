@@ -10,6 +10,12 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * GrowthConvert 成长值流水转换器单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 class GrowthConvertTest {
 
     @Test

@@ -13,6 +13,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * MemberConvert 会员转换器单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 class MemberConvertTest {
 
     private MallUserMemberLevelDO buildLevel(Long id, String name, Integer levelValue,

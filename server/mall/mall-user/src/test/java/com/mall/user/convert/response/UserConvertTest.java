@@ -11,6 +11,12 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * UserConvert 用户资料聚合转换器单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 class UserConvertTest {
 
     private MallUserDO buildUser() {

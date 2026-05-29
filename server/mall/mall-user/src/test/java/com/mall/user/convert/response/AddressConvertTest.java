@@ -6,6 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * 地址 Response 转换器（DO → VO）单元测试
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 class AddressConvertTest {
 
     @Test
