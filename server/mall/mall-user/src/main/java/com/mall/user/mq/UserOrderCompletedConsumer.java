@@ -32,8 +32,10 @@ public class UserOrderCompletedConsumer implements RocketMQListener<String> {
     /** JSON 解析器 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /** 积分服务 */
     private final IPointsService pointsService;
 
+    /** 会员服务 */
     private final IMemberService memberService;
 
     /**

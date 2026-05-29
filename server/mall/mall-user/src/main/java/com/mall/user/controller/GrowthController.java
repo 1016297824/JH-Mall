@@ -27,8 +27,10 @@ import com.mall.user.VO.GrowthVO;
 @RequiredArgsConstructor
 public class GrowthController {
 
+    /** 会员服务 */
     private final IMemberService memberService;
 
+    /** 成长值流水服务 */
     private final IGrowthLogService growthService;
 
     /**

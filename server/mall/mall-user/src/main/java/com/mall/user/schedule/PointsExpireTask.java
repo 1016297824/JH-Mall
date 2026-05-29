@@ -34,8 +34,10 @@ public class PointsExpireTask {
     /** 每批处理的记录数 */
     private static final int PAGE_SIZE = 500;
 
+    /** 积分账户 Mapper */
     private final MallPointsAccountMapper pointsAccountMapper;
 
+    /** 积分流水 Mapper */
     private final MallUserPointsLogMapper pointsLogMapper;
 
     /**

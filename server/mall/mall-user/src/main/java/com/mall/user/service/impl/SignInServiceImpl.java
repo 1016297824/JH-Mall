@@ -56,10 +56,13 @@ public class SignInServiceImpl implements ISignInService {
         SIGN_IN_SCRIPT.setResultType(Long.class);
     }
 
+    /** Redis 模板 */
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /** 用户模块配置属性 */
     private final MallUserConfigProperties configProperties;
 
+    /** 积分服务 */
     private final IPointsService pointsService;
 
     /**

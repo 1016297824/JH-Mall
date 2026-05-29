@@ -35,8 +35,11 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class MallUserServiceImpl implements IMallUserService {
 
+    /** 用户 Mapper */
     private final MallUserMapper mallUserMapper;
+    /** 用户会员 Mapper */
     private final MallUserMemberMapper mallUserMemberMapper;
+    /** 积分账户 Mapper */
     private final MallPointsAccountMapper mallPointsAccountMapper;
 
     /**

@@ -42,18 +42,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserProfileServiceImpl implements IUserProfileService {
 
+    /** 用户 Mapper */
     private final MallUserMapper mallUserMapper;
 
+    /** 用户会员 Mapper */
     private final MallUserMemberMapper mallUserMemberMapper;
 
+    /** 会员等级 Mapper */
     private final MallUserMemberLevelMapper mallUserMemberLevelMapper;
 
+    /** 积分账户 Mapper */
     private final MallPointsAccountMapper mallPointsAccountMapper;
 
+    /** Redis 模板 */
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /** 认证服务 Feign 适配器 */
     private final RemoteAuthAdapter remoteAuthAdapter;
 
+    /** 用户模块配置属性 */
     private final MallUserConfigProperties mallUserConfigProperties;
 
     /**

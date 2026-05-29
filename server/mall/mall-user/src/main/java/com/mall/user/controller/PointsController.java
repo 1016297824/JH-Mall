@@ -26,6 +26,7 @@ import com.mall.user.VO.PointsVO;
 @RequiredArgsConstructor
 public class PointsController {
 
+    /** 积分服务 */
     private final IPointsService pointsService;
 
     /**

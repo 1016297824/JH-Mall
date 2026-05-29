@@ -23,6 +23,7 @@ import com.mall.user.VO.SignInVO;
 @RequiredArgsConstructor
 public class SignInController {
 
+    /** 签到服务 */
     private final ISignInService signInService;
 
     /**

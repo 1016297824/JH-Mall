@@ -30,6 +30,7 @@ import com.mall.user.VO.AddressVO;
 @RequiredArgsConstructor
 public class AddressController {
 
+    /** 地址服务 */
     private final IAddressService addressService;
 
     /**

@@ -26,6 +26,7 @@ import com.mall.user.VO.UserProfileVO;
 @RequiredArgsConstructor
 public class ProfileController {
 
+    /** 用户资料服务 */
     private final IUserProfileService userProfileService;
 
     /**

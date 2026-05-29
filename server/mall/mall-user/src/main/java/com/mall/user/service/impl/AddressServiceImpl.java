@@ -31,8 +31,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AddressServiceImpl implements IAddressService {
 
+    /** 地址 Mapper */
     private final MallUserAddressMapper mallUserAddressMapper;
 
+    /** 用户模块配置属性 */
     private final MallUserConfigProperties mallUserConfigProperties;
 
     /**

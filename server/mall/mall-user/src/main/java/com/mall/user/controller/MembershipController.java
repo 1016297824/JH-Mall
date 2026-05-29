@@ -23,6 +23,7 @@ import com.mall.user.VO.MembershipVO;
 @RequiredArgsConstructor
 public class MembershipController {
 
+    /** 会员服务 */
     private final IMemberService memberService;
 
     /**

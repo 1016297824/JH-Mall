@@ -32,8 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RemoteUserInnerController {
 
+    /** 用户服务 */
     private final IMallUserService mallUserService;
 
+    /** 积分过期定时任务 */
     private final PointsExpireTask pointsExpireTask;
 
     /**

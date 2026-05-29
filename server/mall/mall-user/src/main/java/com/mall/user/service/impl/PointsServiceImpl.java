@@ -39,8 +39,10 @@ public class PointsServiceImpl implements IPointsService {
     /** 乐观锁最大重试次数 */
     private static final int MAX_RETRY = 3;
 
+    /** 积分账户 Mapper */
     private final MallPointsAccountMapper mallPointsAccountMapper;
 
+    /** 积分流水 Mapper */
     private final MallUserPointsLogMapper mallUserPointsLogMapper;
 
     /**

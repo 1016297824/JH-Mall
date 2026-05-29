@@ -17,26 +17,50 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "mall.user")
 public class MallUserConfigProperties {
 
+    /** 地址配置 */
     private final Address address = new Address();
 
+    /** 用户资料缓存配置 */
     private final Profile profile = new Profile();
 
+    /** 会员配置 */
     private final Member member = new Member();
 
+    /** 积分配置 */
     private final Points points = new Points();
 
+    /**
+     * 获取地址配置
+     *
+     * @return 地址配置（地址簿上限）
+     */
     public Address getAddress() {
         return address;
     }
 
+    /**
+     * 获取用户资料缓存配置
+     *
+     * @return 资料缓存配置（缓存 TTL）
+     */
     public Profile getProfile() {
         return profile;
     }
 
+    /**
+     * 获取会员配置
+     *
+     * @return 会员配置（默认等级）
+     */
     public Member getMember() {
         return member;
     }
 
+    /**
+     * 获取积分配置
+     *
+     * @return 积分配置（签到基数、连续加成等）
+     */
     public Points getPoints() {
         return points;
     }

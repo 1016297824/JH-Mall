@@ -28,6 +28,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class GrowthLogServiceImpl implements IGrowthLogService {
 
+    /** 成长值流水 Mapper */
     private final MallUserGrowthLogMapper mallUserGrowthLogMapper;
 
     /**

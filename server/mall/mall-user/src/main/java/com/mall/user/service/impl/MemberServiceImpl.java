@@ -43,10 +43,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements IMemberService {
 
+    /** 用户会员 Mapper */
     private final MallUserMemberMapper mallUserMemberMapper;
 
+    /** 会员等级 Mapper */
     private final MallUserMemberLevelMapper mallUserMemberLevelMapper;
 
+    /** 成长值流水 Mapper */
     private final MallUserGrowthLogMapper mallUserGrowthLogMapper;
 
     /** JSON 解析器，用于解析会员权益配置 */
