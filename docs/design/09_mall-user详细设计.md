@@ -104,11 +104,15 @@ server/mall/mall-user/
     │   └── feign/
     │       └── RemoteAuthAdapter.java       # 调 mall-auth 解密手机号
     └── convert/
-        ├── UserConvert.java                # MallUserDO → UserProfileVO
-        ├── AddressConvert.java             # MallUserAddressDO → AddressVO
-        ├── MemberConvert.java              # MallUserMemberDO → MembershipVO
-        ├── PointsConvert.java              # MallPointsLogDO → PointsRecordVO
- │       └── GrowthConvert.java              # MallGrowthLogDO → GrowthRecordVO
+        ├── request/
+        │   ├── AddressConvert.java            # AddressVO → MallUserAddressDO
+        │   └── UserProfileConvert.java        # UpdateProfileRequest → MallUserDO
+        └── response/
+            ├── UserConvert.java               # MallUserDO + Member + Level + Account → UserProfileVO
+            ├── AddressConvert.java            # MallUserAddressDO → AddressVO
+            ├── MemberConvert.java             # MallUserMemberDO + Level → MembershipVO / GrowthVO / MemberLevelVO
+            ├── PointsConvert.java             # MallPointsAccountDO → PointsVO / MallPointsLogDO → PointsRecordVO
+            └── GrowthConvert.java             # MallGrowthLogDO → GrowthRecordVO
 ```
 
 ### 2.1.1 Mapper 层编码规范
@@ -175,7 +179,7 @@ mallUserAddressMapper.updateById(addressDO);
 | `vo/` | `@Data` | 视图对象 |
 | `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 + 日志 |
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | 同上 |
-| `convert/` | 无 Lombok | 纯转换器，手写 `static` 方法 |
+    | `convert/request/`, `convert/response/` | 无 Lombok | 纯转换器，static 方法；request 为 merge 入站，response 为 toVO 出站 |
 
 禁止使用：`@EqualsAndHashCode`（继承场景语义不清）、`@ToString`（统一 `ToStringBuilder`）、`@Value`（不采用不可变模式）。
 

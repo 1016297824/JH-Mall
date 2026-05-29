@@ -88,9 +88,11 @@ server/mall/mall-payment/
     │   ├── RefundVO.java                      # C 端退款单（金额分→元）
     │   ├── RefundDetailVO.java                # 管理端退款单详情
     │   └── ChannelConfigVO.java               # 管理端渠道配置（屏蔽密钥明文）
-    └── convert/                               # 纯转换器（Entity↔DTO↔VO 字段映射）
-        ├── PaymentConvert.java                # MallPayment → PaymentVO / PaymentDetailVO / PayResultDTO
-        └── RefundConvert.java                 # MallRefund → RefundVO / RefundDetailVO
+    └── convert/
+        ├── request/                           # Request → DO（入站）
+        └── response/                          # DO → VO（出站）
+            ├── PaymentConvert.java            # MallPayment → PaymentVO / PaymentDetailVO / PayResultDTO
+            └── RefundConvert.java             # MallRefund → RefundVO / RefundDetailVO
 ```
 
 ### 2.2 接口 → Controller 映射表
@@ -122,7 +124,7 @@ server/mall/mall-payment/
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
 | `statemachine/` | `@Slf4j` | PaymentStateMachine |
 | `infrastructure/channel/` | `@Slf4j` | 支付渠道适配器 |
-| `convert/` | 无 Lombok | 静态转换方法 |
+| `convert/request/`, `convert/response/` | 无 Lombok | 静态转换方法 |
 
 详见 `AGENTS.md` §Lombok 使用规范。
 

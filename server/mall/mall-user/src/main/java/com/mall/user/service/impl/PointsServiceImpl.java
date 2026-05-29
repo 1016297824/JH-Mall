@@ -14,13 +14,12 @@ import com.mall.user.mapper.MallUserPointsLogMapper;
 import com.mall.user.service.IPointsService;
 import com.mall.user.VO.PointsRecordVO;
 import com.mall.user.VO.PointsVO;
+import com.mall.user.convert.response.PointsConvert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 /**
  * 积分服务实现类
@@ -61,12 +60,7 @@ public class PointsServiceImpl implements IPointsService {
         if (account == null) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
-        PointsVO vo = new PointsVO();
-        vo.setTotalPoints(account.getTotalPoints());
-        vo.setAvailablePoints(account.getAvailablePoints());
-        vo.setUsedPoints(account.getUsedPoints());
-        vo.setExpiredPoints(account.getExpiredPoints());
-        return vo;
+        return PointsConvert.toPointsVO(account);
     }
 
     /**
@@ -90,7 +84,7 @@ public class PointsServiceImpl implements IPointsService {
         }
         wrapper.orderByDesc(MallUserPointsLogDO::getCreateTime);
         IPage<MallUserPointsLogDO> logPage = mallUserPointsLogMapper.selectPage(pageParam, wrapper);
-        return logPage.convert(this::toPointsRecordVO);
+        return logPage.convert(PointsConvert::toPointsRecordVO);
     }
 
     /**
@@ -142,29 +136,5 @@ public class PointsServiceImpl implements IPointsService {
         }
         log.error("积分增加失败, 乐观锁重试{}次均失败, userId={}", MAX_RETRY, userId);
         throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-    }
-
-    /**
-     * 将积分流水 DO 转换为 VO
-     *
-     * @param logDO 积分流水 DO
-     * @return 积分流水 VO
-     */
-    private PointsRecordVO toPointsRecordVO(MallUserPointsLogDO logDO) {
-        PointsRecordVO vo = new PointsRecordVO();
-        vo.setId(logDO.getId());
-        vo.setBizType(logDO.getBizType());
-        BizTypeEnum bizTypeEnum = BizTypeEnum.fromCode(logDO.getBizType());
-        vo.setBizTypeName(bizTypeEnum != null ? bizTypeEnum.getName() : logDO.getBizType());
-        vo.setChangeType(logDO.getChangeType());
-        vo.setPoints(logDO.getPoints());
-        vo.setBeforePoints(logDO.getBeforePoints());
-        vo.setAfterPoints(logDO.getAfterPoints());
-        vo.setRemark(logDO.getRemark());
-        // 将 LocalDateTime 转为 Date 供前端展示
-        if (logDO.getCreateTime() != null) {
-            vo.setCreateTime(Date.from(logDO.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-        }
-        return vo;
     }
 }

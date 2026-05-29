@@ -1,5 +1,6 @@
 package com.mall.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserDO;
@@ -51,27 +52,27 @@ class MallUserServiceImplTest {
 
     @Test
     void testSelectByPhoneHash_ShouldReturnUser() {
-        when(mallUserMapper.selectByPhoneHash("abc123hash")).thenReturn(mockUser);
+        when(mallUserMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(mockUser);
         MallUserDO result = mallUserService.selectByPhoneHash("abc123hash");
         assertNotNull(result);
         assertEquals(12345L, result.getId());
-        verify(mallUserMapper).selectByPhoneHash("abc123hash");
+        verify(mallUserMapper).selectOne(any(LambdaQueryWrapper.class));
     }
 
     @Test
     void testSelectByPhoneHash_ShouldReturnNullWhenNotFound() {
-        when(mallUserMapper.selectByPhoneHash("nonexistent")).thenReturn(null);
+        when(mallUserMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(null);
         MallUserDO result = mallUserService.selectByPhoneHash("nonexistent");
         assertNull(result);
     }
 
     @Test
     void testSelectByPhone_ShouldHashPhoneAndQuery() {
-        when(mallUserMapper.selectByPhoneHash(anyString())).thenReturn(mockUser);
+        when(mallUserMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(mockUser);
         MallUserDO result = mallUserService.selectByPhone("13800138000");
         assertNotNull(result);
         assertEquals(12345L, result.getId());
-        verify(mallUserMapper).selectByPhoneHash(anyString());
+        verify(mallUserMapper).selectOne(any(LambdaQueryWrapper.class));
     }
 
     @Test
@@ -97,7 +98,7 @@ class MallUserServiceImplTest {
     @Test
     void testUpdatePasswordById_ShouldDelegate() {
         when(mallUserMapper.selectById(12345L)).thenReturn(mockUser);
-        doNothing().when(mallUserMapper).updateById(any(MallUserDO.class));
+        when(mallUserMapper.updateById(any(MallUserDO.class))).thenReturn(1);
 
         mallUserService.updatePasswordById("12345", "newHash");
 
@@ -107,7 +108,7 @@ class MallUserServiceImplTest {
     @Test
     void testUpdatePhoneById_ShouldDelegate() {
         when(mallUserMapper.selectById(12345L)).thenReturn(mockUser);
-        doNothing().when(mallUserMapper).updateById(any(MallUserDO.class));
+        when(mallUserMapper.updateById(any(MallUserDO.class))).thenReturn(1);
 
         mallUserService.updatePhoneById("12345", "13900139000", "newPhoneHash");
 
@@ -117,7 +118,7 @@ class MallUserServiceImplTest {
     @Test
     void testUpdateUserStatusById_ShouldDelegate() {
         when(mallUserMapper.selectById(12345L)).thenReturn(mockUser);
-        doNothing().when(mallUserMapper).updateById(any(MallUserDO.class));
+        when(mallUserMapper.updateById(any(MallUserDO.class))).thenReturn(1);
 
         mallUserService.updateUserStatusById("12345", String.valueOf(UserStatusEnum.DELETED.getCode()));
 

@@ -74,10 +74,12 @@ mall-order/src/main/java/com/mall/order/
 │  ├─ mq/             → OrderEventProducer, PaymentPaidConsumer, RefundSucceededConsumer
   │  ├─ feign/          → RemoteProductAdapter, RemoteMarketingAdapter, RemotePaymentAdapter, RemoteUserAdapter, RemoteAuthAdapter
 │  └─ outbox/         → OutboxMessage.java, OutboxMapper.java, OutboxScheduler.java
-├─ convert/           # 纯转换器（Entity↔DTO↔VO 字段映射）
-│  ├─ CartConvert.java
-│  ├─ OrderConvert.java
-│  └─ AfterSaleConvert.java
+├─ convert/
+│  ├─ request/       # Request → DO（入站）
+│  └─ response/      # DO → VO（出站）
+│     ├─ CartConvert.java
+│     ├─ OrderConvert.java
+│     └─ AfterSaleConvert.java
 └─ VO/                # 视图对象，前端展示
    ├─ CartVO.java
    ├─ OrderVO.java
@@ -117,7 +119,7 @@ mall-order/src/main/java/com/mall/order/
 | `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
 | `statemachine/` | `@Slf4j` | 状态机为无状态单例，仅需日志 |
-| `convert/` | 无 Lombok | 静态转换方法 |
+| `convert/request/`, `convert/response/` | 无 Lombok | 静态转换方法 |
 
 详见 `AGENTS.md` §Lombok 使用规范。
 

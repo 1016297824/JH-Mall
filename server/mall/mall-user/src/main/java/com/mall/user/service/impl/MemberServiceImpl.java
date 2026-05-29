@@ -16,17 +16,16 @@ import com.mall.user.mapper.MallUserMemberMapper;
 import com.mall.user.service.IMemberService;
 import com.mall.user.VO.GrowthRecordVO;
 import com.mall.user.VO.GrowthVO;
-import com.mall.user.VO.MemberLevelVO;
 import com.mall.user.VO.MembershipVO;
+import com.mall.user.convert.response.GrowthConvert;
+import com.mall.user.convert.response.MemberConvert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,13 +70,8 @@ public class MemberServiceImpl implements IMemberService {
         MallUserMemberLevelDO currentLevel = findLevelById(levels, member.getLevelId());
         MallUserMemberLevelDO nextLevel = findNextLevel(levels, member.getLevelId());
 
-        MembershipVO vo = new MembershipVO();
-        vo.setGrowth(member.getGrowth());
-        vo.setTotalGrowth(member.getTotalGrowth());
-        vo.setCurrentLevel(toMemberLevelVO(currentLevel));
-        vo.setNextLevel(nextLevel != null ? toMemberLevelVO(nextLevel) : null);
-        vo.setBenefits(parseBenefits(currentLevel));
-        return vo;
+        List<String> benefits = parseBenefits(currentLevel);
+        return MemberConvert.toMembershipVO(member, currentLevel, nextLevel, benefits);
     }
 
     /**
@@ -95,23 +89,18 @@ public class MemberServiceImpl implements IMemberService {
         MallUserMemberLevelDO currentLevel = findLevelById(levels, member.getLevelId());
         MallUserMemberLevelDO nextLevel = findNextLevel(levels, member.getLevelId());
 
-        GrowthVO vo = new GrowthVO();
-        vo.setGrowth(member.getGrowth());
-        vo.setTotalGrowth(member.getTotalGrowth());
-        vo.setCurrentLevel(toMemberLevelVO(currentLevel));
-        vo.setNextLevel(nextLevel != null ? toMemberLevelVO(nextLevel) : null);
+        int needGrowth;
+        int progressPercent;
         if (nextLevel != null) {
-            // 计算距离下一级还需多少成长值
-            vo.setNeedGrowth(nextLevel.getMinGrowth() - member.getGrowth());
-            // 计算等级升级百分比进度
+            needGrowth = nextLevel.getMinGrowth() - member.getGrowth();
             int totalSpan = nextLevel.getMinGrowth() - currentLevel.getMinGrowth();
-            int progress = totalSpan > 0 ? (member.getGrowth() - currentLevel.getMinGrowth()) * 100 / totalSpan : 100;
-            vo.setProgressPercent(progress);
+            progressPercent = totalSpan > 0
+                ? (member.getGrowth() - currentLevel.getMinGrowth()) * 100 / totalSpan : 100;
         } else {
-            vo.setNeedGrowth(0);
-            vo.setProgressPercent(100);
+            needGrowth = 0;
+            progressPercent = 100;
         }
-        return vo;
+        return MemberConvert.toGrowthVO(member, currentLevel, nextLevel, needGrowth, progressPercent);
     }
 
     /**
@@ -173,7 +162,7 @@ public class MemberServiceImpl implements IMemberService {
         }
         wrapper.orderByDesc(MallUserGrowthLogDO::getCreateTime);
         IPage<MallUserGrowthLogDO> logPage = mallUserGrowthLogMapper.selectPage(pageParam, wrapper);
-        return logPage.convert(this::toGrowthRecordVO);
+        return logPage.convert(GrowthConvert::toGrowthRecordVO);
     }
 
     /**
@@ -252,22 +241,6 @@ public class MemberServiceImpl implements IMemberService {
     }
 
     /**
-     * 将等级 DO 转换为等级 VO
-     *
-     * @param level 等级 DO
-     * @return 等级 VO
-     */
-    private MemberLevelVO toMemberLevelVO(MallUserMemberLevelDO level) {
-        MemberLevelVO vo = new MemberLevelVO();
-        if (level != null) {
-            vo.setLevelName(level.getLevelName());
-            vo.setIcon(level.getIcon());
-            vo.setLevelValue(level.getLevelValue());
-        }
-        return vo;
-    }
-
-    /**
      * 解析等级权益 JSON 为字符串列表
      *
      * @param level 等级 DO
@@ -284,29 +257,5 @@ public class MemberServiceImpl implements IMemberService {
             log.warn("解析会员权益JSON失败, levelId={}", level.getId(), e);
             return Collections.emptyList();
         }
-    }
-
-    /**
-     * 将成长值流水 DO 转换为 VO
-     *
-     * @param logDO 成长值流水 DO
-     * @return 成长值流水 VO
-     */
-    private GrowthRecordVO toGrowthRecordVO(MallUserGrowthLogDO logDO) {
-        GrowthRecordVO vo = new GrowthRecordVO();
-        vo.setId(logDO.getId());
-        vo.setBizType(logDO.getBizType());
-        BizTypeEnum bizTypeEnum = BizTypeEnum.fromCode(logDO.getBizType());
-        vo.setBizTypeName(bizTypeEnum != null ? bizTypeEnum.getName() : logDO.getBizType());
-        vo.setChangeType(logDO.getChangeType());
-        vo.setGrowth(logDO.getGrowth());
-        vo.setBeforeGrowth(logDO.getBeforeGrowth());
-        vo.setAfterGrowth(logDO.getAfterGrowth());
-        vo.setRemark(logDO.getRemark());
-        // 将 LocalDateTime 转为 Date 供前端展示
-        if (logDO.getCreateTime() != null) {
-            vo.setCreateTime(Date.from(logDO.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-        }
-        return vo;
     }
 }

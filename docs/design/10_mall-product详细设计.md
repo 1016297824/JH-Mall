@@ -89,12 +89,14 @@ server/mall/mall-product/
     │   │   └── OrderCancelledConsumer.java   # 消费 mall:order:cancelled 释放库存
     │   └── feign/
     │       └── RemoteSearchAdapter.java      # 调 mall-search 实时同步索引
-    ├── convert/                             # 纯转换器（Entity↔DTO↔VO 字段映射）
-    │   ├── CategoryConvert.java            # MallCategoryDO → CategoryTreeVO
-    │   ├── BrandConvert.java               # MallBrandDO → BrandVO
-    │   ├── SpuConvert.java                 # MallProductSpuDO → SpuVO / SpuDetailVO / SpuAdminVO
-    │   ├── SkuConvert.java                 # MallProductSkuDO → SkuVO (attrsJson 展开)
-    │   └── StockConvert.java               # MallSkuStockDO → StockVO
+    ├── convert/
+    │   ├── request/                        # Request/VO → DO（入站）
+    │   └── response/                       # DO → VO（出站）
+    │       ├── CategoryConvert.java
+    │       ├── BrandConvert.java
+    │       ├── SpuConvert.java
+    │       ├── SkuConvert.java
+    │       └── StockConvert.java
     └── VO/                                  # 视图对象，前端展示（与 DO 字段不同，需转换）
         ├── CategoryTreeVO.java              # 类目树（嵌套 children），与 DO 扁平行不同
         ├── BrandVO.java                     # 品牌展示
@@ -131,7 +133,7 @@ server/mall/mall-product/
 | `vo/` | `@Data` | 视图对象（CategoryTreeVO 等） |
 | `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
-| `convert/` | 无 Lombok | 纯静态转换方法 |
+| `convert/request/`, `convert/response/` | 无 Lombok | 纯静态转换方法 |
 
 详见 `AGENTS.md` §Lombok 使用规范。
 

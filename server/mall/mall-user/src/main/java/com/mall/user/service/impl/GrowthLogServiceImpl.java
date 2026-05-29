@@ -3,17 +3,14 @@ package com.mall.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mall.common.enums.user.BizTypeEnum;
 import com.mall.user.DO.MallUserGrowthLogDO;
+import com.mall.user.VO.GrowthRecordVO;
+import com.mall.user.convert.response.GrowthConvert;
 import com.mall.user.mapper.MallUserGrowthLogMapper;
 import com.mall.user.service.IGrowthLogService;
-import com.mall.user.VO.GrowthRecordVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.time.ZoneId;
-import java.util.Date;
 
 /**
  * 成长值流水服务实现类
@@ -53,30 +50,6 @@ public class GrowthLogServiceImpl implements IGrowthLogService {
         }
         wrapper.orderByDesc(MallUserGrowthLogDO::getCreateTime);
         IPage<MallUserGrowthLogDO> logPage = mallUserGrowthLogMapper.selectPage(pageParam, wrapper);
-        return logPage.convert(this::toGrowthRecordVO);
-    }
-
-    /**
-     * 将成长值流水 DO 转换为 VO
-     *
-     * @param logDO 成长值流水 DO
-     * @return 成长值流水 VO
-     */
-    private GrowthRecordVO toGrowthRecordVO(MallUserGrowthLogDO logDO) {
-        GrowthRecordVO vo = new GrowthRecordVO();
-        vo.setId(logDO.getId());
-        vo.setBizType(logDO.getBizType());
-        BizTypeEnum bizTypeEnum = BizTypeEnum.fromCode(logDO.getBizType());
-        vo.setBizTypeName(bizTypeEnum != null ? bizTypeEnum.getName() : logDO.getBizType());
-        vo.setChangeType(logDO.getChangeType());
-        vo.setGrowth(logDO.getGrowth());
-        vo.setBeforeGrowth(logDO.getBeforeGrowth());
-        vo.setAfterGrowth(logDO.getAfterGrowth());
-        vo.setRemark(logDO.getRemark());
-        // 将 LocalDateTime 转为 Date 供前端展示
-        if (logDO.getCreateTime() != null) {
-            vo.setCreateTime(Date.from(logDO.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-        }
-        return vo;
+        return logPage.convert(GrowthConvert::toGrowthRecordVO);
     }
 }

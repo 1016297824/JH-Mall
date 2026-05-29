@@ -3,7 +3,6 @@ package com.mall.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.enums.ErrorCode;
-import com.mall.common.enums.user.GenderEnum;
 import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserDO;
@@ -11,6 +10,8 @@ import com.mall.user.DO.MallUserMemberDO;
 import com.mall.user.DO.MallUserMemberLevelDO;
 import com.mall.user.config.MallUserConfigProperties;
 import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.convert.request.UserProfileConvert;
+import com.mall.user.convert.response.UserConvert;
 import com.mall.user.infrastructure.feign.RemoteAuthAdapter;
 import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserMapper;
@@ -25,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -104,21 +104,7 @@ public class UserProfileServiceImpl implements IUserProfileService {
         }
 
         // 仅更新传入的非空字段，null 表示不修改
-        if (request.getNickname() != null) {
-            user.setNickname(request.getNickname());
-        }
-        if (request.getAvatar() != null) {
-            user.setAvatar(request.getAvatar());
-        }
-        if (request.getGender() != null) {
-            user.setGender(request.getGender());
-        }
-        if (request.getBirthday() != null) {
-            user.setBirthday(parseBirthday(request.getBirthday()));
-        }
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
-        }
+        UserProfileConvert.merge(request, user);
         user.setUpdateTime(LocalDateTime.now());
         mallUserMapper.updateById(user);
 
@@ -144,43 +130,21 @@ public class UserProfileServiceImpl implements IUserProfileService {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        UserProfileVO vo = new UserProfileVO();
-        vo.setUserId(String.valueOf(user.getId()));
-        vo.setNickname(user.getNickname());
-        vo.setAvatar(user.getAvatar());
-        vo.setGender(user.getGender());
-        vo.setGenderName(getGenderName(user.getGender()));
-        if (user.getBirthday() != null) {
-            vo.setBirthday(user.getBirthday().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        }
-        // 通过 Feign 调用 auth 服务脱敏手机号
-        vo.setPhone(remoteAuthAdapter.maskPhone(user.getPhone()));
-        vo.setEmail(user.getEmail());
+        String maskedPhone = remoteAuthAdapter.maskPhone(user.getPhone());
 
-        // 聚合会员等级信息（当前等级名称和图标）
         MallUserMemberDO member = getMemberByUserId(userId);
+        MallUserMemberLevelDO level = null;
         if (member != null) {
-            vo.setGrowth(member.getGrowth());
-            vo.setTotalGrowth(member.getTotalGrowth());
             List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
-            MallUserMemberLevelDO currentLevel = levels.stream()
+            level = levels.stream()
                     .filter(l -> l.getId().equals(member.getLevelId()))
                     .findFirst()
                     .orElse(null);
-            if (currentLevel != null) {
-                vo.setMembershipLevel(currentLevel.getLevelName());
-                vo.setMembershipIcon(currentLevel.getIcon());
-            }
         }
 
-        // 聚合积分账户信息
         MallPointsAccountDO account = getPointsAccountByUserId(userId);
-        if (account != null) {
-            vo.setPoints(account.getTotalPoints());
-            vo.setAvailablePoints(account.getAvailablePoints());
-        }
 
-        return vo;
+        return UserConvert.toUserProfileVO(user, maskedPhone, member, level, account);
     }
 
     /**
@@ -207,38 +171,5 @@ public class UserProfileServiceImpl implements IUserProfileService {
         wrapper.eq(MallPointsAccountDO::getUserId, userId)
                 .eq(MallPointsAccountDO::getIsDeleted, 0);
         return mallPointsAccountMapper.selectOne(wrapper);
-    }
-
-    /**
-     * 根据性别编码获取中文描述
-     *
-     * @param gender 性别编码
-     * @return 性别中文描述，null 或未知编码返回"未知"
-     */
-    private String getGenderName(Integer gender) {
-        if (gender == null) {
-            return GenderEnum.UNKNOWN.getDescription();
-        }
-        for (GenderEnum e : GenderEnum.values()) {
-            if (e.getCode() == gender) {
-                return e.getDescription();
-            }
-        }
-        return GenderEnum.UNKNOWN.getDescription();
-    }
-
-    /**
-     * 将生日字符串解析为 LocalDateTime
-     *
-     * @param birthday 生日字符串，格式 yyyy-MM-dd
-     * @return 解析后的 LocalDateTime，解析失败返回 null
-     */
-    private LocalDateTime parseBirthday(String birthday) {
-        try {
-            return LocalDateTime.parse(birthday + "T00:00:00");
-        } catch (Exception e) {
-            log.warn("解析生日失败, birthday={}", birthday, e);
-            return null;
-        }
     }
 }

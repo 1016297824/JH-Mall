@@ -8,6 +8,7 @@ import com.mall.user.config.MallUserConfigProperties;
 import com.mall.user.mapper.MallUserAddressMapper;
 import com.mall.user.service.IAddressService;
 import com.mall.user.VO.AddressVO;
+import com.mall.user.convert.response.AddressConvert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class AddressServiceImpl implements IAddressService {
                 .orderByDesc(MallUserAddressDO::getIsDefault)
                 .orderByDesc(MallUserAddressDO::getCreateTime);
         List<MallUserAddressDO> list = mallUserAddressMapper.selectList(wrapper);
-        return list.stream().map(this::toAddressVO).collect(Collectors.toList());
+        return list.stream().map(AddressConvert::toAddressVO).collect(Collectors.toList());
     }
 
     /**
@@ -81,14 +82,14 @@ public class AddressServiceImpl implements IAddressService {
 
         MallUserAddressDO addressDO = new MallUserAddressDO();
         addressDO.setUserId(userId);
-        fillAddressDO(addressDO, request);
+        com.mall.user.convert.request.AddressConvert.merge(request, addressDO);
         addressDO.setIsDeleted(0);
         addressDO.setCreateTime(LocalDateTime.now());
         addressDO.setUpdateTime(LocalDateTime.now());
         mallUserAddressMapper.insert(addressDO);
 
         log.info("新增地址成功, userId={}, addressId={}", userId, addressDO.getId());
-        return toAddressVO(addressDO);
+        return AddressConvert.toAddressVO(addressDO);
     }
 
     /**
@@ -105,12 +106,12 @@ public class AddressServiceImpl implements IAddressService {
         MallUserAddressDO addressDO = getAddressById(addressId);
         checkOwnership(addressDO, userId);
 
-        fillAddressDO(addressDO, request);
+        com.mall.user.convert.request.AddressConvert.merge(request, addressDO);
         addressDO.setUpdateTime(LocalDateTime.now());
         mallUserAddressMapper.updateById(addressDO);
 
         log.info("修改地址成功, userId={}, addressId={}", userId, addressId);
-        return toAddressVO(addressDO);
+        return AddressConvert.toAddressVO(addressDO);
     }
 
     /**
@@ -182,48 +183,5 @@ public class AddressServiceImpl implements IAddressService {
         if (!addressDO.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.NO_PERMISSION);
         }
-    }
-
-    /**
-     * 将地址 VO 的字段填充到地址 DO
-     *
-     * <p>仅填充传入的非空字段</p>
-     *
-     * @param addressDO 目标地址 DO
-     * @param request   源地址 VO
-     */
-    private void fillAddressDO(MallUserAddressDO addressDO, AddressVO request) {
-        addressDO.setReceiverName(request.getReceiverName());
-        addressDO.setReceiverPhone(request.getReceiverPhone());
-        addressDO.setProvince(request.getProvince());
-        addressDO.setCity(request.getCity());
-        addressDO.setDistrict(request.getDistrict());
-        addressDO.setDetailAddress(request.getDetailAddress());
-        addressDO.setZipCode(request.getZipCode());
-        addressDO.setLabel(request.getLabel());
-        if (request.getIsDefault() != null && request.getIsDefault()) {
-            addressDO.setIsDefault(1);
-        }
-    }
-
-    /**
-     * 将地址 DO 转换为地址 VO
-     *
-     * @param addressDO 地址 DO
-     * @return 地址 VO
-     */
-    private AddressVO toAddressVO(MallUserAddressDO addressDO) {
-        AddressVO vo = new AddressVO();
-        vo.setAddressId(String.valueOf(addressDO.getId()));
-        vo.setReceiverName(addressDO.getReceiverName());
-        vo.setReceiverPhone(addressDO.getReceiverPhone());
-        vo.setProvince(addressDO.getProvince());
-        vo.setCity(addressDO.getCity());
-        vo.setDistrict(addressDO.getDistrict());
-        vo.setDetailAddress(addressDO.getDetailAddress());
-        vo.setZipCode(addressDO.getZipCode());
-        vo.setIsDefault(addressDO.getIsDefault() != null && addressDO.getIsDefault() == 1);
-        vo.setLabel(addressDO.getLabel());
-        return vo;
     }
 }

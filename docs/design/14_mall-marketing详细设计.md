@@ -81,9 +81,11 @@ server/mall/mall-marketing/
     │   └── feign/
     │       └── RemoteOrderAdapter.java       # 调 mall-order 查询订单状态
     └── convert/
-        ├── CouponConvert.java               # MallCoupon ↔ CouponDefResp
-        ├── CouponRecordConvert.java          # MallCouponRecord ↔ CouponRecordResp
-        └── PromotionConvert.java            # MallPromotion ↔ PromotionResp
+        ├── request/                         # Request → DO（入站）
+        └── response/                        # DO → VO（出站）
+            ├── CouponConvert.java           # MallCoupon → CouponDefResp
+            ├── CouponRecordConvert.java     # MallCouponRecord → CouponRecordResp
+            └── PromotionConvert.java        # MallPromotion → PromotionResp
 ```
 
 ### 2.2 接口 → Controller 映射
@@ -108,7 +110,7 @@ server/mall/mall-marketing/
 | `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
 | `statemachine/` | `@Slf4j` | CouponStateMachine |
-| `convert/` | 无 Lombok | 静态转换方法 |
+| `convert/request/`, `convert/response/` | 无 Lombok | 静态转换方法 |
 
 详见 `AGENTS.md` §Lombok 使用规范。
 

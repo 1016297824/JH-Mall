@@ -68,7 +68,9 @@ server/mall/mall-search/
     │   └── feign/
     │       └── RemoteProductAdapter.java     # 调 mall-product 取商品数据
     └── convert/
-        └── SearchConvert.java               # ProductIndex ↔ SearchItemVO
+        ├── request/                         # Request → DO（入站）
+        └── response/                        # DO → VO（出站）
+            └── SearchConvert.java           # ProductIndex → SearchItemVO
 ```
 
 ### 2.2 接口 → Controller 映射
@@ -90,7 +92,7 @@ server/mall/mall-search/
 | `vo/` | `@Data` | 视图对象 |
 | `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
-| `convert/` | 无 Lombok | 静态转换方法 |
+| `convert/request/`, `convert/response/` | 无 Lombok | 静态转换方法 |
 
 > `ProductIndex` 是 ES 实体（Spring Data Elasticsearch），非 JPA Entity，`@Data` 不违反"禁止用于 JPA Entity"约束。
 
