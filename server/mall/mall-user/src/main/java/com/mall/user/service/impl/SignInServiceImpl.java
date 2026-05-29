@@ -89,15 +89,19 @@ public class SignInServiceImpl implements ISignInService {
 
         Long result = redisTemplate.execute(SIGN_IN_SCRIPT,
                 Collections.singletonList(key), String.valueOf(offset));
+        // Lua 返回 0 表示当天已签到，抛出幂等异常
         if (result == null || result == 0) {
             throw new BusinessException(ErrorCode.RESOURCE_EXISTS);
         }
 
+        // 计算连续签到天数和本次应得积分（基础分 + 连续加成）
         int consecutiveDays = calcConsecutiveDays(key, offset, today);
         int points = calcPoints(consecutiveDays);
 
+        // 设置 60 天过期，防止 Redis key 堆积
         redisTemplate.expire(key, 60, TimeUnit.DAYS);
 
+        // 调用积分服务发放签到积分
         pointsService.addPoints(userId, points, BizTypeEnum.SIGN_IN, null);
 
         List<Integer> calendar = buildCalendar(key, today);

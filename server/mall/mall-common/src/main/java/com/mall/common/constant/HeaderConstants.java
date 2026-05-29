@@ -1,5 +1,11 @@
 package com.mall.common.constant;
 
+/**
+ * C 端 HTTP Header 常量
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
+ */
 public final class HeaderConstants {
 
     /** C端 JWT Token */

@@ -50,6 +50,7 @@ public class PointsExpireTask {
         log.info("开始年度积分清零");
         int page = 1;
         int totalExpired = 0;
+        // 分页查询所有可用积分大于 0 的账户，逐批清零
         while (true) {
             Page<MallPointsAccountDO> pageParam = new Page<>(page, PAGE_SIZE);
             LambdaQueryWrapper<MallPointsAccountDO> wrapper = new LambdaQueryWrapper<>();
@@ -65,8 +66,10 @@ public class PointsExpireTask {
                     continue;
                 }
 
+                // 执行积分清零：可用积分移至过期字段
                 pointsAccountMapper.expirePoints(account.getUserId());
 
+                // 逐条记录积分过期流水日志
                 MallUserPointsLogDO logDO = new MallUserPointsLogDO();
                 logDO.setUserId(account.getUserId());
                 logDO.setBizType(BizTypeEnum.EXPIRE.getCode());

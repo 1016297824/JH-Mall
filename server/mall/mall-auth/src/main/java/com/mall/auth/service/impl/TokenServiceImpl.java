@@ -53,9 +53,11 @@ public class TokenServiceImpl implements ITokenService {
         Date accessExp = new Date(now.getTime() + authProperties.getAccessTokenTtl() * 1000);
         Date refreshExp = new Date(now.getTime() + authProperties.getRefreshTokenTtl() * 1000);
 
+        // 为 accessToken 和 refreshToken 分别生成唯一 jti
         String accessJti = UUID.randomUUID().toString();
         String refreshJti = UUID.randomUUID().toString();
 
+        // 构建 accessToken JWT（HS512 签名）
         String accessToken = Jwts.builder()
                 .setId(accessJti)
                 .setSubject(userId)
@@ -67,6 +69,7 @@ public class TokenServiceImpl implements ITokenService {
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
 
+        // 构建 refreshToken JWT（有效期更长，用于续期 accessToken）
         String refreshToken = Jwts.builder()
                 .setId(refreshJti)
                 .setSubject(userId)
@@ -78,9 +81,11 @@ public class TokenServiceImpl implements ITokenService {
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
 
+        // accessToken 会话缓存，用于快速校验 token 有效性
         String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + accessJti;
         redisTemplate.opsForValue().set(sessionKey, "1", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
 
+        // refreshToken 映射缓存，刷新时校验 refreshToken 有效性
         String refreshKey = CacheConstants.Auth.REFRESH + refreshJti;
         redisTemplate.opsForValue().set(refreshKey, userId, authProperties.getRefreshTokenTtl(), TimeUnit.SECONDS);
 
@@ -100,11 +105,13 @@ public class TokenServiceImpl implements ITokenService {
         String jti = claims.getId();
         String userId = claims.getSubject();
 
+        // 检查黑名单：已注销/已刷新的 token 直接拒绝
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey))) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
+        // 检查会话缓存：无 session 说明 token 未签发或已被删除
         String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionKey))) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
@@ -123,6 +130,7 @@ public class TokenServiceImpl implements ITokenService {
     public TokenResponse refresh(String refreshToken) {
         Claims claims = parseToken(refreshToken);
 
+        // 校验 token 类型必须为 refresh
         String type = claims.get("type", String.class);
         if (!"refresh".equals(type)) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
@@ -132,21 +140,25 @@ public class TokenServiceImpl implements ITokenService {
         String userId = claims.getSubject();
         Date expiration = claims.getExpiration();
 
+        // 检查该 refreshToken 是否已被加入黑名单（已被使用）
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey))) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
+        // 检查 Redis 中是否存在 refresh 映射记录
         String refreshMappingKey = CacheConstants.Auth.REFRESH + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(refreshMappingKey))) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
+        // 旧 refreshToken 一次性使用：加入黑名单 + 删除映射，剩余有效期作为黑名单 TTL
         long remainingSeconds = Math.max(0,
                 (expiration.getTime() - System.currentTimeMillis()) / 1000);
         redisTemplate.opsForValue().set(blacklistKey, "revoked", remainingSeconds, TimeUnit.SECONDS);
         redisTemplate.delete(refreshMappingKey);
 
+        // 重新签发全套 Token
         return issue(userId);
     }
 
@@ -163,9 +175,11 @@ public class TokenServiceImpl implements ITokenService {
         String userId = claims.getSubject();
         Date expiration = claims.getExpiration();
 
+        // 计算 token 剩余有效期作为黑名单 TTL
         long remainingSeconds = Math.max(0,
                 (expiration.getTime() - System.currentTimeMillis()) / 1000);
 
+        // 加入黑名单防止后续使用，同时删除会话缓存
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         redisTemplate.opsForValue().set(blacklistKey, "revoked", remainingSeconds, TimeUnit.SECONDS);
 
@@ -180,12 +194,14 @@ public class TokenServiceImpl implements ITokenService {
      */
     @Override
     public void revokeAll(String userId) {
+        // pattern 匹配该用户所有 session Key：mall:auth:session:{userId}:*
         String pattern = CacheConstants.Auth.SESSION + userId + ":*";
         Set<String> keys = redisTemplate.keys(pattern);
         if (keys == null || keys.isEmpty()) {
             return;
         }
 
+        // 遍历每个 session，提取 jti 并加入黑名单
         for (String sessionKey : keys) {
             String jti = sessionKey.substring(sessionKey.lastIndexOf(':') + 1);
             String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
@@ -203,13 +219,16 @@ public class TokenServiceImpl implements ITokenService {
     private Claims parseToken(String token) {
         try {
             byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
+            // 用 HS512 密钥解析并校验 JWT 签名
             return Jwts.parser()
                     .setSigningKey(key)
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
+            // token 过期也视为无效，统一返 TOKEN_INVALID
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         } catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
+            // 签名篡改 / 格式非法 / 参数异常
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
     }

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * RemoteAuthAdapter 单元测试
  *
- * @author system
+ * @author JH-Mall
  * @date 2026/05/28
  */
 class RemoteAuthAdapterTest {

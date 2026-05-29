@@ -145,6 +145,7 @@ public class CaptchaController {
             throw new BusinessException(ErrorCode.ACCOUNT_DELETED);
         }
 
+        // 读取 Redis 中的密码错误计数，超过上限则临时锁定
         String pwdErrKey = CacheConstants.Auth.PWD_ERR + user.getId();
         Object errCountObj = redisTemplate.opsForValue().get(pwdErrKey);
         int errCount = errCountObj instanceof Number ? ((Number) errCountObj).intValue() : 0;
@@ -152,11 +153,13 @@ public class CaptchaController {
             throw new BusinessException(ErrorCode.PASSWORD_LOCKED);
         }
 
+        // 密码不匹配时递增错误计数
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             incrementPwdErrCount(pwdErrKey);
             throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
 
+        // 密码正确时清除错误计数
         redisTemplate.delete(pwdErrKey);
         TokenResponse token = tokenService.issue(user.getId());
         return MallResult.success(token);

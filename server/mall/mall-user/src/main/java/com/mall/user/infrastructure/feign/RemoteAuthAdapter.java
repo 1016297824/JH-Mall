@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 /**
  * 远程认证适配器，封装对 mall-auth 的手机号解密和脱敏调用
  *
- * @author system
+ * @author JH-Mall
  * @date 2026/05/28
  */
 @Component

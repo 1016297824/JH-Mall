@@ -85,6 +85,7 @@ public class MallExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public MallResult<Void> handleValidation(MethodArgumentNotValidException e) {
+        // 优先取 @NotBlank/@NotNull 等注解的 message，无具体字段错误时使用默认
         String msg = e.getBindingResult().getFieldError() != null
                 ? e.getBindingResult().getFieldError().getDefaultMessage()
                 : ErrorCode.PARAM_MISSING.getUserTip();

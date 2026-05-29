@@ -63,6 +63,7 @@ public class MemberServiceImpl implements IMemberService {
     @Override
     public MembershipVO getMembership(Long userId) {
         MallUserMemberDO member = getMemberByUserId(userId);
+        // 查询全部等级配置，用于定位当前等级和下一等级
         List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
         MallUserMemberLevelDO currentLevel = findLevelById(levels, member.getLevelId());
         MallUserMemberLevelDO nextLevel = findNextLevel(levels, member.getLevelId());
@@ -97,7 +98,9 @@ public class MemberServiceImpl implements IMemberService {
         vo.setCurrentLevel(toMemberLevelVO(currentLevel));
         vo.setNextLevel(nextLevel != null ? toMemberLevelVO(nextLevel) : null);
         if (nextLevel != null) {
+            // 计算距离下一级还需多少成长值
             vo.setNeedGrowth(nextLevel.getMinGrowth() - member.getGrowth());
+            // 计算等级升级百分比进度
             int totalSpan = nextLevel.getMinGrowth() - currentLevel.getMinGrowth();
             int progress = totalSpan > 0 ? (member.getGrowth() - currentLevel.getMinGrowth()) * 100 / totalSpan : 100;
             vo.setProgressPercent(progress);
@@ -122,8 +125,10 @@ public class MemberServiceImpl implements IMemberService {
     public void addGrowth(Long userId, int growth, BizTypeEnum bizType, String bizNo) {
         MallUserMemberDO member = getMemberByUserId(userId);
         int beforeGrowth = member.getGrowth();
+        // 原子增加成长值
         mallUserMemberMapper.addGrowth(userId, growth);
 
+        // 记录成长值变更流水日志
         MallUserGrowthLogDO logDO = new MallUserGrowthLogDO();
         logDO.setUserId(userId);
         logDO.setBizType(bizType.getCode());
@@ -138,6 +143,7 @@ public class MemberServiceImpl implements IMemberService {
         logDO.setUpdateTime(LocalDateTime.now());
         mallUserGrowthLogMapper.insert(logDO);
 
+        // 检测当前成长值是否已达到升级条件
         List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
         checkUpgrade(userId, beforeGrowth + growth, levels);
         log.info("成长值增加成功, userId={}, growth={}, bizType={}, bizNo={}", userId, growth, bizType.getCode(), bizNo);

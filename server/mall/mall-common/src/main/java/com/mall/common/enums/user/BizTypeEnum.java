@@ -3,7 +3,7 @@ package com.mall.common.enums.user;
 /**
  * 积分/成长值业务类型枚举
  *
- * @author system
+ * @author JH-Mall
  * @date 2026/05/28
  */
 public enum BizTypeEnum {
@@ -26,8 +26,10 @@ public enum BizTypeEnum {
     /** 积分过期 */
     EXPIRE("expire", "积分过期");
 
+    /** 业务类型编码 */
     private final String code;
 
+    /** 业务类型名称 */
     private final String name;
 
     BizTypeEnum(String code, String name) {
@@ -50,6 +52,7 @@ public enum BizTypeEnum {
      * @return 对应的枚举值，不存在返回 null
      */
     public static BizTypeEnum fromCode(String code) {
+        // 遍历枚举匹配 code，不存在返回 null
         for (BizTypeEnum e : values()) {
             if (e.code.equals(code)) {
                 return e;

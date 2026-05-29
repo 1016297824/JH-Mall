@@ -31,7 +31,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>拦截 /inner/** 路径，校验 {@code X-Internal-*} 签名头。</p>
  * <p>{@code @Component} 自动注册，各模块无需额外配置。</p>
  *
- * @author AI
+ * @author JH-Mall
  * @date 2026/05/28
  */
 @Component
@@ -64,22 +64,27 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        // 提取签名头
         String timestamp = request.getHeader(HeaderConstants.X_INTERNAL_TIMESTAMP);
         String nonce = request.getHeader(HeaderConstants.X_INTERNAL_NONCE);
         String signature = request.getHeader(HeaderConstants.X_INTERNAL_SIGNATURE);
 
+        // 签名头缺失直接拒绝
         if (timestamp == null || nonce == null || signature == null) {
             throw new BusinessException(ErrorCode.INTERNAL_SIGN_MISSING);
         }
 
+        // 校验时间戳偏差与 nonce 防重放
         validateTimestamp(timestamp);
         validateNonce(nonce);
 
+        // GET/DELETE 无请求体，不参与签名计算
         String method = request.getMethod();
         CachedBodyRequestWrapper wrapper = new CachedBodyRequestWrapper(request);
         String body = HttpMethod.GET.name().equals(method) || HttpMethod.DELETE.name().equals(method)
                 ? "" : wrapper.getBodyAsString();
 
+        // 校验 HMAC-SHA256 签名
         validateSignature(timestamp, nonce, body, signature);
 
         filterChain.doFilter(wrapper, response);
@@ -93,6 +98,7 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
     private void validateTimestamp(String timestamp) {
         long now = System.currentTimeMillis() / 1000;
         long reqTime = Long.parseLong(timestamp);
+        // 时间戳偏差超过配置容差（默认 300s）视为无效
         if (Math.abs(now - reqTime) > timestampToleranceSeconds) {
             throw new BusinessException(ErrorCode.INTERNAL_SIGN_INVALID);
         }
@@ -104,7 +110,9 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
      * @param nonce 请求头中的一次性随机数
      */
     private void validateNonce(String nonce) {
+        // Redis key: mall:internal:nonce:<nonce>
         String key = CacheConstants.Internal.NONCE + nonce;
+        // SETNX 原子写入，key 已存在说明该 nonce 已被使用（重放攻击）
         Boolean success = redisTemplate.opsForValue()
                 .setIfAbsent(key, CacheConstants.Internal.NONCE_VALUE, Duration.ofSeconds(timestampToleranceSeconds));
         if (Boolean.FALSE.equals(success)) {
@@ -121,6 +129,7 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
      * @param expectedSignature 期望的签名
      */
     private void validateSignature(String timestamp, String nonce, String body, String expectedSignature) {
+        // 签名载荷：timestamp + separator + nonce [+ separator + body]
         String payload = timestamp + SecurityConstants.SIGN_PAYLOAD_SEPARATOR + nonce;
         if (!body.isEmpty()) {
             payload += SecurityConstants.SIGN_PAYLOAD_SEPARATOR + body;
@@ -135,7 +144,7 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
     /**
      * 缓存请求体，使 InputStream 可重复读取
      *
-     * @author AI
+     * @author JH-Mall
      * @date 2026/05/28
      */
     private static class CachedBodyRequestWrapper extends HttpServletRequestWrapper {
@@ -165,6 +174,7 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
 
         @Override
         public ServletInputStream getInputStream() {
+            // 用缓存字节包装可重复读取的输入流
             ByteArrayInputStream bais = new ByteArrayInputStream(body);
             return new ServletInputStream() {
                 @Override
@@ -184,6 +194,7 @@ public class InnerSignatureFilter extends OncePerRequestFilter {
 
                 @Override
                 public void setReadListener(ReadListener listener) {
+                    // 纯内存流，无需异步监听
                 }
             };
         }

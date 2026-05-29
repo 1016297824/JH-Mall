@@ -3,7 +3,7 @@ package com.mall.common.constant;
 /**
  * C 端安全常量（算法名称、签名分隔符等）
  *
- * @author AI
+ * @author JH-Mall
  * @date 2026/05/28
  */
 public final class SecurityConstants {
@@ -14,6 +14,7 @@ public final class SecurityConstants {
     /** 内部签名 payload 分隔符 */
     public static final String SIGN_PAYLOAD_SEPARATOR = "|";
 
+    /** 工具类禁止实例化 */
     private SecurityConstants() {
     }
 }

@@ -36,6 +36,12 @@ public class RemoteUserInnerController {
 
     private final PointsExpireTask pointsExpireTask;
 
+    /**
+     * 根据手机号查询用户
+     *
+     * @param phone 手机号
+     * @return 用户 DTO（脱敏后），不存在则返回 null
+     */
     @GetMapping("/phone/{phone}")
     public MallUserDTO findByPhone(@PathVariable("phone") String phone) {
         MallUserDO user = mallUserService.selectByPhone(phone);
@@ -45,6 +51,12 @@ public class RemoteUserInnerController {
         return toDTO(user);
     }
 
+    /**
+     * 手机号注册
+     *
+     * @param request 注册请求（含手机号、手机号哈希、密码）
+     * @return 新用户 ID
+     */
     @PostMapping("/register")
     public String register(@RequestBody RemoteUserService.RegisterRequest request) {
         return mallUserService.registerByPhone(
@@ -54,6 +66,12 @@ public class RemoteUserInnerController {
         );
     }
 
+    /**
+     * 修改密码
+     *
+     * @param userId  用户 ID
+     * @param request 密码更新请求（含新密码）
+     */
     @PutMapping("/{userId}/password")
     public void updatePassword(
             @PathVariable("userId") String userId,
@@ -61,6 +79,12 @@ public class RemoteUserInnerController {
         mallUserService.updatePasswordById(userId, request.getNewPassword());
     }
 
+    /**
+     * 换绑手机号
+     *
+     * @param userId  用户 ID
+     * @param request 换绑请求（含新手机号、新手机号哈希）
+     */
     @PutMapping("/{userId}/phone")
     public void updatePhone(
             @PathVariable("userId") String userId,
@@ -68,6 +92,11 @@ public class RemoteUserInnerController {
         mallUserService.updatePhoneById(userId, request.getNewPhone(), request.getNewPhoneHash());
     }
 
+    /**
+     * 注销账号（软删除）
+     *
+     * @param userId 用户 ID
+     */
     @DeleteMapping("/{userId}/account")
     public void deactivateAccount(@PathVariable("userId") String userId) {
         mallUserService.updateUserStatusById(userId, String.valueOf(UserStatusEnum.DELETED.getCode()));
@@ -83,7 +112,12 @@ public class RemoteUserInnerController {
         return pointsExpireTask.execute();
     }
 
-    // DO 转 DTO，脱敏移除密码
+    /**
+     * DO 转 DTO，脱敏移除密码
+     *
+     * @param user 用户 DO
+     * @return 用户 DTO（密码置空）
+     */
     private MallUserDTO toDTO(MallUserDO user) {
         MallUserDTO dto = new MallUserDTO();
         BeanUtils.copyProperties(user, dto);

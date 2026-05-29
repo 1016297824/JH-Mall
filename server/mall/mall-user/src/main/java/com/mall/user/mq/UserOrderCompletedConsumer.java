@@ -51,6 +51,7 @@ public class UserOrderCompletedConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String message) {
         try {
+            // 解析订单完成事件的 JSON 消息体
             JsonNode json = objectMapper.readTree(message);
             Long userId = json.has("userId") ? json.get("userId").asLong() : null;
             String orderNo = json.has("orderNo") ? json.get("orderNo").asText() : null;

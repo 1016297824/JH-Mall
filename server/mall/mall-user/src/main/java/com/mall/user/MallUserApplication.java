@@ -9,7 +9,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * mall-user 用户服务
- * 端口：9302
+ *
+ * <p>端口：9302，提供 C 端用户注册、资料、地址、会员、积分、签到等功能</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
  */
 @EnableScheduling
 @EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})

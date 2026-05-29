@@ -67,11 +67,13 @@ public class UserProfileServiceImpl implements IUserProfileService {
     @Override
     public UserProfileVO getProfile(Long userId) {
         String cacheKey = CacheConstants.User.PROFILE + userId;
+        // 缓存命中直接返回，避免查库
         UserProfileVO cached = (UserProfileVO) redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
             return cached;
         }
 
+        // 缓存未命中，查库构建资料并回写缓存
         UserProfileVO vo = buildProfile(userId);
         long ttl = mallUserConfigProperties.getProfile().getCacheTtl();
         redisTemplate.opsForValue().set(cacheKey, vo, Duration.ofSeconds(ttl));
@@ -94,6 +96,7 @@ public class UserProfileServiceImpl implements IUserProfileService {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
+        // 仅更新传入的非空字段，null 表示不修改
         if (request.getNickname() != null) {
             user.setNickname(request.getNickname());
         }
@@ -112,7 +115,7 @@ public class UserProfileServiceImpl implements IUserProfileService {
         user.setUpdateTime(LocalDateTime.now());
         mallUserMapper.updateById(user);
 
-        // 清除缓存，下次查询时重新加载
+        // 更新后清除缓存，下次查询时重新加载最新资料
         String cacheKey = CacheConstants.User.PROFILE + userId;
         redisTemplate.delete(cacheKey);
 
@@ -147,6 +150,7 @@ public class UserProfileServiceImpl implements IUserProfileService {
         vo.setPhone(remoteAuthAdapter.maskPhone(user.getPhone()));
         vo.setEmail(user.getEmail());
 
+        // 聚合会员等级信息（当前等级名称和图标）
         MallUserMemberDO member = getMemberByUserId(userId);
         if (member != null) {
             vo.setGrowth(member.getGrowth());
@@ -162,6 +166,7 @@ public class UserProfileServiceImpl implements IUserProfileService {
             }
         }
 
+        // 聚合积分账户信息
         MallPointsAccountDO account = getPointsAccountByUserId(userId);
         if (account != null) {
             vo.setPoints(account.getTotalPoints());

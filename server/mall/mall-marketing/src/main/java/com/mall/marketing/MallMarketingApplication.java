@@ -8,7 +8,11 @@ import org.mybatis.spring.annotation.MapperScan;
 
 /**
  * mall-marketing 营销服务
- * 端口：9305
+ *
+ * <p>端口：9306，提供 C 端优惠券、促销活动、优惠试算等功能</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
  */
 @EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.marketing.mapper")

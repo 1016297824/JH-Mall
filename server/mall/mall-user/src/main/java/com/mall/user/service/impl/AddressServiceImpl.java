@@ -66,6 +66,7 @@ public class AddressServiceImpl implements IAddressService {
      */
     @Override
     public AddressVO createAddress(Long userId, AddressVO request) {
+        // 校验当前地址数量是否已达上限
         int maxCount = mallUserConfigProperties.getAddress().getMaxCount();
         Long count = mallUserAddressMapper.selectCount(
                 new LambdaQueryWrapper<MallUserAddressDO>()
@@ -144,6 +145,7 @@ public class AddressServiceImpl implements IAddressService {
         MallUserAddressDO addressDO = getAddressById(addressId);
         checkOwnership(addressDO, userId);
 
+        // 先清除该用户所有地址的默认标记，再设置新的默认地址
         mallUserAddressMapper.clearDefault(userId);
         addressDO.setIsDefault(1);
         addressDO.setUpdateTime(LocalDateTime.now());

@@ -14,11 +14,12 @@ import com.mall.common.exception.BusinessException;
 /**
  * HMAC-SHA256 签名工具
  *
- * @author AI
+ * @author JH-Mall
  * @date 2026/05/28
  */
 final class HmacUtils {
 
+    /** 工具类禁止实例化 */
     private HmacUtils() {
     }
 
@@ -32,11 +33,14 @@ final class HmacUtils {
     static String sign(String payload, String secret) {
         try {
             Mac mac = Mac.getInstance(SecurityConstants.HMAC_SHA256_ALGORITHM);
+            // 用密钥初始化 HmacSHA256 算法
             SecretKeySpec keySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SecurityConstants.HMAC_SHA256_ALGORITHM);
             mac.init(keySpec);
+            // 执行签名并输出 hex 编码
             byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            // 算法不可用或密钥非法，抛系统内部异常
             throw new BusinessException(ErrorCode.SYSTEM_INTERNAL);
         }
     }

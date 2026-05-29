@@ -95,6 +95,7 @@ public class MallUserServiceImpl implements IMallUserService {
         user.setPhone(phone);
         user.setPhoneHash(phoneHash);
         user.setPassword(password);
+        // 默认昵称取手机号后 4 位，注册后可修改
         user.setNickname("用户" + phone.substring(7));
         user.setUserStatus(UserStatusEnum.NORMAL.getCode());
         user.setRegisterTime(LocalDateTime.now());
@@ -107,6 +108,7 @@ public class MallUserServiceImpl implements IMallUserService {
         Long userId = user.getId();
         log.info("用户注册成功, userId={}, phone={}", userId, phone);
 
+        // 同步初始化会员信息和积分账户
         initMemberInfo(userId);
         initPointsAccount(userId);
 
@@ -221,6 +223,7 @@ public class MallUserServiceImpl implements IMallUserService {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            // 将字节数组转为十六进制小写字符串
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);

@@ -105,6 +105,7 @@ public class PointsServiceImpl implements IPointsService {
      */
     @Override
     public void addPoints(Long userId, int points, BizTypeEnum bizType, String bizNo) {
+        // 乐观锁重试，最多 MAX_RETRY 次，防止并发冲突
         for (int i = 0; i < MAX_RETRY; i++) {
             LambdaQueryWrapper<MallPointsAccountDO> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(MallPointsAccountDO::getUserId, userId)
@@ -115,6 +116,7 @@ public class PointsServiceImpl implements IPointsService {
             }
             int currentVersion = account.getVersion();
             int beforePoints = account.getAvailablePoints();
+            // 乐观锁更新：version 匹配才更新成功，否则重试
             int rows = mallPointsAccountMapper.addPoints(userId, points, currentVersion);
             if (rows > 0) {
                 // 乐观锁成功，写入积分流水日志

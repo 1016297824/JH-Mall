@@ -6,6 +6,12 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * 订单模块 Redis 模板配置
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Configuration
 public class OrderConfig {
 

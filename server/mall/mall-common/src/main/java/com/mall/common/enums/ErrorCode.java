@@ -2,8 +2,12 @@ package com.mall.common.enums;
 
 /**
  * C 端统一错误码枚举（基线：{@code docs/design/03_系统详细设计.md} §2.3 + 各模块设计文档 §错误码汇总）
+ *
  * <p>三参构造器：code（5位字符串）、message（日志/系统消息）、userTip（用户提示）。</p>
  * <p>message 与 userTip 相同时显式写两遍，不使用隐式默认。</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/26
  */
 public enum ErrorCode {
 

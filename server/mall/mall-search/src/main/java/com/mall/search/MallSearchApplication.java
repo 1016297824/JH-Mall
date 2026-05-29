@@ -7,7 +7,11 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * mall-search 搜索服务
- * 端口：9306
+ *
+ * <p>端口：9307，提供 C 端商品搜索、搜索建议、索引重建等功能</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
  */
 @EnableFeignClients(basePackages = "com.mall.api")
 @EnableDiscoveryClient

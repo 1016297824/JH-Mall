@@ -3,7 +3,7 @@ package com.mall.user.DTO.request;
 /**
  * 修改用户资料请求体
  *
- * @author system
+ * @author JH-Mall
  * @date 2026/05/28
  */
 public class UpdateProfileDTO {

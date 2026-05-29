@@ -8,7 +8,11 @@ import org.mybatis.spring.annotation.MapperScan;
 
 /**
  * mall-payment 支付服务
- * 端口：9304
+ *
+ * <p>端口：9304，提供 C 端支付、退款、支付回调等功能</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
  */
 @EnableFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.payment.mapper")

@@ -7,8 +7,8 @@ package com.mall.common.enums.user;
  *
  * @author JH-Mall
  * @date 2026/05/26
- * @see docs/design/03_系统详细设计.md §1.1
- * @see docs/design/06_mall-common公共模块设计.md §2.2
+ * @see 03_系统详细设计.md §1.1
+ * @see 06_mall-common公共模块设计.md §2.2
  */
 public enum UserStatusEnum {
 

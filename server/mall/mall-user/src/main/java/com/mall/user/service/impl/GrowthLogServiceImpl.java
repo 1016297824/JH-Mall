@@ -41,6 +41,7 @@ public class GrowthLogServiceImpl implements IGrowthLogService {
      */
     @Override
     public IPage<GrowthRecordVO> getGrowthRecords(Long userId, String bizType, int page, int size) {
+        // 参数安全处理：防止负数页码和超大分页
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(size, 100);
         Page<MallUserGrowthLogDO> pageParam = new Page<>(safePage, safeSize);

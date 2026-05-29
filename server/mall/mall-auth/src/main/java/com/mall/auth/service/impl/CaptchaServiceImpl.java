@@ -41,12 +41,15 @@ public class CaptchaServiceImpl implements ICaptchaService {
         SpecCaptcha captcha = new SpecCaptcha(130, 48, 4);
         String text = captcha.text().toLowerCase();
 
+        // 排除易混淆字符（0/o、1/i），避免用户识别困难
         while (text.contains("0") || text.contains("o") || text.contains("1") || text.contains("i")) {
             captcha = new SpecCaptcha(130, 48, 4);
             text = captcha.text().toLowerCase();
         }
+        // 生成 UUID 作为验证码 Key（去横线）
         String captchaKey = UUID.randomUUID().toString().replace("-", "");
 
+        // 验证码文本写入 Redis，TTL 由配置项 sms.codeTtl 控制（默认 300s）
         redisTemplate.opsForValue().set(
                 CacheConstants.Auth.CAPTCHA + captchaKey,
                 text,
@@ -72,15 +75,18 @@ public class CaptchaServiceImpl implements ICaptchaService {
             throw new CaptchaException(ErrorCode.PARAM_MISSING);
         }
 
+        // 校验同一 IP 验证码错误次数是否超限
         String ipKey = CacheConstants.Auth.CAPTCHA_IP + clientIp;
         Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
         if (ipCount != null && ipCount >= authProperties.getSms().getIpDailyLimit()) {
             throw new CaptchaException(ErrorCode.CAPTCHA_RETRY_LIMIT);
         }
 
+        // 从 Redis 取出验证码文本
         String redisKey = CacheConstants.Auth.CAPTCHA + captchaKey;
         String storedCode = (String) redisTemplate.opsForValue().get(redisKey);
         if (storedCode == null) {
+            // Key 不存在说明超时或已被消费
             incrementIpCount(ipKey);
             throw new CaptchaException(ErrorCode.CAPTCHA_EXPIRED);
         }
@@ -90,6 +96,7 @@ public class CaptchaServiceImpl implements ICaptchaService {
             throw new CaptchaException(ErrorCode.CAPTCHA_WRONG);
         }
 
+        // 校验通过立即删除，确保一次性使用
         redisTemplate.delete(redisKey);
     }
 
@@ -99,6 +106,7 @@ public class CaptchaServiceImpl implements ICaptchaService {
      * @param ipKey 验证码 IP 计数 Key
      */
     private void incrementIpCount(String ipKey) {
+        // INCR 原子递增，首次写入时设 TTL（仅首次返回 1）
         Long count = redisTemplate.opsForValue().increment(ipKey, 1L);
         if (count != null && count == 1) {
             redisTemplate.expire(ipKey, authProperties.getCaptcha().getIpTtl(), TimeUnit.SECONDS);

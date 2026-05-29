@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
  * C 端商品模块配置属性（热更新）
  *
  * <p>对应 Nacos mall-product-dev.yml 中 mall.product.* 配置</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
  */
 @Component
 @RefreshScope

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
  * C 端搜索模块配置属性（热更新）
  *
  * <p>对应 Nacos mall-search-dev.yml 中 mall.search.* 配置</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
  */
 @Component
 @RefreshScope
