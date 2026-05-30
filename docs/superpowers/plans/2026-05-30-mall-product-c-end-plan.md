@@ -864,9 +864,6 @@ class CategoryServiceImplTest {
     @Mock
     private MallCategoryMapper mallCategoryMapper;
 
-    @Mock
-    private ICategoryCacheService categoryCacheService;
-
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
@@ -950,7 +947,6 @@ import java.util.List;
 public class CategoryServiceImpl implements ICategoryService {
 
     private final MallCategoryMapper mallCategoryMapper;
-    private final ICategoryCacheService categoryCacheService;
 
     @Override
     public List<CategoryVO> tree() {
@@ -2337,26 +2333,41 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDateTime;
 
-@TableName("mall_outbox_message")
+@TableName("mall_outbox")
 public class OutboxMessageDO {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @TableField("biz_type")
-    private String bizType;
+    @TableField("message_id")
+    private String messageId;
 
-    @TableField("biz_id")
-    private String bizId;
+    @TableField("topic")
+    private String topic;
+
+    @TableField("event_type")
+    private String eventType;
+
+    @TableField("aggregate_type")
+    private String aggregateType;
+
+    @TableField("aggregate_id")
+    private String aggregateId;
 
     @TableField("payload")
     private String payload;
 
     @TableField("status")
-    private Integer status;
+    private String status;
 
     @TableField("retry_count")
     private Integer retryCount;
+
+    @TableField("next_retry_time")
+    private LocalDateTime nextRetryTime;
+
+    @TableField("scheduled_time")
+    private LocalDateTime scheduledTime;
 
     @TableField("create_time")
     private LocalDateTime createTime;
@@ -2367,16 +2378,26 @@ public class OutboxMessageDO {
     // --- 完整 getter/setter + toString ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getBizType() { return bizType; }
-    public void setBizType(String bizType) { this.bizType = bizType; }
-    public String getBizId() { return bizId; }
-    public void setBizId(String bizId) { this.bizId = bizId; }
+    public String getMessageId() { return messageId; }
+    public void setMessageId(String messageId) { this.messageId = messageId; }
+    public String getTopic() { return topic; }
+    public void setTopic(String topic) { this.topic = topic; }
+    public String getEventType() { return eventType; }
+    public void setEventType(String eventType) { this.eventType = eventType; }
+    public String getAggregateType() { return aggregateType; }
+    public void setAggregateType(String aggregateType) { this.aggregateType = aggregateType; }
+    public String getAggregateId() { return aggregateId; }
+    public void setAggregateId(String aggregateId) { this.aggregateId = aggregateId; }
     public String getPayload() { return payload; }
     public void setPayload(String payload) { this.payload = payload; }
-    public Integer getStatus() { return status; }
-    public void setStatus(Integer status) { this.status = status; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public Integer getRetryCount() { return retryCount; }
     public void setRetryCount(Integer retryCount) { this.retryCount = retryCount; }
+    public LocalDateTime getNextRetryTime() { return nextRetryTime; }
+    public void setNextRetryTime(LocalDateTime nextRetryTime) { this.nextRetryTime = nextRetryTime; }
+    public LocalDateTime getScheduledTime() { return scheduledTime; }
+    public void setScheduledTime(LocalDateTime scheduledTime) { this.scheduledTime = scheduledTime; }
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
     public LocalDateTime getUpdateTime() { return updateTime; }
@@ -2405,15 +2426,16 @@ import java.util.List;
 @Mapper
 public interface OutboxMessageMapper extends BaseMapper<OutboxMessageDO> {
 
-    default List<OutboxMessageDO> selectPending(String bizType, int limit) {
+    default List<OutboxMessageDO> selectPending(String topic, int limit) {
         return selectList(new LambdaQueryWrapper<OutboxMessageDO>()
-                .eq(OutboxMessageDO::getBizType, bizType)
-                .eq(OutboxMessageDO::getStatus, 0)
+                .eq(OutboxMessageDO::getTopic, topic)
+                .eq(OutboxMessageDO::getStatus, "NEW")
+                .orderByAsc(OutboxMessageDO::getNextRetryTime)
                 .last("LIMIT " + limit));
     }
 
-    @Update("UPDATE mall_outbox_message SET status = #{status}, retry_count = retry_count + 1 WHERE id = #{id}")
-    int updateStatus(Long id, Integer status);
+    @Update("UPDATE mall_outbox SET status = #{status}, retry_count = retry_count + 1 WHERE id = #{id}")
+    int updateStatus(@Param("id") Long id, @Param("status") String status);
 }
 ```
 
@@ -2476,38 +2498,54 @@ git commit -m "feat(mall-product): add RemoteSearchAdapter"
 
 ## 阶段 8：搜索降级兜底
 
-### Task 8.1: SearchFallbackController
+### Task 8.1: ISearchFallbackService + 实现 + Controller（RED→GREEN）
 
-- [ ] **Step 1: 创建**
+> 搜索降级兜底查询，加 Service 层保留扩展空间。
+
+**ISearchFallbackService：**
 
 ```java
-package com.mall.product.controller;
+package com.mall.product.service;
 
-import com.mall.common.DTO.MallResult;
+import com.mall.product.VO.SpuVO;
+
+import java.util.List;
+
+public interface ISearchFallbackService {
+
+    List<SpuVO> search(String keyword, int page, int size);
+}
+```
+
+**SearchFallbackServiceImpl：**
+
+```java
+package com.mall.product.service.impl;
+
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.product.DO.MallProductSpuDO;
 import com.mall.product.VO.SpuVO;
 import com.mall.product.convert.response.SpuConvert;
 import com.mall.product.mapper.MallProductSpuMapper;
+import com.mall.product.service.ISearchFallbackService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/product")
+@Slf4j
+@Service
 @RequiredArgsConstructor
-public class SearchFallbackController {
+public class SearchFallbackServiceImpl implements ISearchFallbackService {
 
     private final MallProductSpuMapper mallProductSpuMapper;
 
-    @GetMapping("/search/fallback")
-    public MallResult<List<SpuVO>> search(@RequestParam String keyword,
-                                          @RequestParam(defaultValue = "1") int page,
-                                          @RequestParam(defaultValue = "20") int size) {
+    @Override
+    public List<SpuVO> search(String keyword, int page, int size) {
         if (keyword.length() < 2 || keyword.length() > 50) {
             throw new BusinessException(ErrorCode.A0802);
         }
@@ -2524,11 +2562,28 @@ public class SearchFallbackController {
 
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectPage(pageParam, wrapper);
 
-        List<SpuVO> voList = result.getRecords().stream()
+        return result.getRecords().stream()
                 .map(SpuConvert::toSpuVO)
                 .toList();
+    }
+}
+```
 
-        return MallResult.success(voList);
+**SearchFallbackController：**
+
+```java
+@RestController
+@RequestMapping("/api/product")
+@RequiredArgsConstructor
+public class SearchFallbackController {
+
+    private final ISearchFallbackService searchFallbackService;
+
+    @GetMapping("/search/fallback")
+    public MallResult<List<SpuVO>> search(@RequestParam String keyword,
+                                          @RequestParam(defaultValue = "1") int page,
+                                          @RequestParam(defaultValue = "20") int size) {
+        return MallResult.success(searchFallbackService.search(keyword, page, size));
     }
 }
 ```
@@ -2536,8 +2591,10 @@ public class SearchFallbackController {
 - [ ] **Step 2: Commit**
 
 ```bash
+git add server/mall/mall-product/src/main/java/com/mall/product/service/ISearchFallbackService.java
+git add server/mall/mall-product/src/main/java/com/mall/product/service/impl/SearchFallbackServiceImpl.java
 git add server/mall/mall-product/src/main/java/com/mall/product/controller/SearchFallbackController.java
-git commit -m "feat(mall-product): add SearchFallbackController (DB LIkE fallback)"
+git commit -m "feat(mall-product): add SearchFallback with service layer"
 ```
 
 ---

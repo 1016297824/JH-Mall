@@ -282,6 +282,29 @@ public class MqTopicConstants {
     }
 
     /**
+     * 商品域（生产者：mall-product）
+     *
+     * <p>消费组命名：{@code mall-search:mall-search:sync}。</p>
+     */
+    public static final class Product {
+
+        /**
+         * 搜索索引同步
+         *
+         * <p>Topic：{@code mall:search:sync}</p>
+         * <ul>
+         *   <li>生产者：mall-product（商品信息变更后写 Outbox）</li>
+         *   <li>消费者：mall-search（SearchSyncConsumer，幂等去重后增量写入 ES）</li>
+         *   <li>Payload：{@code spuId, operation}（UPSERT / DELETE），{@code timestamp}</li>
+         * </ul>
+         */
+        public static final String SEARCH_SYNC = "mall:search:sync";
+
+        private Product() {
+        }
+    }
+
+    /**
      * 搜索域（生产者：mall-product）
      *
      * <p>消费组命名：{@code mall-search:mall-search:sync}。</p>

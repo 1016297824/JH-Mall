@@ -285,6 +285,30 @@ public class CacheConstants {
          */
         public static final String UV = "mall:product:uv:";
 
+        /**
+         * 库存扣减幂等键
+         *
+         * <p>Key 模式：{@code mall:product:stock:reserve:{orderNo}:{skuId}}</p>
+         * <ul>
+         *   <li>TTL：1800s（30min）</li>
+         *   <li>数据结构：String（SETNX），value 存预留数量</li>
+         *   <li>防止同一订单重复扣减库存</li>
+         * </ul>
+         */
+        public static final String STOCK_RESERVE = "mall:product:stock:reserve:";
+
+        /**
+         * Outbox 消息幂等键
+         *
+         * <p>Key 模式：{@code mall:product:outbox:{messageId}}</p>
+         * <ul>
+         *   <li>TTL：86400s（24h）</li>
+         *   <li>数据结构：String（SETNX）</li>
+         *   <li>Outbox 发件箱投递消息前幂等去重</li>
+         * </ul>
+         */
+        public static final String OUTBOX = "mall:product:outbox:";
+
         private Product() {
         }
     }
