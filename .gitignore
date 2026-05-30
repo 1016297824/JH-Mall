@@ -45,3 +45,6 @@ client/ruoyi-ui/auto-imports.d.ts
 
 # opencode配置
 .opencode
+
+# trae项目配置
+.trae
