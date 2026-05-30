@@ -95,12 +95,12 @@ server/mall/mall-user/
     │   ├── MallPointsAccountMapper.java
     │   ├── MallPointsLogMapper.java
     │   └── MallGrowthLogMapper.java
-    ├── mq/
-    │   └── consumer/
-    │       └── UserOrderCompletedConsumer.java  # 消费 mall:order:completed
-    ├── schedule/
-    │   └── PointsExpireTask.java              # 积分清零（ruoyi-job 调度）
     ├── infrastructure/
+    │   ├── mq/
+    │   │   └── consumer/
+    │   │       └── UserOrderCompletedConsumer.java  # 消费 mall:order:completed
+    │   ├── schedule/
+    │   │   └── PointsExpireTask.java              # 积分清零（ruoyi-job 调度）
     │   └── feign/
     │       └── RemoteAuthAdapter.java       # 调 mall-auth 解密手机号
     └── convert/

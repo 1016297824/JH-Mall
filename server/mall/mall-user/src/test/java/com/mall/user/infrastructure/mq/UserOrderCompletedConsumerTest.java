@@ -1,6 +1,7 @@
-package com.mall.user.mq;
+package com.mall.user.infrastructure.mq;
 
 import com.mall.common.enums.user.BizTypeEnum;
+import com.mall.user.infrastructure.mq.UserOrderCompletedConsumer;
 import com.mall.user.service.IMemberService;
 import com.mall.user.service.IPointsService;
 import org.junit.jupiter.api.Test;

@@ -49,14 +49,14 @@ server/mall/mall-user/src/main/java/com/mall/user/
 │   ├── GrowthController                      # GET /api/user/growth + /growth/records
 │   └── SignInController                      # POST /api/user/sign-in
 │
-├── infrastructure/feign/
-│   └── RemoteAuthAdapter                     # 🆕 封装 mall-auth 手机号解密
-│
-├── mq/consumer/
-│   └── UserOrderCompletedConsumer            # 🆕 消费 mall:order:completed
-│
-└── schedule/
-    └── PointsExpireTask                      # 🆕 年末积分清零
+├── infrastructure/
+│   ├── feign/
+│   │   └── RemoteAuthAdapter                     # 🆕 封装 mall-auth 手机号解密
+│   ├── mq/
+│   │   └── consumer/
+│   │       └── UserOrderCompletedConsumer            # 🆕 消费 mall:order:completed
+│   └── schedule/
+│       └── PointsExpireTask                      # 🆕 年末积分清零
 ```
 
 ```

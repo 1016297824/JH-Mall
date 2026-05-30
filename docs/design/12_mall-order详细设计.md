@@ -72,7 +72,7 @@ mall-order/src/main/java/com/mall/order/
 │  └─ OrderEventEnum.java
 ├─ infrastructure/    # 外部适配
 │  ├─ mq/             → OrderEventProducer, PaymentPaidConsumer, RefundSucceededConsumer
-  │  ├─ feign/          → RemoteProductAdapter, RemoteMarketingAdapter, RemotePaymentAdapter, RemoteUserAdapter, RemoteAuthAdapter
+│  ├─ feign/          → RemoteProductAdapter, RemoteMarketingAdapter, RemotePaymentAdapter, RemoteUserAdapter, RemoteAuthAdapter
 │  └─ outbox/         → OutboxMessage.java, OutboxMapper.java, OutboxScheduler.java
 ├─ convert/
 │  ├─ request/       # Request → DO（入站）

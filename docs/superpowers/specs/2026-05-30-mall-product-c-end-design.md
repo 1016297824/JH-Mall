@@ -299,8 +299,8 @@ server/mall/mall-product/src/main/java/com/mall/product/
 │   ├── ISpuService.java                       # 🆕
 │   ├── ISkuService.java                       # 🆕
 │   ├── IStockService.java                     # 🆕
-│   ├── CategoryCacheService.java              # 🆕
-│   ├── SkuCacheService.java                   # 🆕
+│   ├── ICategoryCacheService.java              # 🆕
+│   ├── ISkuCacheService.java                   # 🆕
 │   └── impl/
 │       ├── CategoryServiceImpl.java           # 🆕
 │       ├── BrandServiceImpl.java              # 🆕
@@ -317,12 +317,12 @@ server/mall/mall-product/src/main/java/com/mall/product/
 │   └── SearchFallbackController.java          # 🆕
 └── infrastructure/
     ├── mq/
-    │   ├── SearchSyncProducer.java            # 🆕
-    │   └── OrderCancelledConsumer.java        # 🆕
+    │   ├── SearchSyncProducer.java           # 🆕
+    │   └── OrderCancelledConsumer.java       # 🆕
     ├── feign/
-    │   └── RemoteSearchAdapter.java           # 🆕
+    │   └── RemoteSearchAdapter.java          # 🆕
     └── schedule/
-        └── SearchSyncScheduleTask.java        # 🆕
+        └── SearchSyncScheduleTask.java       # 🆕
 ```
 
 ## 12. 关键设计决策

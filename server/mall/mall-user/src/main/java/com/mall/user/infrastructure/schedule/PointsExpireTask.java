@@ -1,4 +1,4 @@
-package com.mall.user.schedule;
+package com.mall.user.infrastructure.schedule;
 
 import java.time.LocalDateTime;
 import java.util.List;

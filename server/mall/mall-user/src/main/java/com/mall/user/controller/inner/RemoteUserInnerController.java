@@ -4,7 +4,7 @@ import com.mall.api.feign.RemoteUserService;
 import com.mall.common.DTO.user.response.MallUserDTO;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.user.DO.MallUserDO;
-import com.mall.user.schedule.PointsExpireTask;
+import com.mall.user.infrastructure.schedule.PointsExpireTask;
 import com.mall.user.service.IMallUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
