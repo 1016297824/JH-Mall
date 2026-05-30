@@ -11,6 +11,12 @@ import com.mall.product.VO.SpuVO;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * SPU 转换器（DO → VO / DetailVO）
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 public class SpuConvert {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -18,6 +24,12 @@ public class SpuConvert {
     private SpuConvert() {
     }
 
+    /**
+     * SPU DO 转 VO（列表用）
+     *
+     * @param spuDO SPU DO
+     * @return SPU VO
+     */
     public static SpuVO toSpuVO(MallProductSpuDO spuDO) {
         if (spuDO == null) {
             return null;
@@ -34,6 +46,13 @@ public class SpuConvert {
         return vo;
     }
 
+    /**
+     * SPU DO 转详情 VO（含图片列表、SKU 列表）
+     *
+     * @param spuDO    SPU DO
+     * @param skuDOList SKU DO 列表
+     * @return SPU 详情 VO
+     */
     public static SpuDetailVO toSpuDetailVO(MallProductSpuDO spuDO, List<MallProductSkuDO> skuDOList) {
         if (spuDO == null) {
             return null;
@@ -59,17 +78,26 @@ public class SpuConvert {
         return vo;
     }
 
+    /**
+     * 解析图片 JSON 为 URL 列表
+     */
     private static List<String> parseImagesJson(String imagesJson) {
+        // 空值直接返回空列表
         if (imagesJson == null || imagesJson.isEmpty()) {
             return Collections.emptyList();
         }
         try {
+            // JSON 数组字符串解析为 List<String>
             return objectMapper.readValue(imagesJson, new TypeReference<List<String>>() {});
         } catch (Exception e) {
+            // 解析失败时静默返回空列表，不阻断主流程
             return Collections.emptyList();
         }
     }
 
+    /**
+     * SKU DO 转简要 VO
+     */
     private static SkuBriefVO toSkuBriefVO(MallProductSkuDO skuDO) {
         SkuBriefVO vo = new SkuBriefVO();
         vo.setSkuId(String.valueOf(skuDO.getId()));

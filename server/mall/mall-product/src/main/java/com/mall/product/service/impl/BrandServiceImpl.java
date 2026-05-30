@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 品牌服务实现
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -20,7 +26,9 @@ public class BrandServiceImpl implements IBrandService {
 
     @Override
     public List<BrandVO> list(Long categoryId) {
+        // 查询全部未删除品牌（按排序值升序）
         List<MallBrandDO> brandDOList = mallBrandMapper.selectAll();
+        // DO 转 VO
         return BrandConvert.toBrandVOList(brandDOList);
     }
 }

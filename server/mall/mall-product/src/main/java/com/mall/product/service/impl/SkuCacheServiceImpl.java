@@ -11,6 +11,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * SKU 缓存服务实现
+ *
+ * <p>缓存 SKU 详情，TTL 10 分钟</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,6 +27,7 @@ public class SkuCacheServiceImpl implements ISkuCacheService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ISkuService skuService;
 
+    /** SKU 缓存 TTL（秒） */
     private static final long TTL_SECONDS = 600;
 
     @Override

@@ -12,10 +12,15 @@ import lombok.Getter;
  */
 @Getter
 public enum PublishStatusEnum {
+
+    /** 已下架 */
     OFFLINE(0, "已下架"),
+    /** 已上架 */
     ONLINE(1, "已上架");
 
+    /** 状态码 */
     private final int code;
+    /** 状态描述 */
     private final String desc;
 
     PublishStatusEnum(int code, String desc) {

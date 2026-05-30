@@ -15,6 +15,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 搜索降级服务实现
+ *
+ * <p>搜索引擎不可用时，退化为数据库 SPU 名称 LIKE 模糊查询</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,21 +32,22 @@ public class SearchFallbackServiceImpl implements ISearchFallbackService {
 
     @Override
     public List<SpuVO> search(String keyword, int page, int size) {
+        // 关键词长度校验（2~50 字符）
         if (keyword.length() < 2 || keyword.length() > 50) {
             throw new BusinessException(ErrorCode.SEARCH_RESULT_LIMIT);
         }
         if (size > 100) {
             size = 100;
         }
-
+        // 构建查询条件：已上架 + 未删除 + SPU 名称模糊匹配
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
                 .eq(MallProductSpuDO::getPublishStatus, 1)
                 .eq(MallProductSpuDO::getIsDeleted, 0)
                 .like(MallProductSpuDO::getSpuName, keyword);
-
+        // 执行分页查询
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectPage(pageParam, wrapper);
-
+        // DO 转 VO
         return result.getRecords().stream()
                 .map(SpuConvert::toSpuVO)
                 .toList();

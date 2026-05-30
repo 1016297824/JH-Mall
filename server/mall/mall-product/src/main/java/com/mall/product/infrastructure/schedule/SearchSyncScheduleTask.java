@@ -5,11 +5,19 @@ import com.mall.product.DO.OutboxMessageDO;
 import com.mall.product.mapper.OutboxMessageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 搜索同步补偿定时任务
+ *
+ * <p>由 ruoyi-job 调度，通过 {@code /inner/product/outbox/compensate} 端点调用。
+ * 扫描 Outbox 表中待发送的搜索同步消息，逐条补偿投递</p>
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -17,10 +25,18 @@ public class SearchSyncScheduleTask {
 
     private final OutboxMessageMapper outboxMessageMapper;
 
-    @Scheduled(fixedDelay = 30000)
-    public void compensate() {
+    /**
+     * 执行 Outbox 消息补偿投递
+     *
+     * <p>查询最多 100 条待发送的搜索同步消息，逐条更新状态为已发送</p>
+     *
+     * @return 本次处理的记录数
+     */
+    public int execute() {
+        // 查询待发送的搜索同步消息（最多 100 条）
         List<OutboxMessageDO> pendingList = outboxMessageMapper.selectPending(
                 MqTopicConstants.Product.SEARCH_SYNC, 100);
+        // 逐条处理并更新状态
         for (OutboxMessageDO outbox : pendingList) {
             try {
                 log.info("Compensate outbox: messageId={}, spuId={}", outbox.getMessageId(), outbox.getAggregateId());
@@ -29,5 +45,6 @@ public class SearchSyncScheduleTask {
                 log.error("Failed to compensate outbox: messageId={}", outbox.getMessageId(), e);
             }
         }
+        return pendingList.size();
     }
 }

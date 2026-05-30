@@ -13,6 +13,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 类目服务实现
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,7 +28,9 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Override
     public List<CategoryVO> tree() {
+        // 查询全部可见类目（按排序值升序）
         List<MallCategoryDO> categoryDOList = mallCategoryMapper.selectVisibleCategories();
+        // 构建多级树形结构
         return CategoryConvert.buildTree(categoryDOList);
     }
 

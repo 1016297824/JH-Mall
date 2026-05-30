@@ -6,28 +6,45 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDateTime;
 
+/**
+ * SKU 库存 DO
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @TableName("mall_product_sku_stock")
 public class MallSkuStockDO {
+    /** 库存记录 ID */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+    /** SKU ID */
     @TableField("sku_id")
     private Long skuId;
+    /** 总库存 */
     @TableField("total_stock")
     private Integer totalStock;
+    /** 可用库存 */
     @TableField("available_stock")
     private Integer availableStock;
+    /** 锁定库存（已下单未支付） */
     @TableField("locked_stock")
     private Integer lockedStock;
+    /** 已售库存 */
     @TableField("sold_stock")
     private Integer soldStock;
+    /** 冻结库存（售后/维权） */
     @TableField("frozen_stock")
     private Integer frozenStock;
+    /** 逻辑删除标识（0=未删，1=已删） */
     @TableField("is_deleted")
     private Integer isDeleted;
+    /** 创建时间 */
     @TableField("create_time")
     private LocalDateTime createTime;
+    /** 更新时间 */
     @TableField("update_time")
     private LocalDateTime updateTime;
+    /** 乐观锁版本号 */
     @Version
     @TableField("version")
     private Integer version;

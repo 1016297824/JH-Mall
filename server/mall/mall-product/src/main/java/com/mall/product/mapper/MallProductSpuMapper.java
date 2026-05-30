@@ -6,9 +6,24 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.product.DO.MallProductSpuDO;
 import org.apache.ibatis.annotations.Mapper;
 
+/**
+ * SPU Mapper
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Mapper
 public interface MallProductSpuMapper extends BaseMapper<MallProductSpuDO> {
 
+    /**
+     * 分页查询已上架 SPU（含分类/品牌/关键词过滤）
+     *
+     * @param page       分页参数
+     * @param categoryId 类目 ID（可选）
+     * @param brandId    品牌 ID（可选）
+     * @param keyword    关键词（可选）
+     * @return SPU 分页结果
+     */
     default Page<MallProductSpuDO> selectPublishedPage(Page<MallProductSpuDO> page,
                                                         Long categoryId, Long brandId, String keyword) {
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
@@ -29,6 +44,12 @@ public interface MallProductSpuMapper extends BaseMapper<MallProductSpuDO> {
         return selectPage(page, wrapper);
     }
 
+    /**
+     * 分页查询全部未删除 SPU（供全量重建使用）
+     *
+     * @param page 分页参数
+     * @return SPU 分页结果
+     */
     default Page<MallProductSpuDO> selectAllPage(Page<MallProductSpuDO> page) {
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
                 .eq(MallProductSpuDO::getIsDeleted, 0);

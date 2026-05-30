@@ -12,11 +12,17 @@ import lombok.Getter;
  */
 @Getter
 public enum VerifyStatusEnum {
+
+    /** 待审核 */
     PENDING(0, "待审核"),
+    /** 审核通过 */
     APPROVED(1, "审核通过"),
+    /** 审核驳回 */
     REJECTED(2, "审核驳回");
 
+    /** 状态码 */
     private final int code;
+    /** 状态描述 */
     private final String desc;
 
     VerifyStatusEnum(int code, String desc) {

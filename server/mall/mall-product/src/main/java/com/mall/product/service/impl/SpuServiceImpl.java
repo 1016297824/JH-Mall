@@ -20,6 +20,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * SPU 服务实现
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,9 +36,13 @@ public class SpuServiceImpl implements ISpuService {
 
     @Override
     public PageResult<SpuVO> page(int page, int size, Long categoryId, Long brandId, String keyword, String sort) {
+        // 构建分页参数
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
+        // 应用排序（price_asc/price_desc/sales_desc）
         applySort(pageParam, sort);
+        // 条件查询已上架 SPU
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectPublishedPage(pageParam, categoryId, brandId, keyword);
+        // DO 转 VO
         List<SpuVO> voList = result.getRecords().stream().map(SpuConvert::toSpuVO).toList();
         return PageResult.of(page, size, result.getTotal(), voList);
     }
@@ -40,24 +50,30 @@ public class SpuServiceImpl implements ISpuService {
     @Override
     public SpuDetailVO detail(Long spuId) {
         MallProductSpuDO spuDO = mallProductSpuMapper.selectById(spuId);
+        // 校验 SPU 存在性：未删除、已上架、已审核
         if (spuDO == null
                 || Integer.valueOf(1).equals(spuDO.getIsDeleted())
                 || Integer.valueOf(1).equals(spuDO.getPublishStatus()) == false
                 || Integer.valueOf(1).equals(spuDO.getVerifyStatus()) == false) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
+        // 查询关联 SKU 列表
         List<MallProductSkuDO> skuDOList = mallProductSkuMapper.selectBySpuId(spuId);
         return SpuConvert.toSpuDetailVO(spuDO, skuDOList);
     }
 
     @Override
     public PageResult<SpuDTO> pageForFullRebuild(int page, int size) {
+        // 分页查询全部未删除 SPU（不分上架状态）
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectAllPage(pageParam);
         List<SpuDTO> dtoList = result.getRecords().stream().map(this::toSpuDTO).toList();
         return PageResult.of(page, size, result.getTotal(), dtoList);
     }
 
+    /**
+     * SPU DO 转 SpuDTO（全量重建用）
+     */
     private SpuDTO toSpuDTO(MallProductSpuDO spuDO) {
         SpuDTO dto = new SpuDTO();
         dto.setSpuId(spuDO.getId());
@@ -72,6 +88,12 @@ public class SpuServiceImpl implements ISpuService {
         return dto;
     }
 
+    /**
+     * 应用排序参数
+     *
+     * @param pageParam 分页参数
+     * @param sort      排序方式
+     */
     private void applySort(Page<MallProductSpuDO> pageParam, String sort) {
         if ("price_asc".equals(sort)) {
             pageParam.addOrder(OrderItem.asc("price_min"));

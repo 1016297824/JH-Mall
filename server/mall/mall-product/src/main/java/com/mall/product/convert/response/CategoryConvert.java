@@ -8,11 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 类目转换器（DO → VO）
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 public class CategoryConvert {
 
     private CategoryConvert() {
     }
 
+    /**
+     * 类目 DO 转 VO
+     *
+     * @param categoryDO 类目 DO
+     * @return 类目 VO
+     */
     public static CategoryVO toCategoryVO(MallCategoryDO categoryDO) {
         if (categoryDO == null) {
             return null;
@@ -28,14 +40,21 @@ public class CategoryConvert {
         return vo;
     }
 
+    /**
+     * 构建类目树
+     *
+     * @param categoryDOList 类目 DO 列表
+     * @return 树形结构类目列表
+     */
     public static List<CategoryVO> buildTree(List<MallCategoryDO> categoryDOList) {
+        // 全部转为 VO
         List<CategoryVO> allVos = categoryDOList.stream()
                 .map(CategoryConvert::toCategoryVO)
                 .toList();
-
+        // 建立 ID → VO 映射，便于快速找父节点
         Map<Long, CategoryVO> voMap = allVos.stream()
                 .collect(Collectors.toMap(v -> Long.parseLong(v.getCategoryId()), v -> v));
-
+        // 组装树：parentId=0 为根节点，其余挂到对应父节点下
         List<CategoryVO> tree = new ArrayList<>();
         for (CategoryVO vo : allVos) {
             Long parentId = Long.parseLong(vo.getParentId());

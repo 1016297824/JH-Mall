@@ -72,6 +72,16 @@ public interface RemoteProductService {
                                     @RequestParam("size") int size);
 
     /**
+     * 补偿 Outbox 消息（ruoyi-job 调度）
+     *
+     * <p>扫描并投递待发送的搜索同步 Outbox 消息</p>
+     *
+     * @return 本次处理的消息数量
+     */
+    @PostMapping("/inner/product/outbox/compensate")
+    int compensateOutbox();
+
+    /**
      * 库存预占请求项
      */
     @Data
