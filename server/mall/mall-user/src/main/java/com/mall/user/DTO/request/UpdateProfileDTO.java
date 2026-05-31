@@ -1,12 +1,17 @@
 package com.mall.user.DTO.request;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
- * 修改用户资料请求体
+ * 修改个人资料请求 DTO
  *
  * @author JH-Mall
  * @date 2026/05/28
  */
-public class UpdateProfileDTO {
+@Data
+@NoArgsConstructor
+public class UpdateProfileRequest {
 
     /** 昵称 */
     private String nickname;
@@ -22,44 +27,4 @@ public class UpdateProfileDTO {
 
     /** 邮箱 */
     private String email;
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public Integer getGender() {
-        return gender;
-    }
-
-    public void setGender(Integer gender) {
-        this.gender = gender;
-    }
-
-    public String getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(String birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }
