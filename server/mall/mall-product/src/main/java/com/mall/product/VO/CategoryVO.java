@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class CategoryVO {
+
     /** 类目 ID */
     private String categoryId;
     /** 父类目 ID，0=顶级 */

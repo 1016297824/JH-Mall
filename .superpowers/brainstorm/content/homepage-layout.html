@@ -1,0 +1,103 @@
+<h2>首页布局方案</h2>
+<p class="subtitle">选一个你觉得最合适的整体布局结构</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>经典电商流</h3>
+      <p>搜索栏 → Banner → 类目网格 → 推荐商品流（瀑布），电商最常见形式</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>搜索驱动型</h3>
+      <p>Hero 大搜索区（高对比度）→ 类目入口 → Banner 横幅 → 商品卡片网格</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<h3>方案 A：经典电商流</h3>
+
+<div class="mockup">
+  <div class="mockup-header">经典电商首页布局</div>
+  <div class="mockup-body" style="padding:20px;background:#FAF5FF;border-radius:12px;">
+    
+    <div class="mock-nav" style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:#7C3AED;color:#FFF;border-radius:8px;margin-bottom:16px;">
+      <span style="font-weight:700;font-size:18px;">JH-Mall</span>
+      <span style="background:#FFFFFF20;padding:6px 16px;border-radius:20px;width:200px;text-align:left;">🔍 搜索商品</span>
+      <span>🛒 登录</span>
+    </div>
+
+    <div class="placeholder" style="height:280px;background:linear-gradient(135deg,#A78BFA,#C4B5FD);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:24px;font-weight:700;margin-bottom:24px;">Banner 轮播区</div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+      <div class="placeholder" style="text-align:center;padding:16px;background:#FFF;border-radius:10px;">👗<br><small>女装</small></div>
+      <div class="placeholder" style="text-align:center;padding:16px;background:#FFF;border-radius:10px;">👔<br><small>男装</small></div>
+      <div class="placeholder" style="text-align:center;padding:16px;background:#FFF;border-radius:10px;">📱<br><small>数码</small></div>
+      <div class="placeholder" style="text-align:center;padding:16px;background:#FFF;border-radius:10px;">🏠<br><small>家居</small></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+    </div>
+  </div>
+</div>
+
+<br>
+
+<h3>方案 B：搜索驱动型</h3>
+
+<div class="mockup">
+  <div class="mockup-header">搜索驱动型首页布局</div>
+  <div class="mockup-body" style="padding:20px;background:#FAF5FF;border-radius:12px;">
+    
+    <div class="mock-nav" style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:#FFF;border-bottom:1px solid #E9D5FF;border-radius:8px;margin-bottom:24px;">
+      <span style="font-weight:700;font-size:18px;color:#7C3AED;">JH-Mall</span>
+      <span style="flex:1;text-align:right;color:#4C1D95;">🛒 登录</span>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:16px;padding:48px 32px;text-align:center;margin-bottom:24px;">
+      <h3 style="color:#FFF;margin:0 0 8px 0;">发现好物</h3>
+      <div class="mock-input" style="width:400px;margin:0 auto;background:#FFFFFF20;border:1px solid #FFFFFF40;color:#FFF;text-align:center;padding:12px;">🔍 搜索你想要的一切</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px;">
+      <div class="placeholder" style="text-align:center;padding:12px;background:#FFF;border-radius:12px;">👗 女装</div>
+      <div class="placeholder" style="text-align:center;padding:12px;background:#FFF;border-radius:12px;">👔 男装</div>
+      <div class="placeholder" style="text-align:center;padding:12px;background:#FFF;border-radius:12px;">📱 数码</div>
+      <div class="placeholder" style="text-align:center;padding:12px;background:#FFF;border-radius:12px;">🏠 家居</div>
+      <div class="placeholder" style="text-align:center;padding:12px;background:#FFF;border-radius:12px;">💄 美妆</div>
+    </div>
+
+    <div class="placeholder" style="height:200px;background:linear-gradient(135deg,#A78BFA,#C4B5FD);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:18px;margin-bottom:24px;">Banner 横幅</div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+      <div class="placeholder" style="background:#FFF;border-radius:12px;padding:12px;height:200px;">商品卡片</div>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros"><h4>关键区别</h4>
+    <ul>
+      <li>A：Banner 在顶部，首页以"逛"为主，视觉冲击强</li>
+      <li>B：搜索在 Hero 位，首页以"搜"为主，效率优先</li>
+    </ul>
+  </div>
+  <div class="cons"><h4>参考</h4>
+    <ul>
+      <li>A → 淘宝/京东 首页</li>
+      <li>B → 拼多多 首页（搜索 + 类目入口主导）</li>
+    </ul>
+  </div>
+</div>
