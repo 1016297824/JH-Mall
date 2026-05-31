@@ -3,6 +3,7 @@ package com.ruoyi.gateway.filter;
 import com.ruoyi.common.core.constant.HttpStatus;
 import com.ruoyi.common.core.utils.ServletUtils;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.redis.service.RedisService;
 import com.ruoyi.gateway.config.properties.MallAuthProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -55,6 +56,13 @@ public class MallAuthFilter implements GlobalFilter, Ordered
 
     @Autowired
     private MallAuthProperties mallAuthProperties;
+
+    @Autowired
+    private RedisService redisService;
+
+    /** C 端 Redis Key 前缀——与 mall-common CacheConstants.Auth 保持一致 */
+    private static final String REDIS_BLACKLIST_PREFIX = "mall:auth:blacklist:";
+    private static final String REDIS_SESSION_PREFIX = "mall:auth:session:";
 
     /**
      * 启动时校验 C 端 JWT 密钥是否已配置
@@ -135,13 +143,30 @@ public class MallAuthFilter implements GlobalFilter, Ordered
             return unauthorized(response, "C 端 token 无效");
         }
 
-        // 6. 注入 X-User-Id 头
+        // 6. 检查 Token 黑名单与会话有效性
+        String jti = claims.getId();
         String userId = claims.get(USER_ID_KEY, String.class);
         if (StringUtils.isEmpty(userId))
         {
             log.warn("[C 端鉴权失败] 请求路径:{} 原因:token 中缺少 userId", path);
             return unauthorized(response, "C 端 token 缺少 userId");
         }
+
+        String blacklistKey = REDIS_BLACKLIST_PREFIX + jti;
+        if (Boolean.TRUE.equals(redisService.hasKey(blacklistKey)))
+        {
+            log.warn("[C 端鉴权失败] 请求路径:{} jti:{} 原因:token 已被吊销（黑名单命中）", path, jti);
+            return unauthorized(response, "C 端 token 已被吊销");
+        }
+
+        String sessionKey = REDIS_SESSION_PREFIX + userId + ":" + jti;
+        if (Boolean.FALSE.equals(redisService.hasKey(sessionKey)))
+        {
+            log.warn("[C 端鉴权失败] 请求路径:{} userId:{} 原因:会话不存在或已被删除", path, userId);
+            return unauthorized(response, "C 端 token 会话不存在");
+        }
+
+        // 7. 注入 X-User-Id 头
 
         request = request.mutate()
                 .header(HEADER_X_USER_ID, userId)
