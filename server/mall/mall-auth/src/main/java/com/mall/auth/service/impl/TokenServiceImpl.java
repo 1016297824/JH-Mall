@@ -2,7 +2,7 @@ package com.mall.auth.service.impl;
 
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.config.MallSecurityConfigProperties;
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.auth.service.ITokenService;
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.enums.ErrorCode;
@@ -47,7 +47,7 @@ public class TokenServiceImpl implements ITokenService {
      * @return Token 响应
      */
     @Override
-    public TokenResponse issue(String userId) {
+    public TokenRespDTO issue(String userId) {
         byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
         Date now = new Date();
         Date accessExp = new Date(now.getTime() + authProperties.getAccessTokenTtl() * 1000);
@@ -89,7 +89,7 @@ public class TokenServiceImpl implements ITokenService {
         String refreshKey = CacheConstants.Auth.REFRESH + refreshJti;
         redisTemplate.opsForValue().set(refreshKey, userId, authProperties.getRefreshTokenTtl(), TimeUnit.SECONDS);
 
-        return new TokenResponse(accessToken, refreshToken, authProperties.getAccessTokenTtl());
+        return new TokenRespDTO(accessToken, refreshToken, authProperties.getAccessTokenTtl());
     }
 
     /**
@@ -127,7 +127,7 @@ public class TokenServiceImpl implements ITokenService {
      * @return 新的 Token 响应
      */
     @Override
-    public TokenResponse refresh(String refreshToken) {
+    public TokenRespDTO refresh(String refreshToken) {
         Claims claims = parseToken(refreshToken);
 
         // 校验 token 类型必须为 refresh

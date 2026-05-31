@@ -1,16 +1,13 @@
 package com.mall.auth.controller;
 
+import com.mall.auth.DTO.request.*;
+import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.common.DTO.user.response.MallUserDTO;
 import com.mall.common.DTO.MallResult;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.config.MallAuthConfigProperties;
-import com.mall.auth.DTO.request.CaptchaChangePhoneReq;
-import com.mall.auth.DTO.request.CaptchaDeactivateReq;
-import com.mall.auth.DTO.request.CaptchaLoginReq;
-import com.mall.auth.DTO.request.CaptchaRegisterReq;
-import com.mall.auth.DTO.request.CaptchaResetPasswordReq;
-import com.mall.auth.DTO.response.CaptchaResponse;
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.request.CaptchaChangePhoneReqDTO;
+import com.mall.auth.DTO.response.CaptchaRespDTO;
 import com.mall.auth.service.ICaptchaService;
 import com.mall.auth.service.ITokenService;
 import com.mall.common.enums.ErrorCode;
@@ -75,9 +72,9 @@ public class CaptchaController {
      * @return 验证码响应
      */
     @GetMapping
-    public MallResult<CaptchaResponse> getCaptcha() {
+    public MallResult<CaptchaRespDTO> getCaptcha() {
         Map<String, String> result = captchaService.generate();
-        CaptchaResponse response = new CaptchaResponse(
+        CaptchaRespDTO response = new CaptchaRespDTO(
                 result.get("captchaKey"), result.get("captchaImage"));
         return MallResult.success(response);
     }
@@ -90,8 +87,8 @@ public class CaptchaController {
      * @return Token 响应
      */
     @PostMapping("/register")
-    public MallResult<TokenResponse> register(@Valid @RequestBody CaptchaRegisterReq req,
-                                              HttpServletRequest request) {
+    public MallResult<TokenRespDTO> register(@Valid @RequestBody CaptchaRegisterReqDTO req,
+                                             HttpServletRequest request) {
         String clientIp = getClientIp(request);
         captchaService.verify(req.getCaptchaKey(), req.getCaptchaCode(), clientIp);
 
@@ -116,7 +113,7 @@ public class CaptchaController {
         registerReq.setRegisterType(RegisterTypeEnum.PHONE.getCode());
 
         String userId = remoteUserService.register(registerReq);
-        TokenResponse token = tokenService.issue(userId);
+        TokenRespDTO token = tokenService.issue(userId);
         return MallResult.success(token);
     }
 
@@ -128,8 +125,8 @@ public class CaptchaController {
      * @return Token 响应
      */
     @PostMapping("/login")
-    public MallResult<TokenResponse> login(@Valid @RequestBody CaptchaLoginReq req,
-                                           HttpServletRequest request) {
+    public MallResult<TokenRespDTO> login(@Valid @RequestBody CaptchaLoginReqDTO req,
+                                          HttpServletRequest request) {
         String clientIp = getClientIp(request);
         captchaService.verify(req.getCaptchaKey(), req.getCaptchaCode(), clientIp);
 
@@ -161,7 +158,7 @@ public class CaptchaController {
 
         // 密码正确时清除错误计数
         redisTemplate.delete(pwdErrKey);
-        TokenResponse token = tokenService.issue(user.getId());
+        TokenRespDTO token = tokenService.issue(user.getId());
         return MallResult.success(token);
     }
 
@@ -173,7 +170,7 @@ public class CaptchaController {
      * @return 成功响应
      */
     @PostMapping("/password/reset")
-    public MallResult<Void> resetPassword(@Valid @RequestBody CaptchaResetPasswordReq req,
+    public MallResult<Void> resetPassword(@Valid @RequestBody CaptchaResetPasswordReqDTO req,
                                           HttpServletRequest request) {
         String clientIp = getClientIp(request);
         captchaService.verify(req.getCaptchaKey(), req.getCaptchaCode(), clientIp);
@@ -202,7 +199,7 @@ public class CaptchaController {
      * @return 成功响应
      */
     @PutMapping("/phone")
-    public MallResult<Void> changePhone(@Valid @RequestBody CaptchaChangePhoneReq req) {
+    public MallResult<Void> changePhone(@Valid @RequestBody CaptchaChangePhoneReqDTO req) {
         MallUserDTO user = remoteUserService.findByPhone(req.getOldPhone());
         if (user == null) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -234,7 +231,7 @@ public class CaptchaController {
      * @return 成功响应
      */
     @DeleteMapping("/account")
-    public MallResult<Void> deactivateAccount(@Valid @RequestBody CaptchaDeactivateReq req) {
+    public MallResult<Void> deactivateAccount(@Valid @RequestBody CaptchaDeactivateReqDTO req) {
         MallUserDTO user = remoteUserService.findByPhone(req.getPhone());
         if (user == null) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);

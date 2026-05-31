@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class CaptchaRegisterReq {
+public class CaptchaRegisterReqDTO {
 
     /** 手机号 */
     @NotBlank(message = "手机号不能为空")

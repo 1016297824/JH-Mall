@@ -1,12 +1,19 @@
 package com.mall.auth.controller;
 
+import com.mall.auth.DTO.response.TokenRespDTO;
+import com.mall.auth.service.ITokenService;
+import com.mall.common.enums.ErrorCode;
+import com.mall.common.exception.TokenException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,12 +24,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerTest {
 
     private MockMvc mockMvc;
+    private ITokenService tokenService;
 
     @BeforeEach
     void setUp() {
-        AuthController controller = new AuthController();
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        tokenService = mock(ITokenService.class);
+        AuthController controller = new AuthController(tokenService);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new com.mall.common.handler.MallExceptionHandler())
+                .build();
     }
+
+    // ========== 占位端点（暂未开放）==========
 
     @Test
     void shouldReturnNotOpenWhenCreateUser() throws Exception {
@@ -31,7 +44,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -41,7 +54,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -51,7 +64,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -61,35 +74,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
-    }
-
-    @Test
-    void shouldReturnNotOpenWhenRefreshSession() throws Exception {
-        mockMvc.perform(post("/api/auth/sessions/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
-    }
-
-    @Test
-    void shouldReturnNotOpenWhenGetCurrentSession() throws Exception {
-        mockMvc.perform(get("/api/auth/sessions/current")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
-    }
-
-    @Test
-    void shouldReturnNotOpenWhenDeleteCurrentSession() throws Exception {
-        mockMvc.perform(delete("/api/auth/sessions/current")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -99,7 +84,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -109,7 +94,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -119,7 +104,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -129,7 +114,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -139,7 +124,7 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
     }
 
     @Test
@@ -149,6 +134,99 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errorCode").value("A9999"))
-                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放，请使用 CAPTCHA 端点"));
+                .andExpect(jsonPath("$.errorMessage").value("该功能暂未开放"));
+    }
+
+    // ========== POST /sessions/refresh ==========
+
+    @Test
+    void shouldRefreshTokenSuccess() throws Exception {
+        TokenRespDTO tokenResp = new TokenRespDTO("new-access", "new-refresh", 1800L);
+        when(tokenService.refresh("old-refresh-token")).thenReturn(tokenResp);
+
+        mockMvc.perform(post("/api/auth/sessions/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"old-refresh-token\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("00000"))
+                .andExpect(jsonPath("$.data.accessToken").value("new-access"))
+                .andExpect(jsonPath("$.data.refreshToken").value("new-refresh"))
+                .andExpect(jsonPath("$.data.expiresIn").value(1800));
+    }
+
+    @Test
+    void shouldRefreshTokenFailWhenTokenInvalid() throws Exception {
+        when(tokenService.refresh("bad-token"))
+                .thenThrow(new TokenException(ErrorCode.TOKEN_INVALID));
+
+        mockMvc.perform(post("/api/auth/sessions/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"bad-token\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("A0231"));
+    }
+
+    @Test
+    void shouldRefreshTokenFailWhenRefreshTokenBlank() throws Exception {
+        mockMvc.perform(post("/api/auth/sessions/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"refreshToken\":\"\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("A0401"));
+    }
+
+    // ========== GET /sessions/current ==========
+
+    @Test
+    void shouldCheckSessionSuccess() throws Exception {
+        when(tokenService.verify("valid-access-token")).thenReturn("user-001");
+
+        mockMvc.perform(get("/api/auth/sessions/current")
+                        .header("Authorization", "Bearer valid-access-token")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("00000"))
+                .andExpect(jsonPath("$.data.userId").value("user-001"));
+    }
+
+    @Test
+    void shouldCheckSessionFailWhenNoAuthHeader() throws Exception {
+        mockMvc.perform(get("/api/auth/sessions/current")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("A0231"));
+    }
+
+    @Test
+    void shouldCheckSessionFailWhenTokenInvalid() throws Exception {
+        when(tokenService.verify("expired-token"))
+                .thenThrow(new TokenException(ErrorCode.TOKEN_INVALID));
+
+        mockMvc.perform(get("/api/auth/sessions/current")
+                        .header("Authorization", "Bearer expired-token")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("A0231"));
+    }
+
+    // ========== DELETE /sessions/current ==========
+
+    @Test
+    void shouldLogoutSuccess() throws Exception {
+        mockMvc.perform(delete("/api/auth/sessions/current")
+                        .header("Authorization", "Bearer valid-access-token")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("00000"));
+
+        verify(tokenService).revoke("valid-access-token");
+    }
+
+    @Test
+    void shouldLogoutFailWhenNoAuthHeader() throws Exception {
+        mockMvc.perform(delete("/api/auth/sessions/current")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("A0231"));
     }
 }

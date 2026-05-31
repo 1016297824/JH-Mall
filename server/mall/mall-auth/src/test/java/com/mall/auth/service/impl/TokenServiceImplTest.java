@@ -1,7 +1,8 @@
 package com.mall.auth.service.impl;
 
+import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.auth.config.MallAuthConfigProperties;
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.config.MallSecurityConfigProperties;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Jwts;
@@ -14,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashSet;
@@ -45,17 +44,20 @@ class TokenServiceImplTest {
     @Mock
     private MallAuthConfigProperties authProperties;
 
+    @Mock
+    private MallSecurityConfigProperties securityProperties;
+
     @BeforeEach
     void setUp() {
         lenient().when(authProperties.getAccessTokenTtl()).thenReturn(1800L);
         lenient().when(authProperties.getRefreshTokenTtl()).thenReturn(604800L);
-        ReflectionTestUtils.setField(tokenService, "jwtSecret", JWT_SECRET);
+        lenient().when(securityProperties.getJwtSecret()).thenReturn(JWT_SECRET);
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     @Test
     void shouldIssueTokenWithCompleteFields() {
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         assertNotNull(response.getAccessToken());
         assertNotNull(response.getRefreshToken());
@@ -68,7 +70,7 @@ class TokenServiceImplTest {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
         when(redisTemplate.hasKey(contains("session"))).thenReturn(true);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
         String userId = tokenService.verify(response.getAccessToken());
 
         assertEquals(USER_ID, userId);
@@ -78,7 +80,7 @@ class TokenServiceImplTest {
     void shouldVerifyThrowOnBlacklistedToken() {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(true);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.verify(response.getAccessToken()));
@@ -109,7 +111,7 @@ class TokenServiceImplTest {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
         when(redisTemplate.hasKey(contains("session"))).thenReturn(false);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.verify(response.getAccessToken()));
@@ -121,11 +123,11 @@ class TokenServiceImplTest {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
         when(redisTemplate.hasKey(contains("refresh"))).thenReturn(true);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         when(redisTemplate.delete(anyString())).thenReturn(true);
 
-        TokenResponse refreshed = tokenService.refresh(response.getRefreshToken());
+        TokenRespDTO refreshed = tokenService.refresh(response.getRefreshToken());
 
         assertNotNull(refreshed.getAccessToken());
         assertNotNull(refreshed.getRefreshToken());
@@ -136,7 +138,7 @@ class TokenServiceImplTest {
 
     @Test
     void shouldRefreshThrowOnAccessToken() {
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.refresh(response.getAccessToken()));
@@ -147,7 +149,7 @@ class TokenServiceImplTest {
     void shouldRefreshThrowOnRevokedToken() {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(true);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.refresh(response.getRefreshToken()));
@@ -159,7 +161,7 @@ class TokenServiceImplTest {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
         when(redisTemplate.hasKey(contains("refresh"))).thenReturn(false);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.refresh(response.getRefreshToken()));
@@ -170,7 +172,7 @@ class TokenServiceImplTest {
     void shouldRevokeSuccessfully() {
         when(redisTemplate.delete(anyString())).thenReturn(true);
 
-        TokenResponse response = tokenService.issue(USER_ID);
+        TokenRespDTO response = tokenService.issue(USER_ID);
 
         tokenService.revoke(response.getAccessToken());
 

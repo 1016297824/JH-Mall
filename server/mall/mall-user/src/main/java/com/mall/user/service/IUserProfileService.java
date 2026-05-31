@@ -1,6 +1,6 @@
 package com.mall.user.service;
 
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 import com.mall.user.VO.UserProfileVO;
 
 /**
@@ -26,5 +26,5 @@ public interface IUserProfileService {
      * @param request 修改请求
      * @return 更新后的用户资料VO
      */
-    UserProfileVO updateProfile(Long userId, UpdateProfileRequest request);
+    UserProfileVO updateProfile(Long userId, UpdateProfileDTO request);
 }

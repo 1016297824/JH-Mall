@@ -5,18 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 验证码响应
+ * 会话信息响应
  *
  * @author JH-Mall
- * @date 2026/05/26
+ * @date 2026/05/31
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CaptchaRespDTO {
+public class SessionInfoRespDTO {
 
-    /** 验证码 Key */
-    private String captchaKey;
-    /** 验证码图片 Base64 */
-    private String captchaImage;
+    /** 用户 ID */
+    private String userId;
 }

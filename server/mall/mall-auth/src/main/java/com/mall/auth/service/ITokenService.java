@@ -1,6 +1,6 @@
 package com.mall.auth.service;
 
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenRespDTO;
 
 /**
  * C 端 Token 服务接口
@@ -18,7 +18,7 @@ public interface ITokenService {
      * @param userId 用户 ID
      * @return Token 响应
      */
-    TokenResponse issue(String userId);
+    TokenRespDTO issue(String userId);
 
     /**
      * 校验 accessToken 并返回 userId
@@ -34,7 +34,7 @@ public interface ITokenService {
      * @param refreshToken 刷新令牌
      * @return 新的 Token 响应
      */
-    TokenResponse refresh(String refreshToken);
+    TokenRespDTO refresh(String refreshToken);
 
     /**
      * 吊销单条 accessToken（加入黑名单）

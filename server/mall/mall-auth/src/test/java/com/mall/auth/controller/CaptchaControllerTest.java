@@ -4,7 +4,7 @@ import com.mall.common.DTO.user.response.MallUserDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.auth.service.ICaptchaService;
 import com.mall.auth.service.ITokenService;
 import com.mall.auth.config.MallAuthConfigProperties;
@@ -99,7 +99,7 @@ class CaptchaControllerTest {
         when(remoteUserService.register(any(RemoteUserService.RegisterRequest.class)))
                 .thenReturn("user-001");
         when(tokenService.issue("user-001"))
-                .thenReturn(new TokenResponse("access-token-1", "refresh-token-1", 1800L));
+                .thenReturn(new TokenRespDTO("access-token-1", "refresh-token-1", 1800L));
 
         mockMvc.perform(post("/api/auth/captcha/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -196,7 +196,7 @@ class CaptchaControllerTest {
         when(remoteUserService.findByPhone(phone)).thenReturn(user);
         when(valueOperations.get("mall:auth:pwd_err:user-001")).thenReturn(null);
         when(tokenService.issue("user-001"))
-                .thenReturn(new TokenResponse("access-token-2", "refresh-token-2", 1800L));
+                .thenReturn(new TokenRespDTO("access-token-2", "refresh-token-2", 1800L));
 
         mockMvc.perform(post("/api/auth/captcha/login")
                         .contentType(MediaType.APPLICATION_JSON)

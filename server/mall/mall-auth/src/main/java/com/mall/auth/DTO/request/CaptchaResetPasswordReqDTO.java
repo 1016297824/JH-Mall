@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class CaptchaResetPasswordReq {
+public class CaptchaResetPasswordReqDTO {
 
     /** 手机号 */
     @NotBlank(message = "手机号不能为空")

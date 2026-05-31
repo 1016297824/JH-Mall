@@ -6,7 +6,7 @@ import com.mall.user.DO.MallUserDO;
 import com.mall.user.DO.MallUserMemberDO;
 import com.mall.user.DO.MallUserMemberLevelDO;
 import com.mall.user.config.MallUserConfigProperties;
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 import com.mall.user.infrastructure.feign.RemoteAuthAdapter;
 import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserMapper;
@@ -183,7 +183,7 @@ class ProfileServiceImplTest {
         when(remoteAuthAdapter.maskPhone(anyString())).thenReturn("138****8000");
         when(mallUserConfigProperties.getProfile()).thenReturn(profileConfig);
 
-        UpdateProfileRequest request = new UpdateProfileRequest();
+        UpdateProfileDTO request = new UpdateProfileDTO();
         request.setNickname("新昵称");
         request.setGender(2);
 

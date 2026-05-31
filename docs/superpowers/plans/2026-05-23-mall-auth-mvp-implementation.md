@@ -950,7 +950,7 @@ git commit -m "feat(mall-common): add CaptchaException and TokenException; feat(
 ```java
 package com.mall.auth.service;
 
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenRespDTO;
 
 public interface TokenService {
 
@@ -971,7 +971,7 @@ public interface TokenService {
 ```java
 package com.mall.auth.service.impl;
 
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.auth.service.TokenService;
 import com.mall.common.exception.TokenException;
 import io.jsonwebtoken.Claims;
@@ -1624,13 +1624,13 @@ package com.mall.auth.controller;
 import com.mall.api.DTO.MallResult;
 import com.mall.api.DTO.MallUserDTO;
 import com.mall.api.feign.RemoteUserService;
-import com.mall.auth.DTO.request.CaptchaChangePhoneReq;
-import com.mall.auth.DTO.request.CaptchaDeactivateReq;
-import com.mall.auth.DTO.request.CaptchaLoginReq;
-import com.mall.auth.DTO.request.CaptchaRegisterReq;
-import com.mall.auth.DTO.request.CaptchaResetPasswordReq;
-import com.mall.auth.DTO.response.CaptchaResponse;
-import com.mall.auth.DTO.response.TokenResponse;
+import com.mall.auth.DTO.request.CaptchaChangePhoneReqDTO;
+import com.mall.auth.DTO.request.CaptchaDeactivateReqDTO;
+import com.mall.auth.DTO.request.CaptchaLoginReqDTO;
+import com.mall.auth.DTO.request.CaptchaRegisterReqDTO;
+import com.mall.auth.DTO.request.CaptchaResetPasswordReqDTO;
+import com.mall.auth.DTO.response.CaptchaRespDTO;
+import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.auth.service.CaptchaService;
 import com.mall.auth.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;

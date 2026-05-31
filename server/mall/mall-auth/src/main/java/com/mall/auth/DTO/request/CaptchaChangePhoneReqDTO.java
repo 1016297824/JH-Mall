@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class CaptchaChangePhoneReq {
+public class CaptchaChangePhoneReqDTO {
 
     /** 旧手机号 */
     @NotBlank(message = "旧手机号不能为空")

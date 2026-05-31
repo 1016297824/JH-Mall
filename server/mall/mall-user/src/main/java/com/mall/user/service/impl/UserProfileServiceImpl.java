@@ -9,7 +9,7 @@ import com.mall.user.DO.MallUserDO;
 import com.mall.user.DO.MallUserMemberDO;
 import com.mall.user.DO.MallUserMemberLevelDO;
 import com.mall.user.config.MallUserConfigProperties;
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 import com.mall.user.convert.request.UserProfileConvert;
 import com.mall.user.convert.response.UserConvert;
 import com.mall.user.infrastructure.feign.RemoteAuthAdapter;
@@ -97,7 +97,7 @@ public class UserProfileServiceImpl implements IUserProfileService {
      * @return 更新后的用户资料 VO
      */
     @Override
-    public UserProfileVO updateProfile(Long userId, UpdateProfileRequest request) {
+    public UserProfileVO updateProfile(Long userId, UpdateProfileDTO request) {
         MallUserDO user = mallUserMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);

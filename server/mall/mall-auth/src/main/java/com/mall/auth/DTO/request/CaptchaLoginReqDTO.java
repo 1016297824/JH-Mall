@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class CaptchaLoginReq {
+public class CaptchaLoginReqDTO {
 
     /** 手机号 */
     @NotBlank(message = "手机号不能为空")

@@ -1,6 +1,6 @@
 package com.mall.user.controller;
 
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 import com.mall.user.service.IUserProfileService;
 import com.mall.user.VO.UserProfileVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,7 +72,7 @@ class ProfileControllerTest {
 
     @Test
     void updateProfile_shouldReturnUpdatedProfile() throws Exception {
-        UpdateProfileRequest request = new UpdateProfileRequest();
+        UpdateProfileDTO request = new UpdateProfileDTO();
         request.setNickname("新昵称");
         request.setAvatar("https://example.com/new-avatar.png");
 
@@ -80,7 +80,7 @@ class ProfileControllerTest {
         mockVO.setUserId("1");
         mockVO.setNickname("新昵称");
         mockVO.setAvatar("https://example.com/new-avatar.png");
-        when(userProfileService.updateProfile(eq(1L), any(UpdateProfileRequest.class))).thenReturn(mockVO);
+        when(userProfileService.updateProfile(eq(1L), any(UpdateProfileDTO.class))).thenReturn(mockVO);
 
         mockMvc.perform(put("/api/user/profile")
                         .header(X_USER_ID, "1")

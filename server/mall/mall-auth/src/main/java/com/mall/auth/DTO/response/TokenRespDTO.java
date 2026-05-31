@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TokenResponse {
+public class TokenRespDTO {
 
     /** 访问令牌 */
     private String accessToken;

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class UpdateProfileRequest {
+public class UpdateProfileDTO {
 
     /** 昵称 */
     private String nickname;

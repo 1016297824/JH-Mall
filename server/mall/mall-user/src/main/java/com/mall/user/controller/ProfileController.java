@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mall.common.DTO.MallResult;
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 import com.mall.user.service.IUserProfileService;
 import com.mall.user.VO.UserProfileVO;
 
@@ -49,7 +49,7 @@ public class ProfileController {
      * @return 最新用户资料
      */
     @PutMapping("/profile")
-    public MallResult<UserProfileVO> updateProfile(@RequestBody UpdateProfileRequest request,
+    public MallResult<UserProfileVO> updateProfile(@RequestBody UpdateProfileDTO request,
                                                    HttpServletRequest httpRequest) {
         String userId = httpRequest.getHeader(X_USER_ID);
         return MallResult.success(userProfileService.updateProfile(Long.parseLong(userId), request));

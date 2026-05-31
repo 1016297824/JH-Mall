@@ -1,7 +1,7 @@
 package com.mall.user.convert;
 
 import com.mall.user.DO.MallUserDO;
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 import com.mall.user.convert.request.UserProfileConvert;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ class UserProfileRequestConvertTest {
 
     @Test
     void mergeShouldCopyNonNullFields() {
-        UpdateProfileRequest request = new UpdateProfileRequest();
+        UpdateProfileDTO request = new UpdateProfileDTO();
         request.setNickname("新昵称");
         request.setAvatar("https://img.example.com/new.jpg");
         request.setGender(2);
@@ -47,7 +47,7 @@ class UserProfileRequestConvertTest {
         user.setGender(1);
         user.setEmail("old@example.com");
 
-        UpdateProfileRequest request = new UpdateProfileRequest();
+        UpdateProfileDTO request = new UpdateProfileDTO();
         request.setNickname("新昵称");
 
         UserProfileConvert.merge(request, user);
@@ -61,7 +61,7 @@ class UserProfileRequestConvertTest {
 
     @Test
     void mergeShouldHandleNullBirthdayString() {
-        UpdateProfileRequest request = new UpdateProfileRequest();
+        UpdateProfileDTO request = new UpdateProfileDTO();
         request.setBirthday("bad-date");
 
         MallUserDO user = new MallUserDO();
@@ -77,7 +77,7 @@ class UserProfileRequestConvertTest {
         MallUserDO user = new MallUserDO();
         user.setNickname("旧昵称");
 
-        UpdateProfileRequest request = new UpdateProfileRequest();
+        UpdateProfileDTO request = new UpdateProfileDTO();
         UserProfileConvert.merge(request, user);
 
         assertEquals("旧昵称", user.getNickname());

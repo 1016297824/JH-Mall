@@ -1,7 +1,7 @@
 package com.mall.user.convert.request;
 
 import com.mall.user.DO.MallUserDO;
-import com.mall.user.DTO.request.UpdateProfileRequest;
+import com.mall.user.DTO.request.UpdateProfileDTO;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +22,7 @@ public class UserProfileConvert {
      * @param request 修改请求
      * @param user    目标用户 DO
      */
-    public static void merge(UpdateProfileRequest request, MallUserDO user) {
+    public static void merge(UpdateProfileDTO request, MallUserDO user) {
         if (request.getNickname() != null) {
             user.setNickname(request.getNickname());
         }
