@@ -26,7 +26,7 @@ const router = createRouter({
           meta: { requiresAuth: false },
         },
         {
-          path: 'products/:id',
+          path: 'spus/:id',
           name: 'productDetail',
           component: () => import('@/pages/product/ProductDetailPage.vue'),
           meta: { requiresAuth: false },

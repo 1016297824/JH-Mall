@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <router-link :to="`/products/${product.spuId}`" class="product-card-link">
+  <router-link :to="`/spus/${product.spuId}`" class="product-card-link">
     <el-card class="product-card" shadow="hover" :body-style="{ padding: '12px' }">
       <div class="card-image">
         <img

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -52,6 +53,7 @@ public class HotProductServiceImpl implements IHotProductService {
             return fallbackMysql(limit);
         }
         // 第 2 步：遍历 ZSet 中的 spuId，优先从 Caffeine 本地缓存获取 VO
+        // 用 ArrayList 维护与 ZSet 一致的排名顺序（通过 null 占位），保证返回顺序与 Redis 排名一致
         List<SpuVO> result = new ArrayList<>();
         List<Long> missedIds = new ArrayList<>();
         for (Object obj : spuIdSet) {
@@ -62,14 +64,14 @@ public class HotProductServiceImpl implements IHotProductService {
                 // Caffeine 命中，直接加入结果集
                 result.add(cached);
             } else {
-                // Caffeine 未命中，占位 null 保持 ZSet 排名顺序，稍后批量回查 MySQL 填入
+                // Caffeine 未命中，占位 null 保持索引位置，稍后批量回查 MySQL 后按原位置填入
                 result.add(null);
                 missedIds.add(spuId);
             }
         }
         // 第 3 步：Caffeine 未命中的 ID 批量回查 MySQL，按 ZSet 排名顺序回填并回种缓存
         if (!missedIds.isEmpty()) {
-            List<MallProductSpuDO> spuDOList = spuMapper.selectBatchIds(missedIds);
+            List<MallProductSpuDO> spuDOList = spuMapper.selectByIds(missedIds);
             List<SpuVO> voList = SpuConvert.toSpuVOList(spuDOList);
             Map<Long, SpuVO> voMap = new HashMap<>();
             for (SpuVO vo : voList) {
@@ -97,6 +99,7 @@ public class HotProductServiceImpl implements IHotProductService {
      * @return 按销量降序的 SPU 列表
      */
     private List<SpuVO> fallbackMysql(int limit) {
+        // 按 rankMaxSize（默认 200）取全部种子数据，用于回填缓存，不局限于 limit
         int seedSize = configProps.getHot().getRankMaxSize();
         Page<MallProductSpuDO> page = new Page<>(1, seedSize);
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
@@ -106,11 +109,13 @@ public class HotProductServiceImpl implements IHotProductService {
                 .orderByDesc(MallProductSpuDO::getSalesCount);
         Page<MallProductSpuDO> result = spuMapper.selectPage(page, wrapper);
         List<SpuVO> allList = SpuConvert.toSpuVOList(result.getRecords());
+        // 回填 Caffeine 本地缓存 + Redis ZSet，种子数据比请求量更大，使 Caffeine 有更充足的命中储备
         BoundZSetOperations<String, Object> zSetOps = redisTemplate.boundZSetOps(CacheConstants.Product.HOT_RANK);
         for (SpuVO vo : allList) {
             hotProductCache.put(Long.valueOf(vo.getSpuId()), vo);
             zSetOps.add(vo.getSpuId(), vo.getSalesCount() != null ? vo.getSalesCount() * 10.0 : 0);
         }
+        // 只返回调用方请求的 limit 条，多余的种子数据留在缓存中供后续请求使用
         return allList.size() > limit ? allList.subList(0, limit) : allList;
     }
 
