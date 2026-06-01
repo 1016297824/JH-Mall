@@ -31,7 +31,7 @@ onMounted(async () => {
   <div class="home-page">
     <main class="home-content">
       <BannerSwiper />
-      <CategoryGrid v-if="categories.length > 0" :categories="categories" />
+      <CategoryGrid :categories="categories" :loading="loading" />
       <ProductSection :products="hotProducts" :loading="loading" />
     </main>
   </div>

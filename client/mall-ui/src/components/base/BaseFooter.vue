@@ -6,13 +6,13 @@ const currentYear = new Date().getFullYear()
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-links">
-        <a href="#">关于我们</a>
+        <span>关于我们</span>
         <span class="divider">|</span>
-        <a href="#">帮助中心</a>
+        <span>帮助中心</span>
         <span class="divider">|</span>
-        <a href="#">隐私政策</a>
+        <span>隐私政策</span>
         <span class="divider">|</span>
-        <a href="#">用户协议</a>
+        <span>用户协议</span>
       </div>
       <p class="footer-copyright">&copy; {{ currentYear }} JH-Mall. All Rights Reserved.</p>
       <a
@@ -29,7 +29,7 @@ const currentYear = new Date().getFullYear()
 @use '@/assets/styles/variables' as *;
 
 .site-footer {
-  background: #F8F9FA;
+  background: $color-bg-card;
   border-top: 1px solid $color-border;
   padding: 32px $spacing-lg 24px;
 }
@@ -47,15 +47,10 @@ const currentYear = new Date().getFullYear()
   gap: 0;
   margin-bottom: $spacing-md;
 
-  a {
+  span {
     font-size: 13px;
     color: var(--el-text-color-regular);
-    text-decoration: none;
     padding: 0 12px;
-
-    &:hover {
-      color: $color-primary;
-    }
   }
 }
 

@@ -87,14 +87,14 @@ defineProps<{
 .price-symbol {
   font-size: 14px;
   font-weight: 700;
-  color: #EF4444;
+  color: #DC2626;
 }
 
 .price-value {
   font-size: 22px;
   font-weight: 700;
   font-family: $font-heading;
-  color: #EF4444;
+  color: #DC2626;
 }
 
 .card-sales {

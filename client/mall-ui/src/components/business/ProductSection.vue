@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <section class="product-section">
-    <h2 class="section-title">🔥 热销推荐</h2>
+    <h2 class="section-title">热销推荐</h2>
 
     <div v-if="loading" class="skeleton-grid">
       <div v-for="n in 4" :key="n" class="skeleton-card">
@@ -43,7 +43,7 @@ defineProps<{
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   margin-bottom: $spacing-md;
 }
@@ -106,6 +106,13 @@ defineProps<{
   p {
     margin-bottom: $spacing-md;
     font-size: 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .product-grid,
+  .skeleton-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

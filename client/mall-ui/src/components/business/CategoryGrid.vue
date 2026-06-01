@@ -4,6 +4,7 @@ import type { CategoryVO } from '@/types/product'
 
 const props = defineProps<{
   categories: CategoryVO[]
+  loading?: boolean
 }>()
 
 const expanded = ref(false)
@@ -12,10 +13,14 @@ const gridRef = ref<HTMLElement | null>(null)
 const itemHeight = ref(0)
 const gridGap = ref(16)
 
-const mediaQuery = window.matchMedia('(max-width: 768px)')
-
-function updateColumns(e: MediaQueryListEvent | MediaQueryList) {
-  columnsPerRow.value = e.matches ? 3 : 5
+function updateColumns() {
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    columnsPerRow.value = 3
+  } else if (window.matchMedia('(max-width: 1024px)').matches) {
+    columnsPerRow.value = 4
+  } else {
+    columnsPerRow.value = 5
+  }
 }
 
 function measureRowHeight() {
@@ -28,14 +33,14 @@ function measureRowHeight() {
 }
 
 onMounted(() => {
-  updateColumns(mediaQuery)
-  mediaQuery.addEventListener('change', updateColumns)
+  updateColumns()
+  window.addEventListener('resize', updateColumns)
   nextTick(measureRowHeight)
   window.addEventListener('resize', () => nextTick(measureRowHeight))
 })
 
 onUnmounted(() => {
-  mediaQuery.removeEventListener('change', updateColumns)
+  window.removeEventListener('resize', updateColumns)
   window.removeEventListener('resize', () => nextTick(measureRowHeight))
 })
 
@@ -75,37 +80,48 @@ function toggleExpand() {
 <template>
   <section class="category-section">
     <h2 class="section-title">全部分类</h2>
-    <div class="category-grid-scroll" :style="gridScrollStyle">
-      <div ref="gridRef" class="category-grid">
-        <router-link
-          v-for="cat in visibleCategories"
-          :key="cat.categoryId"
-          :to="`/categories/${cat.categoryId}`"
-          class="category-item"
-        >
-          <div class="category-icon">
-            <img v-if="cat.icon" :src="cat.icon" :alt="cat.name" loading="lazy" />
-            <span v-else class="category-icon-fallback">{{ cat.name.charAt(0) }}</span>
-          </div>
-          <span class="category-name">{{ cat.name }}</span>
-        </router-link>
-      </div>
-      <div v-if="needsScroll" class="scroll-fade" />
+
+    <div v-if="props.loading" class="skeleton-grid">
+      <div v-for="n in columnsPerRow" :key="n" class="skeleton-card" />
     </div>
-    <div v-if="hasMore" class="category-toggle">
-      <button class="toggle-btn" @click="toggleExpand">
-        <span>{{ expanded ? '收起' : '展开更多分类' }}</span>
-        <svg
-          class="toggle-icon"
-          :class="{ expanded: expanded }"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
-          <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
+
+    <template v-else-if="props.categories.length > 0">
+      <div class="category-grid-scroll" :style="gridScrollStyle">
+        <div ref="gridRef" class="category-grid">
+          <router-link
+            v-for="cat in visibleCategories"
+            :key="cat.categoryId"
+            :to="`/categories/${cat.categoryId}`"
+            class="category-item"
+          >
+            <div class="category-icon">
+              <img v-if="cat.icon" :src="cat.icon" :alt="cat.name" loading="lazy" />
+              <span v-else class="category-icon-fallback">{{ cat.name.charAt(0) }}</span>
+            </div>
+            <span class="category-name">{{ cat.name }}</span>
+          </router-link>
+        </div>
+        <div v-if="needsScroll" class="scroll-fade" />
+      </div>
+      <div v-if="hasMore" class="category-toggle">
+        <button class="toggle-btn" @click="toggleExpand">
+          <span>{{ expanded ? '收起' : '展开更多分类' }}</span>
+          <svg
+            class="toggle-icon"
+            :class="{ expanded: expanded }"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </template>
+
+    <div v-else class="empty-state">
+      <p>暂无分类</p>
     </div>
   </section>
 </template>
@@ -118,7 +134,7 @@ function toggleExpand() {
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   margin-bottom: $spacing-md;
 }
@@ -128,9 +144,50 @@ function toggleExpand() {
   grid-template-columns: repeat(5, 1fr);
   gap: $spacing-md;
 
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   @media (max-width: 768px) {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: $spacing-md;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.skeleton-card {
+  aspect-ratio: 1;
+  background: linear-gradient(90deg, #F3E8FF 25%, #EDE9FE 50%, #F3E8FF 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: $radius-md;
+}
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-2xl 0;
+  color: var(--el-text-color-secondary);
+
+  p {
+    font-size: 15px;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .category-grid-scroll {
