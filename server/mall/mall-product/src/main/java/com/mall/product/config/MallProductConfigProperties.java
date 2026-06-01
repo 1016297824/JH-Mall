@@ -142,4 +142,47 @@ public class MallProductConfigProperties {
             }
         }
     }
+
+    private final Hot hot = new Hot();
+
+    public Hot getHot() {
+        return hot;
+    }
+
+    /** 热销商品排行配置 */
+    public static class Hot {
+
+        /** 排行榜最大保留数量 */
+        private int rankMaxSize = 200;
+
+        /** 销量权重 */
+        private double salesWeight = 0.6;
+
+        /** 独立访客量权重 */
+        private double uvWeight = 0.4;
+
+        public int getRankMaxSize() {
+            return rankMaxSize;
+        }
+
+        public void setRankMaxSize(int rankMaxSize) {
+            this.rankMaxSize = rankMaxSize;
+        }
+
+        public double getSalesWeight() {
+            return salesWeight;
+        }
+
+        public void setSalesWeight(double salesWeight) {
+            this.salesWeight = salesWeight;
+        }
+
+        public double getUvWeight() {
+            return uvWeight;
+        }
+
+        public void setUvWeight(double uvWeight) {
+            this.uvWeight = uvWeight;
+        }
+    }
 }

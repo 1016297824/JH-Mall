@@ -309,6 +309,18 @@ public class CacheConstants {
          */
         public static final String OUTBOX = "mall:product:outbox:";
 
+        /**
+         * 订单支付消息消费幂等键
+         *
+         * <p>Key 模式：{@code mall:product:hot:paid:{orderNo}}</p>
+         * <ul>
+         *   <li>TTL：604800s（7d）</li>
+         *   <li>数据结构：String（SETNX）</li>
+         *   <li>热点排名增量更新幂等去重</li>
+         * </ul>
+         */
+        public static final String HOT_PAID = "mall:product:hot:paid:";
+
         private Product() {
         }
     }

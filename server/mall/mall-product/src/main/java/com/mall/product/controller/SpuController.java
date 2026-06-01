@@ -2,11 +2,16 @@ package com.mall.product.controller;
 
 import com.mall.common.DTO.MallResult;
 import com.mall.common.DTO.PageResult;
+import com.mall.common.enums.ErrorCode;
+import com.mall.common.exception.BusinessException;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
+import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISpuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * SPU Controller
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class SpuController {
 
     private final ISpuService spuService;
+    private final IHotProductService hotProductService;
 
     /**
      * 分页查询 SPU
@@ -51,5 +57,19 @@ public class SpuController {
     @GetMapping("/spus/{spuId}")
     public MallResult<SpuDetailVO> detail(@PathVariable Long spuId) {
         return MallResult.success(spuService.detail(spuId));
+    }
+
+    /**
+     * 热门商品列表
+     *
+     * @param limit 返回条数（默认 20，最大 50）
+     * @return 热度降序商品列表
+     */
+    @GetMapping("/spus/hot")
+    public MallResult<List<SpuVO>> hotList(@RequestParam(defaultValue = "20") int limit) {
+        if (limit > 50) {
+            throw new BusinessException(ErrorCode.HOT_LIST_LIMIT_EXCEEDED);
+        }
+        return MallResult.success(spuService.hotList(limit));
     }
 }

@@ -4,6 +4,7 @@ import com.mall.api.feign.RemoteProductService.ReserveStockItemRequest;
 import com.mall.common.DTO.PageResult;
 import com.mall.common.DTO.product.ProductSkuDTO;
 import com.mall.common.DTO.product.SpuDTO;
+import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISkuService;
 import com.mall.product.service.ISpuService;
 import com.mall.product.service.IStockService;
@@ -31,6 +32,7 @@ public class RemoteProductInnerController {
     private final ISkuService skuService;
     private final IStockService stockService;
     private final ISpuService spuService;
+    private final IHotProductService hotProductService;
     private final SearchSyncScheduleTask searchSyncScheduleTask;
 
     /**
@@ -102,5 +104,13 @@ public class RemoteProductInnerController {
     @PostMapping("/outbox/compensate")
     int compensateOutbox() {
         return searchSyncScheduleTask.execute();
+    }
+
+    /**
+     * 刷新热点排名
+     */
+    @PostMapping("/hot/refresh")
+    void refreshHotRank() {
+        hotProductService.refreshHotRank();
     }
 }

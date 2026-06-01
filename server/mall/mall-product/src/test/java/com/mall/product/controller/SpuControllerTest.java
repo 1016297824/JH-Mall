@@ -1,8 +1,10 @@
 package com.mall.product.controller;
 
 import com.mall.common.DTO.PageResult;
+import com.mall.common.handler.MallExceptionHandler;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
+import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISpuService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,9 @@ class SpuControllerTest {
     @Mock
     private ISpuService spuService;
 
+    @Mock
+    private IHotProductService hotProductService;
+
     @InjectMocks
     private SpuController controller;
 
@@ -33,7 +38,9 @@ class SpuControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new MallExceptionHandler())
+                .build();
     }
 
     @Test
@@ -60,5 +67,24 @@ class SpuControllerTest {
         mockMvc.perform(get("/api/product/spus/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.spuName").value("iPhone"));
+    }
+
+    @Test
+    void hotListShouldReturnSpuList() throws Exception {
+        SpuVO vo = new SpuVO();
+        vo.setSpuId("1");
+        vo.setSpuName("热门商品");
+        when(spuService.hotList(20)).thenReturn(List.of(vo));
+
+        mockMvc.perform(get("/api/product/spus/hot"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].spuName").value("热门商品"));
+    }
+
+    @Test
+    void hotListShouldRejectLimitExceed50() throws Exception {
+        mockMvc.perform(get("/api/product/spus/hot").param("limit", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errorCode").value("A0803"));
     }
 }

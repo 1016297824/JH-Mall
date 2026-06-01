@@ -21,6 +21,19 @@ public class SpuConvert {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * 批量 SPU DO 转 VO 列表
+     *
+     * @param spuDOList SPU DO 列表
+     * @return SPU VO 列表
+     */
+    public static List<SpuVO> toSpuVOList(List<MallProductSpuDO> spuDOList) {
+        if (spuDOList == null || spuDOList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return spuDOList.stream().map(SpuConvert::toSpuVO).toList();
+    }
+
     private SpuConvert() {
     }
 
@@ -43,6 +56,7 @@ public class SpuConvert {
         vo.setSalesCount(spuDO.getSalesCount());
         vo.setCategoryId(String.valueOf(spuDO.getCategoryId()));
         vo.setBrandId(String.valueOf(spuDO.getBrandId()));
+        vo.setHotScore(0L);
         return vo;
     }
 

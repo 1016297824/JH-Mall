@@ -18,6 +18,8 @@ public class SpuVO {
     private Long priceMax;
     /** 累计销量 */
     private Integer salesCount;
+    /** 热度分（Redis ZSet score，不持久化到 MySQL） */
+    private Long hotScore;
     /** 所属类目 ID */
     private String categoryId;
     /** 所属品牌 ID */

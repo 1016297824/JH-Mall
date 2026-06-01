@@ -5,6 +5,8 @@ import com.mall.common.DTO.product.SpuDTO;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
 
+import java.util.List;
+
 /**
  * SPU 服务接口
  *
@@ -42,4 +44,12 @@ public interface ISpuService {
      * @return SPU DTO 分页
      */
     PageResult<SpuDTO> pageForFullRebuild(int page, int size);
+
+    /**
+     * 获取热点商品列表
+     *
+     * @param limit 返回条数（最大 50）
+     * @return 热度降序 SpuVO 列表
+     */
+    List<SpuVO> hotList(int limit);
 }

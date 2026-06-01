@@ -82,6 +82,12 @@ public interface RemoteProductService {
     int compensateOutbox();
 
     /**
+     * 刷新热点排名
+     */
+    @PostMapping("/inner/product/hot/refresh")
+    void refreshHotRank();
+
+    /**
      * 库存预占请求项
      */
     @Data

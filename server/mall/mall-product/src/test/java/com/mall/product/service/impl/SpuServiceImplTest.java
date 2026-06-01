@@ -8,6 +8,7 @@ import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
 import com.mall.product.mapper.MallProductSkuMapper;
 import com.mall.product.mapper.MallProductSpuMapper;
+import com.mall.product.service.IHotProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,9 @@ class SpuServiceImplTest {
 
     @Mock
     private MallProductSkuMapper mallProductSkuMapper;
+
+    @Mock
+    private IHotProductService hotProductService;
 
     @InjectMocks
     private SpuServiceImpl spuService;

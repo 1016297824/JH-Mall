@@ -32,4 +32,15 @@ public class MallProductTask {
         int total = remoteProductService.compensateOutbox();
         log.info("ruoyi-job Outbox 补偿完成，共处理 {} 条", total);
     }
+
+    /**
+     * 刷新热点排名
+     *
+     * <p>调 mall-product /inner/product/hot/refresh</p>
+     */
+    public void refreshHotRank() {
+        log.info("ruoyi-job 触发热点排名刷新");
+        remoteProductService.refreshHotRank();
+        log.info("ruoyi-job 热点排名刷新完成");
+    }
 }

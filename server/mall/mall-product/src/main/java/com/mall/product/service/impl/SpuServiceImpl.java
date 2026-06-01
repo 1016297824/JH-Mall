@@ -13,6 +13,7 @@ import com.mall.product.VO.SpuVO;
 import com.mall.product.convert.response.SpuConvert;
 import com.mall.product.mapper.MallProductSkuMapper;
 import com.mall.product.mapper.MallProductSpuMapper;
+import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISpuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class SpuServiceImpl implements ISpuService {
 
     private final MallProductSpuMapper mallProductSpuMapper;
     private final MallProductSkuMapper mallProductSkuMapper;
+    private final IHotProductService hotProductService;
 
     @Override
     public PageResult<SpuVO> page(int page, int size, Long categoryId, Long brandId, String keyword, String sort) {
@@ -59,6 +61,7 @@ public class SpuServiceImpl implements ISpuService {
         }
         // 查询关联 SKU 列表
         List<MallProductSkuDO> skuDOList = mallProductSkuMapper.selectBySpuId(spuId);
+        hotProductService.incrUv(spuId, 0L);
         return SpuConvert.toSpuDetailVO(spuDO, skuDOList);
     }
 
@@ -69,6 +72,11 @@ public class SpuServiceImpl implements ISpuService {
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectAllPage(pageParam);
         List<SpuDTO> dtoList = result.getRecords().stream().map(this::toSpuDTO).toList();
         return PageResult.of(page, size, result.getTotal(), dtoList);
+    }
+
+    @Override
+    public List<SpuVO> hotList(int limit) {
+        return hotProductService.hotList(limit);
     }
 
     /**
