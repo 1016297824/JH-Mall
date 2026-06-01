@@ -161,11 +161,11 @@ public class HotProductServiceImpl implements IHotProductService {
             for (MallProductSpuDO spu : spuList) {
                 String spuIdStr = String.valueOf(spu.getId());
                 topSpuIds.add(spuIdStr);
-                // 综合热度分 = 销量 * 10 * 销量权重 + PFCOUNT(UV) * UV 权重
+                // 综合热度分 = 销量 * 10 * 销量权重 + PFCOUNT(UV) * 10 * UV 权重
                 // PFCOUNT 返回 HyperLogLog 的基数估算值
                 int salesCount = spu.getSalesCount() != null ? spu.getSalesCount() : 0;
                 Long uv = redisTemplate.opsForHyperLogLog().size(CacheConstants.Product.UV + spuIdStr);
-                double newScore = salesCount * 10 * salesWeight + uv * uvWeight;
+                double newScore = salesCount * 10 * salesWeight + uv * 10 * uvWeight;
                 zSetOps.add(spuIdStr, newScore);
             }
             // 清理未进入 Top N 的过期 UV HyperLogLog 键，防止 Redis 内存无限膨胀

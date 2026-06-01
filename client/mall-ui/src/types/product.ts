@@ -31,4 +31,19 @@ export interface SpuVO {
   salesCount: number
   categoryId: string
   brandId: string
+  hotScore?: number
+}
+
+export interface SkuBriefVO {
+  skuId: string
+  skuName: string
+  price: number
+  image: string
+}
+
+export interface SpuDetailVO extends SpuVO {
+  description: string
+  images: string[]
+  reviewCount: number
+  skus: SkuBriefVO[]
 }
