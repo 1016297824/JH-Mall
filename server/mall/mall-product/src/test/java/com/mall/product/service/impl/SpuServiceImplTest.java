@@ -22,6 +22,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+/**
+ * {@link SpuServiceImpl} 单元测试
+ *
+ * <p>覆盖分页查询、详情（含 UV 记录）、热点列表等核心场景</p>
+ *
+ * @author JH-Mall
+ * @date 2026/06/01
+ */
 @ExtendWith(MockitoExtension.class)
 class SpuServiceImplTest {
 
@@ -31,6 +39,7 @@ class SpuServiceImplTest {
     @Mock
     private MallProductSkuMapper mallProductSkuMapper;
 
+    /** 热点商品服务（用于验证 UV 记录调用） */
     @Mock
     private IHotProductService hotProductService;
 

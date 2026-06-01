@@ -155,6 +155,9 @@ public class MallProductConfigProperties {
         /** 排行榜最大保留数量 */
         private int rankMaxSize = 200;
 
+        /** C 端热点列表单次最大条数 */
+        private int hotListLimit = 50;
+
         /** 销量权重 */
         private double salesWeight = 0.6;
 
@@ -167,6 +170,14 @@ public class MallProductConfigProperties {
 
         public void setRankMaxSize(int rankMaxSize) {
             this.rankMaxSize = rankMaxSize;
+        }
+
+        public int getHotListLimit() {
+            return hotListLimit;
+        }
+
+        public void setHotListLimit(int hotListLimit) {
+            this.hotListLimit = hotListLimit;
         }
 
         public double getSalesWeight() {

@@ -549,6 +549,7 @@ mall:
         ttl: 86400
     hot:
       rank-max-size: 200
+      hot-list-limit: 50
       sales-weight: 0.6
       uv-weight: 0.4
 ```

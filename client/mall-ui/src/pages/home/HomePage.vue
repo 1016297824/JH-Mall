@@ -1,69 +1,48 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getCategoryTree, getSpuList } from '@/api/product'
+import { getCategoryTree, getHotList } from '@/api/product'
 import type { CategoryVO, SpuVO } from '@/types/product'
 import BannerSwiper from '@/components/business/BannerSwiper.vue'
 import CategoryGrid from '@/components/business/CategoryGrid.vue'
 import ProductSection from '@/components/business/ProductSection.vue'
 
-const PAGE_SIZE = 8
-const MAX_TOTAL = 100
+const DISPLAY_INITIAL = 8
+const DISPLAY_STEP = 8
+const HOT_LIMIT = 50
 
 const categories = ref<CategoryVO[]>([])
 const hotProducts = ref<SpuVO[]>([])
+const displayCount = ref(DISPLAY_INITIAL)
 const loading = ref(true)
 const isLoadingMore = ref(false)
-const totalLoaded = ref(0)
-const noMore = ref(false)
 const sentinelRef = ref<HTMLElement | null>(null)
 
 let observer: IntersectionObserver | null = null
 
-async function loadPage(page: number) {
-  const result = await getSpuList({ sort: 'sales_desc', page, size: PAGE_SIZE })
-  const rows = result.rows
-  hotProducts.value.push(...rows)
-  totalLoaded.value += rows.length
-  if (rows.length < PAGE_SIZE || totalLoaded.value >= MAX_TOTAL) {
-    noMore.value = true
-  }
-}
+const visibleProducts = computed(() => hotProducts.value.slice(0, displayCount.value))
+const noMore = computed(() => displayCount.value >= hotProducts.value.length && !loading.value)
 
-async function loadMore() {
-  if (isLoadingMore.value || noMore.value) return
+function showMore() {
+  if (displayCount.value >= hotProducts.value.length) return
   isLoadingMore.value = true
-  const nextPage = Math.floor(totalLoaded.value / PAGE_SIZE) + 1
-  try {
-    await loadPage(nextPage)
-  } catch {
-    ElMessage.error('加载失败')
-  } finally {
+  setTimeout(() => {
+    displayCount.value = Math.min(displayCount.value + DISPLAY_STEP, hotProducts.value.length)
     isLoadingMore.value = false
-    await nextTick()
-    observeSentinel()
-  }
+  }, 300)
 }
 
 function setupObserver() {
   if (!sentinelRef.value) return
   observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0]?.isIntersecting) {
-        loadMore()
+      if (entries[0]?.isIntersecting && !noMore.value) {
+        showMore()
       }
     },
     { rootMargin: '200px' },
   )
   observer.observe(sentinelRef.value)
-}
-
-function observeSentinel() {
-  if (!observer || !sentinelRef.value) return
-  observer.disconnect()
-  if (!noMore.value) {
-    observer.observe(sentinelRef.value)
-  }
 }
 
 function teardownObserver() {
@@ -73,11 +52,12 @@ function teardownObserver() {
 
 onMounted(async () => {
   try {
-    const [cats] = await Promise.all([
+    const [cats, hot] = await Promise.all([
       getCategoryTree(),
-      loadPage(1),
+      getHotList(HOT_LIMIT),
     ])
     categories.value = cats.filter((c) => c.level === 1)
+    hotProducts.value = hot
   } catch {
     ElMessage.error('加载失败，请稍后重试')
   } finally {
@@ -97,7 +77,7 @@ onUnmounted(() => {
     <main class="home-content">
       <BannerSwiper />
       <CategoryGrid :categories="categories" :loading="loading" />
-      <ProductSection :products="hotProducts" :loading="loading" :loading-more="isLoadingMore" />
+      <ProductSection :products="visibleProducts" :loading="loading" :loading-more="isLoadingMore" />
 
       <div class="load-sentinel">
         <div v-if="isLoadingMore" class="loading-more">

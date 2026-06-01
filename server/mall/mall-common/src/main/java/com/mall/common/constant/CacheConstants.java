@@ -570,7 +570,16 @@ public class CacheConstants {
          */
         public static final String LOCK_ORDER_TIMEOUT = "mall:job:lock:order_timeout";
 
-        /** 热点排名刷新任务锁 */
+        /**
+         * 热点排名刷新分布式锁
+         *
+         * <p>Key 模式：{@code mall:job:lock:hot_rank}</p>
+         * <ul>
+         *   <li>TTL：600s（10min），覆盖全量刷新的最大耗时窗口</li>
+         *   <li>数据结构：String（SETNX）</li>
+         *   <li>ruoyi-job 热点排名刷新任务多实例互斥</li>
+         * </ul>
+         */
         public static final String LOCK_HOT_RANK = "mall:job:lock:hot_rank";
 
         private Job() {

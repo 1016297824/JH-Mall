@@ -61,6 +61,7 @@ public class SpuServiceImpl implements ISpuService {
         }
         // 查询关联 SKU 列表
         List<MallProductSkuDO> skuDOList = mallProductSkuMapper.selectBySpuId(spuId);
+        // 记录 UV（HyperLogLog），未登录传 0L
         hotProductService.incrUv(spuId, 0L);
         return SpuConvert.toSpuDetailVO(spuDO, skuDOList);
     }
@@ -76,6 +77,7 @@ public class SpuServiceImpl implements ISpuService {
 
     @Override
     public List<SpuVO> hotList(int limit) {
+        // 委托给热点商品服务，使用 Caffeine+Redis 两级缓存
         return hotProductService.hotList(limit);
     }
 

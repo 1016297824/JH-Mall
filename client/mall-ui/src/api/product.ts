@@ -15,3 +15,7 @@ export function getSpuList(params: {
 }): Promise<PageResult<SpuVO>> {
   return request.get('/product/spus', { params }).then((res) => res.data.data)
 }
+
+export function getHotList(limit: number): Promise<SpuVO[]> {
+  return request.get('/product/spus/hot', { params: { limit } }).then((res) => res.data.data)
+}

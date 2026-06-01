@@ -9,6 +9,7 @@ import com.mall.product.service.ISkuService;
 import com.mall.product.service.ISpuService;
 import com.mall.product.service.IStockService;
 import com.mall.product.infrastructure.schedule.SearchSyncScheduleTask;
+import com.mall.product.infrastructure.schedule.HotRankRefreshTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +33,8 @@ public class RemoteProductInnerController {
     private final ISkuService skuService;
     private final IStockService stockService;
     private final ISpuService spuService;
-    private final IHotProductService hotProductService;
     private final SearchSyncScheduleTask searchSyncScheduleTask;
+    private final HotRankRefreshTask hotRankRefreshTask;
 
     /**
      * 批量查询 SKU（Feign 内部调用）
@@ -107,10 +108,13 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 刷新热点排名
+     * 全量刷新热点排名（Feign 内部调用）
+     *
+     * <p>综合销量分 + UV 分加权重算 ZSet score，
+     * ruoyi-job 定时调度 {@code mallProductTask.refreshHotRank()}。</p>
      */
     @PostMapping("/hot/refresh")
     void refreshHotRank() {
-        hotProductService.refreshHotRank();
+        hotRankRefreshTask.execute();
     }
 }

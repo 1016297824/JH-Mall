@@ -6,6 +6,7 @@ import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
+import com.mall.product.config.MallProductConfigProperties;
 import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISpuService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class SpuController {
 
     private final ISpuService spuService;
     private final IHotProductService hotProductService;
+    private final MallProductConfigProperties configProps;
 
     /**
      * 分页查询 SPU
@@ -67,7 +69,8 @@ public class SpuController {
      */
     @GetMapping("/spus/hot")
     public MallResult<List<SpuVO>> hotList(@RequestParam(defaultValue = "20") int limit) {
-        if (limit > 50) {
+        int maxLimit = configProps.getHot().getHotListLimit();
+        if (limit > maxLimit) {
             throw new BusinessException(ErrorCode.HOT_LIST_LIMIT_EXCEEDED);
         }
         return MallResult.success(spuService.hotList(limit));
