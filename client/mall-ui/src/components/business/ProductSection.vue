@@ -1,18 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { SpuVO } from '@/types/product'
 import ProductCard from './ProductCard.vue'
 
-defineProps<{
+const props = defineProps<{
   products: SpuVO[]
   loading: boolean
 }>()
+
+const safeProducts = computed(() => props.products ?? [])
+const isEmpty = computed(() => safeProducts.value.length === 0)
 </script>
 
 <template>
   <section class="product-section">
     <h2 class="section-title">热销推荐</h2>
 
-    <div v-if="loading" class="skeleton-grid">
+    <div v-if="props.loading" class="skeleton-grid">
       <div v-for="n in 4" :key="n" class="skeleton-card">
         <div class="skeleton-image" />
         <div class="skeleton-line skeleton-line--long" />
@@ -20,14 +24,14 @@ defineProps<{
       </div>
     </div>
 
-    <div v-else-if="products.length === 0" class="empty-state">
+    <div v-else-if="isEmpty" class="empty-state">
       <p>暂无商品</p>
       <el-button type="primary" @click="$router.push('/search')">去逛逛</el-button>
     </div>
 
     <div v-else class="product-grid">
       <ProductCard
-        v-for="product in products"
+        v-for="product in safeProducts"
         :key="product.spuId"
         :product="product"
       />

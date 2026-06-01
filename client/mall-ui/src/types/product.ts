@@ -8,7 +8,7 @@ export interface PageResult<T> {
   page: number
   size: number
   total: number
-  records: T[]
+  rows: T[]
 }
 
 export interface CategoryVO {

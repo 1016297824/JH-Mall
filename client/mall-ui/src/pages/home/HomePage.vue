@@ -18,7 +18,7 @@ onMounted(async () => {
       getSpuList({ sort: 'sales_desc', size: 8 }),
     ])
     categories.value = cats.filter((c) => c.level === 1)
-    hotProducts.value = productPage.records
+    hotProducts.value = productPage.rows
   } catch {
     ElMessage.error('加载失败，请稍后重试')
   } finally {
