@@ -217,7 +217,7 @@ function toggleExpand() {
   border-radius: 3px;
 
   &:hover {
-    background: darken($color-border, 10%);
+    background: #7DD3FC;
   }
 }
 

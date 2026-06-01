@@ -157,7 +157,7 @@ public class CacheConstants {
     /** 分布式任务锁 */
     public static final class Job {
         public static final String LOCK_ORDER_TIMEOUT = "mall:job:lock:order_timeout";
-        public static final String LOCK_HOT_RANK_REFRESH = "mall:job:lock:hot_rank_refresh";
+        public static final String LOCK_HOT_RANK = "mall:job:lock:hot_rank";
     }
 }
 ```

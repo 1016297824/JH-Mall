@@ -558,6 +558,9 @@ public class CacheConstants {
          */
         public static final String LOCK_ORDER_TIMEOUT = "mall:job:lock:order_timeout";
 
+        /** 热点排名刷新任务锁 */
+        public static final String LOCK_HOT_RANK = "mall:job:lock:hot_rank";
+
         private Job() {
         }
     }

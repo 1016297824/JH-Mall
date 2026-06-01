@@ -547,6 +547,10 @@ mall:
     stock:
       compensate:
         ttl: 86400
+    hot:
+      rank-max-size: 200
+      sales-weight: 0.6
+      uv-weight: 0.4
 ```
 
 > 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
