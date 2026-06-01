@@ -16,7 +16,7 @@
 | SKU 管理 | `mall_product_sku` | 销售规格，含售价/市场价/成本价/重量 |
 | 库存管理 | `mall_product_sku_stock` | 四段库存（可用/锁定/已售/冻结），乐观锁防超卖 |
 | 搜索同步 | Outbox | 商品变更后实时+异步双通道同步到 ES |
-| RocketMQ 事件 | Outbox | 生产 `mall:search:sync`，消费 `mall:order:cancelled` |
+| RocketMQ 事件 | Outbox | 生产 `mall:search:sync`，消费 `mall:order:cancelled`、`mall:order:paid` |
 
 ### 1.2 依赖关系
 
@@ -25,7 +25,7 @@ mall-product (9303端口)
   ├── MySQL：自有表（见表系统设计第 1.2 节）
   ├── Redis：SKU 缓存、类目树缓存、搜索降级锁
   ├── RocketMQ (Producer)：写 Outbox → 投递 mall:search:sync
-  ├── RocketMQ (Consumer)：消费 mall:order:cancelled → 释放库存
+  ├── RocketMQ (Consumer)：消费 mall:order:cancelled → 释放库存；消费 mall:order:paid → 更新热度排行
   ├── mall-api (Feign)：RemoteProductService 供 mall-order 调用
   │   方法：batchGetSku / reserveStock / releaseStock / restock
   └── mall-search (Feign Caller)：调 RemoteSearchService.syncProduct 直推索引
@@ -69,6 +69,7 @@ server/mall/mall-product/
     │   ├── StockService.java
     │   ├── SkuCacheService.java
     │   ├── CategoryCacheService.java
+    │   ├── HotProductService.java
     │   └── impl/
     │       ├── CategoryServiceImpl.java
     │       ├── BrandServiceImpl.java
@@ -76,7 +77,8 @@ server/mall/mall-product/
     │       ├── SkuServiceImpl.java
     │       ├── StockServiceImpl.java
     │       ├── SkuCacheServiceImpl.java
-    │       └── CategoryCacheServiceImpl.java
+    │       ├── CategoryCacheServiceImpl.java
+    │       └── HotProductServiceImpl.java
     ├── mapper/
     │   ├── MallCategoryMapper.java
     │   ├── MallBrandMapper.java
@@ -86,7 +88,8 @@ server/mall/mall-product/
     ├── infrastructure/
     │   ├── mq/
     │   │   ├── SearchSyncProducer.java       # Outbox 生产 mall:search:sync
-    │   │   └── OrderCancelledConsumer.java   # 消费 mall:order:cancelled 释放库存
+    │   │   ├── OrderCancelledConsumer.java   # 消费 mall:order:cancelled 释放库存
+    │   │   └── OrderPaidConsumer.java        # 消费 mall:order:paid 更新热度排行
     │   └── feign/
     │       └── RemoteSearchAdapter.java      # 调 mall-search 实时同步索引
     ├── convert/
@@ -118,6 +121,7 @@ server/mall/mall-product/
 | 5 | GET | `/api/product/spus/{spuId}` | SpuApiController | `detail(spuId)` | 否 | — |
 | 6 | GET | `/api/product/skus/{skuId}` | SkuApiController | `detail(skuId)` | 否 | — |
 | 7 | GET | `/api/product/search/fallback` | SearchFallbackController | `search(params)` | 否 | — |
+| 8 | GET | `/api/product/spus/hot` | SpuApiController | `hotList(limit)` | 否 | — |
 
 管理端接口由若依代码生成器自动生成（类目/品牌/SPU/SKU/库存 CRUD + 上下架），权限码无需手动维护。
 
@@ -353,6 +357,7 @@ ES 不可用时，mall-search 自动降级到 mall-product 的 DB 查询：
 | Topic | 消费者类 | 处理流程 |
 |-------|---------|---------|
 | `mall:order:cancelled` | `OrderCancelledConsumer` | ①幂等去重 ②查订单项 SKU 列表 ③逐 SKU 释放库存 `releaseStock(skuId, qty)` ④幂等 key：`orderNo + skuId` |
+| `mall:order:paid` | `OrderPaidConsumer` | ①幂等去重 ②查订单项 SKU 列表 ③逐 SKU → 查所属 SPU ④`HotProductService.hotRank(spuId, qty)` 更新 ZSet 热度分 |
 
 ### 7.3 重试策略
 
@@ -364,10 +369,137 @@ ES 不可用时，mall-search 自动降级到 mall-product 的 DB 查询：
 | 超过 3 次 | — | status = FAILED，死信处理 |
 
 ---
+## 8 热点数据设计
 
-## 8 Nacos 配置
+> 热点数据设计遵循 `03_06_系统详细设计-缓存与一致性设计.md` §6.1.3 中定义的 Caffeine `hotProduct` 缓存和 Redis ZSet `mall:product:hot:rank` 排行机制。
 
-### 8.1 DataId: `mall-product-dev.yml`
+### 8.1 设计动机
+
+商城首页、推荐位、榜单页需要展示**热门商品列表**，这些商品访问量大（高并发读），且排名需要定期更新。如果每次都查 MySQL `ORDER BY sales_count DESC LIMIT N`，数据库压力大且无法引入实时行为（UV 浏览）权重。因此采用 Caffeine + Redis 两级缓存 + 定时计算排行的架构。
+
+### 8.2 技术架构
+
+```
+┌─────────────────────────────────────────────────┐
+│  C 端请求 GET /api/product/spus/hot?limit=20     │
+└──────────────┬──────────────────────────────────┘
+               ↓
+┌─────────────────────────────────────────────────┐
+│ L1: Caffeine hotProduct (500容量/5min访问过期)    │
+│     key = spuId → 返回 SpuHotVO                   │
+└──────────────┬──────────────────────────────────┘
+               ↓ (未命中)
+┌─────────────────────────────────────────────────┐
+│ L2: Redis ZSet mall:product:hot:rank              │
+│     member=spuId, score=热度分 → ZREVRANGE 取TopN │
+└──────────────┬──────────────────────────────────┘
+               ↓ (未命中 或 冷启动)
+┌─────────────────────────────────────────────────┐
+│ MySQL: ORDER BY sales_count DESC LIMIT N          │
+└─────────────────────────────────────────────────┘
+```
+
+### 8.3 HotProductService
+
+位于 `service/HotProductService.java`，热点商品查询 + 排名管理。
+
+**hotList(limit)**：返回热点商品列表
+1. 从 Redis ZSet `mall:product:hot:rank` `ZREVRANGE 0 {limit-1}` 取排名 ID 列表
+2. 批量从 Caffeine `hotProduct` 读取 → 命中直接返回
+3. 未命中列表 → 批量查 MySQL → 回种 Caffeine → 返回
+4. 若 Redis ZSet 为空（冷启动）→ 降级查 MySQL `ORDER BY sales_count DESC LIMIT {limit}`
+
+**incrUv(spuId)**：商品详情页访问时记录 UV
+- 每次商品详情页加载时调用，异步执行不阻塞响应
+- 使用 Redis HyperLogLog `PFADD mall:product:uv:{spuId} {userId}` 去重统计
+
+**hotRank(skuId, quantity)**：下单成功后更新热度（消费 `mall:order:paid`）
+- `ZINCRBY mall:product:hot:rank {quantity * 10} {spuId}`（销量权重）
+
+### 8.4 热度计算模型
+
+热度分 = 销量权重(60%) + UV 权重(40%)
+
+| 维度 | 数据来源 | 刷新频率 | Redis 操作 |
+|------|----------|:---:|------|
+| 销量分 | `mall_product_spu.sales_count` | 支付成功时实时更新 | `ZINCRBY` 增量累加 |
+| UV 分 | Redis HyperLogLog `mall:product:uv:{spuId}` | 商品详情页访问时异步写入 | `PFADD` 去重统计 |
+
+**定时任务（每 10 分钟）**：
+1. Redis 分布式锁 `mall:job:lock:hot_rank_refresh`，SETNX TTL 600s
+2. 遍历 ZSet Top 200，对每个 spuId 取 `PFCOUNT` UV 值
+3. 重新计算 score = `ZSCORE 销量分 * 0.6 + UV值 * 0.4`
+4. `ZADD mall:product:hot:rank {newScore} {spuId}` 更新排名
+5. 清理超过 200 名的冷数据，控制 ZSet 大小
+
+### 8.5 缓存击穿防护
+
+热点商品的详情页（`GET /api/product/spus/{spuId}`）也受益于 Caffeine L1 缓存。当 Caffeine 过期且 Redis 未命中时，使用分布式锁防止大量请求打到 DB：
+
+```java
+// SpuServiceImpl.detailC(spuId)
+String lockKey = "mall:product:hot:rebuild:" + spuId;
+Boolean locked = redisTemplate.opsForValue()
+    .setIfAbsent(lockKey, "1", Duration.ofSeconds(10));
+if (Boolean.TRUE.equals(locked)) {
+    try {
+        // 查 DB → 回种 Caffeine + Redis
+    } finally {
+        redisTemplate.delete(lockKey);
+    }
+} else {
+    // 自旋等待 100ms 重试 Caffeine
+}
+```
+
+### 8.6 热点数据生命周期
+
+```
+商品上架 ──→ 纳入热点计算池（ZSet 初始 score=0）
+   │
+支付成功 ──→ ZINCRBY 增加销量分
+   │
+详情页访问 ──→ PFADD 记录 UV
+   │
+定时任务 ──→ 重新计算 score → ZADD 更新排名
+   │
+商品下架 ──→ ZREM 从 ZSet 移除 → 删除 Caffeine
+   │
+排名 > 200 ──→ ZREMRANGEBYRANK 清理冷数据
+```
+
+### 8.7 C 端接口
+
+#### GET /api/product/spus/hot — 热门商品列表
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|:---:|:---:|------|
+| limit | Integer | 否 | 20 | 返回条数，最大 50 |
+
+**成功响应**：
+
+```json
+{
+  "code": "00000",
+  "data": [
+    {
+      "spuId": 1001,
+      "spuName": "iPhone 15 Pro Max",
+      "mainImage": "https://cdn.example.com/img/1001.jpg",
+      "minPrice": 899900,
+      "salesCount": 15680,
+      "hotScore": 98200
+    }
+  ]
+}
+```
+
+**错误码**：A0401（limit > 50）
+
+---
+## 9 Nacos 配置
+
+### 9.1 DataId: `mall-product-dev.yml`
 
 ```yaml
 spring:
@@ -420,7 +552,7 @@ mall:
 > 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新。
 > 配置项通过 `MallProductConfigProperties`（`@ConfigurationProperties(prefix = "mall.product")` + `@RefreshScope`）注入，各 Service/Controller 通过构造注入获取，禁止使用 `@Value`。
 
-### 8.2 本地配置文件 `bootstrap.yml`
+### 9.2 本地配置文件 `bootstrap.yml`
 
 ```yaml
 # mall-product 商品服务
@@ -447,7 +579,7 @@ spring:
 
 > 注：`file-extension` 和 `import` 必须放在 `spring.config.*` 下（而非 `spring.cloud.nacos.config.*`），否则 Nacos 配置不会被加载。
 
-### 8.3 配置项说明
+### 9.3 配置项说明
 
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|--------|:---:|------|
@@ -457,10 +589,14 @@ spring:
 | `mall.product.search.fallback.timeout` | 3000 | ms | 降级搜索超时 |
 | `mall.product.search.fallback.max-size` | 100 | 条 | 降级搜索单页上限 |
 | `mall.product.stock.compensate.ttl` | 86400 | 秒 | 库存释放幂等键 TTL（24h） |
+| `mall.product.hot.rank.max-size` | 200 | 条 | 热点排名 ZSet 最大容量 |
+| `mall.product.hot.rank.refresh-cron` | `0 */10 * * * ?` | — | 热点排名定时刷新 cron |
+| `mall.product.hot.sales-weight` | 0.6 | — | 热度计算：销量权重 |
+| `mall.product.hot.uv-weight` | 0.4 | — | 热度计算：UV 权重 |
 
 ---
 
-## 9 错误码汇总
+## 10 错误码汇总
 
 | 错误码 | HTTP | userTip | 说明 |
 |--------|:----:|---------|------|
@@ -473,6 +609,7 @@ spring:
 | A0520 | 400 | 商品已下架 | 该商品当前不可购买 |
 | A0521 | 400 | 商品库存不足 | 下单时 available_stock 不够 |
 | A0802 | 400 | 搜索结果超出限制 | 降级搜索超限 |
+| A0803 | 400 | 热门商品查询参数无效 | limit 超过最大值 50 |
 | B0001 | 500 | 系统繁忙，请稍后再试 | 未预期异常 |
 | C0110 | 500 | 服务暂时不可用 | Redis 连接失败 |
 | C0120 | 500 | 数据库异常 | MySQL 连接失败 |
@@ -481,7 +618,7 @@ spring:
 
 ---
 
-## 10 服务间 Feign 安全（接收方）
+## 11 服务间 Feign 安全（接收方）
 
 mall-product 供 mall-order 通过 Feign 内部调用（库存查询/锁定/释放等 `/inner/` 接口），由 `mall-api` 共享的 `InnerSignatureFilter`（`com.mall.api.infrastructure.security`）验签。
 

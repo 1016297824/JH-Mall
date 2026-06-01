@@ -8,17 +8,17 @@
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .el-input__wrapper:focus-within {
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 0 0 2px rgba(3, 105, 161, 0.2);
 }
 
 .el-card {
   border-radius: 16px;
-  border: 1px solid #E9D5FF;
+  border: 1px solid #BAE6FD;
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 .el-card:hover {
   transform: scale(1.02);
-  box-shadow: 0 10px 20px rgba(76, 29, 149, 0.12);
+  box-shadow: 0 10px 20px rgba(3, 105, 161, 0.12);
 }
 
 .el-dialog {

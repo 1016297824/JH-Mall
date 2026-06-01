@@ -5,8 +5,8 @@ import 'element-plus/dist/index.css'
 
 import App from './App.vue'
 import router from './router'
-import './assets/styles/tokens.css'
-import './assets/styles/element-overrides.css'
+import './assets/styles/tokens.scss'
+import './assets/styles/element-overrides.scss'
 import './assets/styles/global.scss'
 
 const app = createApp(App)

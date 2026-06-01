@@ -43,9 +43,9 @@
 
 | 角色 | 色值 | 用途 |
 |------|------|------|
-| **Primary（主色）** | `#7C3AED` | 主按钮、链接、品牌标识、重点元素 |
-| **Primary Light** | `#A78BFA` | 辅助背景、hover 态、次要高亮 |
-| **Primary Dark** | `#5B21B6` | 激活态、深色背景下的主色 |
+| **Primary（主色）** | `#0369A1` | 主按钮、链接、品牌标识、重点元素 |
+| **Primary Light** | `#0EA5E9` | 辅助背景、hover 态、次要高亮 |
+| **Primary Dark** | `#075985` | 激活态、深色背景下的主色 |
 | **CTA（行动色）** | `#22C55E` | 加入购物车、立即购买、支付确认 |
 | **CTA Hover** | `#16A34A` | CTA 按钮 hover 态 |
 
@@ -53,13 +53,13 @@
 
 | 色阶 | 色值 | 用途 |
 |------|------|------|
-| `--color-neutral-50` | `#FAF5FF` | 页面背景 |
-| `--color-neutral-100` | `#F3E8FF` | 卡片背景、输入框背景 |
-| `--color-neutral-200` | `#E9D5FF` | 边框、分割线 |
-| `--color-neutral-300` | `#D8B4FE` | 禁用态边框 |
-| `--color-neutral-500` | `#A855F7` | 次要文字 |
-| `--color-neutral-700` | `#7E22CE` | 正文文字 |
-| `--color-neutral-900` | `#4C1D95` | 标题文字 |
+| `--color-neutral-50` | `#F0F9FF` | 页面背景 |
+| `--color-neutral-100` | `#E0F2FE` | 卡片背景、输入框背景 |
+| `--color-neutral-200` | `#BAE6FD` | 边框、分割线 |
+| `--color-neutral-300` | `#7DD3FC` | 禁用态边框 |
+| `--color-neutral-500` | `#0369A1` | 次要文字 |
+| `--color-neutral-700` | `#075985` | 正文文字 |
+| `--color-neutral-900` | `#0C4A6E` | 标题文字 |
 
 ### 2.3 语义色
 
@@ -74,12 +74,12 @@
 
 ```css
 :root {
-  --el-color-primary: #7C3AED;
-  --el-color-primary-light-3: #A78BFA;
-  --el-color-primary-light-5: #C4B5FD;
-  --el-color-primary-light-7: #DDD6FE;
-  --el-color-primary-light-9: #EDE9FE;
-  --el-color-primary-dark-2: #6D28D9;
+  --el-color-primary: #0369A1;
+  --el-color-primary-light-3: #0EA5E9;
+  --el-color-primary-light-5: #38BDF8;
+  --el-color-primary-light-7: #7DD3FC;
+  --el-color-primary-light-9: #E0F2FE;
+  --el-color-primary-dark-2: #075985;
   --el-color-success: #22C55E;
   --el-color-warning: #F59E0B;
   --el-color-danger: #EF4444;
@@ -179,10 +179,10 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 | Token | CSS 值 | 用途 |
 |:------|--------|------|
 | `--shadow-none` | `none` | 扁平元素 |
-| `--shadow-sm` | `0 1px 3px rgba(76, 29, 149, 0.08)` | 卡片默认、输入框 |
-| `--shadow-md` | `0 4px 6px rgba(76, 29, 149, 0.1)` | 悬浮卡片、下拉菜单 |
-| `--shadow-lg` | `0 10px 20px rgba(76, 29, 149, 0.12)` | 模态框、弹出层 |
-| `--shadow-xl` | `0 20px 40px rgba(76, 29, 149, 0.15)` | 最高优先级浮层 |
+| `--shadow-sm` | `0 1px 3px rgba(3, 105, 161, 0.08)` | 卡片默认、输入框 |
+| `--shadow-md` | `0 4px 6px rgba(3, 105, 161, 0.1)` | 悬浮卡片、下拉菜单 |
+| `--shadow-lg` | `0 10px 20px rgba(3, 105, 161, 0.12)` | 模态框、弹出层 |
+| `--shadow-xl` | `0 20px 40px rgba(3, 105, 161, 0.15)` | 最高优先级浮层 |
 
 ### 5.2 圆角
 
@@ -270,13 +270,13 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 ```css
 :root {
   /* ===== 主色 ===== */
-  --el-color-primary: #7C3AED;
-  --el-color-primary-light-3: #A78BFA;
-  --el-color-primary-light-5: #C4B5FD;
-  --el-color-primary-light-7: #DDD6FE;
-  --el-color-primary-light-8: #EDE9FE;
-  --el-color-primary-light-9: #F5F3FF;
-  --el-color-primary-dark-2: #6D28D9;
+  --el-color-primary: #0369A1;
+  --el-color-primary-light-3: #0EA5E9;
+  --el-color-primary-light-5: #38BDF8;
+  --el-color-primary-light-7: #7DD3FC;
+  --el-color-primary-light-8: #BAE6FD;
+  --el-color-primary-light-9: #E0F2FE;
+  --el-color-primary-dark-2: #075985;
 
   /* ===== 语义色 ===== */
   --el-color-success: #22C55E;
@@ -293,9 +293,9 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
   --el-border-radius-base: 12px;
   --el-border-radius-small: 8px;
   --el-border-radius-round: 24px;
-  --el-border-color: #E9D5FF;
-  --el-border-color-light: #F3E8FF;
-  --el-border-color-lighter: #FAF5FF;
+  --el-border-color: #BAE6FD;
+  --el-border-color-light: #E0F2FE;
+  --el-border-color-lighter: #F0F9FF;
 
   /* ===== 字体 ===== */
   --el-font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -304,16 +304,16 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
   --el-font-size-large: 16px;
 
   /* ===== 背景 & 文字 ===== */
-  --el-bg-color: #FAF5FF;
+  --el-bg-color: #F0F9FF;
   --el-bg-color-overlay: #FFFFFF;
-  --el-text-color-primary: #4C1D95;
-  --el-text-color-regular: #6B21A8;
-  --el-text-color-secondary: #A855F7;
-  --el-text-color-placeholder: #C084FC;
+  --el-text-color-primary: #0C4A6E;
+  --el-text-color-regular: #075985;
+  --el-text-color-secondary: #0369A1;
+  --el-text-color-placeholder: #7DD3FC;
 
   /* ===== 填充色 ===== */
-  --el-fill-color: #F5F3FF;
-  --el-fill-color-light: #FAF5FF;
+  --el-fill-color: #F0F9FF;
+  --el-fill-color-light: #F0F9FF;
   --el-fill-color-blank: #FFFFFF;
 }
 ```
@@ -333,18 +333,18 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .el-input__wrapper:focus-within {
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 0 0 2px rgba(3, 105, 161, 0.2);
 }
 
 /* 卡片 */
 .el-card {
   border-radius: 16px;
-  border: 1px solid #E9D5FF;
+  border: 1px solid #BAE6FD;
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 .el-card:hover {
   transform: scale(1.02);
-  box-shadow: 0 10px 20px rgba(76, 29, 149, 0.12);
+  box-shadow: 0 10px 20px rgba(3, 105, 161, 0.12);
 }
 
 /* 对话框 */
@@ -375,12 +375,12 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 ```css
 /* 所有颜色通过 CSS Variables 引用，暗黑模式时切换 :root[data-theme="dark"] */
 :root[data-theme="dark"] {
-  --color-neutral-50: #1A0A2E;
-  --color-neutral-100: #2D1B4E;
-  --color-neutral-200: #3B2468;
-  --color-neutral-900: #F5F3FF;
-  --el-bg-color: #1A0A2E;
-  --el-text-color-primary: #F5F3FF;
+  --color-neutral-50: #0C1929;
+  --color-neutral-100: #1B3A5C;
+  --color-neutral-200: #26547C;
+  --color-neutral-900: #F0F9FF;
+  --el-bg-color: #0C1929;
+  --el-text-color-primary: #F0F9FF;
   /* ... */
 }
 ```
