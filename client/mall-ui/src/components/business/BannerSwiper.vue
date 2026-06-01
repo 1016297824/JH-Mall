@@ -50,6 +50,10 @@ function handleBannerClick(banner: Banner) {
   border-radius: $radius-lg;
   overflow: hidden;
   margin-bottom: $spacing-xl;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .banner-slide {
