@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import type { CategoryVO } from '@/types/product'
 
 const props = defineProps<{
@@ -43,6 +43,14 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateColumns)
   window.removeEventListener('resize', () => nextTick(measureRowHeight))
 })
+
+watch(
+  () => props.categories,
+  async () => {
+    await nextTick()
+    measureRowHeight()
+  },
+)
 
 const visibleRowCount = computed(() => columnsPerRow.value)
 

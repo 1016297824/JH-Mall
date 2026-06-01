@@ -6,6 +6,7 @@ import ProductCard from './ProductCard.vue'
 const props = defineProps<{
   products: SpuVO[]
   loading: boolean
+  loadingMore?: boolean
 }>()
 
 const safeProducts = computed(() => props.products ?? [])
