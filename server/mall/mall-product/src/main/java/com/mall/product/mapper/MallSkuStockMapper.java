@@ -19,7 +19,7 @@ import java.util.List;
 public interface MallSkuStockMapper extends BaseMapper<MallSkuStockDO> {
 
     /**
-     * 根据 SKU ID 查询库存
+     * 根据 SKU ID 查询库存（库存记录不区分删除状态，is_deleted 统一为 0）
      *
      * @param skuId SKU ID
      * @return 库存 DO

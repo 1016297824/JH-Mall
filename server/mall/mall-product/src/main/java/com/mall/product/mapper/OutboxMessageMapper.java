@@ -19,10 +19,12 @@ import java.util.List;
 public interface OutboxMessageMapper extends BaseMapper<OutboxMessageDO> {
 
     /**
-     * 查询待发送的消息
+     * 查询待发送的消息（按 nextRetryTime 升序取前 N 条）
      *
-     * @param topic 消息主题
-     * @param limit 获取条数
+     * <p>仅查询 status = 'NEW' 的消息，用于补偿定时任务批量投递。</p>
+     *
+     * @param topic 消息主题（如 mall:product:search:sync）
+     * @param limit 获取条数（最大 100）
      * @return 待发送消息列表
      */
     default List<OutboxMessageDO> selectPending(String topic, int limit) {
@@ -34,10 +36,10 @@ public interface OutboxMessageMapper extends BaseMapper<OutboxMessageDO> {
     }
 
     /**
-     * 更新消息状态
+     * 更新消息状态并递增重试次数
      *
      * @param id     消息 ID
-     * @param status 目标状态
+     * @param status 目标状态（SENT/FAILED）
      * @return 影响行数
      */
     @Update("UPDATE mall_outbox SET status = #{status}, retry_count = retry_count + 1 WHERE id = #{id}")

@@ -5,6 +5,12 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 类目 VO（支持树形结构，children 存储子节点）
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Data
 public class CategoryVO {
 

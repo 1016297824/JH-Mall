@@ -50,13 +50,13 @@ public class SkuServiceImpl implements ISkuService {
 
     @Override
     public List<ProductSkuDTO> batchGetSkuDTOs(List<Long> skuIds) {
-        // 批量查询 SKU 基本信息
+        // 批量查询 SKU 基本信息（含逻辑删除过滤）
         List<MallProductSkuDO> skuDOList = mallProductSkuMapper.selectBySkuIds(skuIds);
-        // 批量查询库存，建立 skuId → stock 映射
+        // 批量查询库存并构建 skuId → stock 映射，避免 N+1 查询
         Map<Long, MallSkuStockDO> stockMap = mallSkuStockMapper.selectBySkuIds(skuIds).stream()
                 .collect(Collectors.toMap(MallSkuStockDO::getSkuId, s -> s));
 
-        // 组装 DTO，根据库存判断是否在售
+        // 逐条组装 DTO，可用库存 > 0 标记为在售状态
         return skuDOList.stream().map(sku -> {
             ProductSkuDTO dto = new ProductSkuDTO();
             dto.setSkuId(sku.getId());
@@ -66,6 +66,7 @@ public class SkuServiceImpl implements ISkuService {
             dto.setPrice(sku.getPrice());
             dto.setImage(sku.getImage());
             MallSkuStockDO stock = stockMap.get(sku.getId());
+            // 可用库存大于 0 且库存记录存在才算在售
             dto.setIsOnSale(stock != null && stock.getAvailableStock() > 0);
             dto.setAvailableQty(stock != null ? stock.getAvailableStock() : 0);
             return dto;

@@ -26,13 +26,17 @@ public class RemoteSearchAdapter {
     /**
      * 同步商品索引到搜索引擎
      *
-     * @param request 搜索同步请求
+     * <p>封装 RemoteSearchService Feign 调用，Feign 异常统一转为 BusinessException，
+     * 由调用方 (SearchSyncProducer) 根据异常决定是否降级到 Outbox。</p>
+     *
+     * @param request 搜索同步请求（含 spuId + operation + timestamp）
      */
     public void syncProduct(SearchSyncRequest request) {
         try {
             remoteSearchService.syncProduct(request);
         } catch (Exception e) {
             log.error("实时同步搜索索引失败, spuId={}, operation={}", request.getSpuId(), request.getOperation(), e);
+            // 转为 BusinessException，上层 SearchSyncProducer 捕获后写 Outbox
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }

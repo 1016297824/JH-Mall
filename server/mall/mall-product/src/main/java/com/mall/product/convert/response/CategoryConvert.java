@@ -43,18 +43,20 @@ public class CategoryConvert {
     /**
      * 构建类目树
      *
+     * <p>遍历全部扁平类目列表，parentId=0 为根节点，其余按其 parentId 挂到对应父节点 children 下。
+     * 利用 ID → VO 映射实现 O(n) 时间复杂度建树。</p>
+     *
      * @param categoryDOList 类目 DO 列表
      * @return 树形结构类目列表
      */
     public static List<CategoryVO> buildTree(List<MallCategoryDO> categoryDOList) {
-        // 全部转为 VO
         List<CategoryVO> allVos = categoryDOList.stream()
                 .map(CategoryConvert::toCategoryVO)
                 .toList();
-        // 建立 ID → VO 映射，便于快速找父节点
+        // 建立 ID → VO 映射，便于 O(1) 查找父节点
         Map<Long, CategoryVO> voMap = allVos.stream()
                 .collect(Collectors.toMap(v -> Long.parseLong(v.getCategoryId()), v -> v));
-        // 组装树：parentId=0 为根节点，其余挂到对应父节点下
+        // 一次遍历完成树组装：parentId=0 为顶层根节点，其余找到父节点后追加到 children
         List<CategoryVO> tree = new ArrayList<>();
         for (CategoryVO vo : allVos) {
             Long parentId = Long.parseLong(vo.getParentId());

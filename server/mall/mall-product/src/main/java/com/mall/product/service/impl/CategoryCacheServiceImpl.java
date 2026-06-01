@@ -33,14 +33,14 @@ public class CategoryCacheServiceImpl implements ICategoryCacheService {
 
     @Override
     public List<CategoryVO> getTree() {
+        // 先从 Redis 读取缓存的类目树，避免频繁穿透 DB
         String key = CacheConstants.Product.CATEGORY_TREE;
-        // 尝试从缓存获取
         @SuppressWarnings("unchecked")
         List<CategoryVO> cached = (List<CategoryVO>) redisTemplate.opsForValue().get(key);
         if (cached != null) {
             return cached;
         }
-        // 缓存未命中，查 DB 并回填缓存
+        // 缓存未命中，查 DB 构建类目树后回填 Redis，TTL 30 分钟
         List<CategoryVO> tree = categoryService.tree();
         redisTemplate.opsForValue().set(key, tree, TTL_SECONDS, TimeUnit.SECONDS);
         return tree;

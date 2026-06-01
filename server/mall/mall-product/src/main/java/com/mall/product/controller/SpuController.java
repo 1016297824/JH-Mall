@@ -64,12 +64,15 @@ public class SpuController {
     /**
      * 热门商品列表
      *
+     * <p>支持 Caffeine+Redis 两级缓存，按热度分降序返回。</p>
+     *
      * @param limit 返回条数（默认 20，最大 50）
      * @return 热度降序商品列表
      */
     @GetMapping("/spus/hot")
     public MallResult<List<SpuVO>> hotList(@RequestParam(defaultValue = "20") int limit) {
         int maxLimit = configProps.getHot().getHotListLimit();
+        // 校验 limit 上限，防止恶意大请求打垮 DB 降级查询
         if (limit > maxLimit) {
             throw new BusinessException(ErrorCode.HOT_LIST_LIMIT_EXCEEDED);
         }

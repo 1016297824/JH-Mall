@@ -35,18 +35,22 @@ public class StockServiceImpl implements IStockService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean reserveStock(String orderNo, List<ReserveStockItemRequest> items) {
-        // 逐项预扣库存（乐观锁版本控制）
+        // 逐项预扣库存（乐观锁版本控制，任一失败整体回滚）
         for (ReserveStockItemRequest item : items) {
+            // 先查询当前库存记录，获取乐观锁版本号
             MallSkuStockDO stock = mallSkuStockMapper.selectBySkuId(item.getSkuId());
             if (stock == null) {
                 throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
             }
-            // 乐观锁扣减 available → locked，不满足则回滚
+            // 乐观锁扣减：available_stock -= qty, locked_stock += qty
+            // WHERE 条件附带 version 校验，防止并发覆盖
+            // 影响行数为 0 说明版本冲突或可用库存不足
             int affected = mallSkuStockMapper.reserveStock(item.getSkuId(), item.getQty(), stock.getVersion());
             if (affected == 0) {
                 throw new BusinessException(ErrorCode.STOCK_INSUFFICIENT);
             }
-            // 记录预扣缓存（作为幂等键，TTL 24h）
+            // 预扣成功后在 Redis 记录幂等键：orderNo:skuId → qty，TTL 24小时
+            // 用于订单超时取消时释放库存或防止重复扣减
             redisTemplate.opsForValue().set(
                     CacheConstants.Product.STOCK_RESERVE + orderNo + ":" + item.getSkuId(),
                     item.getQty().toString(), 86400, TimeUnit.SECONDS);

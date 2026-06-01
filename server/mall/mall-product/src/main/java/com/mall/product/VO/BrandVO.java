@@ -2,6 +2,12 @@ package com.mall.product.VO;
 
 import lombok.Data;
 
+/**
+ * 品牌 VO
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Data
 public class BrandVO {
     /** 品牌 ID */

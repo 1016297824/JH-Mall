@@ -26,9 +26,8 @@ public class BrandServiceImpl implements IBrandService {
 
     @Override
     public List<BrandVO> list(Long categoryId) {
-        // 查询全部未删除品牌（按排序值升序）
+        // 查询全部未删除品牌（按排序值升序），暂未按 categoryId 过滤
         List<MallBrandDO> brandDOList = mallBrandMapper.selectAll();
-        // DO 转 VO
         return BrandConvert.toBrandVOList(brandDOList);
     }
 }

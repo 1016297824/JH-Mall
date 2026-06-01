@@ -34,7 +34,7 @@ public class ProductConfig {
      * 热点商品 Caffeine 本地缓存
      *
      * <p>热点排行接口中加速 C 端查询，减少 Redis 压力。
-     * 最大 500 条，5min 无访问过期，启用统计用于监控。</p>
+     * 最大 500 条，5min 无访问过期，启用统计 (recordStats) 用于 Micrometer 监控。</p>
      *
      * @return Caffeine 缓存实例（key = spuId, value = SpuVO）
      */

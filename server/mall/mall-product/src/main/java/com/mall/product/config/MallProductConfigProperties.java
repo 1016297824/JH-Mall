@@ -149,19 +149,19 @@ public class MallProductConfigProperties {
         return hot;
     }
 
-    /** 热销商品排行配置 */
+    /** 热销商品排行配置（综合热度 = salesCount * 10 * salesWeight + uv * uvWeight） */
     public static class Hot {
 
-        /** 排行榜最大保留数量 */
+        /** 排行榜最大保留数量（ZSet 只保留 Top N，超出部分 UV 键会被清理） */
         private int rankMaxSize = 200;
 
-        /** C 端热点列表单次最大条数 */
+        /** C 端热点列表单次最大条数（接口请求 limit 超过此值时拒绝） */
         private int hotListLimit = 50;
 
-        /** 销量权重 */
+        /** 销量权重（默认 0.6，与 uvWeight 之和应等于 1.0） */
         private double salesWeight = 0.6;
 
-        /** 独立访客量权重 */
+        /** 独立访客量权重（默认 0.4，与 salesWeight 之和应等于 1.0） */
         private double uvWeight = 0.4;
 
         public int getRankMaxSize() {

@@ -3,6 +3,12 @@ package com.mall.product.VO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * SPU 列表 VO
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Data
 @NoArgsConstructor
 public class SpuVO {

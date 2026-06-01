@@ -46,7 +46,7 @@ public class MallCategoryDO {
     @TableField("is_visible")
     private Integer isVisible;
 
-    /** 路径，如 /1/2/3 */
+    /** 路径，如 /1/2/3（从根到当前节点的 ID 链，用于快速查询子类目） */
     @TableField("path")
     private String path;
 

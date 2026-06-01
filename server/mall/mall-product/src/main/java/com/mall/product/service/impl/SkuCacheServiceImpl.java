@@ -32,11 +32,13 @@ public class SkuCacheServiceImpl implements ISkuCacheService {
 
     @Override
     public SkuVO getBySkuId(Long skuId) {
+        // Cache-Aside 模式：先读 Redis，命中直接返回
         String key = CacheConstants.Product.SKU + skuId;
         SkuVO cached = (SkuVO) redisTemplate.opsForValue().get(key);
         if (cached != null) {
             return cached;
         }
+        // 缓存未命中，回查 DB 并回填 Redis，TTL 10 分钟
         SkuVO skuVO = skuService.getBySkuId(skuId);
         redisTemplate.opsForValue().set(key, skuVO, TTL_SECONDS, TimeUnit.SECONDS);
         return skuVO;

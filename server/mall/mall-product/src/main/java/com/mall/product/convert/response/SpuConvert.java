@@ -61,7 +61,9 @@ public class SpuConvert {
     }
 
     /**
-     * SPU DO 转详情 VO（含图片列表、SKU 列表）
+     * SPU DO 转详情 VO（含图片列表、SKU 简要列表）
+     *
+     * <p>图片 JSON 字符串解析为 List&lt;String&gt;，SKU DO 转 SkuBriefVO 仅保留关键信息</p>
      *
      * @param spuDO    SPU DO
      * @param skuDOList SKU DO 列表
@@ -94,17 +96,17 @@ public class SpuConvert {
 
     /**
      * 解析图片 JSON 为 URL 列表
+     *
+     * <p>DB 中 images_json 以 JSON 数组字符串存储，需反序列化为 List&lt;String&gt;</p>
      */
     private static List<String> parseImagesJson(String imagesJson) {
-        // 空值直接返回空列表
         if (imagesJson == null || imagesJson.isEmpty()) {
             return Collections.emptyList();
         }
         try {
-            // JSON 数组字符串解析为 List<String>
             return objectMapper.readValue(imagesJson, new TypeReference<List<String>>() {});
         } catch (Exception e) {
-            // 解析失败时静默返回空列表，不阻断主流程
+            // 解析失败时静默返回空列表，不阻断 SPU 详情主流程
             return Collections.emptyList();
         }
     }

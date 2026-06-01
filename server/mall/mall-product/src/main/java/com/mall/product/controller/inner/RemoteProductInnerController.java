@@ -39,8 +39,10 @@ public class RemoteProductInnerController {
     /**
      * 批量查询 SKU（Feign 内部调用）
      *
+     * <p>供 mall-order 订单模块查询商品快照，含库存在售状态判断</p>
+     *
      * @param skuIds SKU ID 列表
-     * @return SKU DTO 列表
+     * @return SKU DTO 列表（含可用库存、在售标记）
      */
     @GetMapping("/skus")
     List<ProductSkuDTO> batchGetSku(@RequestParam("skuIds") List<Long> skuIds) {
@@ -48,11 +50,14 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 预扣库存
+     * 预扣库存（乐观锁并发安全）
      *
-     * @param orderNo 订单号
+     * <p>供 mall-order 下单时调用，逐项乐观锁扣减 available → locked。
+     * 预扣成功后在 Redis 记录 orderNo:skuId 幂等键。</p>
+     *
+     * @param orderNo 订单号（幂等键前缀）
      * @param items   预扣项列表
-     * @return 是否成功
+     * @return 是否全部扣减成功
      */
     @PostMapping("/stock/reserve")
     boolean reserveStock(@RequestParam("orderNo") String orderNo,
@@ -61,7 +66,9 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 释放预扣库存
+     * 释放预扣库存（订单取消时调用）
+     *
+     * <p>供 mall-order 订单取消时释放已锁库存，locked → available</p>
      *
      * @param orderNo 订单号
      */
@@ -71,10 +78,12 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 补货
+     * 补货（增加可用库存）
+     *
+     * <p>供 mall-admin 管理端或售后流程调用，乐观锁增加 available_stock</p>
      *
      * @param skuId SKU ID
-     * @param qty   数量
+     * @param qty   补货数量
      */
     @PostMapping("/stock/restock")
     void restock(@RequestParam("skuId") Long skuId,
@@ -83,9 +92,11 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 全量查询 SPU（供搜索索引重建）
+     * 全量分页查询 SPU（供搜索索引重建）
      *
-     * @param page 页码
+     * <p>返回全部未删除 SPU（不限上架状态），供 mall-search 模块重建搜索索引使用</p>
+     *
+     * @param page 页码（从 1 开始）
      * @param size 每页条数
      * @return SPU DTO 分页
      */
@@ -96,9 +107,10 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 补偿 Outbox 消息（ruoyi-job 调度）
+     * 补偿 Outbox 消息（ruoyi-job 定时调度）
      *
-     * <p>扫描并投递待发送的搜索同步 Outbox 消息</p>
+     * <p>扫描 Outbox 表中状态为 NEW 的搜索同步消息，逐条补偿投递。
+     * 搜索引擎不可用导致实时同步失败时，由此定时任务兜底。</p>
      *
      * @return 本次处理的消息数量
      */
@@ -111,7 +123,8 @@ public class RemoteProductInnerController {
      * 全量刷新热点排名（Feign 内部调用）
      *
      * <p>综合销量分 + UV 分加权重算 ZSet score，
-     * ruoyi-job 定时调度 {@code mallProductTask.refreshHotRank()}。</p>
+     * SETNX 分布式锁防并发，ruoyi-job 定时调度。
+     * 同时清理未进 Top N 的过期 UV HyperLogLog 键。</p>
      */
     @PostMapping("/hot/refresh")
     void refreshHotRank() {

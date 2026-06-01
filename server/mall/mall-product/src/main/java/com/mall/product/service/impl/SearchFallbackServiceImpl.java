@@ -32,22 +32,21 @@ public class SearchFallbackServiceImpl implements ISearchFallbackService {
 
     @Override
     public List<SpuVO> search(String keyword, int page, int size) {
-        // 关键词长度校验（2~50 字符）
+        // 关键词长度校验（2~50 字符），过短或过长都直接返回参数错误
         if (keyword.length() < 2 || keyword.length() > 50) {
             throw new BusinessException(ErrorCode.SEARCH_RESULT_LIMIT);
         }
+        // 单页上限 100，防止模糊查询被大页数打垮 DB
         if (size > 100) {
             size = 100;
         }
-        // 构建查询条件：已上架 + 未删除 + SPU 名称模糊匹配
+        // 构建查询条件：已上架 + 未逻辑删除 + SPU 名称 LIKE 模糊匹配
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
                 .eq(MallProductSpuDO::getPublishStatus, 1)
                 .eq(MallProductSpuDO::getIsDeleted, 0)
                 .like(MallProductSpuDO::getSpuName, keyword);
-        // 执行分页查询
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectPage(pageParam, wrapper);
-        // DO 转 VO
         return result.getRecords().stream()
                 .map(SpuConvert::toSpuVO)
                 .toList();

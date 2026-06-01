@@ -34,19 +34,19 @@ public class MallProductSkuDO {
     @TableField("sku_name")
     private String skuName;
 
-    /** 销售属性 JSON */
+    /** 销售属性 JSON（如 [{"k":"颜色","v":"红色"},{"k":"尺寸","v":"XL"}]） */
     @TableField("attrs_json")
     private String attrsJson;
 
-    /** 销售价（分） */
+    /** 销售价（分，C 端实际售价） */
     @TableField("price")
     private Long price;
 
-    /** 市场价/划线价（分） */
+    /** 市场价/划线价（分，展示原价用于对比，高于销售价） */
     @TableField("market_price")
     private Long marketPrice;
 
-    /** 成本价（分） */
+    /** 成本价（分，内部核算用，不对外展示） */
     @TableField("cost_price")
     private Long costPrice;
 
@@ -54,7 +54,7 @@ public class MallProductSkuDO {
     @TableField("image")
     private String image;
 
-    /** 重量（克） */
+    /** 重量（克，用于运费计算） */
     @TableField("weight")
     private Integer weight;
 

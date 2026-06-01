@@ -21,6 +21,12 @@ public class HotRankRefreshTask {
 
     private final IHotProductService hotProductService;
 
+    /**
+     * 执行热点排名全量刷新
+     *
+     * <p>由 ruoyi-job 定时调度或 Feign 内部调用，委托 {@link IHotProductService#refreshHotRank()}。
+     * 内部使用 SETNX 分布式锁防多实例并发，综合 sales_count 和 UV 重算 ZSet score。</p>
+     */
     public void execute() {
         log.info("热点排名刷新开始");
         hotProductService.refreshHotRank();

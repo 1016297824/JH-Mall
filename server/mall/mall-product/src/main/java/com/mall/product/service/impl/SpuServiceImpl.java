@@ -38,13 +38,9 @@ public class SpuServiceImpl implements ISpuService {
 
     @Override
     public PageResult<SpuVO> page(int page, int size, Long categoryId, Long brandId, String keyword, String sort) {
-        // 构建分页参数
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
-        // 应用排序（price_asc/price_desc/sales_desc）
         applySort(pageParam, sort);
-        // 条件查询已上架 SPU
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectPublishedPage(pageParam, categoryId, brandId, keyword);
-        // DO 转 VO
         List<SpuVO> voList = result.getRecords().stream().map(SpuConvert::toSpuVO).toList();
         return PageResult.of(page, size, result.getTotal(), voList);
     }
@@ -52,16 +48,16 @@ public class SpuServiceImpl implements ISpuService {
     @Override
     public SpuDetailVO detail(Long spuId) {
         MallProductSpuDO spuDO = mallProductSpuMapper.selectById(spuId);
-        // 校验 SPU 存在性：未删除、已上架、已审核
+        // 校验 SPU 存在性：记录存在、未逻辑删除、已上架、已通过审核，四项全满足才可访问
         if (spuDO == null
                 || Integer.valueOf(1).equals(spuDO.getIsDeleted())
                 || Integer.valueOf(1).equals(spuDO.getPublishStatus()) == false
                 || Integer.valueOf(1).equals(spuDO.getVerifyStatus()) == false) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
-        // 查询关联 SKU 列表
+        // 查询关联 SKU 列表（未删除 SKU）
         List<MallProductSkuDO> skuDOList = mallProductSkuMapper.selectBySpuId(spuId);
-        // 记录 UV（HyperLogLog），未登录传 0L
+        // 记录 UV（HyperLogLog），每次详情访问算一个独立访客，未登录传 0L
         hotProductService.incrUv(spuId, 0L);
         return SpuConvert.toSpuDetailVO(spuDO, skuDOList);
     }

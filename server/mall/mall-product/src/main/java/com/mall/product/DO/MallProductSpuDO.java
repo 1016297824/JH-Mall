@@ -39,15 +39,15 @@ public class MallProductSpuDO {
     @TableField("main_image")
     private String mainImage;
 
-    /** 轮播图 JSON 数组 */
+    /** 轮播图 JSON 数组（存储为 JSON 字符串，如 ["url1","url2"]） */
     @TableField("images_json")
     private String imagesJson;
 
-    /** 最低价（分） */
+    /** 最低价（分，同 SPU 下 SKU 最低销售价） */
     @TableField("price_min")
     private Long priceMin;
 
-    /** 最高价（分） */
+    /** 最高价（分，同 SPU 下 SKU 最高销售价） */
     @TableField("price_max")
     private Long priceMax;
 

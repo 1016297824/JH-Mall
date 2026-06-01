@@ -3,6 +3,12 @@ package com.mall.product.VO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * SKU 详情 VO
+ *
+ * @author JH-Mall
+ * @date 2026/05/29
+ */
 @Data
 @NoArgsConstructor
 public class SkuVO {

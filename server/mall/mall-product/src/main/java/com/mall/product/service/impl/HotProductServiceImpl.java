@@ -17,10 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 热点商品服务实现
@@ -47,13 +44,14 @@ public class HotProductServiceImpl implements IHotProductService {
 
     @Override
     public List<SpuVO> hotList(int limit) {
-        // 从 Redis ZSet 获取热度降序的 spuId 列表
+        // 第 1 步：从 Redis ZSet 获取热度降序的 spuId 列表（score=综合热度分）
         BoundZSetOperations<String, Object> zSetOps = redisTemplate.boundZSetOps(CacheConstants.Product.HOT_RANK);
         Set<Object> spuIdSet = zSetOps.reverseRange(0, limit - 1);
+        // ZSet 为空（首次启动或缓存过期），降级到 MySQL 按销量排序兜底
         if (spuIdSet == null || spuIdSet.isEmpty()) {
             return fallbackMysql(limit);
         }
-        // 优先从 Caffeine 本地缓存读取，未命中再查 MySQL
+        // 第 2 步：遍历 ZSet 中的 spuId，优先从 Caffeine 本地缓存获取 VO
         List<SpuVO> result = new ArrayList<>();
         List<Long> missedIds = new ArrayList<>();
         for (Object obj : spuIdSet) {
@@ -61,59 +59,80 @@ public class HotProductServiceImpl implements IHotProductService {
             Long spuId = Long.valueOf(spuIdStr);
             SpuVO cached = hotProductCache.getIfPresent(spuId);
             if (cached != null) {
+                // Caffeine 命中，直接加入结果集
                 result.add(cached);
             } else {
+                // Caffeine 未命中，占位 null 保持 ZSet 排名顺序，稍后批量回查 MySQL 填入
+                result.add(null);
                 missedIds.add(spuId);
             }
         }
-        // 批量回查未命中 ID 并回种 Caffeine 缓存
+        // 第 3 步：Caffeine 未命中的 ID 批量回查 MySQL，按 ZSet 排名顺序回填并回种缓存
         if (!missedIds.isEmpty()) {
             List<MallProductSpuDO> spuDOList = spuMapper.selectBatchIds(missedIds);
             List<SpuVO> voList = SpuConvert.toSpuVOList(spuDOList);
+            Map<Long, SpuVO> voMap = new HashMap<>();
             for (SpuVO vo : voList) {
-                hotProductCache.put(Long.valueOf(vo.getSpuId()), vo);
+                Long id = Long.valueOf(vo.getSpuId());
+                voMap.put(id, vo);
+                hotProductCache.put(id, vo);
             }
-            result.addAll(voList);
+            for (int i = 0; i < result.size(); i++) {
+                if (result.get(i) == null) {
+                    String spuIdStr = (String) new ArrayList<>(spuIdSet).get(i);
+                    result.set(i, voMap.get(Long.valueOf(spuIdStr)));
+                }
+            }
         }
+        result.removeIf(Objects::isNull);
         return result;
     }
 
     /**
      * MySQL 降级查询（ZSet 为空时按销量排序兜底）
      *
+     * <p>降级的同时回填 Caffeine 和 ZSet 缓存，避免后续请求持续降级到 DB</p>
+     *
      * @param limit 返回条数
      * @return 按销量降序的 SPU 列表
      */
     private List<SpuVO> fallbackMysql(int limit) {
-        Page<MallProductSpuDO> page = new Page<>(1, limit);
+        int seedSize = configProps.getHot().getRankMaxSize();
+        Page<MallProductSpuDO> page = new Page<>(1, seedSize);
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
                 .eq(MallProductSpuDO::getPublishStatus, 1)
                 .eq(MallProductSpuDO::getVerifyStatus, 1)
                 .eq(MallProductSpuDO::getIsDeleted, 0)
                 .orderByDesc(MallProductSpuDO::getSalesCount);
         Page<MallProductSpuDO> result = spuMapper.selectPage(page, wrapper);
-        List<SpuVO> voList = SpuConvert.toSpuVOList(result.getRecords());
+        List<SpuVO> allList = SpuConvert.toSpuVOList(result.getRecords());
         BoundZSetOperations<String, Object> zSetOps = redisTemplate.boundZSetOps(CacheConstants.Product.HOT_RANK);
-        for (SpuVO vo : voList) {
+        for (SpuVO vo : allList) {
             hotProductCache.put(Long.valueOf(vo.getSpuId()), vo);
             zSetOps.add(vo.getSpuId(), vo.getSalesCount() != null ? vo.getSalesCount() * 10.0 : 0);
         }
-        return voList;
+        return allList.size() > limit ? allList.subList(0, limit) : allList;
     }
 
     @Override
     public void incrUv(Long spuId, Long userId) {
+        // 使用 Redis HyperLogLog 统计 UV，误差约 0.81%，空间占用固定 12KB
+        // key = mall:product:uv:{spuId}，value = userId，去重统计独立访客
         redisTemplate.opsForHyperLogLog().add(CacheConstants.Product.UV + spuId, userId.toString());
     }
 
     @Override
     public void refreshHotRank() {
+        // 使用 SETNX 获取分布式锁，防止多实例并发刷新热点排名
+        // key = mall:job:lock:hot:rank，TTL 600 秒防止锁未释放导致死锁
         Boolean locked = redisTemplate.opsForValue()
                 .setIfAbsent(CacheConstants.Job.LOCK_HOT_RANK, "1", Duration.ofSeconds(600));
         if (!Boolean.TRUE.equals(locked)) {
+            // 其他实例已持有锁，直接跳过本次刷新
             return;
         }
         try {
+            // 从 MySQL 查询已上架已审核的 SPU，按销量降序取前 rankMaxSize 条
             int rankMaxSize = configProps.getHot().getRankMaxSize();
             Page<MallProductSpuDO> page = new Page<>(1, rankMaxSize);
             LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
@@ -126,19 +145,25 @@ public class HotProductServiceImpl implements IHotProductService {
             if (spuList.isEmpty()) {
                 return;
             }
+            // 从配置读取销量权重和 UV 权重（默认 0.6 : 0.4）
             double salesWeight = configProps.getHot().getSalesWeight();
             double uvWeight = configProps.getHot().getUvWeight();
             BoundZSetOperations<String, Object> zSetOps = redisTemplate.boundZSetOps(CacheConstants.Product.HOT_RANK);
+            // 清空旧 ZSet，全量重建新排名
             redisTemplate.delete(CacheConstants.Product.HOT_RANK);
+            // 记录本轮 Top N 的 spuId，后续用于清理过期 UV 键
             Set<String> topSpuIds = new java.util.HashSet<>();
             for (MallProductSpuDO spu : spuList) {
                 String spuIdStr = String.valueOf(spu.getId());
                 topSpuIds.add(spuIdStr);
+                // 综合热度分 = 销量 * 10 * 销量权重 + PFCOUNT(UV) * UV 权重
+                // PFCOUNT 返回 HyperLogLog 的基数估算值
                 int salesCount = spu.getSalesCount() != null ? spu.getSalesCount() : 0;
                 Long uv = redisTemplate.opsForHyperLogLog().size(CacheConstants.Product.UV + spuIdStr);
                 double newScore = salesCount * 10 * salesWeight + uv * uvWeight;
                 zSetOps.add(spuIdStr, newScore);
             }
+            // 清理未进入 Top N 的过期 UV HyperLogLog 键，防止 Redis 内存无限膨胀
             Set<String> uvKeys = redisTemplate.keys(CacheConstants.Product.UV + "*");
             if (uvKeys != null) {
                 for (String uvKey : uvKeys) {
@@ -149,6 +174,7 @@ public class HotProductServiceImpl implements IHotProductService {
                 }
             }
         } finally {
+            // 释放分布式锁
             redisTemplate.delete(CacheConstants.Job.LOCK_HOT_RANK);
         }
     }
