@@ -48,3 +48,6 @@ client/ruoyi-ui/auto-imports.d.ts
 
 # trae项目配置
 .trae
+
+# 工具运行时状态
+/data/
