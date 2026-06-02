@@ -26,7 +26,7 @@ services:
       JVM_XMX: 256m
       JVM_XMN: 128m
       # MySQL 连接（你的 MySQL 在 Windows 宿主机上）
-      MYSQL_SERVICE_HOST: host.docker.internal
+      MYSQL_SERVICE_HOST: mall-mysql
       MYSQL_SERVICE_PORT: 3306
       MYSQL_SERVICE_DB_NAME: ry-config
       MYSQL_SERVICE_USER: root
@@ -74,5 +74,19 @@ services:
     volumes:
       - ./data/rocketmq/logs:/home/rocketmq/logs
       - ./data/rocketmq/store:/home/rocketmq/store
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: mall-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "138992"
+      TZ: Asia/Shanghai
+    command: --innodb_buffer_pool_size=128M
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
     restart: unless-stopped
 volumes: {}

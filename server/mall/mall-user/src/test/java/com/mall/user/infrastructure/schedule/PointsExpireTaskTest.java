@@ -3,7 +3,6 @@ package com.mall.user.infrastructure.schedule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.user.DO.MallPointsAccountDO;
 import com.mall.user.DO.MallUserPointsLogDO;
-import com.mall.user.infrastructure.schedule.PointsExpireTask;
 import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserPointsLogMapper;
 import org.junit.jupiter.api.Test;

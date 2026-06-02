@@ -2,7 +2,6 @@ package com.mall.user.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.BizTypeEnum;
 import com.mall.common.enums.user.GrowthChangeTypeEnum;
 import com.mall.common.exception.BusinessException;

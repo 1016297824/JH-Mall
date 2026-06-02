@@ -1,6 +1,5 @@
 package com.mall.user.service.impl;
 
-import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallUserAddressDO;
 import com.mall.user.config.MallUserConfigProperties;
