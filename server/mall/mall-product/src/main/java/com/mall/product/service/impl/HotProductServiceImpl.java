@@ -50,7 +50,12 @@ public class HotProductServiceImpl implements IHotProductService {
         Set<Object> spuIdSet = zSetOps.reverseRange(0, limit - 1);
         // ZSet 为空（首次启动或缓存过期），降级到 MySQL 按销量排序兜底
         if (spuIdSet == null || spuIdSet.isEmpty()) {
-            return fallbackMysql(limit);
+            synchronized (this) {
+                spuIdSet = zSetOps.reverseRange(0, limit - 1);
+                if (spuIdSet == null || spuIdSet.isEmpty()) {
+                    return fallbackMysql(limit);
+                }
+            }
         }
         // 第 2 步：遍历 ZSet 中的 spuId，优先从 Caffeine 本地缓存获取 VO
         // 用 ArrayList 维护与 ZSet 一致的排名顺序（通过 null 占位），保证返回顺序与 Redis 排名一致
@@ -72,17 +77,17 @@ public class HotProductServiceImpl implements IHotProductService {
         // 第 3 步：Caffeine 未命中的 ID 批量回查 MySQL，按 ZSet 排名顺序回填并回种缓存
         if (!missedIds.isEmpty()) {
             List<MallProductSpuDO> spuDOList = spuMapper.selectByIds(missedIds);
-            List<SpuVO> voList = SpuConvert.toSpuVOList(spuDOList);
             Map<Long, SpuVO> voMap = new HashMap<>();
-            for (SpuVO vo : voList) {
+            for (SpuVO vo : SpuConvert.toSpuVOList(spuDOList)) {
                 Long id = Long.valueOf(vo.getSpuId());
                 voMap.put(id, vo);
                 hotProductCache.put(id, vo);
             }
+            List<Object> spuIdList = new ArrayList<>(spuIdSet);
             for (int i = 0; i < result.size(); i++) {
                 if (result.get(i) == null) {
-                    String spuIdStr = (String) new ArrayList<>(spuIdSet).get(i);
-                    result.set(i, voMap.get(Long.valueOf(spuIdStr)));
+                    Long spuId = Long.valueOf((String) spuIdList.get(i));
+                    result.set(i, voMap.get(spuId));
                 }
             }
         }
