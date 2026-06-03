@@ -65,6 +65,7 @@ public enum ErrorCode {
     RESOURCE_NOT_FOUND("A0501", "资源不存在", "资源不存在"),
     RESOURCE_EXISTS("A0502", "资源已存在（重复创建）", "资源已存在（重复创建）"),
     RESOURCE_STATUS_ERROR("A0503", "资源状态异常", "资源状态异常"),
+    USER_NOT_FOUND("A0504", "用户不存在", "用户不存在"),
     ADDRESS_LIMIT("A0511", "地址数量已达上限", "地址数量已达上限"),
     PRODUCT_OFFLINE("A0520", "商品已下架", "商品已下架"),
     STOCK_INSUFFICIENT("A0521", "商品库存不足", "商品库存不足"),

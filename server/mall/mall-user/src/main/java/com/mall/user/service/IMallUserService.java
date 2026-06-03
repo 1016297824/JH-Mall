@@ -70,4 +70,20 @@ public interface IMallUserService {
      * @param userStatus 用户状态
      */
     void updateUserStatusById(String userId, String userStatus);
+
+    /**
+     * 递增用户 token_version（原子操作，InnoDB 行锁保证）
+     *
+     * @param userId 用户 ID
+     * @return 受影响行数（0 表示用户不存在）
+     */
+    int incrementTokenVersion(Long userId);
+
+    /**
+     * 查询用户 token_version
+     *
+     * @param userId 用户 ID
+     * @return token_version 值，用户不存在返回 null
+     */
+    Integer getTokenVersion(Long userId);
 }

@@ -13,25 +13,28 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import com.mall.api.feign.RemoteUserService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Token 服务实现
  *
- * <p>使用 HS512 签名生成 JWT（accessToken + refreshToken），通过 Redis 维护会话（session Key）
- * 和黑名单（blacklist Key）。refreshToken 一次性使用，刷新时旧 refreshToken 立即加入黑名单。</p>
+ * <p>使用 HS512 签名生成 JWT（accessToken + refreshToken），通过 token_version（DB + Redis 缓存）+ JTI 黑名单维护令牌有效性。
+ * refreshToken 一次性使用，刷新时旧 refreshToken 立即加入黑名单。</p>
  *
  * @author JH-Mall
  * @date 2026/05/26
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenServiceImpl implements ITokenService {
@@ -39,6 +42,7 @@ public class TokenServiceImpl implements ITokenService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final MallAuthConfigProperties authProperties;
     private final MallSecurityConfigProperties securityProperties;
+    private final RemoteUserService remoteUserService;
 
     /**
      * 签发 Token（同时生成 accessToken 和 refreshToken）
@@ -48,6 +52,19 @@ public class TokenServiceImpl implements ITokenService {
      */
     @Override
     public TokenRespDTO issue(String userId) {
+        // 获取当前 token_version
+        Long uid;
+        try {
+            uid = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            log.error("issue: userId 转换失败, userId={}", userId, e);
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+        Integer version = getTokenVersion(uid);
+        if (version == null) {
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+
         byte[] key = securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8);
         Date now = new Date();
         Date accessExp = new Date(now.getTime() + authProperties.getAccessTokenTtl() * 1000);
@@ -65,6 +82,7 @@ public class TokenServiceImpl implements ITokenService {
                 .setExpiration(accessExp)
                 .claim("type", "access")
                 .claim("userId", userId)
+                .claim("ver", version)
                 .setIssuer("mall-auth")
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
@@ -77,13 +95,10 @@ public class TokenServiceImpl implements ITokenService {
                 .setExpiration(refreshExp)
                 .claim("type", "refresh")
                 .claim("userId", userId)
+                .claim("ver", version)
                 .setIssuer("mall-auth")
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact();
-
-        // accessToken 会话缓存，用于快速校验 token 有效性
-        String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + accessJti;
-        redisTemplate.opsForValue().set(sessionKey, "1", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
 
         // refreshToken 映射缓存，刷新时校验 refreshToken 有效性
         String refreshKey = CacheConstants.Auth.REFRESH + refreshJti;
@@ -111,9 +126,21 @@ public class TokenServiceImpl implements ITokenService {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
-        // 检查会话缓存：无 session 说明 token 未签发或已被删除
-        String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + jti;
-        if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionKey))) {
+        // token_version 比对（cache miss 回源 DB）
+        Integer jwtVersion = claims.get("ver", Integer.class);
+        if (jwtVersion == null) {
+            log.warn("verify: jwt 中 ver 为空, userId={}, jti={}", userId, jti);
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+        Long uid;
+        try {
+            uid = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            log.error("verify: userId 转换失败, userId={}", userId, e);
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+        Integer currentVersion = getTokenVersion(uid);
+        if (!jwtVersion.equals(currentVersion)) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
@@ -139,6 +166,7 @@ public class TokenServiceImpl implements ITokenService {
         String jti = claims.getId();
         String userId = claims.getSubject();
         Date expiration = claims.getExpiration();
+        Integer jwtVersion = claims.get("ver", Integer.class);
 
         // 检查该 refreshToken 是否已被加入黑名单（已被使用）
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
@@ -149,6 +177,23 @@ public class TokenServiceImpl implements ITokenService {
         // 检查 Redis 中是否存在 refresh 映射记录
         String refreshMappingKey = CacheConstants.Auth.REFRESH + jti;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(refreshMappingKey))) {
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+
+        // token_version 比对（全端下线后旧 refreshToken 拒绝）
+        Long uid;
+        try {
+            uid = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            log.error("refresh: userId 转换失败, userId={}", userId, e);
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+        Integer currentVersion = getTokenVersion(uid);
+        if (jwtVersion == null) {
+            log.warn("refresh: jwt 中 ver 为空, userId={}, jti={}", userId, jti);
+            throw new TokenException(ErrorCode.TOKEN_INVALID);
+        }
+        if (!jwtVersion.equals(currentVersion)) {
             throw new TokenException(ErrorCode.TOKEN_INVALID);
         }
 
@@ -179,35 +224,66 @@ public class TokenServiceImpl implements ITokenService {
         long remainingSeconds = Math.max(0,
                 (expiration.getTime() - System.currentTimeMillis()) / 1000);
 
-        // 加入黑名单防止后续使用，同时删除会话缓存
+        // 加入黑名单防止后续使用
         String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
         redisTemplate.opsForValue().set(blacklistKey, "revoked", remainingSeconds, TimeUnit.SECONDS);
-
-        String sessionKey = CacheConstants.Auth.SESSION + userId + ":" + jti;
-        redisTemplate.delete(sessionKey);
     }
 
     /**
-     * 吊销用户所有 Token（通过 pattern 匹配 session Key）
+     * 吊销用户所有 Token（递增 token_version，使所有已签发 token 失效）
      *
      * @param userId 用户 ID
      */
     @Override
     public void revokeAll(String userId) {
-        // pattern 匹配该用户所有 session Key：mall:auth:session:{userId}:*
-        String pattern = CacheConstants.Auth.SESSION + userId + ":*";
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (keys == null || keys.isEmpty()) {
+        Long uid;
+        try {
+            uid = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            log.error("revokeAll: userId 转换失败, userId={}", userId, e);
             return;
         }
-
-        // 遍历每个 session，提取 jti 并加入黑名单
-        for (String sessionKey : keys) {
-            String jti = sessionKey.substring(sessionKey.lastIndexOf(':') + 1);
-            String blacklistKey = CacheConstants.Auth.BLACKLIST + jti;
-            redisTemplate.opsForValue().set(blacklistKey, "revoked", authProperties.getAccessTokenTtl(), TimeUnit.SECONDS);
-            redisTemplate.delete(sessionKey);
+        try {
+            remoteUserService.incrementTokenVersion(String.valueOf(uid));
+            // 读取新 version 并刷新 Redis 缓存
+            Integer newVersion = getTokenVersion(uid);
+            if (newVersion != null) {
+                updateVersionCache(uid, newVersion);
+            } else {
+                log.warn("revokeAll: 获取新 version 失败, userId={}", userId);
+            }
+        } catch (FeignException e) {
+            log.error("revokeAll: Feign 调用失败, userId={}", userId, e);
+        } catch (Exception e) {
+            log.error("revokeAll: 未知异常, userId={}", userId, e);
         }
+    }
+
+    /**
+     * 获取用户 token_version（优先 Redis，miss 则查 DB 并写缓存）
+     */
+    private Integer getTokenVersion(Long userId) {
+        String key = CacheConstants.Auth.USER_VERSION + userId;
+        Integer version = (Integer) redisTemplate.opsForValue().get(key);
+        if (version != null) {
+            return version;
+        }
+        // 缓存 miss → 查 DB 并写回缓存
+        version = remoteUserService.getTokenVersion(String.valueOf(userId));
+        if (version != null) {
+            redisTemplate.opsForValue().set(key, version, authProperties.getTokenVersionCacheTtl(), TimeUnit.SECONDS);
+        } else {
+            log.warn("getTokenVersion: DB 未查询到用户版本, userId={}", userId);
+        }
+        return version;
+    }
+
+    /**
+     * 更新 Redis 缓存中的 token_version
+     */
+    private void updateVersionCache(Long userId, Integer version) {
+        String key = CacheConstants.Auth.USER_VERSION + userId;
+        redisTemplate.opsForValue().set(key, version, authProperties.getTokenVersionCacheTtl(), TimeUnit.SECONDS);
     }
 
     /**

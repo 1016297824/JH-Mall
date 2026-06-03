@@ -62,7 +62,8 @@ public class MallAuthFilter implements GlobalFilter, Ordered
 
     /** C 端 Redis Key 前缀——与 mall-common CacheConstants.Auth 保持一致 */
     private static final String REDIS_BLACKLIST_PREFIX = "mall:auth:blacklist:";
-    private static final String REDIS_SESSION_PREFIX = "mall:auth:session:";
+    /** C 端 token_version Redis Key 前缀 — 与 mall-common CacheConstants.Auth.USER_VERSION 一致 */
+    private static final String USER_VERSION_PREFIX = "mall:auth:user_version:";
 
     /**
      * 启动时校验 C 端 JWT 密钥是否已配置
@@ -159,11 +160,24 @@ public class MallAuthFilter implements GlobalFilter, Ordered
             return unauthorized(response, "C 端 token 已被吊销");
         }
 
-        String sessionKey = REDIS_SESSION_PREFIX + userId + ":" + jti;
-        if (Boolean.FALSE.equals(redisService.hasKey(sessionKey)))
-        {
-            log.warn("[C 端鉴权失败] 请求路径:{} userId:{} 原因:会话不存在或已被删除", path, userId);
-            return unauthorized(response, "C 端 token 会话不存在");
+        // token_version 校验（cache miss 直接放行，由下游 verify() 兜底回源 DB）
+        Integer jwtVersion = claims.get("ver", Integer.class);
+        String versionKey = USER_VERSION_PREFIX + userId;
+        Object cachedVersion = redisService.getCacheObject(versionKey);
+        if (jwtVersion != null && cachedVersion != null) {
+            try {
+                int currentVer = Integer.parseInt(cachedVersion.toString());
+                if (jwtVersion != currentVer) {
+                    log.warn("[C 端鉴权失败] 请求路径:{} userId:{} jwtVer:{} curVer:{} 原因:token_version 不匹配",
+                            path, userId, jwtVersion, currentVer);
+                    return unauthorized(response, "C 端 token 已失效");
+                }
+            } catch (NumberFormatException e) {
+                log.error("[C 端鉴权] 缓存 version 转换失败, userId={}, cachedVersion={}", userId, cachedVersion, e);
+            }
+        }
+        if (cachedVersion == null) {
+            log.info("[C 端鉴权] 缓存未命中, userId={}, 放行下游兜底", userId);
         }
 
         // 7. 注入 X-User-Id 头

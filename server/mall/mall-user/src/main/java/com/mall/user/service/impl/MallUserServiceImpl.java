@@ -240,4 +240,14 @@ public class MallUserServiceImpl implements IMallUserService {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
+
+    @Override
+    public int incrementTokenVersion(Long userId) {
+        return mallUserMapper.incrementTokenVersion(userId);
+    }
+
+    @Override
+    public Integer getTokenVersion(Long userId) {
+        return mallUserMapper.selectTokenVersion(userId);
+    }
 }

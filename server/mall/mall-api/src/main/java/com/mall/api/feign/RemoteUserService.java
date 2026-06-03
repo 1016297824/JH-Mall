@@ -75,6 +75,23 @@ public interface RemoteUserService {
     int expirePoints();
 
     /**
+     * 递增用户 token_version（改密码 / 全端下线时调用）
+     *
+     * @param userId 用户 ID
+     */
+    @PutMapping("/inner/user/{userId}/token-version/increment")
+    void incrementTokenVersion(@PathVariable("userId") String userId);
+
+    /**
+     * 获取用户 token_version
+     *
+     * @param userId 用户 ID
+     * @return token_version 值（用户不存在返回 null）
+     */
+    @GetMapping("/inner/user/{userId}/token-version")
+    Integer getTokenVersion(@PathVariable("userId") String userId);
+
+    /**
      * 注册请求
      */
     @Data

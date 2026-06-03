@@ -2,7 +2,9 @@ package com.mall.user.controller.inner;
 
 import com.mall.api.feign.RemoteUserService;
 import com.mall.common.DTO.user.response.MallUserDTO;
+import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
+import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallUserDO;
 import com.mall.user.infrastructure.schedule.PointsExpireTask;
 import com.mall.user.service.IMallUserService;
@@ -120,6 +122,30 @@ public class RemoteUserInnerController {
      * @param user 用户 DO
      * @return 用户 DTO（密码置空）
      */
+    /**
+     * 递增用户 token_version（改密码 / 全端下线时调用）
+     *
+     * @param userId 用户 ID
+     */
+    @PutMapping("/{userId}/token-version/increment")
+    public void incrementTokenVersion(@PathVariable String userId) {
+        int rows = mallUserService.incrementTokenVersion(Long.parseLong(userId));
+        if (rows == 0) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 获取用户 token_version
+     *
+     * @param userId 用户 ID
+     * @return token_version 值（用户不存在返回 null）
+     */
+    @GetMapping("/{userId}/token-version")
+    public Integer getTokenVersion(@PathVariable String userId) {
+        return mallUserService.getTokenVersion(Long.parseLong(userId));
+    }
+
     private MallUserDTO toDTO(MallUserDO user) {
         MallUserDTO dto = new MallUserDTO();
         BeanUtils.copyProperties(user, dto);

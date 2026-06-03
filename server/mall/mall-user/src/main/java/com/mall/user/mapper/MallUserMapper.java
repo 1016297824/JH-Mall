@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.mall.user.DO.MallUserDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * 用户账号 Mapper
@@ -27,4 +30,10 @@ public interface MallUserMapper extends BaseMapper<MallUserDO> {
                 .eq(MallUserDO::getPhoneHash, phoneHash)
                 .eq(MallUserDO::getIsDeleted, 0));
     }
+
+    @Update("UPDATE mall_user SET token_version = token_version + 1 WHERE id = #{userId}")
+    int incrementTokenVersion(@Param("userId") Long userId);
+
+    @Select("SELECT token_version FROM mall_user WHERE id = #{userId}")
+    Integer selectTokenVersion(@Param("userId") Long userId);
 }

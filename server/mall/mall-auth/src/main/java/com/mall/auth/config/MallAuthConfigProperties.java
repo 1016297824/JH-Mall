@@ -22,6 +22,9 @@ public class MallAuthConfigProperties {
     /** Refresh Token 有效期（秒，默认 604800 = 7 天） */
     private long refreshTokenTtl = 604800;
 
+    /** token_version Redis 缓存 TTL（秒，默认 2592000 = 30 天） */
+    private long tokenVersionCacheTtl = 2592000;
+
     /** 密码连续错误次数上限 */
     private int pwdErrLimit = 5;
 
@@ -69,6 +72,24 @@ public class MallAuthConfigProperties {
      */
     public void setRefreshTokenTtl(long refreshTokenTtl) {
         this.refreshTokenTtl = refreshTokenTtl;
+    }
+
+    /**
+     * 获取 token_version 缓存 TTL
+     *
+     * @return TTL（秒）
+     */
+    public long getTokenVersionCacheTtl() {
+        return tokenVersionCacheTtl;
+    }
+
+    /**
+     * 设置 token_version 缓存 TTL
+     *
+     * @param tokenVersionCacheTtl TTL（秒）
+     */
+    public void setTokenVersionCacheTtl(long tokenVersionCacheTtl) {
+        this.tokenVersionCacheTtl = tokenVersionCacheTtl;
     }
 
     /**

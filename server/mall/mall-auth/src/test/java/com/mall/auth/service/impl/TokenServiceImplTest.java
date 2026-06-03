@@ -1,5 +1,6 @@
 package com.mall.auth.service.impl;
 
+import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.auth.config.MallAuthConfigProperties;
 import com.mall.auth.config.MallSecurityConfigProperties;
@@ -15,10 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +34,9 @@ class TokenServiceImplTest {
 
     @Mock
     private ValueOperations<String, Object> valueOperations;
+
+    @Mock
+    private RemoteUserService remoteUserService;
 
     @InjectMocks
     private TokenServiceImpl tokenService;
@@ -51,12 +54,15 @@ class TokenServiceImplTest {
     void setUp() {
         lenient().when(authProperties.getAccessTokenTtl()).thenReturn(1800L);
         lenient().when(authProperties.getRefreshTokenTtl()).thenReturn(604800L);
+        lenient().when(authProperties.getTokenVersionCacheTtl()).thenReturn(2592000L);
         lenient().when(securityProperties.getJwtSecret()).thenReturn(JWT_SECRET);
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        // token_version 默认返回 1
+        lenient().when(remoteUserService.getTokenVersion(anyString())).thenReturn(1);
     }
 
     @Test
-    void shouldIssueTokenWithCompleteFields() {
+    void shouldIssueTokenWithVerClaim() {
         TokenRespDTO response = tokenService.issue(USER_ID);
 
         assertNotNull(response.getAccessToken());
@@ -68,7 +74,8 @@ class TokenServiceImplTest {
     @Test
     void shouldVerifyValidTokenReturnUserId() {
         when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
-        when(redisTemplate.hasKey(contains("session"))).thenReturn(true);
+        // Redis 缓存命中，version=1
+        when(valueOperations.get(contains("user_version:"))).thenReturn(1);
 
         TokenRespDTO response = tokenService.issue(USER_ID);
         String userId = tokenService.verify(response.getAccessToken());
@@ -107,11 +114,13 @@ class TokenServiceImplTest {
     }
 
     @Test
-    void shouldVerifyThrowWhenSessionMissing() {
-        when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
-        when(redisTemplate.hasKey(contains("session"))).thenReturn(false);
-
+    void shouldVerifyThrowWhenVersionMismatch() {
+        // 先签发 JWT（此时 Redis 缓存 miss，走 Feign getTokenVersion 返回 1，JWT 签 ver=1）
         TokenRespDTO response = tokenService.issue(USER_ID);
+
+        // 再 mock Redis 缓存返回 version=99，JWT 中 ver=1，不匹配 → 应抛异常
+        when(redisTemplate.hasKey(contains("blacklist"))).thenReturn(false);
+        when(valueOperations.get(contains("user_version:"))).thenReturn(99);
 
         TokenException exception = assertThrows(TokenException.class,
                 () -> tokenService.verify(response.getAccessToken()));
@@ -170,32 +179,20 @@ class TokenServiceImplTest {
 
     @Test
     void shouldRevokeSuccessfully() {
-        when(redisTemplate.delete(anyString())).thenReturn(true);
-
         TokenRespDTO response = tokenService.issue(USER_ID);
 
         tokenService.revoke(response.getAccessToken());
 
+        // revoke 只写黑名单，不删 session
         verify(valueOperations).set(
                 contains("blacklist"), eq("revoked"), anyLong(), eq(TimeUnit.SECONDS));
-        verify(redisTemplate).delete(contains("session"));
     }
 
     @Test
-    void shouldRevokeAllDeleteSessions() {
-        Set<String> sessionKeys = new HashSet<>();
-        sessionKeys.add("mall:auth:session:" + USER_ID + ":jti-1");
-        sessionKeys.add("mall:auth:session:" + USER_ID + ":jti-2");
-
-        when(redisTemplate.keys(eq("mall:auth:session:" + USER_ID + ":*")))
-                .thenReturn(sessionKeys);
-        when(redisTemplate.delete(anyString())).thenReturn(true);
-
+    void shouldRevokeAllCallIncrementTokenVersion() {
         tokenService.revokeAll(USER_ID);
 
-        verify(redisTemplate).keys(eq("mall:auth:session:" + USER_ID + ":*"));
-        verify(redisTemplate, times(2)).delete(contains("mall:auth:session:"));
-        verify(valueOperations, times(2)).set(
-                contains("blacklist"), eq("revoked"), anyLong(), eq(TimeUnit.SECONDS));
+        // revokeAll 改为调 Feign incrementTokenVersion
+        verify(remoteUserService).incrementTokenVersion(USER_ID);
     }
 }

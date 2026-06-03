@@ -25,17 +25,6 @@ public class CacheConstants {
      */
     public static final class Auth {
 
-        /**
-         * 用户会话缓存
-         *
-         * <p>Key 模式：{@code mall:auth:session:{userId}:{jti}}</p>
-         * <ul>
-         *   <li>TTL：与 accessToken 过期时间同步（默认 30min）</li>
-         *   <li>数据结构：String (JSON)，存储设备/IP/登录时间</li>
-         *   <li>多端共存：每端独立 jti，各自维护独立 session</li>
-         * </ul>
-         */
-        public static final String SESSION = "mall:auth:session:";
 
         /**
          * refreshToken 映射
@@ -156,6 +145,18 @@ public class CacheConstants {
          * </ul>
          */
         public static final String CAPTCHA_IP = "mall:auth:captcha:ip:";
+
+        /**
+         * 用户 token 版本号
+         *
+         * <p>Key 模式：{@code mall:auth:user_version:{userId}}</p>
+         * <ul>
+         *   <li>TTL：Nacos {@code mall.auth.token-version-cache-ttl} 配置（默认 30d）</li>
+         *   <li>数据结构：Integer</li>
+         *   <li>缓存 miss 时回源 DB 兜底</li>
+         * </ul>
+         */
+        public static final String USER_VERSION = "mall:auth:user_version:";
 
         private Auth() {
         }
