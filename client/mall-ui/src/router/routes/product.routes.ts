@@ -2,6 +2,12 @@ import type { RouteRecordRaw } from 'vue-router'
 
 const productRoutes: RouteRecordRaw[] = [
   {
+    path: '',
+    name: 'home',
+    component: () => import('@/pages/product/HomePage/HomePage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
     path: 'categories',
     name: 'categories',
     component: () => import('@/pages/product/CategoryPage/CategoryPage.vue'),
