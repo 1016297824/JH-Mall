@@ -1,31 +1,55 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import {
+  BANNER_INTERVAL,
+  ROUTE_CATEGORY_PRODUCTS,
+  ROUTE_PRODUCT_DETAIL,
+} from '@/utils/constants/product'
+import { BannerLinkType } from '@/utils/enums/product.enum'
 
 interface Banner {
   id: number
   image: string
   title: string
-  linkType: 'CATEGORY' | 'PRODUCT' | 'URL'
+  linkType: BannerLinkType
   linkTarget: string
 }
 
 const banners = ref<Banner[]>([
-  { id: 1, image: '/images/banner/banner-1.png', title: '春季焕新', linkType: 'CATEGORY', linkTarget: '1' },
-  { id: 2, image: '/images/banner/banner-2.png', title: '数码狂欢', linkType: 'CATEGORY', linkTarget: '2' },
-  { id: 3, image: '/images/banner/banner-3.png', title: '新品首发', linkType: 'PRODUCT', linkTarget: '1' },
+  {
+    id: 1,
+    image: '/images/banner/banner-1.png',
+    title: '春季焕新',
+    linkType: BannerLinkType.CATEGORY,
+    linkTarget: '1',
+  },
+  {
+    id: 2,
+    image: '/images/banner/banner-2.png',
+    title: '数码狂欢',
+    linkType: BannerLinkType.CATEGORY,
+    linkTarget: '2',
+  },
+  {
+    id: 3,
+    image: '/images/banner/banner-3.png',
+    title: '新品首发',
+    linkType: BannerLinkType.PRODUCT,
+    linkTarget: '1',
+  },
 ])
 
 function handleBannerClick(banner: Banner) {
-  if (banner.linkType === 'CATEGORY') {
-    window.location.href = `/categories/${banner.linkTarget}`
-  } else if (banner.linkType === 'PRODUCT') {
-    window.location.href = `/spus/${banner.linkTarget}`
+  if (banner.linkType === BannerLinkType.CATEGORY) {
+    window.location.href = `${ROUTE_CATEGORY_PRODUCTS}/${banner.linkTarget}`
+  } else if (banner.linkType === BannerLinkType.PRODUCT) {
+    window.location.href = `${ROUTE_PRODUCT_DETAIL}/${banner.linkTarget}`
   }
 }
 </script>
 
 <template>
-  <el-carousel class="banner-swiper" :interval="4000" arrow="always" height="360px">
+  <el-carousel class="banner-swiper" :interval="BANNER_INTERVAL" arrow="always" height="360px">
     <el-carousel-item v-for="banner in banners" :key="banner.id">
       <div
         class="banner-slide"
@@ -75,7 +99,7 @@ function handleBannerClick(banner: Banner) {
   left: $spacing-lg;
 
   h2 {
-    color: #FFF;
+    color: #fff;
     font-size: 32px;
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
