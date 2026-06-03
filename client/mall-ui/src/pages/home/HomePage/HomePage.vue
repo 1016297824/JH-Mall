@@ -2,10 +2,10 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getCategoryTree, getHotList } from '@/api/product'
-import type { CategoryVO, SpuVO } from '@/types/product'
-import BannerSwiper from '@/components/business/BannerSwiper.vue'
-import CategoryGrid from '@/components/business/CategoryGrid.vue'
-import ProductSection from '@/components/business/ProductSection.vue'
+import type { CategoryVO, SpuVO } from '@/types'
+import BannerSwiper from './components/BannerSwiper.vue'
+import CategoryGrid from './components/CategoryGrid.vue'
+import ProductSection from './components/ProductSection.vue'
 
 const DISPLAY_INITIAL = 8
 const DISPLAY_STEP = 8
@@ -52,10 +52,7 @@ function teardownObserver() {
 
 onMounted(async () => {
   try {
-    const [cats, hot] = await Promise.all([
-      getCategoryTree(),
-      getHotList(HOT_LIMIT),
-    ])
+    const [cats, hot] = await Promise.all([getCategoryTree(), getHotList(HOT_LIMIT)])
     categories.value = cats.filter((c) => c.level === 1)
     hotProducts.value = hot
   } catch {
@@ -77,16 +74,18 @@ onUnmounted(() => {
     <main class="home-content">
       <BannerSwiper />
       <CategoryGrid :categories="categories" :loading="loading" />
-      <ProductSection :products="visibleProducts" :loading="loading" :loading-more="isLoadingMore" />
+      <ProductSection
+        :products="visibleProducts"
+        :loading="loading"
+        :loading-more="isLoadingMore"
+      />
 
       <div class="load-sentinel">
         <div v-if="isLoadingMore" class="loading-more">
           <span class="spinner" />
           <span>正在加载更多</span>
         </div>
-        <div v-else-if="noMore && hotProducts.length > 0" class="no-more">
-          已经到底了
-        </div>
+        <div v-else-if="noMore && hotProducts.length > 0" class="no-more">已经到底了</div>
         <div ref="sentinelRef" class="sentinel-trigger" />
       </div>
     </main>
@@ -144,6 +143,8 @@ onUnmounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

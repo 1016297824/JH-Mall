@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import BaseNavBar from '@/components/base/BaseNavBar.vue'
-import BaseTabBar from '@/components/base/BaseTabBar.vue'
-import BaseFooter from '@/components/base/BaseFooter.vue'
+import { BaseNavBar, BaseTabBar, BaseFooter } from '@/components/base'
 </script>
 
 <template>

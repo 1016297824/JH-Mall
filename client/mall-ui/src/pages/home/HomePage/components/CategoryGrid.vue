@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import type { CategoryVO } from '@/types/product'
+import type { CategoryVO } from '@/types'
 
 const props = defineProps<{
   categories: CategoryVO[]

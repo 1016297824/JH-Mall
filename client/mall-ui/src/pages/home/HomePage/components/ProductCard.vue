@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { SpuVO } from '@/types/product'
-import { formatPrice } from '@/utils/format'
+import type { SpuVO } from '@/types'
+import { formatPrice } from '@/utils'
 
 defineProps<{
   product: SpuVO

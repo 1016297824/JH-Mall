@@ -30,7 +30,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getSpuDetail } from '@/api/product'
-import type { SpuDetailVO } from '@/types/product'
+import type { SpuDetailVO } from '@/types'
 
 const route = useRoute()
 const detail = ref<SpuDetailVO | null>(null)

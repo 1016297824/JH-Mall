@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { SpuVO } from '@/types/product'
+import type { SpuVO } from '@/types'
 import ProductCard from './ProductCard.vue'
 
 const props = defineProps<{

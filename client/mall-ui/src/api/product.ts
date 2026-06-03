@@ -1,5 +1,5 @@
-import request from './request'
-import type { CategoryVO, SpuVO, SpuDetailVO, PageResult } from '@/types/product'
+import request from './client'
+import type { CategoryVO, SpuVO, SpuDetailVO, PageResult } from '@/types'
 
 export function getCategoryTree(): Promise<CategoryVO[]> {
   return request.get('/product/categories').then((res) => res.data.data)

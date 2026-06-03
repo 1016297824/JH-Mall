@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { MallResult } from '@/types/product'
+import type { MallResult } from '@/types'
 
 const request = axios.create({
   baseURL: '/api',
