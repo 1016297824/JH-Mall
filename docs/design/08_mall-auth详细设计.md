@@ -201,31 +201,32 @@ server/mall/mall-auth/
 
 **issue(userId)**：
 
-- ①生成 `accessToken`：JWT payload `{userId, iat, exp=+30min, jti=UUID}`
-- ②生成 `refreshToken`：JWT payload `{userId, iat, exp=+7d, jti=UUID, type="refresh"}`
-- ③Redis 写 session：key `mall:auth:session:{userId}:{jti}` → value `{device, ip, loginTime}`，TTL 同 token 有效期
+- ①获取用户 `token_version`：优先 Redis，miss 则 Feign 调 mall-user 查 DB 并回种缓存
+- ②生成 `accessToken`：JWT payload `{userId, iat, exp=+30min, jti=UUID, ver=token_version}`
+- ③生成 `refreshToken`：JWT payload `{userId, iat, exp=+7d, jti=UUID, type="refresh", ver=token_version}`
 - ④Redis 写 refreshToken 映射：key `mall:auth:refresh:{jti}` → value `userId`，TTL 7d
 - ⑤accessToken/refreshToken 的 issuer/secret 与管理端 ruoyi-auth 不同
+- ~~⑥不再写 session key~~（有效性改为 token_version 比对）
 
 **verify(accessToken)**：
 
 - ①JWT 签名校验 + 过期校验 → 失败抛 `TokenException("A0231", "token 无效或已过期")`
 - ②Redis 黑名单检查：key `mall:auth:blacklist:{jti}` 存在 → 抛 `TokenException("A0231", "token 已被撤销")`
-- ③Redis session 存在性检查：key `mall:auth:session:{userId}:{jti}` 不存在 → 抛 `TokenException("A0231", "token 会话不存在或已过期")`
+- ③token_version 比对：`jwt.ver` vs Redis `mall:auth:user_version:{userId}`（miss 则回源 DB）→ 不一致抛 `TokenException("A0231", "token 已失效")`
 - ④返回 `userId`
 
 **refresh(refreshToken)**：
 
-- ①校验 refreshToken 有效性（同 verify 逻辑）→ 失败抛 `TokenException("A0231", ...)`
-- ②校验 `type="refresh"` → 否抛 `TokenException("A0231", "refreshToken 类型错误")`
-- ③黑名单检查 → 已撤销抛 `TokenException("A0231", "refreshToken 已被撤销")`
-- ④Redis refresh 映射存在性 → 不存在抛 `TokenException("A0231", "refreshToken 已过期")`
-- ⑤一次性轮换：旧 refreshToken jti 加入黑名单（TTL 同原 exp） + 删除旧 session
+- ①校验 `type="refresh"` → 否抛 `TokenException("A0231", "refreshToken 类型错误")`
+- ②黑名单检查 → 已撤销抛 `TokenException("A0231", "refreshToken 已被撤销")`
+- ③Redis refresh 映射存在性 → 不存在抛 `TokenException("A0231", "refreshToken 已过期")`
+- ④token_version 比对：`jwt.ver` vs DB → 不一致抛 `TokenException("A0231", ...)`（全端下线后旧 refreshToken 被拒）
+- ⑤一次性轮换：旧 refreshToken jti 加入黑名单（TTL=剩余有效期） + 删除 mapping
 - ⑥签发新 token 对
 
-**revoke(accessToken)**：jti 加入黑名单 `SETEX mall:auth:blacklist:{jti} {exp-now} "logout"` → 删除 session
+**revoke(accessToken)**：jti 加入黑名单 `SETEX mall:auth:blacklist:{jti} {exp-now} "logout"`
 
-**revokeAll(userId)**：删除 `mall:auth:session:{userId}:*` 全部 key，注销时踢所有端下线
+**revokeAll(userId)**：调 mall-user `incrementTokenVersion(userId)` 使 `token_version++`，同时刷新 Redis `mall:auth:user_version:{userId}` 缓存。所有持有旧 ver 的 token 立即全端失效。
 
 **Token 策略**：
 
@@ -276,7 +277,7 @@ server/mall/mall-auth/
 
 | Key 模式                                   | 常量引用                                      | 用途                     | TTL                |
 | ------------------------------------------ | --------------------------------------------- | ------------------------ | ------------------ |
-| `mall:auth:session:{userId}:{jti}`       | `CacheConstants.Auth.SESSION`               | 会话信息（设备/IP/时间） | 同 accessToken exp |
+| `mall:auth:user_version:{userId}`         | `CacheConstants.Auth.USER_VERSION`           | 用户 token 版本号        | Nacos 配置（默认 30d） |
 | `mall:auth:refresh:{jti}`                | `CacheConstants.Auth.REFRESH`               | refreshToken 映射        | 7d                 |
 | `mall:auth:blacklist:{jti}`              | `CacheConstants.Auth.BLACKLIST`             | 黑名单（注销/刷新作废）  | 原 token 剩余时间  |
 | `mall:auth:sms:code:{phone}:{scene}`     | `CacheConstants.Auth.SMS_CODE`              | 短信验证码               | 300s               |
@@ -295,22 +296,21 @@ server/mall/mall-auth/
 ```
 客户端: accessToken 过期 → 用 refreshToken 调 /refresh
   → TokenService.refresh(oldRefreshToken):
-      ① 校验 refreshToken 有效性（签名+过期+黑名单+session）
-      ② 该 refreshToken jti 加入黑名单（TTL=剩余有效期），删除旧 refresh session
-      ③ 旧 accessToken jti 加入宽限黑名单（TTL=剩余有效期，最大1h）
-      ④ 签发新 accessToken + refreshToken 对
-      ⑤ 返回新 token 对
+      ① 校验 refreshToken 类型
+      ② 黑名单检查
+      ③ refresh 映射存在性检查
+      ④ token_version 比对（全端下线后拒绝）
+      ⑤ 旧 refreshToken jti 加入黑名单（TTL=剩余有效期） + 删除 mapping
+      ⑥ 签发新 accessToken + refreshToken 对
+      ⑦ 返回新 token 对
   → 客户端: 收到新 token，丢弃旧 token
 ```
 
-宽限机制：旧 accessToken 在刷新后 1h 内仍可用（防止刷新与请求的并发时序问题），1h 后黑名单 TTL 过期自动失效。
-
 ### 4.3 多端管理
 
-- 每端签发独立 jti，存储 session 为 `mall:auth:session:{userId}:{jti}`
-- 查询在线设备：`SCAN mall:auth:session:{userId}:*` 获取所有活跃 session
-- 踢指定端下线：删除对应 jti 的 session + 加入黑名单
-- 改密/注销 → 踢全部下线：批量删除 `mall:auth:session:{userId}:*`
+- 每端签发独立 jti，通过 refresh mapping 维护活跃端
+- token_version 递增后，所有端持有的旧 token（access + refresh）立即全端失效
+- 改密/注销 → `revokeAll(userId)` → `token_version++`
 
 ---
 
@@ -498,6 +498,7 @@ mall:
   auth:
     access-token-ttl: 1800
     refresh-token-ttl: 604800
+    token-version-cache-ttl: 2592000
     sms:
       code-length: 6
       code-ttl: 300
@@ -554,6 +555,7 @@ spring:
 | --------------------------------- | ------ | :--: | -------------------------------------- |
 | `mall.auth.access-token-ttl`    | 1800   |  秒  | accessToken 有效期（30min）            |
 | `mall.auth.refresh-token-ttl`   | 604800 |  秒  | refreshToken 有效期（7d）              |
+| `mall.auth.token-version-cache-ttl` | 2592000 | 秒 | token_version Redis 缓存 TTL（30d）    |
 | `mall.security.jwt-secret`      | —     |  —  | JWT 签名密钥（`application-dev.yml` 共享配置，\*） |
 | `mall.security.aes-key`         | —     |  —  | AES-256-GCM 密钥（Nacos 管理，\*）     |
 | `mall.auth.sms.code-length`     | 6      |  位  | 验证码长度                             |

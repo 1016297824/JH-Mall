@@ -92,7 +92,7 @@ public class CacheConstants {
 
     /** 认证模块 Redis Key — 11 个常量 */
     public static final class Auth {
-        public static final String SESSION      = "mall:auth:session:";
+        public static final String USER_VERSION  = "mall:auth:user_version:";
         public static final String REFRESH      = "mall:auth:refresh:";
         public static final String BLACKLIST    = "mall:auth:blacklist:";
         public static final String SMS_CODE     = "mall:auth:sms:code:";
