@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +19,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_user_member_level")
 public class MallUserMemberLevelDO {
 
@@ -58,83 +64,8 @@ public class MallUserMemberLevelDO {
     @TableField("update_time")
     private LocalDateTime updateTime;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLevelName() {
-        return levelName;
-    }
-
-    public void setLevelName(String levelName) {
-        this.levelName = levelName;
-    }
-
-    public Integer getLevelValue() {
-        return levelValue;
-    }
-
-    public void setLevelValue(Integer levelValue) {
-        this.levelValue = levelValue;
-    }
-
-    public Integer getMinGrowth() {
-        return minGrowth;
-    }
-
-    public void setMinGrowth(Integer minGrowth) {
-        this.minGrowth = minGrowth;
-    }
-
-    public Integer getMaxGrowth() {
-        return maxGrowth;
-    }
-
-    public void setMaxGrowth(Integer maxGrowth) {
-        this.maxGrowth = maxGrowth;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public String getBenefitsJson() {
-        return benefitsJson;
-    }
-
-    public void setBenefitsJson(String benefitsJson) {
-        this.benefitsJson = benefitsJson;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +19,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_user_growth_log")
 public class MallUserGrowthLogDO {
 
@@ -66,99 +72,8 @@ public class MallUserGrowthLogDO {
     @TableField("update_time")
     private LocalDateTime updateTime;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getBizType() {
-        return bizType;
-    }
-
-    public void setBizType(String bizType) {
-        this.bizType = bizType;
-    }
-
-    public String getBizNo() {
-        return bizNo;
-    }
-
-    public void setBizNo(String bizNo) {
-        this.bizNo = bizNo;
-    }
-
-    public Integer getChangeType() {
-        return changeType;
-    }
-
-    public void setChangeType(Integer changeType) {
-        this.changeType = changeType;
-    }
-
-    public Integer getGrowth() {
-        return growth;
-    }
-
-    public void setGrowth(Integer growth) {
-        this.growth = growth;
-    }
-
-    public Integer getBeforeGrowth() {
-        return beforeGrowth;
-    }
-
-    public void setBeforeGrowth(Integer beforeGrowth) {
-        this.beforeGrowth = beforeGrowth;
-    }
-
-    public Integer getAfterGrowth() {
-        return afterGrowth;
-    }
-
-    public void setAfterGrowth(Integer afterGrowth) {
-        this.afterGrowth = afterGrowth;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

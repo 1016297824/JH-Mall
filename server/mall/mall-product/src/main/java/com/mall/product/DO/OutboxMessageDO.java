@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -17,6 +19,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_outbox")
 public class OutboxMessageDO {
 
@@ -71,110 +75,6 @@ public class OutboxMessageDO {
     /** 更新时间 */
     @TableField("update_time")
     private LocalDateTime updateTime;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public String getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public String getAggregateType() {
-        return aggregateType;
-    }
-
-    public void setAggregateType(String aggregateType) {
-        this.aggregateType = aggregateType;
-    }
-
-    public String getAggregateId() {
-        return aggregateId;
-    }
-
-    public void setAggregateId(String aggregateId) {
-        this.aggregateId = aggregateId;
-    }
-
-    public String getPayload() {
-        return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Integer getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(Integer retryCount) {
-        this.retryCount = retryCount;
-    }
-
-    public LocalDateTime getNextRetryTime() {
-        return nextRetryTime;
-    }
-
-    public void setNextRetryTime(LocalDateTime nextRetryTime) {
-        this.nextRetryTime = nextRetryTime;
-    }
-
-    public LocalDateTime getScheduledTime() {
-        return scheduledTime;
-    }
-
-    public void setScheduledTime(LocalDateTime scheduledTime) {
-        this.scheduledTime = scheduledTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
 
     @Override
     public String toString() {

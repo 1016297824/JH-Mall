@@ -52,7 +52,7 @@ public class TokenServiceImpl implements ITokenService {
      */
     @Override
     public TokenRespDTO issue(String userId) {
-        // 获取当前 token_version
+        // 获取当前 token_version，写入 JWT 的 ver claim，用于后续校验全端下线
         Long uid;
         try {
             uid = Long.parseLong(userId);
@@ -244,8 +244,11 @@ public class TokenServiceImpl implements ITokenService {
             return;
         }
         try {
+            // 通过 Feign 调 mall-user 原子递增 DB 中 token_version（SQL: SET token_version = token_version + 1，InnoDB 行锁）
             remoteUserService.incrementTokenVersion(String.valueOf(uid));
-            // 读取新 version 并刷新 Redis 缓存
+            // 删除 Redis 缓存，确保后续 getTokenVersion 回源 DB 获取最新值（缓存脏读隐患）
+            redisTemplate.delete(CacheConstants.Auth.USER_VERSION + uid);
+            // 读取新 version（cache miss → DB → 写回正确值）
             Integer newVersion = getTokenVersion(uid);
             if (newVersion != null) {
                 updateVersionCache(uid, newVersion);

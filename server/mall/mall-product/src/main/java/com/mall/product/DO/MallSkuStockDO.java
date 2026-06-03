@@ -1,6 +1,8 @@
 package com.mall.product.DO;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_product_sku_stock")
 public class MallSkuStockDO {
     /** 库存记录 ID */
@@ -48,29 +52,6 @@ public class MallSkuStockDO {
     @Version
     @TableField("version")
     private Integer version;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getSkuId() { return skuId; }
-    public void setSkuId(Long skuId) { this.skuId = skuId; }
-    public Integer getTotalStock() { return totalStock; }
-    public void setTotalStock(Integer totalStock) { this.totalStock = totalStock; }
-    public Integer getAvailableStock() { return availableStock; }
-    public void setAvailableStock(Integer availableStock) { this.availableStock = availableStock; }
-    public Integer getLockedStock() { return lockedStock; }
-    public void setLockedStock(Integer lockedStock) { this.lockedStock = lockedStock; }
-    public Integer getSoldStock() { return soldStock; }
-    public void setSoldStock(Integer soldStock) { this.soldStock = soldStock; }
-    public Integer getFrozenStock() { return frozenStock; }
-    public void setFrozenStock(Integer frozenStock) { this.frozenStock = frozenStock; }
-    public Integer getIsDeleted() { return isDeleted; }
-    public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }
-    public LocalDateTime getCreateTime() { return createTime; }
-    public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-    public LocalDateTime getUpdateTime() { return updateTime; }
-    public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
-    public Integer getVersion() { return version; }
-    public void setVersion(Integer version) { this.version = version; }
 
     @Override
     public String toString() {

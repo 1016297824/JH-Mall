@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +19,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_user_member")
 public class MallUserMemberDO {
 
@@ -62,91 +68,8 @@ public class MallUserMemberDO {
     @TableField("update_time")
     private LocalDateTime updateTime;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getLevelId() {
-        return levelId;
-    }
-
-    public void setLevelId(Long levelId) {
-        this.levelId = levelId;
-    }
-
-    public Integer getGrowth() {
-        return growth;
-    }
-
-    public void setGrowth(Integer growth) {
-        this.growth = growth;
-    }
-
-    public Integer getTotalGrowth() {
-        return totalGrowth;
-    }
-
-    public void setTotalGrowth(Integer totalGrowth) {
-        this.totalGrowth = totalGrowth;
-    }
-
-    public LocalDateTime getLevelStartTime() {
-        return levelStartTime;
-    }
-
-    public void setLevelStartTime(LocalDateTime levelStartTime) {
-        this.levelStartTime = levelStartTime;
-    }
-
-    public LocalDateTime getLevelEndTime() {
-        return levelEndTime;
-    }
-
-    public void setLevelEndTime(LocalDateTime levelEndTime) {
-        this.levelEndTime = levelEndTime;
-    }
-
-    public LocalDateTime getBecomeTime() {
-        return becomeTime;
-    }
-
-    public void setBecomeTime(LocalDateTime becomeTime) {
-        this.becomeTime = becomeTime;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

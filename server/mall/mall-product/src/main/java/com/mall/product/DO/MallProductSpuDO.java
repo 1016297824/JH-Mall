@@ -1,6 +1,8 @@
 package com.mall.product.DO;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_product_spu")
 public class MallProductSpuDO {
 
@@ -91,45 +95,6 @@ public class MallProductSpuDO {
     @Version
     @TableField("version")
     private Integer version;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
-    public Long getBrandId() { return brandId; }
-    public void setBrandId(Long brandId) { this.brandId = brandId; }
-    public String getSpuName() { return spuName; }
-    public void setSpuName(String spuName) { this.spuName = spuName; }
-    public String getSpuDescription() { return spuDescription; }
-    public void setSpuDescription(String spuDescription) { this.spuDescription = spuDescription; }
-    public String getMainImage() { return mainImage; }
-    public void setMainImage(String mainImage) { this.mainImage = mainImage; }
-    public String getImagesJson() { return imagesJson; }
-    public void setImagesJson(String imagesJson) { this.imagesJson = imagesJson; }
-    public Long getPriceMin() { return priceMin; }
-    public void setPriceMin(Long priceMin) { this.priceMin = priceMin; }
-    public Long getPriceMax() { return priceMax; }
-    public void setPriceMax(Long priceMax) { this.priceMax = priceMax; }
-    public Integer getSalesCount() { return salesCount; }
-    public void setSalesCount(Integer salesCount) { this.salesCount = salesCount; }
-    public Integer getReviewCount() { return reviewCount; }
-    public void setReviewCount(Integer reviewCount) { this.reviewCount = reviewCount; }
-    public Integer getPublishStatus() { return publishStatus; }
-    public void setPublishStatus(Integer publishStatus) { this.publishStatus = publishStatus; }
-    public Integer getVerifyStatus() { return verifyStatus; }
-    public void setVerifyStatus(Integer verifyStatus) { this.verifyStatus = verifyStatus; }
-    public Integer getIsDeleted() { return isDeleted; }
-    public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }
-    public String getCreateBy() { return createBy; }
-    public void setCreateBy(String createBy) { this.createBy = createBy; }
-    public String getUpdateBy() { return updateBy; }
-    public void setUpdateBy(String updateBy) { this.updateBy = updateBy; }
-    public LocalDateTime getCreateTime() { return createTime; }
-    public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-    public LocalDateTime getUpdateTime() { return updateTime; }
-    public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
-    public Integer getVersion() { return version; }
-    public void setVersion(Integer version) { this.version = version; }
 
     @Override
     public String toString() {

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -15,6 +17,8 @@ import java.time.LocalDateTime;
  * @author JH-Mall
  * @date 2026/05/29
  */
+@Data
+@NoArgsConstructor
 @TableName("mall_product_sku")
 public class MallProductSkuDO {
 
@@ -73,35 +77,6 @@ public class MallProductSkuDO {
     /** 更新时间 */
     @TableField("update_time")
     private LocalDateTime updateTime;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getSpuId() { return spuId; }
-    public void setSpuId(Long spuId) { this.spuId = spuId; }
-    public String getSkuCode() { return skuCode; }
-    public void setSkuCode(String skuCode) { this.skuCode = skuCode; }
-    public String getSkuName() { return skuName; }
-    public void setSkuName(String skuName) { this.skuName = skuName; }
-    public String getAttrsJson() { return attrsJson; }
-    public void setAttrsJson(String attrsJson) { this.attrsJson = attrsJson; }
-    public Long getPrice() { return price; }
-    public void setPrice(Long price) { this.price = price; }
-    public Long getMarketPrice() { return marketPrice; }
-    public void setMarketPrice(Long marketPrice) { this.marketPrice = marketPrice; }
-    public Long getCostPrice() { return costPrice; }
-    public void setCostPrice(Long costPrice) { this.costPrice = costPrice; }
-    public String getImage() { return image; }
-    public void setImage(String image) { this.image = image; }
-    public Integer getWeight() { return weight; }
-    public void setWeight(Integer weight) { this.weight = weight; }
-    public Integer getSalesCount() { return salesCount; }
-    public void setSalesCount(Integer salesCount) { this.salesCount = salesCount; }
-    public Integer getIsDeleted() { return isDeleted; }
-    public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }
-    public LocalDateTime getCreateTime() { return createTime; }
-    public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-    public LocalDateTime getUpdateTime() { return updateTime; }
-    public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
 
     @Override
     public String toString() {
