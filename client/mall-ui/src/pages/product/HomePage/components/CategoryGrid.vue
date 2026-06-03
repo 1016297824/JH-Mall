@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { ROUTE_CATEGORY_PRODUCTS } from '@/utils/constants/product'
 import type { CategoryVO } from '@/types'
 
 const props = defineProps<{
@@ -100,7 +99,7 @@ function toggleExpand() {
           <router-link
             v-for="cat in visibleCategories"
             :key="cat.categoryId"
-            :to="`${ROUTE_CATEGORY_PRODUCTS}/${cat.categoryId}`"
+            :to="`/categories/${cat.categoryId}`"
             class="category-item"
           >
             <div class="category-icon">

@@ -7,12 +7,15 @@ import type { SpuVO } from '@/types'
 import BannerSwiper from './components/BannerSwiper.vue'
 import CategoryGrid from './components/CategoryGrid.vue'
 import ProductSection from './components/ProductSection.vue'
-import { HOME_DISPLAY_INITIAL, HOME_DISPLAY_STEP, HOME_HOT_LIMIT } from '@/utils/constants/product'
+
+const DISPLAY_INITIAL = 8
+const DISPLAY_STEP = 8
+const HOT_LIMIT = 50
 
 const productStore = useProductStore()
 const categories = computed(() => productStore.categories.filter((c) => c.level === 1))
 const hotProducts = ref<SpuVO[]>([])
-const displayCount = ref(HOME_DISPLAY_INITIAL)
+const displayCount = ref(DISPLAY_INITIAL)
 const loading = ref(true)
 const isLoadingMore = ref(false)
 const sentinelRef = ref<HTMLElement | null>(null)
@@ -26,7 +29,7 @@ function showMore() {
   if (displayCount.value >= hotProducts.value.length) return
   isLoadingMore.value = true
   setTimeout(() => {
-    displayCount.value = Math.min(displayCount.value + HOME_DISPLAY_STEP, hotProducts.value.length)
+    displayCount.value = Math.min(displayCount.value + DISPLAY_STEP, hotProducts.value.length)
     isLoadingMore.value = false
   }, 300)
 }
@@ -51,7 +54,7 @@ function teardownObserver() {
 
 onMounted(async () => {
   try {
-    const [, hot] = await Promise.all([productStore.fetchCategories(), getHotList(HOME_HOT_LIMIT)])
+    const [, hot] = await Promise.all([productStore.fetchCategories(), getHotList(HOT_LIMIT)])
     hotProducts.value = hot
   } catch {
     ElMessage.error('加载失败，请稍后重试')

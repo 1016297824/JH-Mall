@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SpuVO } from '@/types'
 import { formatPrice } from '@/utils/common/format'
-import { ROUTE_PRODUCT_DETAIL } from '@/utils/constants/product'
 
 defineProps<{
   product: SpuVO
@@ -9,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <router-link :to="`${ROUTE_PRODUCT_DETAIL}/${product.spuId}`" class="product-card-link">
+  <router-link :to="`/spus/${product.spuId}`" class="product-card-link">
     <el-card class="product-card" shadow="hover" :body-style="{ padding: '12px' }">
       <div class="card-image">
         <img

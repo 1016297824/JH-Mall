@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { HOME_SKELETON_COUNT, ROUTE_SEARCH } from '@/utils/constants/product'
 import type { SpuVO } from '@/types'
 import ProductCard from './ProductCard.vue'
 
@@ -19,7 +18,7 @@ const isEmpty = computed(() => safeProducts.value.length === 0)
     <h2 class="section-title">热销推荐</h2>
 
     <div v-if="props.loading" class="skeleton-grid">
-      <div v-for="n in HOME_SKELETON_COUNT" :key="n" class="skeleton-card">
+      <div v-for="n in 4" :key="n" class="skeleton-card">
         <div class="skeleton-image" />
         <div class="skeleton-line skeleton-line--long" />
         <div class="skeleton-line skeleton-line--short" />
@@ -28,7 +27,7 @@ const isEmpty = computed(() => safeProducts.value.length === 0)
 
     <div v-else-if="isEmpty" class="empty-state">
       <p>暂无商品</p>
-      <el-button type="primary" @click="$router.push(ROUTE_SEARCH)">去逛逛</el-button>
+      <el-button type="primary" @click="$router.push('/search')">去逛逛</el-button>
     </div>
 
     <div v-else class="product-grid">

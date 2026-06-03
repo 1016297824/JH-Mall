@@ -1,10 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  BANNER_INTERVAL,
-  ROUTE_CATEGORY_PRODUCTS,
-  ROUTE_PRODUCT_DETAIL,
-} from '@/utils/constants/product'
 import { BannerLinkType } from '@/utils/enums/product.enum'
 
 interface Banner {
@@ -41,15 +36,15 @@ const banners = ref<Banner[]>([
 
 function handleBannerClick(banner: Banner) {
   if (banner.linkType === BannerLinkType.CATEGORY) {
-    window.location.href = `${ROUTE_CATEGORY_PRODUCTS}/${banner.linkTarget}`
+    window.location.href = `/categories/${banner.linkTarget}`
   } else if (banner.linkType === BannerLinkType.PRODUCT) {
-    window.location.href = `${ROUTE_PRODUCT_DETAIL}/${banner.linkTarget}`
+    window.location.href = `/spus/${banner.linkTarget}`
   }
 }
 </script>
 
 <template>
-  <el-carousel class="banner-swiper" :interval="BANNER_INTERVAL" arrow="always" height="360px">
+  <el-carousel class="banner-swiper" :interval="4000" arrow="always" height="360px">
     <el-carousel-item v-for="banner in banners" :key="banner.id">
       <div
         class="banner-slide"
