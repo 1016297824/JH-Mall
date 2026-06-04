@@ -67,7 +67,7 @@ function toggleExpand() {
   <section class="category-section">
     <div class="section-header">
       <h2 class="section-title">全部分类</h2>
-      <button v-if="hasMore" class="more-btn" @click="toggleExpand">
+      <button v-if="hasMore" class="more-btn" :aria-expanded="expanded" @click="toggleExpand">
         <span>{{ expanded ? '收起' : '更多' }}</span>
         <svg
           class="toggle-icon"
