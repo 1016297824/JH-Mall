@@ -44,7 +44,7 @@ function handleBannerClick(banner: Banner) {
 </script>
 
 <template>
-  <el-carousel class="banner-swiper" :interval="4000" arrow="always" height="360px">
+  <el-carousel class="banner-swiper" :interval="4000" arrow="always" height="280px">
     <el-carousel-item v-for="banner in banners" :key="banner.id">
       <div
         class="banner-slide"
@@ -95,7 +95,7 @@ function handleBannerClick(banner: Banner) {
 
   h2 {
     color: #fff;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }

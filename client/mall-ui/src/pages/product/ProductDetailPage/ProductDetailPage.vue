@@ -50,7 +50,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.product-detail-page { padding: 16px; }
+.product-detail-page { padding: 12px; }
 .loading, .error { text-align: center; padding: 60px 0; color: #999; }
 .error { color: #e4393c; }
 .detail-container { display: flex; gap: 24px; max-width: 1200px; margin: 0 auto; }
@@ -58,7 +58,7 @@ onMounted(async () => {
 .main-image { width: 100%; border-radius: 8px; }
 .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin: 4px; cursor: pointer; }
 .info-section { flex: 1; }
-.title { font-size: 24px; margin: 0 0 12px; }
+.title { font-size: 22px; margin: 0 0 12px; }
 .description { color: #666; line-height: 1.6; }
 .price { margin: 16px 0; }
 .price-label { color: #999; margin-right: 8px; }

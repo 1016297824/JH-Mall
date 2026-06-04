@@ -91,7 +91,7 @@ defineProps<{
 }
 
 .price-value {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   font-family: $font-heading;
   color: #DC2626;

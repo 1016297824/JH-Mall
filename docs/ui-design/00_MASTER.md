@@ -84,10 +84,10 @@
   --el-color-warning: #F59E0B;
   --el-color-danger: #EF4444;
   --el-color-info: #3B82F6;
-  --el-border-radius-base: 12px;
-  --el-border-radius-small: 8px;
-  --el-border-radius-round: 24px;
-  --el-font-size-base: 15px;
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 20px;
+  --el-font-size-base: 14px;
 }
 ```
 
@@ -113,14 +113,14 @@
 
 | 层级 | 标签 | 字号 | 字重 | 行高 | 用途 |
 |:----:|------|:----:|:----:|:----:|------|
-| H1 | `<h1>` | `32px` | `700` | `1.2` | 页面标题、商品名（详情页） |
-| H2 | `<h2>` | `24px` | `600` | `1.3` | 区块标题（Card 标题） |
-| H3 | `<h3>` | `20px` | `600` | `1.35` | 小标题、面板标题 |
-| Body L | `<p>` | `16px` | `400` | `1.6` | 正文、商品描述 |
-| Body M | `<p>` | `15px` | `400` | `1.5` | 列表项、表单标签（Element Plus 基准） |
-| Body S | `<span>` | `13px` | `400` | `1.4` | 辅助信息、时间戳、销量 |
-| Caption | `<small>` | `12px` | `400` | `1.35` | 免责声明、次要标注 |
-| Price | `<strong>` | `22px` | `700` | `1` | 售价（使用 Rubik） |
+| H1 | `<h1>` | `28px` | `700` | `1.2` | 页面标题、商品名（详情页） |
+| H2 | `<h2>` | `22px` | `600` | `1.3` | 区块标题（Card 标题） |
+| H3 | `<h3>` | `18px` | `600` | `1.35` | 小标题、面板标题 |
+| Body L | `<p>` | `15px` | `400` | `1.6` | 正文、商品描述 |
+| Body M | `<p>` | `14px` | `400` | `1.5` | 列表项、表单标签（Element Plus 基准） |
+| Body S | `<span>` | `12px` | `400` | `1.4` | 辅助信息、时间戳、销量 |
+| Caption | `<small>` | `11px` | `400` | `1.35` | 免责声明、次要标注 |
+| Price | `<strong>` | `20px` | `700` | `1` | 售价（使用 Rubik） |
 
 ### 3.4 Element Plus 字体覆盖
 
@@ -145,18 +145,18 @@ h1, h2, h3, h4, h5, h6,
 | Token | 值 | 用途 |
 |:------|:--:|------|
 | `--spacing-xs` | `4px` | 图标与文字间距 |
-| `--spacing-sm` | `8px` | 标签内边距、紧凑元素间距 |
-| `--spacing-md` | `16px` | 卡片内边距、表单项间距 |
-| `--spacing-lg` | `24px` | 区块内间距 |
-| `--spacing-xl` | `32px` | 区块间间距 |
-| `--spacing-2xl` | `48px` | 大区块间距 |
-| `--spacing-3xl` | `64px` | 页面级间距 |
+| `--spacing-sm` | `6px` | 标签内边距、紧凑元素间距 |
+| `--spacing-md` | `12px` | 卡片内边距、表单项间距 |
+| `--spacing-lg` | `20px` | 区块内间距 |
+| `--spacing-xl` | `28px` | 区块间间距 |
+| `--spacing-2xl` | `40px` | 大区块间距 |
+| `--spacing-3xl` | `56px` | 页面级间距 |
 
 ### 4.2 栅格系统
 
 | 断点 | 容器宽度 | 列数 | 列间距 | 应用场景 |
 |:----:|:--------:|:----:|:----:|------|
-| **PC（≥1440px）** | `max-w-7xl`（1280px） | 12 列 | `24px` | 主力 C 端 |
+| **PC（≥1440px）** | `max-w-7xl`（1280px） | 12 列 | `20px` | 主力 C 端 |
 | **Tablet（≥768px）** | 100% - 32px padding | 8 列 | `16px` | 平板 |
 | **Mobile（≥375px）** | 100% - 16px padding | 4 列 | `12px` | 手机 |
 
@@ -188,10 +188,10 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 
 | Token | 值 | 用途 |
 |:------|:--:|------|
-| `--radius-sm` | `6px` | 标签、Badge、小型按钮 |
-| `--radius-md` | `12px` | 按钮、输入框、表格单元格 |
-| `--radius-lg` | `16px` | 卡片（Bento Grid 保留 24px）、模态框 |
-| `--radius-xl` | `24px` | 大卡片、图片容器 |
+| `--radius-sm` | `4px` | 标签、Badge、小型按钮 |
+| `--radius-md` | `8px` | 按钮、输入框、表格单元格 |
+| `--radius-lg` | `12px` | 卡片、模态框 |
+| `--radius-xl` | `16px` | 大卡片、图片容器 |
 | `--radius-full` | `9999px` | 药丸按钮、头像 |
 
 ### 5.3 边框
@@ -290,18 +290,18 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
   --el-color-info: #3B82F6;
 
   /* ===== 边框 & 圆角 ===== */
-  --el-border-radius-base: 12px;
-  --el-border-radius-small: 8px;
-  --el-border-radius-round: 24px;
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 20px;
   --el-border-color: #BAE6FD;
   --el-border-color-light: #E0F2FE;
   --el-border-color-lighter: #F0F9FF;
 
   /* ===== 字体 ===== */
   --el-font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --el-font-size-base: 15px;
-  --el-font-size-small: 13px;
-  --el-font-size-large: 16px;
+  --el-font-size-base: 14px;
+  --el-font-size-small: 12px;
+  --el-font-size-large: 15px;
 
   /* ===== 背景 & 文字 ===== */
   --el-bg-color: #F0F9FF;
@@ -329,7 +329,7 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 
 /* 输入框 */
 .el-input__wrapper {
-  border-radius: 12px;
+  border-radius: 8px;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .el-input__wrapper:focus-within {
@@ -338,7 +338,7 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 
 /* 卡片 */
 .el-card {
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid #BAE6FD;
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
@@ -349,12 +349,12 @@ Mobile（375-767px）：流式 -> 筛选侧滑弹出 + 两列商品网格
 
 /* 对话框 */
 .el-dialog {
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 /* 标签/Tag */
 .el-tag {
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 500;
 }
 ```

@@ -48,7 +48,7 @@ const isEmpty = computed(() => safeProducts.value.length === 0)
 }
 
 .section-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   margin-bottom: $spacing-md;
 }
@@ -110,7 +110,7 @@ const isEmpty = computed(() => safeProducts.value.length === 0)
 
   p {
     margin-bottom: $spacing-md;
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 

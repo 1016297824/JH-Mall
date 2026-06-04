@@ -106,7 +106,7 @@ onUnmounted(() => {
   padding: $spacing-lg $spacing-lg $spacing-3xl;
 
   @media (max-width: 768px) {
-    padding: 16px 16px 48px;
+    padding: 12px 12px 40px;
   }
 }
 

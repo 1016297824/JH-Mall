@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { CategoryVO } from '@/types'
 
 const props = defineProps<{
@@ -10,8 +10,7 @@ const props = defineProps<{
 const expanded = ref(false)
 const columnsPerRow = ref(5)
 const gridRef = ref<HTMLElement | null>(null)
-const itemHeight = ref(0)
-const gridGap = ref(16)
+const gridGap = ref(12)
 
 function updateColumns() {
   if (window.matchMedia('(max-width: 768px)').matches) {
@@ -23,34 +22,14 @@ function updateColumns() {
   }
 }
 
-function measureRowHeight() {
-  if (!gridRef.value) return
-  const firstItem = gridRef.value.firstElementChild as HTMLElement | null
-  if (!firstItem) return
-  itemHeight.value = firstItem.offsetHeight
-  const style = getComputedStyle(gridRef.value)
-  gridGap.value = parseInt(style.rowGap) || parseInt(style.gap) || 16
-}
-
 onMounted(() => {
   updateColumns()
   window.addEventListener('resize', updateColumns)
-  nextTick(measureRowHeight)
-  window.addEventListener('resize', () => nextTick(measureRowHeight))
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateColumns)
-  window.removeEventListener('resize', () => nextTick(measureRowHeight))
 })
-
-watch(
-  () => props.categories,
-  async () => {
-    await nextTick()
-    measureRowHeight()
-  },
-)
 
 const visibleRowCount = computed(() => columnsPerRow.value)
 
@@ -63,21 +42,20 @@ const hasMore = computed(() => props.categories.length > visibleRowCount.value)
 
 const totalRows = computed(() => Math.ceil(props.categories.length / columnsPerRow.value))
 
-const needsScroll = computed(() => expanded.value && itemHeight.value > 0 && totalRows.value > 2)
+const needsScroll = computed(() => expanded.value && totalRows.value > 2)
 
 const gridScrollStyle = computed(() => {
-  if (itemHeight.value === 0) return {}
   const rows = totalRows.value
-  const oneRow = itemHeight.value
-  const twoRows = 2 * itemHeight.value + gridGap.value
-
   if (!expanded.value) {
-    return { maxHeight: `${oneRow}px`, overflow: 'hidden' as const }
+    return { overflow: 'hidden' as const }
   }
   if (rows <= 2) {
-    return { maxHeight: `${rows * itemHeight.value + (rows - 1) * gridGap.value}px`, overflow: 'hidden' as const }
+    return { overflow: 'hidden' as const }
   }
-  return { maxHeight: `${twoRows}px`, overflowY: 'auto' as const }
+  // 显示 2 行高度 + 滚动条
+  const rowHeight = gridRef.value?.firstElementChild?.clientHeight || 100
+  const gap = gridGap.value
+  return { maxHeight: `${2 * rowHeight + gap}px`, overflowY: 'auto' as const }
 })
 
 function toggleExpand() {
@@ -87,7 +65,28 @@ function toggleExpand() {
 
 <template>
   <section class="category-section">
-    <h2 class="section-title">全部分类</h2>
+    <div class="section-header">
+      <h2 class="section-title">全部分类</h2>
+      <button v-if="hasMore" class="more-btn" @click="toggleExpand">
+        <span>{{ expanded ? '收起' : '更多' }}</span>
+        <svg
+          class="toggle-icon"
+          :class="{ expanded: expanded }"
+          width="14"
+          height="14"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="M4 6L8 10L12 6"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
 
     <div v-if="props.loading" class="skeleton-grid">
       <div v-for="n in columnsPerRow" :key="n" class="skeleton-card" />
@@ -111,21 +110,6 @@ function toggleExpand() {
         </div>
         <div v-if="needsScroll" class="scroll-fade" />
       </div>
-      <div v-if="hasMore" class="category-toggle">
-        <button class="toggle-btn" @click="toggleExpand">
-          <span>{{ expanded ? '收起' : '展开更多分类' }}</span>
-          <svg
-            class="toggle-icon"
-            :class="{ expanded: expanded }"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
     </template>
 
     <div v-else class="empty-state">
@@ -141,10 +125,36 @@ function toggleExpand() {
   margin-bottom: $spacing-xl;
 }
 
-.section-title {
-  font-size: 24px;
-  font-weight: 600;
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: $spacing-md;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.more-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: $color-primary;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color $duration-fast $ease-default;
+
+  &:hover {
+    color: $color-primary-dark;
+  }
 }
 
 .category-grid {
@@ -177,7 +187,7 @@ function toggleExpand() {
 
 .skeleton-card {
   aspect-ratio: 1;
-  background: linear-gradient(90deg, #F3E8FF 25%, #EDE9FE 50%, #F3E8FF 75%);
+  background: linear-gradient(90deg, #f3e8ff 25%, #ede9fe 50%, #f3e8ff 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: $radius-md;
@@ -189,13 +199,17 @@ function toggleExpand() {
   color: var(--el-text-color-secondary);
 
   p {
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .category-grid-scroll {
@@ -225,7 +239,7 @@ function toggleExpand() {
   border-radius: 3px;
 
   &:hover {
-    background: #7DD3FC;
+    background: #7dd3fc;
   }
 }
 
@@ -233,12 +247,14 @@ function toggleExpand() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 8px;
-  background: #FFF;
+  padding: 12px 6px;
+  background: #fff;
   border-radius: $radius-md;
   border: 1px solid $color-border;
   text-decoration: none;
-  transition: transform $duration-normal $ease-default, box-shadow $duration-normal $ease-default;
+  transition:
+    transform $duration-normal $ease-default,
+    box-shadow $duration-normal $ease-default;
 
   &:hover {
     transform: scale(1.02);
@@ -265,7 +281,7 @@ function toggleExpand() {
 }
 
 .category-icon-fallback {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: $color-primary;
 }
@@ -274,31 +290,6 @@ function toggleExpand() {
   font-size: 13px;
   color: var(--el-text-color-regular);
   text-align: center;
-}
-
-.category-toggle {
-  display: flex;
-  justify-content: center;
-  margin-top: $spacing-lg;
-}
-
-.toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 20px;
-  border: 1px solid $color-border;
-  border-radius: $radius-full;
-  background: #FFF;
-  font-size: 14px;
-  color: var(--el-text-color-secondary);
-  cursor: pointer;
-  transition: border-color $duration-normal $ease-default, color $duration-normal $ease-default;
-
-  &:hover {
-    border-color: $color-primary;
-    color: $color-primary;
-  }
 }
 
 .toggle-icon {

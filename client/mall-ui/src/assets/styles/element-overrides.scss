@@ -4,7 +4,7 @@
 }
 
 .el-input__wrapper {
-  border-radius: 12px;
+  border-radius: 8px;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .el-input__wrapper:focus-within {
@@ -12,7 +12,7 @@
 }
 
 .el-card {
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid #BAE6FD;
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
@@ -22,11 +22,11 @@
 }
 
 .el-dialog {
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .el-tag {
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 500;
 }
 
