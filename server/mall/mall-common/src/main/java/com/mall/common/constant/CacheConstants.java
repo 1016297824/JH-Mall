@@ -275,13 +275,14 @@ public class CacheConstants {
         public static final String HOT_RANK = "mall:product:hot:rank";
 
         /**
-         * 商品 UV 统计
+         * 商品 UV 统计（滑动窗口日分片）
          *
-         * <p>Key 模式：{@code mall:product:uv:{productId}}</p>
+         * <p>Key 模式：{@code mall:product:uv:{productId}:{yyyyMMdd}}</p>
          * <ul>
-         *   <li>TTL：无（按需维护）</li>
-         *   <li>数据结构：HyperLogLog</li>
+         *   <li>TTL：uvWindowDays + 2 天，到期自动过期</li>
+         *   <li>数据结构：HyperLogLog（日分片）</li>
          *   <li>误差 0.81% 的去重 UV 计数</li>
+         *   <li>定时任务通过 PFCOUNT 多键联合估算最近 N 天滑动窗口 UV</li>
          * </ul>
          */
         public static final String UV = "mall:product:uv:";

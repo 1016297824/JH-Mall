@@ -11,12 +11,15 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.BoundZSetOperations;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +64,7 @@ class HotProductServiceImplTest {
         configProps.getHot().setRankMaxSize(200);
         configProps.getHot().setSalesWeight(0.6);
         configProps.getHot().setUvWeight(0.4);
+        configProps.getHot().setUvWindowDays(7);
 
         service = new HotProductServiceImpl(hotProductCache, redisTemplate, spuMapper, configProps);
     }
@@ -79,5 +83,77 @@ class HotProductServiceImplTest {
         List<SpuVO> result = service.hotList(20);
 
         assertThat(result).isEmpty();
+    }
+
+    /**
+     * incrUv 应写入日分片键并设置 TTL
+     */
+    @Test
+    void incrUvShouldWriteToDailyShardedKey() {
+        @SuppressWarnings("unchecked")
+        HyperLogLogOperations<String, Object> hllOps = mock(HyperLogLogOperations.class);
+        when(redisTemplate.opsForHyperLogLog()).thenReturn(hllOps);
+
+        String today = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        String expectedKey = CacheConstants.Product.UV + "1001:" + today;
+
+        service.incrUv(1001L, 888L);
+
+        // 验证 PFADD 使用了日分片键
+        verify(hllOps).add(eq(expectedKey), eq("888"));
+
+        // 验证 TTL 设置为 uvWindowDays + 2 = 9 天
+        verify(redisTemplate).expire(eq(expectedKey), eq(Duration.ofDays(9)));
+    }
+
+    /**
+     * refreshHotRank 应使用多键 PFCOUNT 做滑动窗口 UV 联合估算
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    void refreshHotRankShouldUseSlidingWindowMultiKeyPfcount() {
+        // 1. 分布式锁
+        ValueOperations<String, Object> valueOps = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOps);
+        when(valueOps.setIfAbsent(eq(CacheConstants.Job.LOCK_HOT_RANK), eq("1"), any(Duration.class)))
+                .thenReturn(true);
+
+        HyperLogLogOperations<String, Object> hllOps = mock(HyperLogLogOperations.class);
+        when(redisTemplate.opsForHyperLogLog()).thenReturn(hllOps);
+
+        // 2. MySQL 返回 1 条 SPU
+        MallProductSpuDO spu = new MallProductSpuDO();
+        spu.setId(1001L);
+        spu.setSalesCount(100);
+        Page<MallProductSpuDO> page = new Page<>(1, 200);
+        page.setRecords(Collections.singletonList(spu));
+        when(spuMapper.selectPage(any(Page.class), any())).thenReturn(page);
+
+        // 3. ZSet 操作
+        BoundZSetOperations<String, Object> boundZSet = mock(BoundZSetOperations.class);
+        when(redisTemplate.boundZSetOps(CacheConstants.Product.HOT_RANK)).thenReturn(boundZSet);
+
+        // 4. refreshHotRank 会清空 ZSet 和释放锁
+        when(redisTemplate.delete(CacheConstants.Product.HOT_RANK)).thenReturn(true);
+        when(redisTemplate.delete(CacheConstants.Job.LOCK_HOT_RANK)).thenReturn(true);
+
+        service.refreshHotRank();
+
+        // 5. 验证 PFCOUNT 用日分片多键调用
+        //    应传 7 个键（最近 7 天）：mall:product:uv:1001:{today} ... mall:product:uv:1001:{today-6}
+        ArgumentCaptor<String[]> keysCaptor = ArgumentCaptor.forClass(String[].class);
+        verify(hllOps).size(keysCaptor.capture());
+        String[] capturedKeys = keysCaptor.getValue();
+
+        assertThat(capturedKeys).hasSize(7);
+        LocalDate today = LocalDate.now();
+        for (int i = 0; i < 7; i++) {
+            String expectedKey = CacheConstants.Product.UV + "1001:" + today.minusDays(i).format(DateTimeFormatter.BASIC_ISO_DATE);
+            assertThat(capturedKeys[i]).isEqualTo(expectedKey);
+        }
+
+        // 6. 验证 ZSet 写入了综合热度分
+        //    热度分 = 100 * 10 * 0.6 + uv * 10 * 0.4（uv 是 mock 返回值，未设 stubbing 则为 null → 0）
+        verify(boundZSet).add(eq("1001"), anyDouble());
     }
 }

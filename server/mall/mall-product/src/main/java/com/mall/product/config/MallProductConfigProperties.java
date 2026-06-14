@@ -149,10 +149,10 @@ public class MallProductConfigProperties {
         return hot;
     }
 
-    /** 热销商品排行配置（综合热度 = salesCount * 10 * salesWeight + uv * uvWeight） */
+    /** 热销商品排行配置（综合热度 = salesCount * 10 * salesWeight + uv * 10 * uvWeight） */
     public static class Hot {
 
-        /** 排行榜最大保留数量（ZSet 只保留 Top N，超出部分 UV 键会被清理） */
+        /** 排行榜最大保留数量（ZSet 只保留 Top N） */
         private int rankMaxSize = 200;
 
         /** C 端热点列表单次最大条数（接口请求 limit 超过此值时拒绝） */
@@ -163,6 +163,9 @@ public class MallProductConfigProperties {
 
         /** 独立访客量权重（默认 0.4，与 salesWeight 之和应等于 1.0） */
         private double uvWeight = 0.4;
+
+        /** UV 滑动窗口天数（默认 7，只统计最近 N 天独立访客） */
+        private int uvWindowDays = 7;
 
         public int getRankMaxSize() {
             return rankMaxSize;
@@ -194,6 +197,14 @@ public class MallProductConfigProperties {
 
         public void setUvWeight(double uvWeight) {
             this.uvWeight = uvWeight;
+        }
+
+        public int getUvWindowDays() {
+            return uvWindowDays;
+        }
+
+        public void setUvWindowDays(int uvWindowDays) {
+            this.uvWindowDays = uvWindowDays;
         }
     }
 }

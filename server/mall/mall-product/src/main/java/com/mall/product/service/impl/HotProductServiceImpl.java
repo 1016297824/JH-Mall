@@ -18,6 +18,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -126,9 +128,9 @@ public class HotProductServiceImpl implements IHotProductService {
 
     @Override
     public void incrUv(Long spuId, Long userId) {
-        // 使用 Redis HyperLogLog 统计 UV，误差约 0.81%，空间占用固定 12KB
-        // key = mall:product:uv:{spuId}，value = userId，去重统计独立访客
-        redisTemplate.opsForHyperLogLog().add(CacheConstants.Product.UV + spuId, userId.toString());
+        String key = CacheConstants.Product.UV + spuId + ":" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        redisTemplate.opsForHyperLogLog().add(key, userId.toString());
+        redisTemplate.expire(key, Duration.ofDays(configProps.getHot().getUvWindowDays() + 2));
     }
 
     @Override
@@ -158,30 +160,23 @@ public class HotProductServiceImpl implements IHotProductService {
             // 从配置读取销量权重和 UV 权重（默认 0.6 : 0.4）
             double salesWeight = configProps.getHot().getSalesWeight();
             double uvWeight = configProps.getHot().getUvWeight();
+            int uvWindowDays = configProps.getHot().getUvWindowDays();
             BoundZSetOperations<String, Object> zSetOps = redisTemplate.boundZSetOps(CacheConstants.Product.HOT_RANK);
             // 清空旧 ZSet，全量重建新排名
             redisTemplate.delete(CacheConstants.Product.HOT_RANK);
-            // 记录本轮 Top N 的 spuId，后续用于清理过期 UV 键
-            Set<String> topSpuIds = new java.util.HashSet<>();
             for (MallProductSpuDO spu : spuList) {
                 String spuIdStr = String.valueOf(spu.getId());
-                topSpuIds.add(spuIdStr);
                 // 综合热度分 = 销量 * 10 * 销量权重 + PFCOUNT(UV) * 10 * UV 权重
                 // PFCOUNT 返回 HyperLogLog 的基数估算值
                 int salesCount = spu.getSalesCount() != null ? spu.getSalesCount() : 0;
-                Long uv = redisTemplate.opsForHyperLogLog().size(CacheConstants.Product.UV + spuIdStr);
+                String[] dailyKeys = new String[uvWindowDays];
+                LocalDate today = LocalDate.now();
+                for (int i = 0; i < uvWindowDays; i++) {
+                    dailyKeys[i] = CacheConstants.Product.UV + spuIdStr + ":" + today.minusDays(i).format(DateTimeFormatter.BASIC_ISO_DATE);
+                }
+                Long uv = redisTemplate.opsForHyperLogLog().size(dailyKeys);
                 double newScore = salesCount * 10 * salesWeight + uv * 10 * uvWeight;
                 zSetOps.add(spuIdStr, newScore);
-            }
-            // 清理未进入 Top N 的过期 UV HyperLogLog 键，防止 Redis 内存无限膨胀
-            Set<String> uvKeys = redisTemplate.keys(CacheConstants.Product.UV + "*");
-            if (uvKeys != null) {
-                for (String uvKey : uvKeys) {
-                    String spuId = uvKey.substring(CacheConstants.Product.UV.length());
-                    if (!topSpuIds.contains(spuId)) {
-                        redisTemplate.delete(uvKey);
-                    }
-                }
             }
         } finally {
             // 释放分布式锁

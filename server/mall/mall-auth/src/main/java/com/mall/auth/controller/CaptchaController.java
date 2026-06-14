@@ -284,7 +284,9 @@ public class CaptchaController {
      * @param key 密码错误计数 Key
      */
     private void incrementPwdErrCount(String key) {
+        // 真正做计数 +1 的是这一行
         Long count = redisTemplate.opsForValue().increment(key, 1L);
+        // expire 是首次创建 key 时设置过期时间（30 分钟自动解锁）
         if (count != null && count == 1) {
             redisTemplate.expire(key, authProperties.getPwdErrTtl(), TimeUnit.SECONDS);
         }

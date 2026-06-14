@@ -181,7 +181,6 @@ public class MallAuthFilter implements GlobalFilter, Ordered
         }
 
         // 7. 注入 X-User-Id 头
-
         request = request.mutate()
                 .header(HEADER_X_USER_ID, userId)
                 .header(HEADER_X_USER_NAME, DEFAULT_USER_NAME)
