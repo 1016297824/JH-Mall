@@ -477,6 +477,19 @@ C 端审计日志写入 `mall` 库独立表 `mall_audit_log`，Service 层直写
 ```yaml
 # spring配置
 spring:
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+        dashboard: 127.0.0.1:8718
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            dataId: sentinel-mall-auth
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow
   data:
     redis:
       host: localhost

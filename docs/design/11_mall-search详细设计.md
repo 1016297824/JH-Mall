@@ -273,7 +273,20 @@ POST /_aliases
 
 ```yaml
 spring:
-  datasource:
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+         dashboard: 127.0.0.1:8718
+       datasource:
+         ds1:
+           nacos:
+             server-addr: 127.0.0.1:8848
+             dataId: sentinel-mall-search
+             groupId: DEFAULT_GROUP
+             data-type: json
+             rule-type: flow
+    datasource:
     dynamic:
       primary: master
       datasource:

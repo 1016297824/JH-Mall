@@ -533,7 +533,20 @@ RefundService
 
 ```yaml
 spring:
-  data:
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+         dashboard: 127.0.0.1:8718
+       datasource:
+         ds1:
+           nacos:
+             server-addr: 127.0.0.1:8848
+             dataId: sentinel-mall-payment
+             groupId: DEFAULT_GROUP
+             data-type: json
+             rule-type: flow
+    data:
     redis:
       host: localhost
       port: 6379

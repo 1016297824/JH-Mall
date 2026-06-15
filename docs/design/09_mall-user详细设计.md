@@ -324,6 +324,20 @@ mall-user 需要展示手机号
 ```yaml
 # spring配置
 spring:
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+        dashboard: 127.0.0.1:8718
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            dataId: sentinel-mall-user
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow
+# spring配置
   data:
     redis:
       host: localhost
