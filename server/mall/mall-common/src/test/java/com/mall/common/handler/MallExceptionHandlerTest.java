@@ -54,7 +54,7 @@ class MallExceptionHandlerTest {
     @Test
     void shouldReturnCaptchaErrorWhenCaptchaExceptionThrown() throws Exception {
         mockMvc.perform(get("/test/captcha").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0240"))
                 .andExpect(jsonPath("$.errorMessage").value("验证码错误"));
     }
@@ -62,7 +62,7 @@ class MallExceptionHandlerTest {
     @Test
     void shouldReturnBusinessErrorWhenBusinessExceptionThrown() throws Exception {
         mockMvc.perform(get("/test/business").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0101"))
                 .andExpect(jsonPath("$.errorMessage").value("未同意隐私协议（isPrivacyAgreed != 1）"));
     }
@@ -70,7 +70,7 @@ class MallExceptionHandlerTest {
     @Test
     void shouldReturnTokenErrorWhenTokenExceptionThrown() throws Exception {
         mockMvc.perform(get("/test/token").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0231"))
                 .andExpect(jsonPath("$.errorMessage").value("refresh_token 失效或 token 已注销"));
     }
@@ -78,7 +78,7 @@ class MallExceptionHandlerTest {
     @Test
     void shouldReturnSystemErrorWhenUnknownExceptionThrown() throws Exception {
         mockMvc.perform(get("/test/exception").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.errorCode").value("B0001"))
                 .andExpect(jsonPath("$.errorMessage").value("系统繁忙，请稍后再试"));
     }

@@ -16,6 +16,8 @@ public class BusinessException extends RuntimeException {
     private final String errorCode;
     /** 用户提示 */
     private final String userTip;
+    /** 错误码枚举 */
+    private final ErrorCode errorCodeEnum;
 
     /**
      * 使用 ErrorCode 构造业务异常
@@ -26,6 +28,7 @@ public class BusinessException extends RuntimeException {
         super(errorCode.getMessage());
         this.errorCode = errorCode.getCode();
         this.userTip = errorCode.getUserTip();
+        this.errorCodeEnum = errorCode;
     }
 
     /**
@@ -44,5 +47,14 @@ public class BusinessException extends RuntimeException {
      */
     public String getUserTip() {
         return userTip;
+    }
+
+    /**
+     * 获取错误码枚举
+     *
+     * @return 错误码枚举
+     */
+    public ErrorCode getErrorCodeEnum() {
+        return errorCodeEnum;
     }
 }

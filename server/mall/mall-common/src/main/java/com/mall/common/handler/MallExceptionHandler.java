@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -37,9 +38,10 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(BusinessException.class)
-    public MallResult<Void> handleBusiness(BusinessException e) {
+    public ResponseEntity<MallResult<Void>> handleBusiness(BusinessException e) {
         log.warn("业务异常: {} - {}", e.getErrorCode(), e.getMessage());
-        return MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+        MallResult<Void> body = MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+        return ResponseEntity.status(e.getErrorCodeEnum().getHttpStatus()).body(body);
     }
 
     /**
@@ -49,8 +51,9 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(CaptchaException.class)
-    public MallResult<Void> handleCaptcha(CaptchaException e) {
-        return MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+    public ResponseEntity<MallResult<Void>> handleCaptcha(CaptchaException e) {
+        MallResult<Void> body = MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+        return ResponseEntity.status(e.getErrorCodeEnum().getHttpStatus()).body(body);
     }
 
     /**
@@ -60,9 +63,10 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(TokenException.class)
-    public MallResult<Void> handleToken(TokenException e) {
+    public ResponseEntity<MallResult<Void>> handleToken(TokenException e) {
         log.warn("Token 异常: {} - {}", e.getErrorCode(), e.getMessage());
-        return MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+        MallResult<Void> body = MallResult.error(e.getErrorCode(), e.getMessage(), e.getUserTip());
+        return ResponseEntity.status(e.getErrorCodeEnum().getHttpStatus()).body(body);
     }
 
     /**
@@ -72,9 +76,10 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(FeignException.class)
-    public MallResult<Void> handleFeign(FeignException e) {
+    public ResponseEntity<MallResult<Void>> handleFeign(FeignException e) {
         log.error("Feign 调用异常: {}", e.getMessage());
-        return MallResult.error(ErrorCode.SYSTEM_ERROR.getCode(), "服务暂时不可用，请稍后重试");
+        MallResult<Void> body = MallResult.error(ErrorCode.SYSTEM_ERROR.getCode(), "服务暂时不可用，请稍后重试");
+        return ResponseEntity.status(ErrorCode.SYSTEM_ERROR.getHttpStatus()).body(body);
     }
 
     /**
@@ -84,12 +89,13 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public MallResult<Void> handleValidation(MethodArgumentNotValidException e) {
+    public ResponseEntity<MallResult<Void>> handleValidation(MethodArgumentNotValidException e) {
         // 优先取 @NotBlank/@NotNull 等注解的 message，无具体字段错误时使用默认
         String msg = e.getBindingResult().getFieldError() != null
                 ? e.getBindingResult().getFieldError().getDefaultMessage()
                 : ErrorCode.PARAM_MISSING.getUserTip();
-        return MallResult.error(ErrorCode.PARAM_MISSING.getCode(), msg, msg);
+        MallResult<Void> body = MallResult.error(ErrorCode.PARAM_MISSING.getCode(), msg, msg);
+        return ResponseEntity.status(ErrorCode.PARAM_MISSING.getHttpStatus()).body(body);
     }
 
     /**
@@ -99,8 +105,9 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public MallResult<Void> handleConstraintViolation(ConstraintViolationException e) {
-        return MallResult.error(ErrorCode.PARAM_MISSING.getCode(), e.getMessage(), e.getMessage());
+    public ResponseEntity<MallResult<Void>> handleConstraintViolation(ConstraintViolationException e) {
+        MallResult<Void> body = MallResult.error(ErrorCode.PARAM_MISSING.getCode(), e.getMessage(), e.getMessage());
+        return ResponseEntity.status(ErrorCode.PARAM_MISSING.getHttpStatus()).body(body);
     }
 
     /**
@@ -110,8 +117,9 @@ public class MallExceptionHandler {
      * @return 错误响应
      */
     @ExceptionHandler(Exception.class)
-    public MallResult<Void> handleException(Exception e) {
+    public ResponseEntity<MallResult<Void>> handleException(Exception e) {
         log.error("unhandled exception", e);
-        return MallResult.error(ErrorCode.SYSTEM_ERROR.getCode(), ErrorCode.SYSTEM_ERROR.getUserTip());
+        MallResult<Void> body = MallResult.error(ErrorCode.SYSTEM_ERROR.getCode(), ErrorCode.SYSTEM_ERROR.getUserTip());
+        return ResponseEntity.status(ErrorCode.SYSTEM_ERROR.getHttpStatus()).body(body);
     }
 }
