@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { BannerLinkType } from '@/utils/enums/product.enum'
 
 interface Banner {
@@ -9,6 +10,8 @@ interface Banner {
   linkType: BannerLinkType
   linkTarget: string
 }
+
+const router = useRouter()
 
 const banners = ref<Banner[]>([
   {
@@ -36,9 +39,9 @@ const banners = ref<Banner[]>([
 
 function handleBannerClick(banner: Banner) {
   if (banner.linkType === BannerLinkType.CATEGORY) {
-    window.location.href = `/categories/${banner.linkTarget}`
+    router.push(`/categories/${banner.linkTarget}`)
   } else if (banner.linkType === BannerLinkType.PRODUCT) {
-    window.location.href = `/products/${banner.linkTarget}`
+    router.push(`/products/${banner.linkTarget}`)
   }
 }
 </script>
@@ -47,14 +50,14 @@ function handleBannerClick(banner: Banner) {
   <el-carousel class="banner-swiper" :interval="4000" arrow="always" height="280px">
     <el-carousel-item v-for="banner in banners" :key="banner.id">
       <div
-        class="banner-slide"
+        class="banner-swiper__slide"
         tabindex="0"
         @click="handleBannerClick(banner)"
         @keydown.enter="handleBannerClick(banner)"
         @keydown.space.prevent="handleBannerClick(banner)"
       >
         <img :src="banner.image" :alt="banner.title" />
-        <div class="banner-overlay">
+        <div class="banner-swiper__overlay">
           <h2>{{ banner.title }}</h2>
         </div>
       </div>
@@ -63,41 +66,41 @@ function handleBannerClick(banner: Banner) {
 </template>
 
 <style lang="scss" scoped>
-@use '@/assets/styles/variables' as *;
+@use '@/assets/styles/variables' as v;
 
 .banner-swiper {
-  border-radius: $radius-lg;
+  border-radius: v.$radius-lg;
   overflow: hidden;
-  margin-bottom: $spacing-xl;
+  margin-bottom: v.$spacing-xl;
 
   @media (max-width: 768px) {
     display: none;
   }
-}
 
-.banner-slide {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  cursor: pointer;
-
-  img {
+  &__slide {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    position: relative;
+    cursor: pointer;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
-}
 
-.banner-overlay {
-  position: absolute;
-  bottom: $spacing-lg;
-  left: $spacing-lg;
+  &__overlay {
+    position: absolute;
+    bottom: v.$spacing-lg;
+    left: v.$spacing-lg;
 
-  h2 {
-    color: #fff;
-    font-size: 28px;
-    font-weight: 700;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    h2 {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
   }
 }
 </style>

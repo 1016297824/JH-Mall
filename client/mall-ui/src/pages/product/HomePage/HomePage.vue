@@ -72,7 +72,7 @@ onUnmounted(() => {
 
 <template>
   <div class="home-page">
-    <main class="home-content">
+    <main class="home-page__content">
       <BannerSwiper />
       <CategoryGrid :categories="categories" :loading="loading" />
       <ProductSection
@@ -81,66 +81,66 @@ onUnmounted(() => {
         :loading-more="isLoadingMore"
       />
 
-      <div class="load-sentinel">
-        <div v-if="isLoadingMore" class="loading-more">
-          <span class="spinner" />
+      <div class="home-page__sentinel">
+        <div v-if="isLoadingMore" class="home-page__loading">
+          <span class="home-page__spinner" />
           <span>正在加载更多</span>
         </div>
-        <div v-else-if="noMore && hotProducts.length > 0" class="no-more">已经到底了</div>
-        <div ref="sentinelRef" class="sentinel-trigger" />
+        <div v-else-if="noMore && hotProducts.length > 0" class="home-page__no-more">已经到底了</div>
+        <div ref="sentinelRef" class="home-page__sentinel-trigger" />
       </div>
     </main>
   </div>
 </template>
 
 <style lang="scss" scoped>
-@use '@/assets/styles/variables' as *;
+@use '@/assets/styles/variables' as v;
 
 .home-page {
   min-height: 100vh;
-}
 
-.home-content {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: $spacing-lg $spacing-lg $spacing-3xl;
+  &__content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: v.$spacing-lg v.$spacing-lg v.$spacing-3xl;
 
-  @media (max-width: 768px) {
-    padding: 12px 12px 40px;
+    @media (max-width: 768px) {
+      padding: 12px 12px 40px;
+    }
   }
-}
 
-.load-sentinel {
-  padding: $spacing-lg 0;
-  text-align: center;
-}
+  &__sentinel {
+    padding: v.$spacing-lg 0;
+    text-align: center;
+  }
 
-.loading-more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-sm;
-  font-size: 14px;
-  color: var(--el-text-color-secondary);
-}
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: v.$spacing-sm;
+    font-size: 14px;
+    color: var(--el-text-color-secondary);
+  }
 
-.spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid $color-border;
-  border-top-color: $color-primary;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
+  &__spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid v.$color-border;
+    border-top-color: v.$color-primary;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
 
-.no-more {
-  font-size: 13px;
-  color: var(--el-text-color-secondary);
-}
+  &__no-more {
+    font-size: 13px;
+    color: var(--el-text-color-secondary);
+  }
 
-.sentinel-trigger {
-  height: 1px;
+  &__sentinel-trigger {
+    height: 1px;
+  }
 }
 
 @keyframes spin {
