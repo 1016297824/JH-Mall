@@ -1,7 +1,7 @@
 <template>
   <section class="gallery-section">
     <div class="main-image-wrapper">
-      <img :src="currentImage" :alt="alt" class="main-image" loading="eager" />
+      <img :src="currentImage" :alt="alt + ' 主图'" class="main-image" loading="eager" />
       <span v-if="soldOut" class="sold-out-overlay">已售罄</span>
     </div>
     <div v-if="images.length > 1" class="thumbnail-list">

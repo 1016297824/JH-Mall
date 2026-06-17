@@ -340,14 +340,6 @@ function onQuantityInput(e: Event) {
 }
 
 @media (max-width: 767px) {
-  .product-name {
-    font-size: 24px;
-  }
-
-  .price-current {
-    font-size: 20px;
-  }
-
   .action-row {
     flex-direction: column;
   }

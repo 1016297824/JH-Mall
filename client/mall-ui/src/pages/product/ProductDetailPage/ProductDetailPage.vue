@@ -319,7 +319,7 @@ onMounted(loadDetail)
 }
 
 .skeleton-box {
-  background: linear-gradient(90deg, #e2eaf0 25%, #d0dce5 50%, #e2eaf0 75%);
+  background: linear-gradient(90deg, v.$color-bg-card 25%, v.$color-border 50%, v.$color-bg-card 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: v.$radius-md;

@@ -44,6 +44,7 @@ function specButtonClass(specName: string, val: SpecValueVO) {
           :key="val.value"
           :class="specButtonClass(group.specName, val)"
           :disabled="val.disabled"
+          :tabindex="val.disabled ? -1 : undefined"
           :aria-checked="props.selectedSpecs[group.specName] === val.value"
           role="radio"
           @click="selectSpec(group.specName, val)"

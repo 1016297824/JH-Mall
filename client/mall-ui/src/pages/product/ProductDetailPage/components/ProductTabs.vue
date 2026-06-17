@@ -1,18 +1,30 @@
 <template>
-  <section class="detail-tabs-section">
-    <div class="tab-header">
+  <section class="detail-tabs-section" aria-label="商品详情标签页">
+    <div class="tab-header" role="tablist" :aria-label="'详情标签'">
       <button
         v-for="tab in tabs"
         :key="tab.key"
+        :id="'tab-' + tab.key"
         class="tab-btn"
         :class="{ 'tab-btn--active': modelValue === tab.key }"
-        @click="emit('update:modelValue', tab.key)"
+        role="tab"
+        :aria-selected="modelValue === tab.key"
+        :aria-controls="'panel-' + tab.key"
+        :tabindex="modelValue === tab.key ? 0 : -1"
+        @click="switchTab(tab.key)"
       >
         {{ tab.label }}
       </button>
     </div>
-    <div class="tab-content">
-      <div v-if="modelValue === 'specs'" class="tab-panel">
+    <div class="tab-content" ref="tabContentRef">
+      <div
+        v-if="modelValue === 'specs'"
+        id="panel-specs"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="tab-specs"
+        tabindex="0"
+      >
         <dl class="spec-list">
           <template v-for="group in specGroups" :key="group.specName">
             <dt>{{ group.specName }}</dt>
@@ -25,13 +37,27 @@
         </dl>
       </div>
 
-      <div v-else-if="modelValue === 'reviews'" class="tab-panel">
+      <div
+        v-else-if="modelValue === 'reviews'"
+        id="panel-reviews"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="tab-reviews"
+        tabindex="0"
+      >
         <div class="empty-tab">
           <p>暂无评价，成为第一个评价的人吧</p>
         </div>
       </div>
 
-      <div v-else-if="modelValue === 'afterSale'" class="tab-panel">
+      <div
+        v-else-if="modelValue === 'afterSale'"
+        id="panel-afterSale"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="tab-afterSale"
+        tabindex="0"
+      >
         <ul class="after-sale-list">
           <li>支持 7 天无理由退货（商品完好、不影响二次销售）</li>
           <li>签收 15 天内如有质量问题可申请换货</li>
@@ -44,6 +70,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, nextTick } from 'vue'
 import type { SpecGroupVO } from '@/types'
 
 defineProps<{
@@ -57,6 +84,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: 'specs' | 'reviews' | 'afterSale']
 }>()
 
+const tabContentRef = ref<HTMLElement | null>(null)
+
 const tabs = [
   { key: 'specs' as const, label: '商品参数' },
   { key: 'reviews' as const, label: '用户评价' },
@@ -65,6 +94,14 @@ const tabs = [
 
 function joinSpecs(values: { value: string }[]): string {
   return values.map((v) => v.value).join('、')
+}
+
+async function switchTab(key: 'specs' | 'reviews' | 'afterSale') {
+  emit('update:modelValue', key)
+  await nextTick()
+  // 焦点移到新面板
+  const panel = document.getElementById('panel-' + key)
+  if (panel) panel.focus()
 }
 </script>
 
@@ -130,12 +167,7 @@ function joinSpecs(values: { value: string }[]): string {
 }
 
 .tab-panel {
-  animation: fadeIn v.$duration-slow v.$ease-default;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  // 无过渡动画，减少不必要的视觉干扰
 }
 
 .spec-list {
