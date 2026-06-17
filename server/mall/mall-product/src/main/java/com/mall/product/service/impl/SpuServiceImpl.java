@@ -6,11 +6,13 @@ import com.mall.common.DTO.PageResult;
 import com.mall.common.DTO.product.SpuDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
+import com.mall.product.DO.MallBrandDO;
 import com.mall.product.DO.MallProductSkuDO;
 import com.mall.product.DO.MallProductSpuDO;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
 import com.mall.product.convert.response.SpuConvert;
+import com.mall.product.mapper.MallBrandMapper;
 import com.mall.product.mapper.MallProductSkuMapper;
 import com.mall.product.mapper.MallProductSpuMapper;
 import com.mall.product.service.IHotProductService;
@@ -19,7 +21,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * SPU 服务实现
@@ -34,6 +39,7 @@ public class SpuServiceImpl implements ISpuService {
 
     private final MallProductSpuMapper mallProductSpuMapper;
     private final MallProductSkuMapper mallProductSkuMapper;
+    private final MallBrandMapper mallBrandMapper;
     private final IHotProductService hotProductService;
 
     @Override
@@ -42,7 +48,32 @@ public class SpuServiceImpl implements ISpuService {
         applySort(pageParam, sort);
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectPublishedPage(pageParam, categoryId, brandId, keyword);
         List<SpuVO> voList = result.getRecords().stream().map(SpuConvert::toSpuVO).toList();
+        fillBrandNames(voList);
         return PageResult.of(page, size, result.getTotal(), voList);
+    }
+
+    /**
+     * 批量填充品牌名（按 brandId 批量查找，避免 N+1）
+     */
+    private void fillBrandNames(List<SpuVO> voList) {
+        if (voList.isEmpty()) return;
+        List<Long> brandIds = voList.stream()
+                .map(SpuVO::getBrandId)
+                .filter(Objects::nonNull)
+                .map(Long::valueOf)
+                .distinct()
+                .toList();
+        if (brandIds.isEmpty()) return;
+        List<MallBrandDO> brands = mallBrandMapper.selectBatchIds(brandIds);
+        Map<Long, String> nameMap = new HashMap<>();
+        for (MallBrandDO b : brands) {
+            if (b != null) nameMap.put(b.getId(), b.getName());
+        }
+        for (SpuVO vo : voList) {
+            if (vo.getBrandId() != null) {
+                vo.setBrandName(nameMap.get(Long.valueOf(vo.getBrandId())));
+            }
+        }
     }
 
     @Override
@@ -59,7 +90,9 @@ public class SpuServiceImpl implements ISpuService {
         List<MallProductSkuDO> skuDOList = mallProductSkuMapper.selectBySpuId(spuId);
         // 记录 UV（HyperLogLog），每次详情访问算一个独立访客，未登录传 0L
         hotProductService.incrUv(spuId, 0L);
-        return SpuConvert.toSpuDetailVO(spuDO, skuDOList);
+        SpuDetailVO detailVO = SpuConvert.toSpuDetailVO(spuDO, skuDOList);
+        fillBrandName(detailVO);
+        return detailVO;
     }
 
     @Override
@@ -73,8 +106,20 @@ public class SpuServiceImpl implements ISpuService {
 
     @Override
     public List<SpuVO> hotList(int limit) {
-        // 委托给热点商品服务，使用 Caffeine+Redis 两级缓存
-        return hotProductService.hotList(limit);
+        List<SpuVO> hotList = hotProductService.hotList(limit);
+        fillBrandNames(hotList);
+        return hotList;
+    }
+
+    /**
+     * 填充单个 VO 的品牌名
+     */
+    private void fillBrandName(SpuVO vo) {
+        if (vo == null || vo.getBrandId() == null) return;
+        MallBrandDO brand = mallBrandMapper.selectById(Long.valueOf(vo.getBrandId()));
+        if (brand != null) {
+            vo.setBrandName(brand.getName());
+        }
     }
 
     /**

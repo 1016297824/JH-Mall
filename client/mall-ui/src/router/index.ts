@@ -10,6 +10,9 @@ const router = createRouter({
       children: routes,
     },
   ],
+  scrollBehavior() {
+    return { top: 0 }
+  },
 })
 
 export default router

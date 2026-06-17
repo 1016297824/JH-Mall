@@ -18,13 +18,22 @@ export interface SpuVO {
   salesCount: number
   categoryId: string
   brandId: string
+  brandName?: string
   hotScore?: number
+}
+
+/** SKU 销售属性对 */
+export interface SkuAttr {
+  k: string
+  v: string
 }
 
 /** SKU 简要信息（SPU 详情中的 SKU 列表） */
 export interface SkuBriefVO {
   skuId: string
+  skuCode: string
   skuName: string
+  attrs: SkuAttr[]
   price: number
   image: string
 }

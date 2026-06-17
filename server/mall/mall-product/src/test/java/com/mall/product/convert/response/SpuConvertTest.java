@@ -36,7 +36,7 @@ class SpuConvertTest {
         spuDO.setImagesJson("[\"/img1.jpg\",\"/img2.jpg\"]");
 
         MallProductSkuDO sku1 = new MallProductSkuDO();
-        sku1.setId(101L); sku1.setSkuName("256GB 蓝色"); sku1.setPrice(699900L); sku1.setImage("/sku1.jpg");
+        sku1.setId(101L); sku1.setSkuCode("IP15PM-256-BLUE"); sku1.setSkuName("256GB 蓝色"); sku1.setAttrsJson("[{\"k\":\"颜色\",\"v\":\"蓝色\"},{\"k\":\"存储\",\"v\":\"256GB\"}]"); sku1.setPrice(699900L); sku1.setImage("/sku1.jpg");
 
         SpuDetailVO vo = SpuConvert.toSpuDetailVO(spuDO, List.of(sku1));
 
@@ -46,7 +46,12 @@ class SpuConvertTest {
         assertThat(vo.getImages()).containsExactly("/img1.jpg", "/img2.jpg");
         assertThat(vo.getSkus()).hasSize(1);
         assertThat(vo.getSkus().get(0).getSkuId()).isEqualTo("101");
+        assertThat(vo.getSkus().get(0).getSkuCode()).isEqualTo("IP15PM-256-BLUE");
         assertThat(vo.getSkus().get(0).getSkuName()).isEqualTo("256GB 蓝色");
+        assertThat(vo.getSkus().get(0).getAttrs()).isNotNull();
+        assertThat(vo.getSkus().get(0).getAttrs()).hasSize(2);
+        assertThat(vo.getSkus().get(0).getAttrs().get(0).getK()).isEqualTo("颜色");
+        assertThat(vo.getSkus().get(0).getAttrs().get(0).getV()).isEqualTo("蓝色");
         assertThat(vo.getSkus().get(0).getPrice()).isEqualTo(699900L);
     }
 

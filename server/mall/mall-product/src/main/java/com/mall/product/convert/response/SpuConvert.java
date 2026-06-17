@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.product.DO.MallProductSkuDO;
 import com.mall.product.DO.MallProductSpuDO;
+import com.mall.product.VO.SkuAttrVO;
 import com.mall.product.VO.SkuBriefVO;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
@@ -112,14 +113,30 @@ public class SpuConvert {
     }
 
     /**
-     * SKU DO 转简要 VO
+     * SKU DO 转简要 VO（含销售属性）
      */
     private static SkuBriefVO toSkuBriefVO(MallProductSkuDO skuDO) {
         SkuBriefVO vo = new SkuBriefVO();
         vo.setSkuId(String.valueOf(skuDO.getId()));
+        vo.setSkuCode(skuDO.getSkuCode());
         vo.setSkuName(skuDO.getSkuName());
+        vo.setAttrs(parseAttrsJson(skuDO.getAttrsJson()));
         vo.setPrice(skuDO.getPrice());
         vo.setImage(skuDO.getImage());
         return vo;
+    }
+
+    /**
+     * 解析销售属性 JSON → SkuAttrVO 列表
+     */
+    private static List<SkuAttrVO> parseAttrsJson(String attrsJson) {
+        if (attrsJson == null || attrsJson.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            return objectMapper.readValue(attrsJson, new TypeReference<List<SkuAttrVO>>() {});
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 }

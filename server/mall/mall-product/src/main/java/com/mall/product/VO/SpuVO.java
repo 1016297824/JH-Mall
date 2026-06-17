@@ -30,4 +30,6 @@ public class SpuVO {
     private String categoryId;
     /** 所属品牌 ID */
     private String brandId;
+    /** 品牌名称 */
+    private String brandName;
 }
