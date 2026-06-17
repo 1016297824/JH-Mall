@@ -38,7 +38,7 @@ function handleBannerClick(banner: Banner) {
   if (banner.linkType === BannerLinkType.CATEGORY) {
     window.location.href = `/categories/${banner.linkTarget}`
   } else if (banner.linkType === BannerLinkType.PRODUCT) {
-    window.location.href = `/spus/${banner.linkTarget}`
+    window.location.href = `/products/${banner.linkTarget}`
   }
 }
 </script>

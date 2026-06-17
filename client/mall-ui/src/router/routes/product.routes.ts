@@ -20,7 +20,7 @@ const productRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: false },
   },
   {
-    path: 'spus/:id',
+    path: 'products/:id',
     name: 'productDetail',
     component: () => import('@/pages/product/ProductDetailPage/ProductDetailPage.vue'),
     meta: { requiresAuth: false },

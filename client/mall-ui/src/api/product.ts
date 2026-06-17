@@ -1,5 +1,5 @@
 import request from './client'
-import type { CategoryVO, SpuVO, SpuDetailVO, PageResult } from '@/types'
+import type { CategoryVO, SpuVO, SpuDetailVO, SkuVO, PageResult } from '@/types'
 
 export function getCategoryTree(): Promise<CategoryVO[]> {
   return request.get('/product/categories').then((res) => res.data.data)
@@ -22,4 +22,9 @@ export function getHotList(limit: number): Promise<SpuVO[]> {
 
 export function getSpuDetail(spuId: string): Promise<SpuDetailVO> {
   return request.get(`/product/spus/${spuId}`).then((res) => res.data.data)
+}
+
+/** 获取 SKU 详情（含实时价格/库存/划线价） */
+export function getSkuDetail(skuId: string): Promise<SkuVO> {
+  return request.get(`/product/skus/${skuId}`).then((res) => res.data.data)
 }
