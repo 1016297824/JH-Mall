@@ -1,13 +1,21 @@
 package com.mall.search.convert.response;
 
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Buckets;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import com.mall.search.DO.ProductIndexDO;
+import com.mall.search.vo.AggregationVO;
 import com.mall.search.vo.SearchItemVO;
 import com.mall.search.vo.SearchResultVO;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,6 +25,8 @@ import java.util.List;
  * @date 2026/06/19
  */
 public final class SearchConvert {
+
+    private static final BigDecimal PRICE_DIVISOR = new BigDecimal("100");
 
     private SearchConvert() {
     }
@@ -39,6 +49,16 @@ public final class SearchConvert {
         result.setTotal(hits.getTotalHits());
         result.setPage(page);
         result.setSize(size);
+
+        // 提取聚合数据（categories / brands）
+        if (hits.hasAggregations()) {
+            ElasticsearchAggregations esAggs = (ElasticsearchAggregations) hits.getAggregations();
+            AggregationVO aggVO = new AggregationVO();
+            aggVO.setCategories(extractTermBuckets(esAggs, "categories"));
+            aggVO.setBrands(extractTermBuckets(esAggs, "brands"));
+            result.setAggregations(aggVO);
+        }
+
         return result;
     }
 
@@ -58,7 +78,7 @@ public final class SearchConvert {
         // 价格：分 → 元，保留两位小数
         if (source.getPrice() != null) {
             vo.setPrice(BigDecimal.valueOf(source.getPrice())
-                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)
+                    .divide(PRICE_DIVISOR, 2, RoundingMode.HALF_UP)
                     .toPlainString());
         }
         // 高亮字段提取
@@ -67,5 +87,38 @@ public final class SearchConvert {
             vo.setSpuNameHighlight(highlights.get(0));
         }
         return vo;
+    }
+
+    /**
+     * 从 ES 聚合结果中提取指定名称的 terms 桶列表
+     *
+     * @param esAggs  ES 聚合容器
+     * @param aggName 聚合名称
+     * @return 聚合桶列表，聚合不存在时返回空列表
+     */
+    private static List<AggregationVO.AggregationBucket> extractTermBuckets(
+            ElasticsearchAggregations esAggs, String aggName) {
+        ElasticsearchAggregation esAgg = esAggs.get(aggName);
+        if (esAgg == null) {
+            return Collections.emptyList();
+        }
+        Aggregate aggregate = esAgg.aggregation().getAggregate();
+        if (!aggregate.isLterms()) {
+            return Collections.emptyList();
+        }
+        LongTermsAggregate lterms = aggregate.lterms();
+        Buckets<LongTermsBucket> buckets = lterms.buckets();
+        if (!buckets.isArray()) {
+            return Collections.emptyList();
+        }
+        List<LongTermsBucket> bucketList = buckets.array();
+        List<AggregationVO.AggregationBucket> result = new ArrayList<>(bucketList.size());
+        for (LongTermsBucket bucket : bucketList) {
+            AggregationVO.AggregationBucket b = new AggregationVO.AggregationBucket();
+            b.setKey(String.valueOf(bucket.key()));
+            b.setCount(bucket.docCount());
+            result.add(b);
+        }
+        return result;
     }
 }

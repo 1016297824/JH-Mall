@@ -1,5 +1,9 @@
 package com.mall.search.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
@@ -18,6 +22,7 @@ import com.mall.search.service.SearchService;
 import com.mall.search.vo.SearchResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -27,10 +32,6 @@ import org.springframework.data.elasticsearch.core.query.highlight.Highlight;
 import org.springframework.data.elasticsearch.core.query.highlight.HighlightField;
 import org.springframework.data.elasticsearch.core.query.highlight.HighlightFieldParameters;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * C 端商品搜索服务实现
@@ -232,15 +233,27 @@ public class SearchServiceImpl implements SearchService {
      */
     private String buildCacheKey(SearchReqDTO req) {
         StringBuilder sb = new StringBuilder("search:");
-        sb.append(req.getKeyword()).append(':');
+        sb.append(nullToEmpty(req.getKeyword())).append(':');
         sb.append(req.getCategoryId()).append(':');
         sb.append(req.getBrandId()).append(':');
         sb.append(req.getPriceMin()).append(':');
         sb.append(req.getPriceMax()).append(':');
-        sb.append(req.getSort()).append(':');
-        sb.append(req.getSortOrder()).append(':');
-        sb.append(req.getPage()).append(':');
-        sb.append(req.getSize());
+        sb.append(nullToEmpty(req.getSort())).append(':');
+        sb.append(nullToEmpty(req.getSortOrder())).append(':');
+        sb.append(defaultPage(req.getPage())).append(':');
+        sb.append(defaultSize(req.getSize()));
         return sb.toString();
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
+
+    private static int defaultPage(Integer page) {
+        return page != null ? page : 1;
+    }
+
+    private static int defaultSize(Integer size) {
+        return size != null ? size : 20;
     }
 }

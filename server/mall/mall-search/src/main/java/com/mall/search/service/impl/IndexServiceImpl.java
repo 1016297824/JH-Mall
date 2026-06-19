@@ -74,6 +74,10 @@ public class IndexServiceImpl implements IndexService {
         }
         if ("DELETE".equals(operation)) {
             productIndexRepository.deleteById(spuId);
+        } else {
+            // TODO: (JH-Mall, 2026/06/19) UPSERT 需要从 mall-product 获取完整 SpuSearchDTO 转换后写入 ES。
+            //       当前仅记录日志，索引重建/定时补偿时完整数据写入。
+            log.info("增量同步 UPSERT 暂未实现: spuId={}", spuId);
         }
     }
 

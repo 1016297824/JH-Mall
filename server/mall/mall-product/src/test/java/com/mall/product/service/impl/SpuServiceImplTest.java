@@ -146,24 +146,26 @@ class SpuServiceImplTest {
         mockPage.setRecords(List.of(spuDO));
         when(mallProductSpuMapper.selectAllPage(any())).thenReturn(mockPage);
 
-        // Mock 类目
+        // Mock 类目（批量查询优化）
         MallCategoryDO categoryDO = new MallCategoryDO();
         categoryDO.setId(10L);
         categoryDO.setName("手机");
-        when(mallCategoryMapper.selectById(10L)).thenReturn(categoryDO);
+        when(mallCategoryMapper.selectBatchIds(any())).thenReturn(List.of(categoryDO));
 
-        // Mock 品牌
+        // Mock 品牌（批量查询优化）
         MallBrandDO brandDO = new MallBrandDO();
         brandDO.setId(20L);
         brandDO.setName("Apple");
-        when(mallBrandMapper.selectById(20L)).thenReturn(brandDO);
+        when(mallBrandMapper.selectBatchIds(any())).thenReturn(List.of(brandDO));
 
-        // Mock SKU 规格
+        // Mock SKU 规格（批量查询优化）
         MallProductSkuDO sku1 = new MallProductSkuDO();
+        sku1.setSpuId(1L);
         sku1.setAttrsJson("[{\"k\":\"颜色\",\"v\":\"黑色\"},{\"k\":\"容量\",\"v\":\"128GB\"}]");
         MallProductSkuDO sku2 = new MallProductSkuDO();
+        sku2.setSpuId(1L);
         sku2.setAttrsJson("[{\"k\":\"颜色\",\"v\":\"白色\"},{\"k\":\"容量\",\"v\":\"256GB\"}]");
-        when(mallProductSkuMapper.selectBySpuId(1L)).thenReturn(List.of(sku1, sku2));
+        when(mallProductSkuMapper.batchSelectBySpuIds(any())).thenReturn(List.of(sku1, sku2));
 
         // 执行
         PageResult<SpuSearchDTO> result = spuService.pageForSearchRebuild(1, 10);

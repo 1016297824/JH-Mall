@@ -52,4 +52,17 @@ public interface MallProductSkuMapper extends BaseMapper<MallProductSkuDO> {
                 .in(MallProductSkuDO::getId, skuIds)
                 .eq(MallProductSkuDO::getIsDeleted, 0));
     }
+
+    /**
+     * 根据 SPU ID 列表批量查询 SKU（供 N+1 优化使用）
+     *
+     * @param spuIds SPU ID 列表
+     * @return 所有关联 SKU（调用方按 spuId 分组）
+     */
+    default List<MallProductSkuDO> batchSelectBySpuIds(List<Long> spuIds) {
+        if (spuIds == null || spuIds.isEmpty()) return List.of();
+        return selectList(new LambdaQueryWrapper<MallProductSkuDO>()
+                .in(MallProductSkuDO::getSpuId, spuIds)
+                .eq(MallProductSkuDO::getIsDeleted, 0));
+    }
 }

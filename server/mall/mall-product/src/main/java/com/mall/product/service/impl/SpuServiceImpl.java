@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SpuServiceImpl implements ISpuService {
 
+    private static final int SUB_TITLE_MAX_LENGTH = 200;
+
     private final MallProductSpuMapper mallProductSpuMapper;
     private final MallProductSkuMapper mallProductSkuMapper;
     private final MallBrandMapper mallBrandMapper;
@@ -111,11 +113,19 @@ public class SpuServiceImpl implements ISpuService {
 
     @Override
     public PageResult<SpuSearchDTO> pageForSearchRebuild(int page, int size) {
-        // 分页查询全部未删除 SPU，转为含类目名、品牌名、SKU 规格的富 DTO
+        // 分页查询全部未删除 SPU
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectAllPage(pageParam);
-        List<SpuSearchDTO> dtoList = result.getRecords().stream()
-                .map(this::toSpuSearchDTO)
+        List<MallProductSpuDO> spuDOList = result.getRecords();
+        if (spuDOList.isEmpty()) {
+            return PageResult.of(page, size, 0, List.of());
+        }
+        // 批量预取：类目名称、品牌名称、SKU 列表（N+1 优化，3 次批量查询替代 3N 次单条查询）
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(spuDOList);
+        Map<Long, String> brandNameMap = buildBrandNameMap(spuDOList);
+        Map<Long, List<MallProductSkuDO>> skuMap = buildSkuMapBySpuIds(spuDOList);
+        List<SpuSearchDTO> dtoList = spuDOList.stream()
+                .map(spuDO -> toSpuSearchDTO(spuDO, categoryNameMap, brandNameMap, skuMap))
                 .toList();
         return PageResult.of(page, size, result.getTotal(), dtoList);
     }
@@ -156,16 +166,25 @@ public class SpuServiceImpl implements ISpuService {
     }
 
     /**
-     * SPU DO 转 SpuSearchDTO（搜索索引重建专用，含类目名、品牌名、SKU 规格拼接）
+     * SPU DO 转 SpuSearchDTO（接收预计算 Map，避免 N+1 查询）
+     *
+     * @param spuDO           SPU DO
+     * @param categoryNameMap 类目 ID → 类目名称
+     * @param brandNameMap    品牌 ID → 品牌名称
+     * @param skuMap          SPU ID → SKU 列表
+     * @return SpuSearchDTO
      */
-    private SpuSearchDTO toSpuSearchDTO(MallProductSpuDO spuDO) {
+    private SpuSearchDTO toSpuSearchDTO(MallProductSpuDO spuDO,
+                                         Map<Long, String> categoryNameMap,
+                                         Map<Long, String> brandNameMap,
+                                         Map<Long, List<MallProductSkuDO>> skuMap) {
         SpuSearchDTO dto = new SpuSearchDTO();
         dto.setSpuId(spuDO.getId());
         dto.setSpuName(spuDO.getSpuName());
         // 副标题：spu_description 截断 200 字
         if (spuDO.getSpuDescription() != null) {
-            dto.setSubTitle(spuDO.getSpuDescription().length() > 200
-                    ? spuDO.getSpuDescription().substring(0, 200) : spuDO.getSpuDescription());
+            dto.setSubTitle(spuDO.getSpuDescription().length() > SUB_TITLE_MAX_LENGTH
+                    ? spuDO.getSpuDescription().substring(0, SUB_TITLE_MAX_LENGTH) : spuDO.getSpuDescription());
         }
         dto.setMainImage(spuDO.getMainImage());
         dto.setPriceMin(spuDO.getPriceMin());
@@ -175,29 +194,68 @@ public class SpuServiceImpl implements ISpuService {
         dto.setBrandId(spuDO.getBrandId());
         dto.setCreateTime(spuDO.getCreateTime());
         dto.setUpdateTime(spuDO.getUpdateTime());
-        // 类目名称
-        if (spuDO.getCategoryId() != null) {
-            MallCategoryDO cat = mallCategoryMapper.selectById(spuDO.getCategoryId());
-            if (cat != null) {
-                dto.setCategoryName(cat.getName());
-            }
-        }
-        // 品牌名称
-        if (spuDO.getBrandId() != null) {
-            MallBrandDO brand = mallBrandMapper.selectById(spuDO.getBrandId());
-            if (brand != null) {
-                dto.setBrandName(brand.getName());
-            }
-        }
-        // SKU 规格拼接
-        List<MallProductSkuDO> skus = mallProductSkuMapper.selectBySpuId(spuDO.getId());
-        if (skus != null && !skus.isEmpty()) {
+        // 类目名称（从预取 Map 获取）
+        dto.setCategoryName(categoryNameMap.get(spuDO.getCategoryId()));
+        // 品牌名称（从预取 Map 获取）
+        dto.setBrandName(brandNameMap.get(spuDO.getBrandId()));
+        // SKU 规格拼接（从预取 Map 获取）
+        List<MallProductSkuDO> skus = skuMap.getOrDefault(spuDO.getId(), List.of());
+        if (!skus.isEmpty()) {
             dto.setSpuSpecs(skus.stream()
                     .map(s -> s.getAttrsJson() != null ? s.getAttrsJson() : "")
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.joining(" ")));
         }
         return dto;
+    }
+
+    /**
+     * 批量构建类目 ID → 名称映射
+     */
+    private Map<Long, String> buildCategoryNameMap(List<MallProductSpuDO> spuDOList) {
+        List<Long> categoryIds = spuDOList.stream()
+                .map(MallProductSpuDO::getCategoryId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (categoryIds.isEmpty()) return Map.of();
+        List<MallCategoryDO> categories = mallCategoryMapper.selectBatchIds(categoryIds);
+        Map<Long, String> nameMap = new HashMap<>();
+        for (MallCategoryDO cat : categories) {
+            if (cat != null) nameMap.put(cat.getId(), cat.getName());
+        }
+        return nameMap;
+    }
+
+    /**
+     * 批量构建品牌 ID → 名称映射
+     */
+    private Map<Long, String> buildBrandNameMap(List<MallProductSpuDO> spuDOList) {
+        List<Long> brandIds = spuDOList.stream()
+                .map(MallProductSpuDO::getBrandId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (brandIds.isEmpty()) return Map.of();
+        List<MallBrandDO> brands = mallBrandMapper.selectBatchIds(brandIds);
+        Map<Long, String> nameMap = new HashMap<>();
+        for (MallBrandDO brand : brands) {
+            if (brand != null) nameMap.put(brand.getId(), brand.getName());
+        }
+        return nameMap;
+    }
+
+    /**
+     * 批量构建 SPU ID → SKU 列表映射
+     */
+    private Map<Long, List<MallProductSkuDO>> buildSkuMapBySpuIds(List<MallProductSpuDO> spuDOList) {
+        List<Long> spuIds = spuDOList.stream()
+                .map(MallProductSpuDO::getId)
+                .distinct()
+                .toList();
+        if (spuIds.isEmpty()) return Map.of();
+        List<MallProductSkuDO> skus = mallProductSkuMapper.batchSelectBySpuIds(spuIds);
+        return skus.stream().collect(Collectors.groupingBy(MallProductSkuDO::getSpuId));
     }
 
     /**
