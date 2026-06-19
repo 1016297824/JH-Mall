@@ -143,7 +143,7 @@ server/mall/mall-api/
 | **mall-payment** | — | — | — | queryOrder | — | — | — |
 | **mall-marketing** | — | — | — | queryOrder | — | — | — |
 | **mall-product** | — | — | — | — | — | — | syncProduct |
-| **mall-search** | — | — | fetchAllSpus | — | — | — | — |
+| **mall-search** | — | — | fetchAllSpus, fetchAllSpusForSearch | — | — | — | — |
 | **mall-user** | — | decrypt, batchDecrypt | — | — | — | — | — |
 
 ---
