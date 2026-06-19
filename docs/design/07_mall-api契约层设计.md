@@ -89,7 +89,8 @@ server/mall/mall-api/
 | `reserveStock` | `orderNo`(String), `items`(List\<{skuId, qty}\>) | `boolean` | 下单锁库存，乐观锁防超卖 |
 | `releaseStock` | `orderNo`(String) | `void` | 取消订单释放库存 |
 | `restock` | `skuId`(Long), `qty`(Integer) | `void` | 售后退货回补可用库存 |
-| `fetchAllSpus` | `page`(int), `size`(int) | `PageResult\<SpuDTO\>` | 全量重建时分批拉取 SPU 数据 |
+| `fetchAllSpus` | `page`(int), `size`(int) | `PageResult\<SpuDTO\>` | 全量重建时分批拉取 SPU 基础数据 |
+| `fetchAllSpusForSearch` | `page`(int), `size`(int) | `PageResult\<SpuSearchDTO\>` | 全量重建时分批拉取含类目名/品牌名/SKU规格的富 DTO |
 
 ### 3.4 RemoteOrderService
 

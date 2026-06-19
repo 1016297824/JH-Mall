@@ -24,7 +24,7 @@ mall-search (9307端口)
   ├── Elasticsearch：索引 storage + 搜索查询
   ├── Redis：分布式锁（全量重建防并发）、搜索结果缓存（热点词 1min）
   ├── RocketMQ (Consumer)：消费 mall:search:sync → 增量同步索引
-  ├── mall-product (Feign Caller)：调 RemoteProductService 取全量/增量商品数据
+  ├── mall-product (Feign Caller)：调 RemoteProductService 取全量/增量商品数据（专用 SpuSearchDTO）
   └── mall-product (被调)：提供 RemoteSearchService.syncProduct 供商品服务直推索引
 ```
 
@@ -41,15 +41,17 @@ server/mall/mall-search/
 └── src/main/java/com/mall/search/
     ├── MallSearchApplication.java           # Spring Boot 启动类
     ├── controller/
-    │   └── SearchController.java            # 单 Controller，C 端搜索 + 管理端维护
+    │   ├── SearchController.java            # C 端搜索 + 管理端维护
+    │   └── inner/
+    │       └── RemoteSearchInnerController.java   # /inner/search/** 供 ruoyi-job 定时调度
     ├── dto/
     │   ├── request/
     │   │   └── SearchReq.java               # 搜索请求（keyword/filters/sort/page）
-    │   └── response/
-    │       └── SearchResp.java              # 搜索结果（items + aggregations + total）
+    │   └── response/                         # 内部 Feign 响应 DTO（本模块暂无）
     ├── vo/
     │   ├── SearchItemVO.java                # 搜索结果单条（spuId/name/price/image）
-    │   └── AggregationVO.java               # 聚合统计（类目/品牌/价格区间各 count）
+    │   ├── AggregationVO.java               # 聚合统计（类目/品牌/价格区间各 count）
+    │   └── SearchResultVO.java              # 搜索结果（items + aggregations + total）
     ├── DO/
     │   └── ProductIndex.java                # ES 索引实体（非 MySQL DO，使用 @Document）
     ├── service/
@@ -63,13 +65,16 @@ server/mall/mall-search/
     ├── repository/
     │   └── ProductIndexRepository.java      # Spring Data ES Repository
     ├── infrastructure/
+    │   ├── schedule/
+    │   │   └── IndexRebuildTask.java         # 定时全量重建，ruoyi-job 定时调度
     │   ├── mq/
     │   │   └── SearchSyncConsumer.java      # 消费 mall:search:sync 增量同步
     │   └── feign/
     │       └── RemoteProductAdapter.java     # 调 mall-product 取商品数据
     └── convert/
-        ├── request/                         # Request → DO（入站）
-        └── response/                        # DO → VO（出站）
+        ├── request/
+        │   └── SpuSearchConvert.java          # SpuSearchDTO → ProductIndex（入站，全量重建用）
+        └── response/
             └── SearchConvert.java           # ProductIndex → SearchItemVO
 ```
 
@@ -77,9 +82,10 @@ server/mall/mall-search/
 
 | # | 方法 | 路径                                 | 方法名               | 需登录 | 说明                             |
 | - | ---- | ------------------------------------ | -------------------- | :----: | -------------------------------- |
-| 1 | GET  | `/api/search`                      | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合） |
+| 1 | POST | `/api/search`                      | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合） |
 | 2 | GET  | `/api/search/suggest`              | `suggest(keyword)` |   否   | 搜索补全建议                     |
 | 3 | POST | `/mall-search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建     |
+| 4 | POST | `/inner/search/index/rebuild`      | `rebuildIndex()`   | —    | ruoyi-job 定时全量重建，复用 IndexRebuildTask |
 
 ### 2.3 Lombok 使用约定
 
@@ -164,7 +170,7 @@ server/mall/mall-search/
 
 - ①Redis 分布式锁 `mall:search:index:rebuild_lock`，SETNX + UUID + 看门狗 3600s
 - ②创建新索引 `mall_product_v{yyyyMMddHHmmss}`，写入 mapping + settings
-- ③分批拉取 mall-product 全量商品：`RemoteProductAdapter.fetchAllSpus(page, 500)`
+- ③分批拉取 mall-product 全量商品：`RemoteProductAdapter.fetchAllSpusForSearch(page, 500)` → 返回 `SpuSearchDTO`（含类目名、品牌名、SKU规格），转换为 `ProductIndex` 写入新索引
 - ④批量写入新索引（`BulkRequest`，每批 500 条）
 - ⑤增量回补：全量完成后，扫描 T1（重建开始时刻）后的商品变更，同步到新索引
 - ⑥原子切换别名：`_aliases` API，先 remove 旧索引再 add 新索引（单别名策略，读写共用）
@@ -203,6 +209,36 @@ ES 不可用时：
 | 转发降级 | ES 连接超时或 5xx   | 调 `mall-product` 的 `/api/product/search/fallback` DB 兜底 |
 | 直接降级 | mall-product 也失败 | 返回 `A0801`，userTip "搜索服务暂时不可用"                    |
 | 缓存兜底 | Redis 有缓存        | 优先返回缓存的搜索结果                                          |
+
+### 3.6 IndexRebuildTask — 定时全量重建
+
+位于 `infrastructure/schedule/IndexRebuildTask.java`，供 ruoyi-job 定时调度。
+
+```
+ruoyi-job (9204端口)
+  └─ POST /inner/search/index/rebuild → RemoteSearchInnerController.rebuildIndex()
+                                          └─ IndexRebuildTask.execute()
+                                                 └─ IndexService.rebuildIndex()
+```
+
+**设计要点：**
+
+- 由 `RemoteSearchInnerController` 暴露 `POST /inner/search/index/rebuild` 端点
+- `IndexRebuildTask.execute()` 直接委托 `IndexServiceImpl.rebuildIndex()`，不重复实现
+- **cron 表达式在 ruoyi-job 控制台配置**（建议每天凌晨 3 点 `0 0 3 * * ?`），不在 Nacos 也不在代码中
+- 重建内部已有 Redis 分布式锁 `mall:search:index:rebuild_lock`（3600s），定时与手动触发互不冲突
+
+> **频率建议**：全量重建为重操作（拉全量商品 → 建新索引 → 灌数据 → 切别名），日常增量靠 MQ `mall:search:sync` + Outbox 补偿，定时全量重建作为数据一致性的最终兜底，每天一次即可。
+
+### 3.7 RemoteSearchInnerController
+
+位于 `controller/inner/RemoteSearchInnerController.java`，内部端点，不走网关认证。
+
+| 方法 | 路径 | 方法名 | 说明 |
+| ---- | ------------------------------- | ------ | ---- |
+| POST | `/inner/search/index/rebuild` | `rebuildIndex()` | 定时/手动全量重建索引 |
+
+> `SearchInnerController` 路径在 `mall.security.anonymous-paths` 中放行，由 `InnerSignatureFilter` 验签保护。
 
 ---
 

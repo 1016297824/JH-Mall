@@ -309,6 +309,16 @@ WHERE sku_id = #{skuId}
 | 异步 | 写 Outbox `mall:search:sync`，定时投递 RocketMQ → mall-search 消费 | 实时通道失败时降级兜底   |
 | 补偿 | ruoyi-job 定时扫描 Outbox 未投递记录                                  | 兜底通道失败时的最后保障 |
 
+### 5.1.1 全量重建数据供给
+
+供 mall-search 全量重建时调用，通过 `RemoteProductInnerController` 暴露 `/inner/product/spus/all-for-search` 端点：
+
+| 方法 | 返回 | 说明 |
+|------|------|------|
+| `pageForSearchRebuild(page, size)` | `PageResult<SpuSearchDTO>` | 分页查询全量 SPU，JOIN 类目名、品牌名，聚合 SKU 规格文本 |
+
+`SpuSearchDTO`（定义于 `mall-common`）比 `SpuDTO` 多包含 `subTitle`、`categoryName`、`brandName`、`spuSpecs`、`createTime`、`updateTime`、`tags`，满足 ES `ProductIndex` 全量重建所需字段。
+
 ### 5.2 触发时机
 
 | 操作      | 同步内容                              |

@@ -64,7 +64,7 @@ server/mall/mall-common/
     │   ├── MallResult.java                  # C 端统一响应体（替代若依 AjaxResult）
     │   ├── user/
     │   │   └── MallUserDTO.java             # 用户数据传输对象
-    │   └── product/                          # 商品 DTO（后续扩展）
+    │   └── product/                          # 商品 DTO（SpuDTO、SpuSearchDTO）
     │   └── order/                            # 订单 DTO（后续扩展）
     ├── enums/                                # 跨服务共享枚举
     │   └── user/
