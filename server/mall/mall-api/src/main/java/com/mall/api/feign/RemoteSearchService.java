@@ -27,6 +27,12 @@ public interface RemoteSearchService {
     void syncProduct(@RequestBody SearchSyncRequest request);
 
     /**
+     * 触发搜索索引全量重建
+     */
+    @PostMapping("/inner/search/index/rebuild")
+    void rebuildIndex();
+
+    /**
      * 搜索索引同步请求
      */
     @Data

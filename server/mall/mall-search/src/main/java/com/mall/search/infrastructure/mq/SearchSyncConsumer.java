@@ -1,6 +1,11 @@
 package com.mall.search.infrastructure.mq;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.common.constant.MqTopicConstants;
+import com.mall.search.service.IndexService;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -17,11 +22,16 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 @RocketMQMessageListener(
     topic = MqTopicConstants.Product.SEARCH_SYNC,
     consumerGroup = "mall-search-sync-consumer"
 )
 public class SearchSyncConsumer implements RocketMQListener<String> {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private final IndexService indexService;
 
     /**
      * 消费搜索同步消息
@@ -33,6 +43,33 @@ public class SearchSyncConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String message) {
         log.debug("收到搜索同步消息: {}", message);
-        // TODO Batch 2: JSON 解析 → 幂等去重 → IndexService.syncProduct(spuId, operation)
+        SyncMessage syncMessage;
+        try {
+            syncMessage = OBJECT_MAPPER.readValue(message, SyncMessage.class);
+        } catch (Exception e) {
+            log.error("搜索同步消息解析失败: {}", message, e);
+            return;
+        }
+        if (syncMessage == null || syncMessage.getSpuId() == null) {
+            log.warn("搜索同步消息缺少 spuId: {}", message);
+            return;
+        }
+        String operation = syncMessage.getOperation() != null ? syncMessage.getOperation() : "UPSERT";
+        // 幂等去重在 IndexService.syncProduct 内部处理
+        indexService.syncProduct(syncMessage.getSpuId(), operation);
+    }
+
+    /**
+     * 搜索同步消息体
+     *
+     * <p>Payload: {@code spuId, operation}（UPSERT / DELETE），{@code timestamp}</p>
+     */
+    @Data
+    @NoArgsConstructor
+    private static class SyncMessage {
+        /** SPU ID */
+        private Long spuId;
+        /** 操作类型：UPSERT / DELETE */
+        private String operation;
     }
 }

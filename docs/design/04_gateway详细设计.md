@@ -341,18 +341,32 @@ springdoc:
 mall:
   security:
     anonymous-paths:
-      - /api/auth/login
-      - /api/auth/register
-      - /api/auth/sms-code
+      - /api/auth/sessions
+      - /api/auth/sessions/sms
+      - /api/auth/users
+      - /api/auth/sms_codes
+      - /api/auth/captcha
+      - /api/auth/captcha/register
+      - /api/auth/captcha/login
+      - /api/auth/captcha/password/reset
+      - /api/auth/sessions/refresh
+      - /api/product/categories
+      - /api/product/categories/**
+      - /api/product/spus
+      - /api/product/spus/**
+      - /api/product/skus/**
+      - /api/product/brands
+      - /api/product/search/fallback
+      - /api/search/**
 ```
 
 ---
 
 ## 6 关键约束
 
-| 约束                              | 说明                                                                                                         |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `discovery.locator` 不可关闭    | 管理端前端依赖 `/{serviceId}/**` 自动路由                                                                  |
-| AuthFilter 与 MallAuthFilter 串行 | 两条过滤器不是二选一，MallAuthFilter 在前者通过后二次校验                                                    |
-| 白名单顺序                        | `/api/**` 必须放入 `security.ignore.whites`，否则 AuthFilter 拦截 C 端请求                               |
+| 约束                              | 说明                                                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `discovery.locator` 不可关闭    | 管理端前端依赖 `/{serviceId}/**` 自动路由                                                              |
+| AuthFilter 与 MallAuthFilter 串行 | 两条过滤器不是二选一，MallAuthFilter 在前者通过后二次校验                                                |
+| 白名单顺序                        | `/api/**` 必须放入 `security.ignore.whites`，否则 AuthFilter 拦截 C 端请求                           |
 | Controller 包路径                 | 管理端 `controller/admin/` + 不含 `/admin` 的路由前缀；C 端 `controller/` + 含 `/api` 的路由前缀 |

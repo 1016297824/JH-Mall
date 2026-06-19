@@ -19,7 +19,7 @@ import org.springframework.data.elasticsearch.core.suggest.Completion;
  * @date 2026/06/19
  */
 @Data
-@Document(indexName = "mall_product")
+@Document(indexName = "mall_product", createIndex = false)
 public class ProductIndexDO {
 
     /** SPU ID */
@@ -75,7 +75,7 @@ public class ProductIndexDO {
     private Boolean isOnSale;
 
     /** 创建时间 */
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
     private LocalDateTime createTime;
 
     /** SKU 规格文本拼接（ik_max_word，权重 1.0） */

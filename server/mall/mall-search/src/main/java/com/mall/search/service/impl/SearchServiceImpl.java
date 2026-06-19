@@ -1,7 +1,11 @@
 package com.mall.search.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
@@ -10,8 +14,10 @@ import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.mall.api.feign.RemoteProductService;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.search.DO.ProductIndexDO;
@@ -19,10 +25,10 @@ import com.mall.search.DTO.request.SearchReqDTO;
 import com.mall.search.config.MallSearchConfigProperties;
 import com.mall.search.convert.response.SearchConvert;
 import com.mall.search.service.SearchService;
+import com.mall.search.vo.SearchItemVO;
 import com.mall.search.vo.SearchResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -47,11 +53,14 @@ public class SearchServiceImpl implements SearchService {
 
     private final ElasticsearchOperations operations;
     private final MallSearchConfigProperties configProperties;
+    private final RemoteProductService remoteProductService;
     private final Cache<String, SearchResultVO> searchCache;
 
-    public SearchServiceImpl(ElasticsearchOperations operations, MallSearchConfigProperties configProperties) {
+    public SearchServiceImpl(ElasticsearchOperations operations, MallSearchConfigProperties configProperties,
+                              RemoteProductService remoteProductService) {
         this.operations = operations;
         this.configProperties = configProperties;
+        this.remoteProductService = remoteProductService;
         this.searchCache = Caffeine.newBuilder()
                 .expireAfterWrite(configProperties.getResult().getCacheTtl(), TimeUnit.SECONDS)
                 .maximumSize(1000)
@@ -73,8 +82,20 @@ public class SearchServiceImpl implements SearchService {
         try {
             hits = operations.search(query, ProductIndexDO.class);
         } catch (ElasticsearchException e) {
-            log.error("ES 搜索服务不可用", e);
-            throw new BusinessException(ErrorCode.ES_UNAVAILABLE);
+            log.error("ES 搜索服务不可用，尝试降级", e);
+            // Double-check cache before fallback
+            cached = searchCache.getIfPresent(cacheKey);
+            if (cached != null) {
+                return cached;
+            }
+            try {
+                int fallbackPage = req.getPage() != null ? req.getPage() : 1;
+                int fallbackSize = req.getSize() != null ? req.getSize() : 20;
+                return fallbackSearch(req.getKeyword(), fallbackPage, fallbackSize, cacheKey);
+            } catch (Exception fallbackEx) {
+                log.error("搜索降级也失败", fallbackEx);
+                throw new BusinessException(ErrorCode.ES_UNAVAILABLE);
+            }
         }
 
         int page = req.getPage() != null ? req.getPage() : 1;
@@ -108,7 +129,7 @@ public class SearchServiceImpl implements SearchService {
     /**
      * 构建 ES 搜索查询
      *
-     * <p>multi_match(spuName^3/subTitle^1.5/spuSpecs^1.0)
+     * <p>multi_match(spuName^3/subTitle^1.5)
      * + filter(isOnSale=true/categoryId/brandId/price range)
      * + sort + highlight(spuName/&lt;em&gt;) + 分页 + aggregation(categories/brands)</p>
      *
@@ -121,7 +142,8 @@ public class SearchServiceImpl implements SearchService {
 
         NativeQueryBuilder builder = NativeQuery.builder()
                 .withQuery(buildEsQuery(req))
-                .withPageable(PageRequest.of(page - 1, size));
+                .withPageable(PageRequest.of(page - 1, size))
+                .withTimeout(Duration.ofSeconds(2));
 
         // 排序
         List<SortOptions> sorts = buildSorts(req);
@@ -181,7 +203,8 @@ public class SearchServiceImpl implements SearchService {
         if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
             Query multiMatch = Query.of(q -> q.multiMatch(m -> m
                     .query(req.getKeyword())
-                    .fields("spuName^3", "subTitle^1.5", "spuSpecs^1.0")));
+                    .fields("spuName^3", "subTitle^1.5")
+                    .type(TextQueryType.BestFields)));
             return Query.of(q -> q.bool(b -> b
                     .must(multiMatch)
                     .filter(filterQueries)));
@@ -255,5 +278,67 @@ public class SearchServiceImpl implements SearchService {
 
     private static int defaultSize(Integer size) {
         return size != null ? size : 20;
+    }
+
+    /**
+     * ES 降级搜索，通过 Feign 调用 mall-product DB 兜底查询
+     *
+     * @param keyword  搜索关键词
+     * @param page     页码
+     * @param size     每页条数
+     * @param cacheKey 缓存 Key
+     * @return 搜索结果
+     */
+    private SearchResultVO fallbackSearch(String keyword, int page, int size, String cacheKey) {
+        Map<String, Object> response = remoteProductService.searchFallback(keyword, page, size);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) response.get("data");
+        if (dataList == null || dataList.isEmpty()) {
+            SearchResultVO empty = new SearchResultVO();
+            empty.setItems(new ArrayList<>());
+            empty.setTotal(0);
+            empty.setPage(page);
+            empty.setSize(size);
+            return empty;
+        }
+        List<SearchItemVO> items = new ArrayList<>(dataList.size());
+        for (Map<String, Object> spu : dataList) {
+            items.add(mapToSearchItemVO(spu));
+        }
+        SearchResultVO result = new SearchResultVO();
+        result.setItems(items);
+        result.setTotal(items.size());
+        result.setPage(page);
+        result.setSize(size);
+        searchCache.put(cacheKey, result);
+        return result;
+    }
+
+    /**
+     * 将 SpuVO JSON Map 转换为 SearchItemVO
+     *
+     * @param spu SpuVO 的 Map 表示
+     * @return SearchItemVO
+     */
+    private SearchItemVO mapToSearchItemVO(Map<String, Object> spu) {
+        SearchItemVO vo = new SearchItemVO();
+        Object spuIdObj = spu.get("spuId");
+        if (spuIdObj instanceof String) {
+            vo.setSpuId(Long.valueOf((String) spuIdObj));
+        }
+        vo.setSpuName((String) spu.get("spuName"));
+        vo.setImage((String) spu.get("mainImage"));
+        // 价格：分 → 元
+        Object priceObj = spu.get("priceMin");
+        if (priceObj instanceof Number) {
+            vo.setPrice(BigDecimal.valueOf(((Number) priceObj).longValue())
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)
+                    .toPlainString());
+        }
+        Object salesObj = spu.get("salesCount");
+        if (salesObj instanceof Number) {
+            vo.setSalesCount(((Number) salesObj).intValue());
+        }
+        return vo;
     }
 }

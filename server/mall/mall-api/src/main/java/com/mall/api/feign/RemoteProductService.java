@@ -11,6 +11,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * C 端商品服务 Feign 接口
@@ -98,6 +99,19 @@ public interface RemoteProductService {
      */
     @PostMapping("/inner/product/hot/refresh")
     void refreshHotRank();
+
+    /**
+     * 搜索降级兜底（ES 不可用时通过 DB Like 查询）
+     *
+     * @param keyword 搜索关键词
+     * @param page    页码
+     * @param size    每页条数
+     * @return 降级搜索结果（MallResult 的 JSON Map 表示）
+     */
+    @GetMapping("/api/product/search/fallback")
+    Map<String, Object> searchFallback(@RequestParam("keyword") String keyword,
+                                        @RequestParam("page") int page,
+                                        @RequestParam("size") int size);
 
     /**
      * 库存预占请求项

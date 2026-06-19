@@ -152,7 +152,7 @@ server/mall/mall-search/
 **search(req)**：
 
 - 分词器：`ik_max_word`（最细粒度），保证高召回
-- 全文搜索：`multiMatchQuery` 跨 `spuName`(3.0) + `subTitle`(1.5) + `spuSpecs`(1.0)，`type=BEST_FIELDS`（ES 9.x 需改为 `"best_fields"` 字符串或 `bool/should`）
+- 全文搜索：`multiMatchQuery` 跨 `spuName`(3.0) + `subTitle`(1.5)，`type=BEST_FIELDS`
 - 筛选：全部用 `filter`（不参与评分、自动缓存），包括类目/品牌/价格区间/标签/`isOnSale=true`
 - 排序：`_score`(综合) / `salesCount DESC`(销量) / `price ASC|DESC`(价格) / `createTime DESC`(新品)
 - 分页：单页最大 60 条，`from+size ≤ 10000`，超限返回 `A0802`

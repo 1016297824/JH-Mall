@@ -7,7 +7,7 @@ import type { SearchReqDTO, SearchResultVO } from '@/types'
  * @returns 搜索结果（含聚合）
  */
 export async function search(params: SearchReqDTO): Promise<SearchResultVO> {
-  const { data } = await request.post('/api/search', params)
+  const { data } = await request.post('/search', params)
   return data.data
 }
 
@@ -17,6 +17,6 @@ export async function search(params: SearchReqDTO): Promise<SearchResultVO> {
  * @returns 建议词列表
  */
 export async function suggest(keyword: string): Promise<string[]> {
-  const { data } = await request.get('/api/search/suggest', { params: { keyword } })
+  const { data } = await request.get('/search/suggest', { params: { keyword } })
   return data.data
 }
