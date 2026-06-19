@@ -50,4 +50,4 @@ client/ruoyi-ui/auto-imports.d.ts
 .trae
 
 # 工具运行时状态
-/data/
+/data/.worktrees/
