@@ -10,3 +10,9 @@ export type {
   SpecGroupVO,
   SelectedSpecs,
 } from './product'
+export type {
+  SearchItemVO,
+  AggregationBucket,
+  SearchResultVO,
+  SearchReqDTO,
+} from './search'

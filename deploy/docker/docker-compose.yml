@@ -46,6 +46,7 @@ services:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
     volumes:
       - ./data/es:/usr/share/elasticsearch/data
+      - ./data/es/plugins/ik:/usr/share/elasticsearch/plugins/ik
     restart: unless-stopped
 
   sentinel-dashboard:

@@ -27,6 +27,11 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
+        <!-- SpringCloud LoadBalancer (Feign 服务名解析必需) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
 
         <!-- Sentinel Nacos 数据源（规则持久化） -->
         <dependency>
