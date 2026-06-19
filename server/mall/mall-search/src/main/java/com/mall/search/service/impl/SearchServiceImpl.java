@@ -154,12 +154,15 @@ public class SearchServiceImpl implements SearchService {
         // 高亮
         builder = builder.withHighlightQuery(buildHighlightQuery());
 
-        // 聚合
+        // 聚合（带 top_hits 子聚合获取名称）
         builder = builder.withAggregation("categories",
-                        Aggregation.of(a -> a.terms(t -> t.field("categoryId"))))
+                        Aggregation.of(a -> a.terms(t -> t.field("categoryId").size(50))
+                                .aggregations("top_hit", Aggregation.of(a2 -> a2.topHits(th -> th
+                                        .size(1).source(src -> src.filter(f -> f.includes("categoryName"))))))))
                 .withAggregation("brands",
-                        Aggregation.of(a -> a.terms(t -> t.field("brandId"))));
-
+                        Aggregation.of(a -> a.terms(t -> t.field("brandId").size(50))
+                                .aggregations("top_hit", Aggregation.of(a2 -> a2.topHits(th -> th
+                                        .size(1).source(src -> src.filter(f -> f.includes("brandName"))))))));
         return builder.build();
     }
 
@@ -177,21 +180,23 @@ public class SearchServiceImpl implements SearchService {
                 .field("isOnSale")
                 .value(FieldValue.of(true)))));
 
-        // 类目过滤
-        if (req.getCategoryId() != null) {
-            filterQueries.add(Query.of(q -> q.term(t -> t
+        // 类目过滤（多选）
+        if (req.getCategoryIds() != null && !req.getCategoryIds().isEmpty()) {
+            filterQueries.add(Query.of(q -> q.terms(t -> t
                     .field("categoryId")
-                    .value(FieldValue.of(req.getCategoryId())))));
+                    .terms(terms -> terms.value(
+                            req.getCategoryIds().stream().map(FieldValue::of).toList())))));
         }
 
-        // 品牌过滤
-        if (req.getBrandId() != null) {
-            filterQueries.add(Query.of(q -> q.term(t -> t
+        // 品牌过滤（多选）
+        if (req.getBrandIds() != null && !req.getBrandIds().isEmpty()) {
+            filterQueries.add(Query.of(q -> q.terms(t -> t
                     .field("brandId")
-                    .value(FieldValue.of(req.getBrandId())))));
+                    .terms(terms -> terms.value(
+                            req.getBrandIds().stream().map(FieldValue::of).toList())))));
         }
 
-        // 价格区间过滤（单位：分），使用 number range
+        // 价格区间过滤（前端已转分为单位），使用 number range
         if (req.getPriceMin() != null || req.getPriceMax() != null) {
             Double gte = req.getPriceMin() != null ? (double) req.getPriceMin() : null;
             Double lte = req.getPriceMax() != null ? (double) req.getPriceMax() : null;
@@ -257,8 +262,8 @@ public class SearchServiceImpl implements SearchService {
     private String buildCacheKey(SearchReqDTO req) {
         StringBuilder sb = new StringBuilder("search:");
         sb.append(nullToEmpty(req.getKeyword())).append(':');
-        sb.append(req.getCategoryId()).append(':');
-        sb.append(req.getBrandId()).append(':');
+        sb.append(req.getCategoryIds()).append(':');
+        sb.append(req.getBrandIds()).append(':');
         sb.append(req.getPriceMin()).append(':');
         sb.append(req.getPriceMax()).append(':');
         sb.append(nullToEmpty(req.getSort())).append(':');

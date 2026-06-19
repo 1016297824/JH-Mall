@@ -30,8 +30,8 @@ export interface SearchResultVO {
 /** 搜索请求DTO */
 export interface SearchReqDTO {
   keyword?: string
-  categoryId?: number | null
-  brandId?: number | null
+  categoryIds?: number[]
+  brandIds?: number[]
   priceMin?: number | null
   priceMax?: number | null
   sort?: string

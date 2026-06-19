@@ -4,8 +4,8 @@ import { search, suggest } from '@/api/search'
 import type { SearchItemVO, SearchResultVO, AggregationBucket } from '@/types'
 
 interface FilterState {
-  categoryId: number | null
-  brandId: number | null
+  categoryIds: number[]
+  brandIds: number[]
   priceMin: number | null
   priceMax: number | null
   sort: string
@@ -13,8 +13,8 @@ interface FilterState {
 }
 
 const DEFAULT_FILTERS: FilterState = {
-  categoryId: null,
-  brandId: null,
+  categoryIds: [],
+  brandIds: [],
   priceMin: null,
   priceMax: null,
   sort: 'default',
@@ -55,8 +55,8 @@ export const useSearchStore = defineStore('search', () => {
         keyword: keyword.value,
         page: page.value,
         size: size.value,
-        categoryId: filters.value.categoryId,
-        brandId: filters.value.brandId,
+        categoryIds: filters.value.categoryIds.length > 0 ? filters.value.categoryIds : undefined,
+        brandIds: filters.value.brandIds.length > 0 ? filters.value.brandIds : undefined,
         priceMin: filters.value.priceMin,
         priceMax: filters.value.priceMax,
         ...mapped,

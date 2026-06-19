@@ -3,6 +3,8 @@ package com.mall.search.DTO.request;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * C 端商品搜索请求
  *
@@ -16,11 +18,11 @@ public class SearchReqDTO {
     /** 搜索关键词 */
     private String keyword;
 
-    /** 类目 ID 过滤 */
-    private Long categoryId;
+    /** 类目 ID 过滤（多选） */
+    private List<Long> categoryIds;
 
-    /** 品牌 ID 过滤 */
-    private Long brandId;
+    /** 品牌 ID 过滤（多选） */
+    private List<Long> brandIds;
 
     /** 价格区间下限（分） */
     private Integer priceMin;

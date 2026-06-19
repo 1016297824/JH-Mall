@@ -17,6 +17,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 搜索转换器
@@ -117,8 +118,36 @@ public final class SearchConvert {
             AggregationVO.AggregationBucket b = new AggregationVO.AggregationBucket();
             b.setKey(String.valueOf(bucket.key()));
             b.setCount(bucket.docCount());
+            // 从 top_hits 子聚合提取名称
+            extractNameFromTopHits(b, bucket.aggregations());
             result.add(b);
         }
         return result;
+    }
+
+    /**
+     * 从 top_hits 子聚合中提取名称字段（categoryName 或 brandName）
+     */
+    private static void extractNameFromTopHits(AggregationVO.AggregationBucket bucket,
+                                                Map<String, Aggregate> subAggs) {
+        Aggregate topHit = subAggs.get("top_hit");
+        if (topHit == null || !topHit.isTopHits()) {
+            return;
+        }
+        var hits = topHit.topHits().hits().hits();
+        if (hits.isEmpty()) {
+            return;
+        }
+        var source = hits.get(0).source();
+        if (source == null) {
+            return;
+        }
+        // source 类型为 JsonData，转 Jakarta JsonObject 取字段
+        var node = source.toJson().asJsonObject();
+        if (node.containsKey("categoryName")) {
+            bucket.setName(node.get("categoryName").toString().replace("\"", ""));
+        } else if (node.containsKey("brandName")) {
+            bucket.setName(node.get("brandName").toString().replace("\"", ""));
+        }
     }
 }

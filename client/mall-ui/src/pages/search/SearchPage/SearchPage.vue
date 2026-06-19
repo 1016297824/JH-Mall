@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { useSearchStore } from '@/stores'
 import type { AggregationBucket } from '@/types'
 
@@ -19,10 +20,13 @@ const route = useRoute()
 const router = useRouter()
 const store = useSearchStore()
 
+const colorBorder = '#BAE6FD' // v.$color-border，Template 无法直接引用 SCSS 变量
+
 const localKeyword = ref('')
 const showSuggestions = ref(false)
 const drawerVisible = ref(false)
 const suggestTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const suggestionRefs = ref<HTMLElement[]>([])
 
 // 从 Store 解构常用状态
 const loading = computed(() => store.loading)
@@ -37,43 +41,71 @@ const sort = computed({
   set: (val: string) => {
     store.filters.sort = val
     store.page = 1
-    store.doSearch()
+    store.doSearch().catch(() => ElMessage.error('搜索失败，请稍后重试'))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   },
 })
 
-const selectedCategoryId = ref<number | null>(null)
-const selectedBrandId = ref<number | null>(null)
+const selectedCategoryIds = ref<number[]>([])
+const selectedBrandIds = ref<number[]>([])
 const priceMinInput = ref<number | null>(null)
 const priceMaxInput = ref<number | null>(null)
+
+/** 已选筛选项的名称缓存（用于在新聚合中不存在时补回） */
+const selectedCategoryNames = ref<Record<number, string>>({})
+const selectedBrandNames = ref<Record<number, string>>({})
+
+/** 合并聚合：新聚合 + 已选但不在新聚合中的筛选项（count=0 兜底保留） */
+const effectiveAggregations = computed(() => {
+  const aggs = aggregations.value
+  const cats = [...aggs.categories]
+  const brands = [...aggs.brands]
+  for (const cid of selectedCategoryIds.value) {
+    if (!cats.some((c) => Number(c.key) === cid)) {
+      const name = selectedCategoryNames.value[cid] ?? String(cid)
+      cats.push({ key: String(cid), name, count: 0 })
+    }
+  }
+  for (const bid of selectedBrandIds.value) {
+    if (!brands.some((b) => Number(b.key) === bid)) {
+      const name = selectedBrandNames.value[bid] ?? String(bid)
+      brands.push({ key: String(bid), name, count: 0 })
+    }
+  }
+  return { categories: cats, brands }
+})
 
 /** 是否有筛选条件激活 */
 const hasActiveFilters = computed(
   () =>
-    selectedCategoryId.value !== null ||
-    selectedBrandId.value !== null ||
+    selectedCategoryIds.value.length > 0 ||
+    selectedBrandIds.value.length > 0 ||
     priceMinInput.value !== null ||
     priceMaxInput.value !== null,
 )
 
 /** 同步筛选值到 Store 并搜索 */
 function applyFilters() {
-  store.filters.categoryId = selectedCategoryId.value
-  store.filters.brandId = selectedBrandId.value
-  store.filters.priceMin = priceMinInput.value
-  store.filters.priceMax = priceMaxInput.value
+  store.filters.categoryIds = [...selectedCategoryIds.value]
+  store.filters.brandIds = [...selectedBrandIds.value]
+  // 前端输入为元，ES 索引以分为单位存储，需 ×100 转换
+  store.filters.priceMin = priceMinInput.value !== null ? priceMinInput.value * 100 : null
+  store.filters.priceMax = priceMaxInput.value !== null ? priceMaxInput.value * 100 : null
   store.page = 1
-  store.doSearch()
+  store.doSearch().catch(() => ElMessage.error('筛选失败，请稍后重试'))
   closeFilterMobile()
 }
 
 /** 重置筛选 */
 function handleResetFilters() {
-  selectedCategoryId.value = null
-  selectedBrandId.value = null
+  selectedCategoryIds.value = []
+  selectedBrandIds.value = []
   priceMinInput.value = null
   priceMaxInput.value = null
+  selectedCategoryNames.value = {}
+  selectedBrandNames.value = {}
   store.resetFilters()
-  store.doSearch()
+  store.doSearch().catch(() => ElMessage.error('搜索失败，请稍后重试'))
 }
 
 /** 处理搜索输入确认 */
@@ -85,7 +117,7 @@ function handleSearchSubmit() {
     router.replace({ query: {} })
   }
   store.page = 1
-  store.doSearch(localKeyword.value.trim())
+  store.doSearch(localKeyword.value.trim()).catch(() => ElMessage.error('搜索失败，请稍后重试'))
 }
 
 /** 输入变化时获取建议（防抖） */
@@ -113,15 +145,36 @@ function handleSuggestionClick(suggestion: string) {
   handleSearchSubmit()
 }
 
-/** 选择类目 */
+/** 键盘导航建议词 */
+function handleSuggestionKeydown(index: number) {
+  const refs = suggestionRefs.value
+  if (!refs || index < 0 || index >= refs.length) return
+  refs[index]?.focus()
+}
+
+/** 选择类目（多选切换） */
 function handleCategorySelect(cat: AggregationBucket) {
-  selectedCategoryId.value = selectedCategoryId.value === Number(cat.key) ? null : Number(cat.key)
+  const id = Number(cat.key)
+  const idx = selectedCategoryIds.value.indexOf(id)
+  if (idx >= 0) {
+    selectedCategoryIds.value.splice(idx, 1)
+  } else {
+    selectedCategoryIds.value.push(id)
+    selectedCategoryNames.value[id] = cat.name
+  }
   applyFilters()
 }
 
-/** 选择品牌 */
+/** 选择品牌（多选切换） */
 function handleBrandSelect(brand: AggregationBucket) {
-  selectedBrandId.value = selectedBrandId.value === Number(brand.key) ? null : Number(brand.key)
+  const id = Number(brand.key)
+  const idx = selectedBrandIds.value.indexOf(id)
+  if (idx >= 0) {
+    selectedBrandIds.value.splice(idx, 1)
+  } else {
+    selectedBrandIds.value.push(id)
+    selectedBrandNames.value[id] = brand.name
+  }
   applyFilters()
 }
 
@@ -132,7 +185,7 @@ function handlePriceApply() {
 
 /** 加载更多 */
 function handleLoadMore() {
-  store.loadMore()
+  store.loadMore().catch(() => ElMessage.error('加载失败，请稍后重试'))
 }
 
 /** 关闭移动端筛选面板 */
@@ -157,7 +210,15 @@ onMounted(() => {
   const initialKeyword = (route.query.keyword as string) ?? ''
   localKeyword.value = initialKeyword
   if (initialKeyword) {
-    store.doSearch(initialKeyword)
+    // 从首页导航进入时（携带新 keyword），清空旧筛选条件再搜索
+    selectedCategoryIds.value = []
+    selectedBrandIds.value = []
+    priceMinInput.value = null
+    priceMaxInput.value = null
+    selectedCategoryNames.value = {}
+    selectedBrandNames.value = {}
+    store.resetFilters()
+    store.doSearch(initialKeyword).catch(() => ElMessage.error('搜索失败，请稍后重试'))
   }
 })
 
@@ -172,7 +233,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="search-page">
     <!-- 搜索栏 -->
-    <div class="search-page__header">
+    <div class="search-page__header" role="search" aria-label="商品搜索">
       <el-popover
         :visible="showSuggestions"
         placement="bottom-start"
@@ -201,10 +262,16 @@ onBeforeUnmount(() => {
         </template>
         <ul v-if="suggestions.length > 0" class="search-page__suggestions">
           <li
-            v-for="s in suggestions"
+            v-for="(s, i) in suggestions"
             :key="s"
             class="search-page__suggestion-item"
+            tabindex="0"
             @click="handleSuggestionClick(s)"
+            @keydown.enter.prevent="handleSuggestionClick(s)"
+            @keydown.arrow-down.prevent="handleSuggestionKeydown(i + 1)"
+            @keydown.arrow-up.prevent="handleSuggestionKeydown(i - 1)"
+            @keydown.esc.prevent="handlePopoverHide"
+            :ref="(el: unknown) => { if (el) suggestionRefs[i] = el as HTMLElement }"
           >
             <el-icon class="search-page__suggestion-icon"><Search /></el-icon>
             {{ s }}
@@ -241,15 +308,21 @@ onBeforeUnmount(() => {
       <aside class="search-page__sidebar">
         <div class="search-page__filter-section">
           <h3 class="search-page__filter-title">商品类目</h3>
-          <ul class="search-page__filter-list">
+          <ul class="search-page__filter-list" role="listbox" aria-label="商品类目筛选">
             <li
-              v-for="cat in aggregations.categories"
+              v-for="cat in effectiveAggregations.categories"
               :key="cat.key"
               class="search-page__filter-item"
-              :class="{ 'search-page__filter-item--active': selectedCategoryId === Number(cat.key) }"
+              :class="{ 'search-page__filter-item--active': selectedCategoryIds.includes(Number(cat.key)) }"
+              :aria-selected="selectedCategoryIds.includes(Number(cat.key))"
+              role="option"
               @click="handleCategorySelect(cat)"
             >
-              <span>{{ cat.name }}</span>
+              <el-checkbox
+                :model-value="selectedCategoryIds.includes(Number(cat.key))"
+                size="small"
+              />
+              <span class="search-page__filter-label">{{ cat.name }}</span>
               <span class="search-page__filter-count">{{ cat.count }}</span>
             </li>
           </ul>
@@ -257,15 +330,21 @@ onBeforeUnmount(() => {
 
         <div class="search-page__filter-section">
           <h3 class="search-page__filter-title">品牌</h3>
-          <ul class="search-page__filter-list">
+          <ul class="search-page__filter-list" role="listbox" aria-label="品牌筛选">
             <li
-              v-for="brand in aggregations.brands"
+              v-for="brand in effectiveAggregations.brands"
               :key="brand.key"
               class="search-page__filter-item"
-              :class="{ 'search-page__filter-item--active': selectedBrandId === Number(brand.key) }"
+              :class="{ 'search-page__filter-item--active': selectedBrandIds.includes(Number(brand.key)) }"
+              :aria-selected="selectedBrandIds.includes(Number(brand.key))"
+              role="option"
               @click="handleBrandSelect(brand)"
             >
-              <span>{{ brand.name }}</span>
+              <el-checkbox
+                :model-value="selectedBrandIds.includes(Number(brand.key))"
+                size="small"
+              />
+              <span class="search-page__filter-label">{{ brand.name }}</span>
               <span class="search-page__filter-count">{{ brand.count }}</span>
             </li>
           </ul>
@@ -280,6 +359,7 @@ onBeforeUnmount(() => {
               placeholder="最低价"
               :controls="false"
               size="small"
+              inputmode="numeric"
             />
             <span class="search-page__price-separator">-</span>
             <el-input-number
@@ -288,6 +368,7 @@ onBeforeUnmount(() => {
               placeholder="最高价"
               :controls="false"
               size="small"
+              inputmode="numeric"
             />
           </div>
           <el-button
@@ -313,13 +394,14 @@ onBeforeUnmount(() => {
       </aside>
 
       <!-- 右侧结果区 -->
-      <section class="search-page__results">
+      <section class="search-page__results" role="region" aria-label="搜索结果" aria-live="polite">
         <!-- 排序栏 -->
         <div class="search-page__sort-bar">
           <el-radio-group
             v-model="sort"
             size="small"
             class="search-page__sort-group"
+            aria-label="排序方式"
           >
             <el-radio-button
               v-for="opt in SORT_OPTIONS"
@@ -333,7 +415,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 加载骨架屏 -->
-        <div v-if="loading && results.length === 0" class="search-page__skeleton-grid">
+        <div v-if="loading && results.length === 0" class="search-page__skeleton-grid" aria-busy="true">
           <el-skeleton
             v-for="n in SKELETON_COUNT"
             :key="n"
@@ -353,9 +435,9 @@ onBeforeUnmount(() => {
         <div v-else-if="!loading && results.length === 0" class="search-page__empty">
           <el-empty description="未找到相关商品">
             <template #image>
-              <el-icon :size="64" color="#BAE6FD"><Search /></el-icon>
+              <el-icon :size="64" :color="colorBorder"><Search /></el-icon>
             </template>
-            <el-button type="primary" @click="handleResetFilters">换个关键词试试</el-button>
+            <el-button type="primary" @click="handleResetFilters">未找到相关商品，试试其他关键词</el-button>
           </el-empty>
         </div>
 
@@ -378,7 +460,7 @@ onBeforeUnmount(() => {
                 <div v-else class="search-page__card-placeholder" />
               </div>
               <div class="search-page__card-info">
-                <h3 class="search-page__card-name">{{ item.spuName }}</h3>
+                <h3 class="search-page__card-name" v-html="item.spuNameHighlight || item.spuName" />
                 <div class="search-page__card-price">
                   <span class="search-page__card-price-symbol">¥</span>
                   <span class="search-page__card-price-value">{{ item.price }}</span>
@@ -418,15 +500,21 @@ onBeforeUnmount(() => {
     >
       <div class="search-page__filter-section">
         <h3 class="search-page__filter-title">商品类目</h3>
-        <ul class="search-page__filter-list">
+        <ul class="search-page__filter-list" role="listbox" aria-label="商品类目筛选">
           <li
-            v-for="cat in aggregations.categories"
+            v-for="cat in effectiveAggregations.categories"
             :key="cat.key"
             class="search-page__filter-item"
-            :class="{ 'search-page__filter-item--active': selectedCategoryId === Number(cat.key) }"
+            :class="{ 'search-page__filter-item--active': selectedCategoryIds.includes(Number(cat.key)) }"
+            :aria-selected="selectedCategoryIds.includes(Number(cat.key))"
+            role="option"
             @click="handleCategorySelect(cat)"
           >
-            <span>{{ cat.name }}</span>
+            <el-checkbox
+              :model-value="selectedCategoryIds.includes(Number(cat.key))"
+              size="small"
+            />
+            <span class="search-page__filter-label">{{ cat.name }}</span>
             <span class="search-page__filter-count">{{ cat.count }}</span>
           </li>
         </ul>
@@ -434,15 +522,21 @@ onBeforeUnmount(() => {
 
       <div class="search-page__filter-section">
         <h3 class="search-page__filter-title">品牌</h3>
-        <ul class="search-page__filter-list">
+        <ul class="search-page__filter-list" role="listbox" aria-label="品牌筛选">
           <li
-            v-for="brand in aggregations.brands"
+            v-for="brand in effectiveAggregations.brands"
             :key="brand.key"
             class="search-page__filter-item"
-            :class="{ 'search-page__filter-item--active': selectedBrandId === Number(brand.key) }"
+            :class="{ 'search-page__filter-item--active': selectedBrandIds.includes(Number(brand.key)) }"
+            :aria-selected="selectedBrandIds.includes(Number(brand.key))"
+            role="option"
             @click="handleBrandSelect(brand)"
           >
-            <span>{{ brand.name }}</span>
+            <el-checkbox
+              :model-value="selectedBrandIds.includes(Number(brand.key))"
+              size="small"
+            />
+            <span class="search-page__filter-label">{{ brand.name }}</span>
             <span class="search-page__filter-count">{{ brand.count }}</span>
           </li>
         </ul>
@@ -457,6 +551,7 @@ onBeforeUnmount(() => {
             placeholder="最低价"
             :controls="false"
             size="small"
+            inputmode="numeric"
           />
           <span class="search-page__price-separator">-</span>
           <el-input-number
@@ -465,6 +560,7 @@ onBeforeUnmount(() => {
             placeholder="最高价"
             :controls="false"
             size="small"
+            inputmode="numeric"
           />
         </div>
         <el-button
@@ -506,6 +602,7 @@ onBeforeUnmount(() => {
 
   &__input {
     max-width: 720px;
+    margin: 0 auto;
   }
 
   // ========== 搜索建议 ==========
@@ -555,7 +652,7 @@ onBeforeUnmount(() => {
 
   &__total-hint {
     font-size: 13px;
-    color: var(--el-text-color-secondary);
+    color: v.$color-text-regular;
   }
 
   // ========== 主体两栏 ==========
@@ -618,9 +715,17 @@ onBeforeUnmount(() => {
     }
   }
 
+  &__filter-label {
+    flex: 1;
+    margin-left: v.$spacing-sm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   &__filter-count {
     font-size: 11px;
-    color: var(--el-text-color-placeholder);
+    color: v.$color-text-secondary;
   }
 
   // ========== 价格区间 ==========
@@ -637,7 +742,7 @@ onBeforeUnmount(() => {
 
   &__price-separator {
     font-size: 13px;
-    color: var(--el-text-color-secondary);
+    color: v.$color-text-regular;
   }
 
   &__price-btn {
@@ -676,7 +781,7 @@ onBeforeUnmount(() => {
 
   &__total-label {
     font-size: 13px;
-    color: var(--el-text-color-secondary);
+    color: v.$color-text-regular;
   }
 
   // ========== 骨架屏 ==========
@@ -745,8 +850,8 @@ onBeforeUnmount(() => {
   }
 
   &__card-name {
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 600;
     line-height: 1.4;
     margin-bottom: v.$spacing-sm;
     display: -webkit-box;
@@ -776,7 +881,7 @@ onBeforeUnmount(() => {
 
   &__card-sales {
     font-size: 12px;
-    color: var(--el-text-color-secondary);
+    color: v.$color-text-regular;
   }
 
   // ========== 空结果 ==========
@@ -798,7 +903,7 @@ onBeforeUnmount(() => {
     align-items: center;
     gap: v.$spacing-sm;
     font-size: 14px;
-    color: var(--el-text-color-secondary);
+    color: v.$color-text-regular;
   }
 
   &__spinner {
@@ -813,7 +918,7 @@ onBeforeUnmount(() => {
 
   &__no-more {
     font-size: 13px;
-    color: var(--el-text-color-secondary);
+    color: v.$color-text-regular;
     margin: 0;
   }
 

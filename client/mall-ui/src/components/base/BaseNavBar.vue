@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Search, ShoppingCartFull } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 const keyword = ref('')
+
+const isSearchPage = computed(() => route.path === '/search')
 
 function handleSearch() {
   if (keyword.value.trim()) {
@@ -18,7 +21,7 @@ function handleSearch() {
     <div class="navbar-inner">
       <router-link to="/" class="logo">JH-Mall</router-link>
 
-      <div class="search-bar">
+      <div v-if="!isSearchPage" class="search-bar">
         <el-input
           v-model="keyword"
           placeholder="搜索商品"
