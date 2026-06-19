@@ -2,6 +2,7 @@ package com.mall.api.feign;
 
 import com.mall.common.DTO.product.ProductSkuDTO;
 import com.mall.common.DTO.product.SpuDTO;
+import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.common.DTO.PageResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -70,6 +71,17 @@ public interface RemoteProductService {
     @GetMapping("/inner/product/spus/all")
     PageResult<SpuDTO> fetchAllSpus(@RequestParam("page") int page,
                                     @RequestParam("size") int size);
+
+    /**
+     * 分页拉取全量 SPU（搜索索引重建专用，含类目名、品牌名、SKU规格）
+     *
+     * @param page 页码（从 1 开始）
+     * @param size 每页条数
+     * @return 富 DTO 分页
+     */
+    @GetMapping("/inner/product/spus/all-for-search")
+    PageResult<SpuSearchDTO> fetchAllSpusForSearch(@RequestParam("page") int page,
+                                                    @RequestParam("size") int size);
 
     /**
      * 补偿 Outbox 消息（ruoyi-job 调度）

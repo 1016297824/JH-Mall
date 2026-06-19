@@ -111,6 +111,7 @@ public enum ErrorCode {
     REDIS_ERROR("C0110", "Redis 连接失败", "服务暂时不可用", 500),
     MYSQL_ERROR("C0120", "MySQL 服务出错", "服务暂时不可用", 500),
     MQ_ERROR("C0130", "MQ 消息服务出错", "服务暂时不可用", 500),
+    ES_UNAVAILABLE("C0140", "ES 搜索服务不可用", "搜索服务暂时不可用", 503),
     PAYMENT_SERVICE_ERROR("C0210", "支付服务调用失败", "支付服务异常", 500),
     REFUND_SERVICE_ERROR("C0211", "退款服务调用失败", "退款服务异常", 500),
     SMS_SERVICE_ERROR("C0220", "短信平台调用失败", "短信服务异常", 500),

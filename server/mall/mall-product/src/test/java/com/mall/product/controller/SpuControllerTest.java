@@ -110,7 +110,7 @@ class SpuControllerTest {
     @Test
     void hotListShouldRejectLimitExceed50() throws Exception {
         mockMvc.perform(get("/api/product/spus/hot").param("limit", "100"))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0803"));
     }
 }

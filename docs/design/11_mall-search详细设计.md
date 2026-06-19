@@ -44,16 +44,16 @@ server/mall/mall-search/
     │   ├── SearchController.java            # C 端搜索 + 管理端维护
     │   └── inner/
     │       └── RemoteSearchInnerController.java   # /inner/search/** 供 ruoyi-job 定时调度
-    ├── dto/
+    ├── DTO/
     │   ├── request/
-    │   │   └── SearchReq.java               # 搜索请求（keyword/filters/sort/page）
+    │   │   └── SearchReqDTO.java              # 搜索请求（keyword/filters/sort/page）
     │   └── response/                         # 内部 Feign 响应 DTO（本模块暂无）
     ├── vo/
     │   ├── SearchItemVO.java                # 搜索结果单条（spuId/name/price/image）
     │   ├── AggregationVO.java               # 聚合统计（类目/品牌/价格区间各 count）
     │   └── SearchResultVO.java              # 搜索结果（items + aggregations + total）
     ├── DO/
-    │   └── ProductIndex.java                # ES 索引实体（非 MySQL DO，使用 @Document）
+    │   └── ProductIndexDO.java              # ES 索引实体（非 MySQL DO，使用 @Document）
     ├── service/
     │   ├── SearchService.java
     │   ├── IndexService.java
@@ -93,8 +93,8 @@ server/mall/mall-search/
 
 | 类层级 | 注解 | 说明 |
 |--------|------|------|
-| `DO/ProductIndex.java` | `@Data` | ES 索引实体（`@Document`），非 JPA Entity，`@Data` 可用 |
-| `dto/request/`, `dto/response/` | `@Data` + `@NoArgsConstructor` | — |
+| `DO/ProductIndexDO.java` | `@Data` | ES 索引实体（`@Document`），非 JPA Entity，`@Data` 可用 |
+| `DTO/request/`, `DTO/response/` | `@Data` + `@NoArgsConstructor` | — |
 | `vo/` | `@Data` | 视图对象 |
 | `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
 | `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |

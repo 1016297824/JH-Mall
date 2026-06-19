@@ -4,15 +4,18 @@ import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.common.DTO.PageResult;
 import com.mall.common.DTO.product.SpuDTO;
+import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.product.DO.MallBrandDO;
+import com.mall.product.DO.MallCategoryDO;
 import com.mall.product.DO.MallProductSkuDO;
 import com.mall.product.DO.MallProductSpuDO;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
 import com.mall.product.convert.response.SpuConvert;
 import com.mall.product.mapper.MallBrandMapper;
+import com.mall.product.mapper.MallCategoryMapper;
 import com.mall.product.mapper.MallProductSkuMapper;
 import com.mall.product.mapper.MallProductSpuMapper;
 import com.mall.product.service.IHotProductService;
@@ -25,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * SPU 服务实现
@@ -40,6 +44,7 @@ public class SpuServiceImpl implements ISpuService {
     private final MallProductSpuMapper mallProductSpuMapper;
     private final MallProductSkuMapper mallProductSkuMapper;
     private final MallBrandMapper mallBrandMapper;
+    private final MallCategoryMapper mallCategoryMapper;
     private final IHotProductService hotProductService;
 
     @Override
@@ -105,6 +110,17 @@ public class SpuServiceImpl implements ISpuService {
     }
 
     @Override
+    public PageResult<SpuSearchDTO> pageForSearchRebuild(int page, int size) {
+        // 分页查询全部未删除 SPU，转为含类目名、品牌名、SKU 规格的富 DTO
+        Page<MallProductSpuDO> pageParam = new Page<>(page, size);
+        Page<MallProductSpuDO> result = mallProductSpuMapper.selectAllPage(pageParam);
+        List<SpuSearchDTO> dtoList = result.getRecords().stream()
+                .map(this::toSpuSearchDTO)
+                .toList();
+        return PageResult.of(page, size, result.getTotal(), dtoList);
+    }
+
+    @Override
     public List<SpuVO> hotList(int limit) {
         List<SpuVO> hotList = hotProductService.hotList(limit);
         fillBrandNames(hotList);
@@ -136,6 +152,51 @@ public class SpuServiceImpl implements ISpuService {
         dto.setSalesCount(spuDO.getSalesCount());
         dto.setCategoryId(spuDO.getCategoryId());
         dto.setBrandId(spuDO.getBrandId());
+        return dto;
+    }
+
+    /**
+     * SPU DO 转 SpuSearchDTO（搜索索引重建专用，含类目名、品牌名、SKU 规格拼接）
+     */
+    private SpuSearchDTO toSpuSearchDTO(MallProductSpuDO spuDO) {
+        SpuSearchDTO dto = new SpuSearchDTO();
+        dto.setSpuId(spuDO.getId());
+        dto.setSpuName(spuDO.getSpuName());
+        // 副标题：spu_description 截断 200 字
+        if (spuDO.getSpuDescription() != null) {
+            dto.setSubTitle(spuDO.getSpuDescription().length() > 200
+                    ? spuDO.getSpuDescription().substring(0, 200) : spuDO.getSpuDescription());
+        }
+        dto.setMainImage(spuDO.getMainImage());
+        dto.setPriceMin(spuDO.getPriceMin());
+        dto.setPublishStatus(spuDO.getPublishStatus());
+        dto.setSalesCount(spuDO.getSalesCount());
+        dto.setCategoryId(spuDO.getCategoryId());
+        dto.setBrandId(spuDO.getBrandId());
+        dto.setCreateTime(spuDO.getCreateTime());
+        dto.setUpdateTime(spuDO.getUpdateTime());
+        // 类目名称
+        if (spuDO.getCategoryId() != null) {
+            MallCategoryDO cat = mallCategoryMapper.selectById(spuDO.getCategoryId());
+            if (cat != null) {
+                dto.setCategoryName(cat.getName());
+            }
+        }
+        // 品牌名称
+        if (spuDO.getBrandId() != null) {
+            MallBrandDO brand = mallBrandMapper.selectById(spuDO.getBrandId());
+            if (brand != null) {
+                dto.setBrandName(brand.getName());
+            }
+        }
+        // SKU 规格拼接
+        List<MallProductSkuDO> skus = mallProductSkuMapper.selectBySpuId(spuDO.getId());
+        if (skus != null && !skus.isEmpty()) {
+            dto.setSpuSpecs(skus.stream()
+                    .map(s -> s.getAttrsJson() != null ? s.getAttrsJson() : "")
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.joining(" ")));
+        }
         return dto;
     }
 

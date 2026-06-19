@@ -2,6 +2,7 @@ package com.mall.product.service;
 
 import com.mall.common.DTO.PageResult;
 import com.mall.common.DTO.product.SpuDTO;
+import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
 
@@ -44,6 +45,17 @@ public interface ISpuService {
      * @return SPU DTO 分页
      */
     PageResult<SpuDTO> pageForFullRebuild(int page, int size);
+
+    /**
+     * 全量分页查询 SPU（搜索索引重建专用）
+     *
+     * <p>返回含类目名、品牌名、SKU 规格拼接的富 DTO，供 mall-search 全量重建使用</p>
+     *
+     * @param page 页码（从 1 开始）
+     * @param size 每页条数
+     * @return SpuSearchDTO 分页结果
+     */
+    PageResult<SpuSearchDTO> pageForSearchRebuild(int page, int size);
 
     /**
      * 获取热点商品列表

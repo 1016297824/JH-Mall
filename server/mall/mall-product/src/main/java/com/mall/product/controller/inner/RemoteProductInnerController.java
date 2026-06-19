@@ -4,6 +4,7 @@ import com.mall.api.feign.RemoteProductService.ReserveStockItemRequest;
 import com.mall.common.DTO.PageResult;
 import com.mall.common.DTO.product.ProductSkuDTO;
 import com.mall.common.DTO.product.SpuDTO;
+import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISkuService;
 import com.mall.product.service.ISpuService;
@@ -104,6 +105,22 @@ public class RemoteProductInnerController {
     PageResult<SpuDTO> fetchAllSpus(@RequestParam("page") int page,
                                      @RequestParam("size") int size) {
         return spuService.pageForFullRebuild(page, size);
+    }
+
+    /**
+     * 全量分页查询 SPU（搜索索引重建专用，含富信息）
+     *
+     * <p>返回含类目名、品牌名、SKU 规格拼接的 {@link SpuSearchDTO}，
+     * 供 mall-search 全量重建搜索索引时使用。</p>
+     *
+     * @param page 页码（从 1 开始）
+     * @param size 每页条数
+     * @return SpuSearchDTO 分页
+     */
+    @GetMapping("/spus/all-for-search")
+    PageResult<SpuSearchDTO> fetchAllSpusForSearch(@RequestParam("page") int page,
+                                                    @RequestParam("size") int size) {
+        return spuService.pageForSearchRebuild(page, size);
     }
 
     /**
