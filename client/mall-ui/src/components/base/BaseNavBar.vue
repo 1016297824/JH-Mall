@@ -26,7 +26,13 @@ function handleSearch() {
           size="large"
           clearable
           @keyup.enter="handleSearch"
-        />
+        >
+          <template #suffix>
+            <span class="search-submit" @click="handleSearch" title="搜索">
+              <el-icon :size="20"><Search /></el-icon>
+            </span>
+          </template>
+        </el-input>
       </div>
 
       <div class="nav-actions">
@@ -72,6 +78,24 @@ function handleSearch() {
 .search-bar {
   flex: 1;
   max-width: 480px;
+}
+
+.search-submit {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 4px;
+  color: $color-primary;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+
+  &:hover {
+    transform: scale(1.12);
+  }
+
+  &:active {
+    transform: scale(1.0);
+    opacity: 0.8;
+  }
 }
 
 .nav-actions {
