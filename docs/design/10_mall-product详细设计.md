@@ -313,8 +313,8 @@ WHERE sku_id = #{skuId}
 
 供 mall-search 全量重建时调用，通过 `RemoteProductInnerController` 暴露 `/inner/product/spus/all-for-search` 端点：
 
-| 方法 | 返回 | 说明 |
-|------|------|------|
+| 方法                                 | 返回                         | 说明                                                     |
+| ------------------------------------ | ---------------------------- | -------------------------------------------------------- |
 | `pageForSearchRebuild(page, size)` | `PageResult<SpuSearchDTO>` | 分页查询全量 SPU，JOIN 类目名、品牌名，聚合 SKU 规格文本 |
 
 `SpuSearchDTO`（定义于 `mall-common`）比 `SpuDTO` 多包含 `subTitle`、`categoryName`、`brandName`、`spuSpecs`、`createTime`、`updateTime`、`tags`，满足 ES `ProductIndex` 全量重建所需字段。
@@ -548,7 +548,7 @@ spring:
              groupId: DEFAULT_GROUP
              data-type: json
              rule-type: flow
-    data:
+  data:
     redis:
       host: localhost
       port: 6379
@@ -650,11 +650,11 @@ spring:
 
 ## 10 错误码汇总
 
-| 错误码 | HTTP | userTip              | 说明                                         |
-| ------ | :--: | -------------------- | -------------------------------------------- |
-| A0520  | 400 | 商品已下架           | 该商品当前不可购买                           |
-| A0521  | 400 | 商品库存不足         | 下单时 available_stock 不够                  |
-| A0803  | 400 | 热门商品查询参数无效 | limit 超过最大值 50                          |
+| 错误码 | HTTP | userTip              | 说明                        |
+| ------ | :--: | -------------------- | --------------------------- |
+| A0520  | 400 | 商品已下架           | 该商品当前不可购买          |
+| A0521  | 400 | 商品库存不足         | 下单时 available_stock 不够 |
+| A0803  | 400 | 热门商品查询参数无效 | limit 超过最大值 50         |
 
 > 公共错误码（A0301/A0320/A0401/A0501/A0503/B0001/C0110/C0120 等）见 `06_mall-common公共模块设计.md` §6.1。
 

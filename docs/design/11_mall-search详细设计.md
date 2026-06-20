@@ -80,25 +80,25 @@ server/mall/mall-search/
 
 ### 2.2 接口 → Controller 映射
 
-| # | 方法 | 路径                                 | 方法名               | 需登录 | 说明                             |
-| - | ---- | ------------------------------------ | -------------------- | :----: | -------------------------------- |
-| 1 | POST | `/api/search`                      | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合） |
-| 2 | GET  | `/api/search/suggest`              | `suggest(keyword)` |   否   | 搜索补全建议                     |
-| 3 | POST | `/mall-search/index/rebuild` | `rebuildIndex()`   | 管理端 | 触发全量重建     |
-| 4 | POST | `/inner/search/index/rebuild`      | `rebuildIndex()`   | —    | ruoyi-job 定时全量重建，复用 IndexRebuildTask |
+| # | 方法 | 路径                            | 方法名               | 需登录 | 说明                                          |
+| - | ---- | ------------------------------- | -------------------- | :----: | --------------------------------------------- |
+| 1 | POST | `/api/search`                 | `search(req)`      |   否   | 商品全文搜索（含筛选/排序/聚合）              |
+| 2 | GET  | `/api/search/suggest`         | `suggest(keyword)` |   否   | 搜索补全建议                                  |
+| 3 | POST | `/mall-search/index/rebuild`  | `rebuildIndex()`   | 管理端 | 触发全量重建                                  |
+| 4 | POST | `/inner/search/index/rebuild` | `rebuildIndex()`   |   —   | ruoyi-job 定时全量重建，复用 IndexRebuildTask |
 
 ### 2.3 Lombok 使用约定
 
 本模块与其它 C 端模块不同：**无 MySQL DO 类**，仅有 ES `@Document` 索引实体。
 
-| 类层级 | 注解 | 说明 |
-|--------|------|------|
-| `DO/ProductIndexDO.java` | `@Data` | ES 索引实体（`@Document`），非 JPA Entity，`@Data` 可用 |
-| `DTO/request/`, `DTO/response/` | `@Data` + `@NoArgsConstructor` | — |
-| `vo/` | `@Data` | 视图对象 |
-| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 |
-| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | — |
-| `convert/request/`, `convert/response/` | 无 Lombok | 静态转换方法 |
+| 类层级                                      | 注解                                      | 说明                                                        |
+| ------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------- |
+| `DO/ProductIndexDO.java`                  | `@Data`                                 | ES 索引实体（`@Document`），非 JPA Entity，`@Data` 可用 |
+| `DTO/request/`, `DTO/response/`         | `@Data` + `@NoArgsConstructor`        | —                                                          |
+| `vo/`                                     | `@Data`                                 | 视图对象                                                    |
+| `service/impl/`                           | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入                                                  |
+| `controller/`                             | `@Slf4j` + `@RequiredArgsConstructor` | —                                                          |
+| `convert/request/`, `convert/response/` | 无 Lombok                                 | 静态转换方法                                                |
 
 > `ProductIndex` 是 ES 实体（Spring Data Elasticsearch），非 JPA Entity，`@Data` 不违反"禁止用于 JPA Entity"约束。
 
@@ -234,8 +234,8 @@ ruoyi-job (9204端口)
 
 位于 `controller/inner/RemoteSearchInnerController.java`，内部端点，不走网关认证。
 
-| 方法 | 路径 | 方法名 | 说明 |
-| ---- | ------------------------------- | ------ | ---- |
+| 方法 | 路径                            | 方法名             | 说明                  |
+| ---- | ------------------------------- | ------------------ | --------------------- |
 | POST | `/inner/search/index/rebuild` | `rebuildIndex()` | 定时/手动全量重建索引 |
 
 > `SearchInnerController` 路径在 `mall.security.anonymous-paths` 中放行，由 `InnerSignatureFilter` 验签保护。
@@ -322,6 +322,12 @@ spring:
              groupId: DEFAULT_GROUP
              data-type: json
              rule-type: flow
+  # 新增Redis配置
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password:
     datasource:
     dynamic:
       primary: master
@@ -405,9 +411,9 @@ spring:
 
 | 配置项                                   | 默认值             | 说明                      |
 | ---------------------------------------- | ------------------ | ------------------------- |
-| `mall.search.es.hosts` *                 | `localhost:9200` | ES 集群地址               |
-| `mall.search.es.shards` *                | 3                  | 索引分片数（生产）        |
-| `mall.search.es.replicas` *              | 1                  | 索引副本数（生产）        |
+| `mall.search.es.hosts` *               | `localhost:9200` | ES 集群地址               |
+| `mall.search.es.shards` *              | 3                  | 索引分片数（生产）        |
+| `mall.search.es.replicas` *            | 1                  | 索引副本数（生产）        |
 | `mall.search.query.timeout`            | 2000ms             | 搜索超时                  |
 | `mall.search.page.max-size`            | 60                 | 单页最大条数              |
 | `mall.search.page.max-depth`           | 10000              | 分页最大深度（from+size） |
