@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "run-p type-check \"build-only {@}\" -- && npm run postbuild",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
     "build-only": "vite build",
+    "postbuild": "node -e \"const fs=require('fs');if(fs.existsSync('edge-functions')){fs.cpSync('edge-functions','dist/edge-functions',{recursive:true});console.log('Copied edge-functions/')};if(fs.existsSync('edgeone.json')){fs.copyFileSync('edgeone.json','dist/edgeone.json');console.log('Copied edgeone.json')}\"",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",

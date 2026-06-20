@@ -2,6 +2,7 @@ package com.mall.search.service.impl;
 
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
+import com.mall.api.feign.RemoteProductService;
 import com.mall.search.DO.ProductIndexDO;
 import com.mall.search.DTO.request.SearchReqDTO;
 import com.mall.search.config.MallSearchConfigProperties;
@@ -27,6 +28,7 @@ class SearchServiceImplTest {
 
     @Mock private ElasticsearchOperations operations;
     @Mock private MallSearchConfigProperties configProperties;
+    @Mock private RemoteProductService remoteProductService;
     @Mock private SearchHits<ProductIndexDO> hits;
     private SearchServiceImpl searchService;
 
@@ -45,7 +47,7 @@ class SearchServiceImplTest {
         when(hits.getTotalHits()).thenReturn(0L);
         when(hits.iterator()).thenReturn(Collections.emptyIterator());
 
-        searchService = new SearchServiceImpl(operations, configProperties);
+        searchService = new SearchServiceImpl(operations, configProperties, remoteProductService);
     }
 
     @Test

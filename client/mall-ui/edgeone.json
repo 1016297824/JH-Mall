@@ -1,0 +1,17 @@
+{
+  "version": "1.1",
+  "rules": [
+    {
+      "pattern": "*",
+      "action": {
+        "type": "serve",
+        "destination": "/index.html"
+      },
+      "condition": {
+        "not": {
+          "file_exists": true
+        }
+      }
+    }
+  ]
+}

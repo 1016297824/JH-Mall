@@ -43,6 +43,9 @@ client/ruoyi-ui/auto-imports.d.ts
 # Docker 持久化数据
 /deploy/docker/data/
 
+# MVP 部署方案（本地部署用，不上仓库）
+/deploy/MVP/
+
 # opencode配置
 .opencode
 

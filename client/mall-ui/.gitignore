@@ -10,9 +10,17 @@ lerna-debug.log*
 node_modules
 .DS_Store
 dist
+dist.zip
 dist-ssr
 coverage
 *.local
+
+# 生产环境配置（含 API 地址，不入库；部署前手动创建或通过 EdgeOne 环境变量注入）
+.env.production
+.env.production.local
+
+# Edge Functions（含 BACKEND_URL 地址，不入库；部署前从 edge-functions.example 复制并修改）
+/edge-functions
 
 # Agent instructions
 AGENTS.md
