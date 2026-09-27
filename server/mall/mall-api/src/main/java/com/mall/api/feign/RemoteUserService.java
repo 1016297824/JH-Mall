@@ -1,6 +1,7 @@
 package com.mall.api.feign;
 
 import com.mall.common.DTO.user.response.MallUserDTO;
+import com.mall.common.DTO.user.response.UserCredentialDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -30,6 +31,18 @@ public interface RemoteUserService {
      */
     @GetMapping("/inner/user/phone/{phone}")
     MallUserDTO findByPhone(@PathVariable("phone") String phone);
+
+    /**
+     * 查询用户密码凭据（仅供 mall-auth 校验密码使用）
+     *
+     * <p>MallUserDTO 的 password 字段为 WRITE_ONLY，序列化时会被忽略，
+     * 因此密码哈希只能经此端点单独获取。</p>
+     *
+     * @param userId 用户 ID
+     * @return 凭据 DTO（用户不存在时返回 null）
+     */
+    @GetMapping("/inner/user/{userId}/credential")
+    UserCredentialDTO getCredential(@PathVariable("userId") String userId);
 
     /**
      * 注册用户

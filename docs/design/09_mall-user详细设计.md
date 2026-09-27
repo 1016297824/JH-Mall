@@ -2,21 +2,21 @@
 
 > 基于系统详细设计 `03_系统详细设计.md` 展开。数据表 DDL 在系统设计 1.1 节统一维护，此处只引用表名和字段。
 
-***
+---
 
 ## 1 模块概述
 
 ### 1.1 子领域
 
-| 子领域   | 实体                         | 说明                        |
-| ----- | -------------------------- | ------------------------- |
-| 用户账号  | `mall_user`                | 基本信息（加密手机号/密码哈希/昵称/头像/状态） |
-| 会员等级  | `mall_user_member_level`   | 等级定义（成长值区间/折扣率/包邮/积分倍数）   |
-| 用户会员  | `mall_user_member`         | 用户当前等级+成长值，与用户 1:1        |
-| 地址簿   | `mall_user_address`        | 收货地址（最多 20 条），手机号加密存储     |
-| 积分账户  | `mall_user_points_account` | 积分余额+累计，与用户 1:1           |
-| 积分流水  | `mall_user_points_log`     | 积分变动记录（获取/消耗/过期/调整）       |
-| 成长值流水 | `mall_user_growth_log`     | 成长值变动记录（获取/消耗）            |
+| 子领域     | 实体                         | 说明                                           |
+| ---------- | ---------------------------- | ---------------------------------------------- |
+| 用户账号   | `mall_user`                | 基本信息（加密手机号/密码哈希/昵称/头像/状态） |
+| 会员等级   | `mall_user_member_level`   | 等级定义（成长值区间/折扣率/包邮/积分倍数）    |
+| 用户会员   | `mall_user_member`         | 用户当前等级+成长值，与用户 1:1                |
+| 地址簿     | `mall_user_address`        | 收货地址（最多 20 条），手机号加密存储         |
+| 积分账户   | `mall_user_points_account` | 积分余额+累计，与用户 1:1                      |
+| 积分流水   | `mall_user_points_log`     | 积分变动记录（获取/消耗/过期/调整）            |
+| 成长值流水 | `mall_user_growth_log`     | 成长值变动记录（获取/消耗）                    |
 
 ### 1.2 依赖关系
 
@@ -31,7 +31,7 @@ mall-user (9302端口)
 
 > **关键约束**：手机号/邮箱 AES-256-GCM 加密存储，等值查询通过 SHA256 哈希辅助列。mall-user 是用户数据唯一持有方，其他服务通过 Feign 调 RemoteUserService 操作。
 
-***
+---
 
 ## 2 包结构与接口映射
 
@@ -117,12 +117,12 @@ server/mall/mall-user/
 
 ### 2.1.1 Mapper 层编码规范
 
-| 操作 | 用什么 | 说明 |
-| --- | --- | --- |
-| **SELECT** | `LambdaQueryWrapper` + `BaseMapper.selectPage()` | 类型安全，字段变更 IDE 即时感知，不需要 XML |
-| **UPDATE** | `@Update` 注解 | 简洁直读，尤其 `SET field = field + #{value}` 算术运算必须用 |
-| **INSERT** | `BaseMapper.insert()` | MyBatis-Plus 内置，无需手写 |
-| **DELETE** | `BaseMapper.update()` 软删除 | 本项目统一逻辑删除 `set is_deleted = 1` |
+| 操作             | 用什么                                               | 说明                                                          |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| **SELECT** | `LambdaQueryWrapper` + `BaseMapper.selectPage()` | 类型安全，字段变更 IDE 即时感知，不需要 XML                   |
+| **UPDATE** | `@Update` 注解                                     | 简洁直读，尤其`SET field = field + #{value}` 算术运算必须用 |
+| **INSERT** | `BaseMapper.insert()`                              | MyBatis-Plus 内置，无需手写                                   |
+| **DELETE** | `BaseMapper.update()` 软删除                       | 本项目统一逻辑删除`set is_deleted = 1`                      |
 
 示例：
 
@@ -151,41 +151,41 @@ mallUserAddressMapper.updateById(addressDO);
 
 ### 2.2 接口 → Controller 映射
 
-| #  | 方法     | 路径                                        | Controller           | 方法名                      | 需登录 | 权限码 |
-| -- | ------ | ----------------------------------------- | -------------------- | ------------------------ | :-: | --- |
-| 1  | GET    | `/api/user/profile`                       | ProfileController    | `getProfile()`           |  是  | —   |
-| 2  | PUT    | `/api/user/profile`                       | ProfileController    | `updateProfile(req)`     |  是  | —   |
-| 3  | GET    | `/api/user/addresses`                     | AddressController    | `list()`                 |  是  | —   |
-| 4  | POST   | `/api/user/addresses`                     | AddressController    | `create(req)`            |  是  | —   |
-| 5  | PUT    | `/api/user/addresses/{addressId}`         | AddressController    | `update(addressId, req)` |  是  | —   |
-| 6  | DELETE | `/api/user/addresses/{addressId}`         | AddressController    | `delete(addressId)`      |  是  | —   |
-| 7  | PUT    | `/api/user/addresses/{addressId}/default` | AddressController    | `setDefault(addressId)`  |  是  | —   |
-| 8  | GET    | `/api/user/membership`                    | MembershipController | `getMembership()`        |  是  | —   |
-| 9  | GET    | `/api/user/points`                        | PointsController     | `getPoints()`            |  是  | —   |
-| 10 | GET    | `/api/user/points/records`                | PointsController     | `listRecords(params)`    |  是  | —   |
-| 11 | GET    | `/api/user/growth`                        | GrowthController     | `getGrowth()`            |  是  | —   |
-| 12 | GET    | `/api/user/growth/records`                | GrowthController     | `listRecords(params)`    |  是  | —   |
-| 13 | POST   | `/api/user/sign-in`                       | SignInController     | `signIn()`               |  是  | —   |
+| #  | 方法   | 路径                                        | Controller           | 方法名                     | 需登录 | 权限码 |
+| -- | ------ | ------------------------------------------- | -------------------- | -------------------------- | :----: | ------ |
+| 1  | GET    | `/api/user/profile`                       | ProfileController    | `getProfile()`           |   是   | —     |
+| 2  | PUT    | `/api/user/profile`                       | ProfileController    | `updateProfile(req)`     |   是   | —     |
+| 3  | GET    | `/api/user/addresses`                     | AddressController    | `list()`                 |   是   | —     |
+| 4  | POST   | `/api/user/addresses`                     | AddressController    | `create(req)`            |   是   | —     |
+| 5  | PUT    | `/api/user/addresses/{addressId}`         | AddressController    | `update(addressId, req)` |   是   | —     |
+| 6  | DELETE | `/api/user/addresses/{addressId}`         | AddressController    | `delete(addressId)`      |   是   | —     |
+| 7  | PUT    | `/api/user/addresses/{addressId}/default` | AddressController    | `setDefault(addressId)`  |   是   | —     |
+| 8  | GET    | `/api/user/membership`                    | MembershipController | `getMembership()`        |   是   | —     |
+| 9  | GET    | `/api/user/points`                        | PointsController     | `getPoints()`            |   是   | —     |
+| 10 | GET    | `/api/user/points/records`                | PointsController     | `listRecords(params)`    |   是   | —     |
+| 11 | GET    | `/api/user/growth`                        | GrowthController     | `getGrowth()`            |   是   | —     |
+| 12 | GET    | `/api/user/growth/records`                | GrowthController     | `listRecords(params)`    |   是   | —     |
+| 13 | POST   | `/api/user/sign-in`                       | SignInController     | `signIn()`               |   是   | —     |
 
 ### 2.3 Lombok 使用约定
 
 本模块类层级与 Lombok 注解映射：
 
-| 类层级 | 注解 | 说明 |
-|--------|------|------|
-| `DO/` | `@Data` + `@Builder` | 数据库实体，禁止 `@EqualsAndHashCode` |
-| `dto/request/` | `@Data` + `@NoArgsConstructor` | Jackson 反序列化需要无参构造 |
-| `dto/response/` | `@Data` | 响应 DTO |
-| `vo/` | `@Data` | 视图对象 |
-| `service/impl/` | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 + 日志 |
-| `controller/` | `@Slf4j` + `@RequiredArgsConstructor` | 同上 |
-    | `convert/request/`, `convert/response/` | 无 Lombok | 纯转换器，static 方法；request 为 merge 入站，response 为 toVO 出站 |
+| 类层级                                      | 注解                                      | 说明                                                                |
+| ------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------- |
+| `DO/`                                     | `@Data` + `@Builder`                  | 数据库实体，禁止`@EqualsAndHashCode`                              |
+| `dto/request/`                            | `@Data` + `@NoArgsConstructor`        | Jackson 反序列化需要无参构造                                        |
+| `dto/response/`                           | `@Data`                                 | 响应 DTO                                                            |
+| `vo/`                                     | `@Data`                                 | 视图对象                                                            |
+| `service/impl/`                           | `@Slf4j` + `@RequiredArgsConstructor` | 构造器注入 + 日志                                                   |
+| `controller/`                             | `@Slf4j` + `@RequiredArgsConstructor` | 同上                                                                |
+| `convert/request/`, `convert/response/` | 无 Lombok                                 | 纯转换器，static 方法；request 为 merge 入站，response 为 toVO 出站 |
 
 禁止使用：`@EqualsAndHashCode`（继承场景语义不清）、`@ToString`（统一 `ToStringBuilder`）、`@Value`（不采用不可变模式）。
 
 详见 `AGENTS.md` §Lombok 使用规范。
 
-***
+---
 
 ## 3 核心类设计
 
@@ -206,7 +206,12 @@ mallUserAddressMapper.updateById(addressDO);
 **findByPhone(phoneHash)**（Feign 接口，供 mall-auth 调用）：
 
 - 查询：`WHERE phone_hash = SHA2(CONCAT(?, salt), 256)`
-- 返回 `MallUserDO`（含密码哈希、状态），用于登录校验
+- 返回 `MallUserDTO`（含用户状态、昵称等），**不含密码哈希**
+
+**getCredential(userId)**（Feign 接口，供 mall-auth 校验密码）：
+
+- 返回 `UserCredentialDTO{userId, passwordHash}`，是密码哈希的唯一出口
+- 与 `findByPhone` 分离的原因：`MallUserDTO.password` 标注 `@JsonProperty(WRITE_ONLY)`，经 Feign（JSON）传输后必为 null；若登录沿用该字段比对，密码校验将永远失败
 
 **register(phoneEncrypted, phoneHash, passwordHash)**（Feign 接口，供 mall-auth 调用）：
 
@@ -259,37 +264,37 @@ mallUserAddressMapper.updateById(addressDO);
 
 **adjustPoints(userId, points, reason)**：管理端手动调整，审计日志记录操作人
 
-***
+---
 
 ## 4 会员成长值设计
 
 ### 4.1 成长值获取
 
-| 来源   |    成长值   | 说明        |
-| ---- | :------: | --------- |
+| 来源     |    成长值    | 说明               |
+| -------- | :----------: | ------------------ |
 | 订单完成 | 订单金额/100 | 订单确认收货后发放 |
-| 每日签到 |   5\~10  | 连续签到递增    |
-| 评价商品 |    10    | 带图+20     |
+| 每日签到 |    5\~10    | 连续签到递增       |
+| 评价商品 |      10      | 带图+20            |
 
 ### 4.2 升级/降级
 
-| 操作 | 时机                       | 说明                 |
-| -- | ------------------------ | ------------------ |
-| 升级 | 成长值达到上级 `min_growth`     | 实时触发，消费积分/成长值事件后检查 |
-| 降级 | 年度到期扣除后低于本级 `min_growth` | 每年 1 月 1 日执行（初期不做） |
+| 操作 | 时机                                 | 说明                                |
+| ---- | ------------------------------------ | ----------------------------------- |
+| 升级 | 成长值达到上级`min_growth`         | 实时触发，消费积分/成长值事件后检查 |
+| 降级 | 年度到期扣除后低于本级`min_growth` | 每年 1 月 1 日执行（初期不做）      |
 
 ### 4.3 会员权益
 
-| 等级   |  折扣率 |    包邮   | 积分倍数 |
-| ---- | :--: | :-----: | :--: |
-| 普通会员 | 100% |    否    | 1.0x |
-| 银卡会员 |  98% | 满 99 包邮 | 1.1x |
-| 金卡会员 |  95% |    包邮   | 1.2x |
-| 钻石会员 |  90% |    包邮   | 1.5x |
+| 等级     | 折扣率 |    包邮    | 积分倍数 |
+| -------- | :----: | :--------: | :------: |
+| 普通会员 |  100%  |     否     |   1.0x   |
+| 银卡会员 |  98%  | 满 99 包邮 |   1.1x   |
+| 金卡会员 |  95%  |    包邮    |   1.2x   |
+| 钻石会员 |  90%  |    包邮    |   1.5x   |
 
 > 会员权益在 `mall_user_member_level.benefits_json` 中以 JSON 存储，前端根据此字段展示权益明细。
 
-***
+---
 
 ## 5 手机号加密存储
 
@@ -297,12 +302,12 @@ mallUserAddressMapper.updateById(addressDO);
 
 遵循系统设计 7.1 节：
 
-| 方面   | 方案                                                      |
-| ---- | ------------------------------------------------------- |
-| 算法   | AES-256-GCM（认证加密）                                       |
-| 密钥持有 | mall-auth（Nacos `mall.security.aes-key`）                |
-| 查询方式 | SHA256 哈希辅助列 `phone_hash`（等值匹配）                         |
-| 解密   | mall-user 调 `RemoteAuthAdapter.decrypt(encryptedPhone)` |
+| 方面     | 方案                                                      |
+| -------- | --------------------------------------------------------- |
+| 算法     | AES-256-GCM（认证加密）                                   |
+| 密钥持有 | mall-auth（Nacos`mall.security.aes-key`）               |
+| 查询方式 | SHA256 哈希辅助列`phone_hash`（等值匹配）               |
+| 解密     | mall-user 调`RemoteAuthAdapter.decrypt(encryptedPhone)` |
 
 ### 5.2 解密调用链
 
@@ -315,7 +320,7 @@ mall-user 需要展示手机号
 
 管理端用户详情可查看完整手机号（权限控制），C 端始终脱敏展示。
 
-***
+---
 
 ## 6 Nacos 配置
 
@@ -419,29 +424,29 @@ spring:
 
 ### 6.3 配置项说明
 
-| 配置项                                         | 默认值 |  单位 | 说明         |
-| ------------------------------------------- | --- | :-: | ---------- |
-| `mall.user.address.max-count`               | 20  |  条  | 地址簿上限      |
-| `mall.user.profile.cache-ttl`               | 600 |  秒  | 用户资料缓存时间   |
-| `mall.user.member.default-level`            | 1   |  —  | 新用户默认会员等级  |
-| `mall.user.points.signin-base`              | 5   |  分  | 每日签到基础积分   |
-| `mall.user.points.signin-consecutive`       | 10  |  分  | 连续签到上限积分   |
-| `mall.user.points.signin-consecutive-bonus` | 1   | 分/天 | 每连续一天额外加积分 |
-| `mall.user.points.review`                   | 10  |  分  | 评价奖励积分     |
-| `mall.user.points.review-with-photo`        | 20  |  分  | 带图评价积分     |
+| 配置项                                        | 默认值 | 单位 | 说明                 |
+| --------------------------------------------- | ------ | :---: | -------------------- |
+| `mall.user.address.max-count`               | 20     |  条  | 地址簿上限           |
+| `mall.user.profile.cache-ttl`               | 600    |  秒  | 用户资料缓存时间     |
+| `mall.user.member.default-level`            | 1      |  —  | 新用户默认会员等级   |
+| `mall.user.points.signin-base`              | 5      |  分  | 每日签到基础积分     |
+| `mall.user.points.signin-consecutive`       | 10     |  分  | 连续签到上限积分     |
+| `mall.user.points.signin-consecutive-bonus` | 1      | 分/天 | 每连续一天额外加积分 |
+| `mall.user.points.review`                   | 10     |  分  | 评价奖励积分         |
+| `mall.user.points.review-with-photo`        | 20     |  分  | 带图评价积分         |
 
-***
+---
 
 ## 7 错误码汇总
 
-| 错误码   | HTTP | userTip    | 说明          |
-| ----- | :--: | ---------- | ----------- |
-| A0504 |  400 | 用户不存在     | 用户/成员不存在    |
-| A0511 |  400 | 地址数量已达上限   | 地址簿已满 20 条  |
+| 错误码 | HTTP | userTip          | 说明             |
+| ------ | :--: | ---------------- | ---------------- |
+| A0504  | 400 | 用户不存在       | 用户/成员不存在  |
+| A0511  | 400 | 地址数量已达上限 | 地址簿已满 20 条 |
 
 > 公共错误码（A0301/A0320/A0401/A0402/A0501/A0502/A0503/B0001/C0110/C0120 等）见 `06_mall-common公共模块设计.md` §6.1。
 
-***
+---
 
 ## 8 /inner/ 接口签名校验（接收方）
 
@@ -453,5 +458,4 @@ mall-user 的 `RemoteUserInnerController`（`/inner/user/**`）接收来自 mall
 
 签名算法详见 [03_系统详细设计.md §7.3](file:///e:/Workspace/AI/JH-Mall/docs/design/03_系统详细设计.md#L4346)。
 
-***
-
+---

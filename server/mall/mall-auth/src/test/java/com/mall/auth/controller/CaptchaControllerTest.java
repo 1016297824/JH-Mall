@@ -1,6 +1,7 @@
 package com.mall.auth.controller;
 
 import com.mall.common.DTO.user.response.MallUserDTO;
+import com.mall.common.DTO.user.response.UserCredentialDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
@@ -139,7 +140,7 @@ class CaptchaControllerTest {
                                     "isPrivacyAgreed": true
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0151"));
     }
 
@@ -156,7 +157,7 @@ class CaptchaControllerTest {
                                     "isPrivacyAgreed": false
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0101"));
     }
 
@@ -176,7 +177,7 @@ class CaptchaControllerTest {
                                     "isPrivacyAgreed": true
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0131"));
     }
 
@@ -190,10 +191,12 @@ class CaptchaControllerTest {
         MallUserDTO user = new MallUserDTO();
         user.setId("user-001");
         user.setPhone(phone);
-        user.setPassword(passwordEncoder.encode(rawPassword));
         user.setUserStatus(String.valueOf(UserStatusEnum.NORMAL.getCode()));
 
         when(remoteUserService.findByPhone(phone)).thenReturn(user);
+        // 密码哈希只能经专用凭据端点获取：MallUserDTO.password 为 WRITE_ONLY，Feign 传输后会丢失
+        when(remoteUserService.getCredential("user-001"))
+                .thenReturn(new UserCredentialDTO("user-001", passwordEncoder.encode(rawPassword)));
         when(valueOperations.get("mall:auth:pwd_err:user-001")).thenReturn(null);
         when(tokenService.issue("user-001"))
                 .thenReturn(new TokenRespDTO("access-token-2", "refresh-token-2", 1800L));
@@ -234,7 +237,7 @@ class CaptchaControllerTest {
                                     "captchaCode": "abcd"
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0202"));
     }
 
@@ -245,10 +248,11 @@ class CaptchaControllerTest {
         MallUserDTO user = new MallUserDTO();
         user.setId("user-001");
         user.setPhone(phone);
-        user.setPassword(passwordEncoder.encode("correct"));
         user.setUserStatus(String.valueOf(UserStatusEnum.NORMAL.getCode()));
 
         when(remoteUserService.findByPhone(phone)).thenReturn(user);
+        when(remoteUserService.getCredential("user-001"))
+                .thenReturn(new UserCredentialDTO("user-001", passwordEncoder.encode("correct")));
         when(valueOperations.get("mall:auth:pwd_err:user-001")).thenReturn(null);
         when(valueOperations.increment("mall:auth:pwd_err:user-001", 1L)).thenReturn(1L);
 
@@ -262,7 +266,7 @@ class CaptchaControllerTest {
                                     "captchaCode": "abcd"
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0210"));
     }
 
@@ -286,7 +290,7 @@ class CaptchaControllerTest {
                                     "captchaCode": "abcd"
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0211"));
     }
 
@@ -309,7 +313,7 @@ class CaptchaControllerTest {
                                     "captchaCode": "abcd"
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("A0203"));
     }
 
@@ -354,9 +358,10 @@ class CaptchaControllerTest {
         MallUserDTO user = new MallUserDTO();
         user.setId("user-001");
         user.setPhone(oldPhone);
-        user.setPassword(passwordEncoder.encode("pass1234"));
 
         when(remoteUserService.findByPhone(oldPhone)).thenReturn(user);
+        when(remoteUserService.getCredential("user-001"))
+                .thenReturn(new UserCredentialDTO("user-001", passwordEncoder.encode("pass1234")));
         when(remoteUserService.findByPhone(newPhone)).thenReturn(null);
 
         mockMvc.perform(put("/api/auth/captcha/phone")
@@ -383,9 +388,10 @@ class CaptchaControllerTest {
         MallUserDTO user = new MallUserDTO();
         user.setId("user-001");
         user.setPhone(phone);
-        user.setPassword(passwordEncoder.encode("pass1234"));
 
         when(remoteUserService.findByPhone(phone)).thenReturn(user);
+        when(remoteUserService.getCredential("user-001"))
+                .thenReturn(new UserCredentialDTO("user-001", passwordEncoder.encode("pass1234")));
 
         mockMvc.perform(delete("/api/auth/captcha/account")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -4,8 +4,15 @@ import { mount } from '@vue/test-utils'
 import App from '../App.vue'
 
 describe('App', () => {
-  it('mounts renders properly', () => {
-    const wrapper = mount(App)
-    expect(wrapper.text()).toContain('You did it!')
+  it('渲染根级路由出口', () => {
+    const wrapper = mount(App, {
+      global: {
+        stubs: {
+          RouterView: { template: '<div class="router-view-stub" />' },
+        },
+      },
+    })
+
+    expect(wrapper.find('.router-view-stub').exists()).toBe(true)
   })
 })

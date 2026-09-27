@@ -157,4 +157,36 @@ class RemoteUserInnerControllerTest {
 
         verify(mallUserService).updateUserStatusById("12345", String.valueOf(UserStatusEnum.DELETED.getCode()));
     }
+
+    @Test
+    void testGetCredential_ShouldReturnPasswordHash() throws Exception {
+        when(mallUserService.selectById(12345L)).thenReturn(buildMockUser());
+
+        mockMvc.perform(get("/inner/user/12345/credential"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value("12345"))
+                .andExpect(jsonPath("$.passwordHash").value("$2a$10$encodedhash"));
+
+        verify(mallUserService).selectById(12345L);
+    }
+
+    @Test
+    void testGetCredential_ShouldReturnNullWhenUserNotFound() throws Exception {
+        when(mallUserService.selectById(99999L)).thenReturn(null);
+
+        mockMvc.perform(get("/inner/user/99999/credential"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+
+        verify(mallUserService).selectById(99999L);
+    }
+
+    @Test
+    void testGetCredential_ShouldReturnNullWhenUserIdInvalid() throws Exception {
+        mockMvc.perform(get("/inner/user/abc/credential"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+
+        verifyNoInteractions(mallUserService);
+    }
 }

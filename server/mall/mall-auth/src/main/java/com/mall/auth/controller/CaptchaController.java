@@ -3,6 +3,7 @@ package com.mall.auth.controller;
 import com.mall.auth.DTO.request.*;
 import com.mall.auth.DTO.response.TokenRespDTO;
 import com.mall.common.DTO.user.response.MallUserDTO;
+import com.mall.common.DTO.user.response.UserCredentialDTO;
 import com.mall.common.DTO.MallResult;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.auth.config.MallAuthConfigProperties;
@@ -151,7 +152,7 @@ public class CaptchaController {
         }
 
         // 密码不匹配时递增错误计数
-        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+        if (!matchesPassword(user.getId(), req.getPassword())) {
             incrementPwdErrCount(pwdErrKey);
             throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
@@ -205,7 +206,7 @@ public class CaptchaController {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+        if (!matchesPassword(user.getId(), req.getPassword())) {
             throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
 
@@ -237,7 +238,7 @@ public class CaptchaController {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+        if (!matchesPassword(user.getId(), req.getPassword())) {
             throw new BusinessException(ErrorCode.PASSWORD_WRONG);
         }
 
@@ -245,6 +246,20 @@ public class CaptchaController {
         tokenService.revokeAll(user.getId());
 
         return MallResult.success(null);
+    }
+
+    /**
+     * 校验用户密码是否匹配
+     *
+     * <p>密码哈希必须经专用凭据端点获取：MallUserDTO.password 为 WRITE_ONLY，Feign 传输后会丢失。</p>
+     *
+     * @param userId      用户 ID
+     * @param rawPassword 明文密码
+     * @return 密码是否匹配
+     */
+    private boolean matchesPassword(String userId, String rawPassword) {
+        UserCredentialDTO credential = remoteUserService.getCredential(userId);
+        return credential != null && passwordEncoder.matches(rawPassword, credential.getPasswordHash());
     }
 
     /**

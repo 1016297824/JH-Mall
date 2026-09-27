@@ -5,7 +5,7 @@ const userRoutes: RouteRecordRaw[] = [
     path: 'profile',
     name: 'profile',
     component: () => import('@/pages/user/UserCenterPage/UserCenterPage.vue'),
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
 ]
 

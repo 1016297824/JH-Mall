@@ -2,6 +2,7 @@ package com.mall.user.controller.inner;
 
 import com.mall.api.feign.RemoteUserService;
 import com.mall.common.DTO.user.response.MallUserDTO;
+import com.mall.common.DTO.user.response.UserCredentialDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.common.exception.BusinessException;
@@ -53,6 +54,30 @@ public class RemoteUserInnerController {
             return null;
         }
         return toDTO(user);
+    }
+
+    /**
+     * 查询用户密码凭据（供 mall-auth 校验密码）
+     *
+     * <p>MallUserDTO 的 password 为 WRITE_ONLY，无法经 findByPhone 传递，
+     * 故单独提供该端点；密码哈希不会出现在用户信息接口中。</p>
+     *
+     * @param userId 用户 ID
+     * @return 凭据 DTO（用户不存在返回 null）
+     */
+    @GetMapping("/{userId}/credential")
+    public UserCredentialDTO getCredential(@PathVariable("userId") String userId) {
+        MallUserDO user;
+        try {
+            user = mallUserService.selectById(Long.parseLong(userId));
+        } catch (NumberFormatException e) {
+            // 非法 userId 按"用户不存在"处理，避免抛出 500
+            return null;
+        }
+        if (user == null) {
+            return null;
+        }
+        return new UserCredentialDTO(String.valueOf(user.getId()), user.getPassword());
     }
 
     /**

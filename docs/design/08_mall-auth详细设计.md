@@ -110,14 +110,14 @@ server/mall/mall-auth/
 
 ### 2.3 MVP CAPTCHA 接口映射（独立实现）
 
-| #  | 方法   | 路径                               | 方法名                       | 需登录 | 审计 |
-| -- | ------ | ---------------------------------- | ---------------------------- | :----: | :--: |
-| 14 | GET    | `/api/auth/captcha`              | `getCaptcha(req)`          |   否   |  —  |
-| 15 | POST   | `/api/auth/captcha/register`     | `registerByCaptcha(req)`   |   否   |  —  |
-| 16 | POST   | `/api/auth/captcha/login`        | `loginByCaptcha(req)`      |   否   |  ✓  |
-| 17 | POST   | `/api/auth/captcha/password/reset` | `resetPasswordByCaptcha(req)` | 否 |  —  |
-| 18 | PUT    | `/api/auth/captcha/phone`        | `changePhoneByCaptcha(req)`|   是   |  ✓  |
-| 19 | DELETE | `/api/auth/captcha/account`      | `deactivateAccount(req)`   |   是   |  ✓  |
+| #  | 方法   | 路径                                 | 方法名                          | 需登录 | 审计 |
+| -- | ------ | ------------------------------------ | ------------------------------- | :----: | :--: |
+| 14 | GET    | `/api/auth/captcha`                | `getCaptcha(req)`             |   否   |  —  |
+| 15 | POST   | `/api/auth/captcha/register`       | `registerByCaptcha(req)`      |   否   |  —  |
+| 16 | POST   | `/api/auth/captcha/login`          | `loginByCaptcha(req)`         |   否   |  ✓  |
+| 17 | POST   | `/api/auth/captcha/password/reset` | `resetPasswordByCaptcha(req)` |   否   |  —  |
+| 18 | PUT    | `/api/auth/captcha/phone`          | `changePhoneByCaptcha(req)`   |   是   |  ✓  |
+| 19 | DELETE | `/api/auth/captcha/account`        | `deactivateAccount(req)`      |   是   |  ✓  |
 
 > #14~#19 为 MVP 阶段独立端点，与原有端点完全隔离。原有端点不动，后续接入真实短信后 CAPTCHA 端点可整体下线。
 
@@ -126,6 +126,7 @@ server/mall/mall-auth/
 所有 mall-auth Controller 统一使用 `@Validated`（或 `@Valid`）进行参数校验，禁止手动 null 检查。
 
 **规则：**
+
 - 请求 DTO 字段使用 `jakarta.validation.constraints`：`@NotBlank`、`@NotNull`、`@Size`、`@Pattern`
 - Controller 方法参数使用 `@Valid @RequestBody` 触发校验
 - 校验失败由 `MallExceptionHandler`（mall-common）统一处理 → `MallResult.error("A0401", 字段错误消息)`
@@ -137,12 +138,12 @@ server/mall/mall-auth/
 
 本模块所有 Java 类遵循项目 Lombok 规范（详见 `AGENTS.md`）：
 
-| 注解 | 适用类 | 约束 |
-|------|--------|------|
-| `@Data` | `dto/request/*Req`, `dto/response/*Resp` | 属性须字段级 Javadoc（`/** */`） |
-| `@Slf4j` | 所有 Service / Controller / Adapter | 替代 `LoggerFactory.getLogger()` |
-| `@RequiredArgsConstructor` | Service 层实现类 | 构造器注入，替代 `@Autowired` |
-| `@Builder` | 复杂响应 DTO（如 `TokenResp`） | 不用于 Controller/Service |
+| 注解                         | 适用类                                       | 约束                               |
+| ---------------------------- | -------------------------------------------- | ---------------------------------- |
+| `@Data`                    | `dto/request/*Req`, `dto/response/*Resp` | 属性须字段级 Javadoc（`/** */`） |
+| `@Slf4j`                   | 所有 Service / Controller / Adapter          | 替代`LoggerFactory.getLogger()`  |
+| `@RequiredArgsConstructor` | Service 层实现类                             | 构造器注入，替代`@Autowired`     |
+| `@Builder`                 | 复杂响应 DTO（如`TokenResp`）              | 不用于 Controller/Service          |
 
 禁止使用：`@EqualsAndHashCode`、`@ToString`、`@Value`。
 
@@ -172,7 +173,7 @@ server/mall/mall-auth/
 - ①调 `RemoteUserAdapter.findByPhone(phone)` → 不存在则 `A0201`
 - ②校验用户状态：冻结 `A0202` / 注销 `A0203`
 - ③校验密码错误次数：Redis `mall:auth:pwd_err:{userId}` 超 5 次临时锁定 `A0211`
-- ④BCrypt 校验密码：不通过 → 错误计数+1 → `A0210`
+- ④取密码哈希并 BCrypt 校验：调 `RemoteUserAdapter.getCredential(userId)` 获取 `passwordHash`（`MallUserDTO.password` 为 `WRITE_ONLY`，经 Feign 传输后恒为 null，不可用于比对）；不通过 → 错误计数+1 → `A0210`
 - ⑤签发 token：`TokenService.issue(userId)`
 - ⑥清除错误计数，记录审计日志
 
@@ -275,19 +276,19 @@ server/mall/mall-auth/
 
 ### 4.1 Redis Key 规范
 
-| Key 模式                                   | 常量引用                                      | 用途                     | TTL                |
-| ------------------------------------------ | --------------------------------------------- | ------------------------ | ------------------ |
-| `mall:auth:user_version:{userId}`         | `CacheConstants.Auth.USER_VERSION`           | 用户 token 版本号        | Nacos 配置（默认 30d） |
-| `mall:auth:refresh:{jti}`                | `CacheConstants.Auth.REFRESH`               | refreshToken 映射        | 7d                 |
-| `mall:auth:blacklist:{jti}`              | `CacheConstants.Auth.BLACKLIST`             | 黑名单（注销/刷新作废）  | 原 token 剩余时间  |
-| `mall:auth:sms:code:{phone}:{scene}`     | `CacheConstants.Auth.SMS_CODE`              | 短信验证码               | 300s               |
-| `mall:auth:sms:limit:{phone}`            | `CacheConstants.Auth.SMS_LIMIT`             | 发送冷却                 | 60s                |
-| `mall:auth:sms:try:{phone}`              | `CacheConstants.Auth.SMS_TRY`               | 验证尝试计数             | 24h                |
-| `mall:auth:sms:ip:{ip}`                  | `CacheConstants.Auth.SMS_IP`                | IP 日发送量              | 24h                |
-| `mall:auth:pwd_err:{userId}`             | `CacheConstants.Auth.PWD_ERR`               | 密码错误计数             | 30min              |
-| `mall:auth:decrypt:{sha256(ciphertext)}` | `CacheConstants.Auth.DECRYPT`               | 解密结果缓存             | 60s                |
-| `mall:auth:captcha:{captchaKey}`         | `CacheConstants.Auth.CAPTCHA`               | 图片验证码               | 300s               |
-| `mall:auth:captcha:ip:{ip}`              | `CacheConstants.Auth.CAPTCHA_IP`            | 验证码 IP 防刷计数       | 24h                |
+| Key 模式                                   | 常量引用                             | 用途                    | TTL                    |
+| ------------------------------------------ | ------------------------------------ | ----------------------- | ---------------------- |
+| `mall:auth:user_version:{userId}`        | `CacheConstants.Auth.USER_VERSION` | 用户 token 版本号       | Nacos 配置（默认 30d） |
+| `mall:auth:refresh:{jti}`                | `CacheConstants.Auth.REFRESH`      | refreshToken 映射       | 7d                     |
+| `mall:auth:blacklist:{jti}`              | `CacheConstants.Auth.BLACKLIST`    | 黑名单（注销/刷新作废） | 原 token 剩余时间      |
+| `mall:auth:sms:code:{phone}:{scene}`     | `CacheConstants.Auth.SMS_CODE`     | 短信验证码              | 300s                   |
+| `mall:auth:sms:limit:{phone}`            | `CacheConstants.Auth.SMS_LIMIT`    | 发送冷却                | 60s                    |
+| `mall:auth:sms:try:{phone}`              | `CacheConstants.Auth.SMS_TRY`      | 验证尝试计数            | 24h                    |
+| `mall:auth:sms:ip:{ip}`                  | `CacheConstants.Auth.SMS_IP`       | IP 日发送量             | 24h                    |
+| `mall:auth:pwd_err:{userId}`             | `CacheConstants.Auth.PWD_ERR`      | 密码错误计数            | 30min                  |
+| `mall:auth:decrypt:{sha256(ciphertext)}` | `CacheConstants.Auth.DECRYPT`      | 解密结果缓存            | 60s                    |
+| `mall:auth:captcha:{captchaKey}`         | `CacheConstants.Auth.CAPTCHA`      | 图片验证码              | 300s                   |
+| `mall:auth:captcha:ip:{ip}`              | `CacheConstants.Auth.CAPTCHA_IP`   | 验证码 IP 防刷计数      | 24h                    |
 
 > **常量管理**：所有 Redis key 统一定义在 `mall-common` 的 `CacheConstants.Auth` 内部类中，禁止在 Controller/Service 中 `private static final` 或硬编码字符串。新增 key 必须先在 `CacheConstants` 中声明。
 
@@ -359,12 +360,12 @@ server/mall/mall-auth/
 
 ### 6.3 登录保护
 
-| 机制         | 说明                                                          |
-| ------------ | ------------------------------------------------------------- |
-| 密码错误计数 | Redis `mall:auth:pwd_err:{userId}`，连续 5 次错误锁定 30min |
-| 冻结检查     | 登录前查用户状态，冻结 `A0202`                              |
-| 注销检查     | 注销用户不可登录 `A0203`                                    |
-| 审计日志     | 每次登录无论成功/失败都记录                                   |
+| 机制         | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| 密码错误计数 | Redis`mall:auth:pwd_err:{userId}`，连续 5 次错误锁定 30min |
+| 冻结检查     | 登录前查用户状态，冻结`A0202`                              |
+| 注销检查     | 注销用户不可登录`A0203`                                    |
+| 审计日志     | 每次登录无论成功/失败都记录                                  |
 
 ---
 
@@ -458,6 +459,7 @@ mall-auth 作为密钥持有方，向其他服务暴露解密接口（定义在 
 C 端审计日志写入 `mall` 库独立表 `mall_audit_log`，Service 层直写 INSERT，不走若依 `RemoteLogService` Feign。
 
 原因：
+
 - `mall` 与 `ry-cloud` 分属不同数据库，跨库 Feign 写入 `sys_oper_log` 不可靠
 - C 端审计与管理端审计在身份体系（userId vs adminId）、查看入口上完全独立
 
@@ -530,7 +532,6 @@ mall:
   security:
     jwt-secret: 7COWPc0I1OG/8Cby86JRsZhk6+kR3tNbKXgxwr45O1mPSZm1SqfRmXyekGo1UojKSEnjVDUSSI7a0HEVKLZcoQ==
     aes-key:
-
 ```
 
 > 以上配置通过 Nacos 下发，支持 `@RefreshScope` 运行时动态刷新（标 \* 的需重启生效）。配置项通过 `MallAuthConfigProperties`（`@ConfigurationProperties(prefix = "mall.auth")` + `@RefreshScope`）注入，各 Service/Controller 通过构造注入获取，禁止使用 `@Value`。
@@ -564,25 +565,25 @@ spring:
 
 ### 11.3 配置项说明
 
-| 配置项                            | 默认值 | 单位 | 说明                                   |
-| --------------------------------- | ------ | :--: | -------------------------------------- |
-| `mall.auth.access-token-ttl`    | 1800   |  秒  | accessToken 有效期（30min）            |
-| `mall.auth.refresh-token-ttl`   | 604800 |  秒  | refreshToken 有效期（7d）              |
-| `mall.auth.token-version-cache-ttl` | 2592000 | 秒 | token_version Redis 缓存 TTL（30d）    |
-| `mall.security.jwt-secret`      | —     |  —  | JWT 签名密钥（`application-dev.yml` 共享配置，\*） |
-| `mall.security.aes-key`         | —     |  —  | AES-256-GCM 密钥（Nacos 管理，\*）     |
-| `mall.auth.sms.code-length`     | 6      |  位  | 验证码长度                             |
-| `mall.auth.sms.code-ttl`        | 300    |  秒  | 验证码有效期                           |
-| `mall.auth.sms.cooldown`        | 60     |  秒  | 同一手机号发送冷却                     |
-| `mall.auth.sms.daily-limit`     | 5      |  次  | 同一手机号日发送上限                   |
-| `mall.auth.sms.ip-daily-limit`  | 10     |  次  | 同一 IP 日发送上限                     |
-| `mall.auth.pwd-err-limit`       | 5      |  次  | 密码连续错误锁定阈值                   |
-| `mall.auth.pwd-err-ttl`         | 1800   |  秒  | 错误计数 TTL（30min）                  |
-| `mall.auth.pwd-bcrypt-cost`     | 12     |  —  | BCrypt 哈希复杂度                      |
-| `mall.auth.wechat.app-id`       | —     |  —  | 微信小程序 AppId（\*）                 |
-| `mall.auth.wechat.app-secret`   | —     |  —  | 微信小程序 AppSecret（Nacos 加密，\*） |
-| `mall.auth.decrypt.cache-ttl`   | 60     |  秒  | 解密结果缓存时间                       |
-| `mall.auth.decrypt.batch-limit` | 50     |  条  | 批量解密上限                           |
+| 配置项                                | 默认值  | 单位 | 说明                                                 |
+| ------------------------------------- | ------- | :--: | ---------------------------------------------------- |
+| `mall.auth.access-token-ttl`        | 1800    |  秒  | accessToken 有效期（30min）                          |
+| `mall.auth.refresh-token-ttl`       | 604800  |  秒  | refreshToken 有效期（7d）                            |
+| `mall.auth.token-version-cache-ttl` | 2592000 |  秒  | token_version Redis 缓存 TTL（30d）                  |
+| `mall.security.jwt-secret`          | —      |  —  | JWT 签名密钥（`application-dev.yml` 共享配置，\*） |
+| `mall.security.aes-key`             | —      |  —  | AES-256-GCM 密钥（Nacos 管理，\*）                   |
+| `mall.auth.sms.code-length`         | 6       |  位  | 验证码长度                                           |
+| `mall.auth.sms.code-ttl`            | 300     |  秒  | 验证码有效期                                         |
+| `mall.auth.sms.cooldown`            | 60      |  秒  | 同一手机号发送冷却                                   |
+| `mall.auth.sms.daily-limit`         | 5       |  次  | 同一手机号日发送上限                                 |
+| `mall.auth.sms.ip-daily-limit`      | 10      |  次  | 同一 IP 日发送上限                                   |
+| `mall.auth.pwd-err-limit`           | 5       |  次  | 密码连续错误锁定阈值                                 |
+| `mall.auth.pwd-err-ttl`             | 1800    |  秒  | 错误计数 TTL（30min）                                |
+| `mall.auth.pwd-bcrypt-cost`         | 12      |  —  | BCrypt 哈希复杂度                                    |
+| `mall.auth.wechat.app-id`           | —      |  —  | 微信小程序 AppId（\*）                               |
+| `mall.auth.wechat.app-secret`       | —      |  —  | 微信小程序 AppSecret（Nacos 加密，\*）               |
+| `mall.auth.decrypt.cache-ttl`       | 60      |  秒  | 解密结果缓存时间                                     |
+| `mall.auth.decrypt.batch-limit`     | 50      |  条  | 批量解密上限                                         |
 
 ---
 
@@ -618,11 +619,11 @@ MVP 阶段无真实短信通道，用图片验证码代替短信验证码。原�
 
 ### 13.2 实现类
 
-| 类 | 说明 |
-|----|------|
-| `CaptchaController` | 6 个 CAPTCHA 端点，位于 `controller/` 包 |
-| `ICaptchaService` | 接口 |
-| `CaptchaServiceImpl` | 生成/校验逻辑 |
+| 类                     | 说明                                      |
+| ---------------------- | ----------------------------------------- |
+| `CaptchaController`  | 6 个 CAPTCHA 端点，位于`controller/` 包 |
+| `ICaptchaService`    | 接口                                      |
+| `CaptchaServiceImpl` | 生成/校验逻辑                             |
 
 **generate()**：EasyCaptcha 生成 4 位字符图片（排除 0/O/1/I），JPEG Base64 返回，Redis 存储 300s。
 
@@ -630,14 +631,14 @@ MVP 阶段无真实短信通道，用图片验证码代替短信验证码。原�
 
 ### 13.3 端点
 
-| 端点 | 替代说明 |
-|------|---------|
-| `GET /api/auth/captcha` | 获取图片验证码，返回 `{ captchaKey, captchaImage }` |
-| `POST /api/auth/captcha/register` | 用 `captchaKey+captchaCode` 替换 `smsCode` |
-| `POST /api/auth/captcha/login` | 密码登录 + 图片验证码防刷 |
-| `POST /api/auth/captcha/password/reset` | 用 `captchaKey+captchaCode` 替换 `smsCode` |
-| `PUT /api/auth/captcha/phone` | 用 `password` 替换短信验证 |
-| `DELETE /api/auth/captcha/account` | 用 `password` 替换短信验证 |
+| 端点                                      | 替代说明                                             |
+| ----------------------------------------- | ---------------------------------------------------- |
+| `GET /api/auth/captcha`                 | 获取图片验证码，返回`{ captchaKey, captchaImage }` |
+| `POST /api/auth/captcha/register`       | 用`captchaKey+captchaCode` 替换 `smsCode`        |
+| `POST /api/auth/captcha/login`          | 密码登录 + 图片验证码防刷                            |
+| `POST /api/auth/captcha/password/reset` | 用`captchaKey+captchaCode` 替换 `smsCode`        |
+| `PUT /api/auth/captcha/phone`           | 用`password` 替换短信验证                          |
+| `DELETE /api/auth/captcha/account`      | 用`password` 替换短信验证                          |
 
 ### 13.4 依赖
 

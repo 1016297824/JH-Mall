@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 
-// See here how to get started:
-// https://playwright.dev/docs/intro
-test('visits the app root url', async ({ page }) => {
+test('访问根路径时应用挂载并渲染主布局', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('h1')).toHaveText('You did it!')
+  // 首页数据依赖后端接口，此处只断言应用壳与主布局挂载成功
+  await expect(page.locator('#app')).toBeVisible()
+  await expect(page.locator('.app-layout')).toBeVisible()
 })

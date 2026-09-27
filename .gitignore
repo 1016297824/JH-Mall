@@ -54,3 +54,6 @@ client/ruoyi-ui/auto-imports.d.ts
 
 # 工具运行时状态
 /data/.worktrees/
+
+# 工作流运行时状态（spwangdev-workflow）
+.spwangdev/
