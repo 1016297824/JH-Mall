@@ -11,15 +11,15 @@ package com.mall.common.enums.marketing;
 public enum CouponRecordStatusEnum {
 
     /** 可用 */
-    AVAILABLE(0, "可用"),
+    AVAILABLE(1, "可用"),
     /** 已锁定 */
-    LOCKED(1, "已锁定"),
+    LOCKED(2, "已锁定"),
     /** 已使用 */
-    USED(2, "已使用"),
+    USED(3, "已使用"),
     /** 已释放 */
-    RELEASED(3, "已释放"),
+    RELEASED(4, "已释放"),
     /** 已过期 */
-    EXPIRED(4, "已过期");
+    EXPIRED(5, "已过期");
 
     /** 记录状态码 */
     private final int code;

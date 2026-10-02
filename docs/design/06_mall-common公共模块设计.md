@@ -318,7 +318,7 @@ public final class HeaderConstants {
 |------|----|--------|
 | `CouponTypeEnum` | FULL_REDUCE(1) / DISCOUNT(2) / NO_THRESHOLD(3) | mall-marketing |
 | `CouponStatusEnum` | DRAFT(0) / PUBLISHED(1) / ENDED(2) / DISCARDED(3) | mall-marketing |
-| `CouponRecordStatusEnum` | AVAILABLE(0) / LOCKED(1) / USED(2) / RELEASED(3) / EXPIRED(4) | mall-marketing, mall-order |
+| `CouponRecordStatusEnum` | AVAILABLE(1) / LOCKED(2) / USED(3) / RELEASED(4) / EXPIRED(5) | mall-marketing, mall-order |
 | `PromotionTypeEnum` | FULL_REDUCE(1) / FULL_DISCOUNT(2) / FREE_SHIPPING(3) / SECKILL(4) | mall-marketing |
 | `PromotionStatusEnum` | PENDING(0) / ACTIVE(1) / ENDED(2) / CLOSED(3) | mall-marketing |
 | `RuleTypeEnum` | FULL_REDUCE(1) / FULL_DISCOUNT(2) / FREE_SHIPPING(3) | mall-marketing |
