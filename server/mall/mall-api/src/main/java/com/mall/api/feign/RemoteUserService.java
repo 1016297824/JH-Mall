@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * C 端用户服务 Feign 接口
@@ -103,6 +104,23 @@ public interface RemoteUserService {
      */
     @GetMapping("/inner/user/{userId}/token-version")
     Integer getTokenVersion(@PathVariable("userId") String userId);
+
+    /**
+     * 校验收货地址归属
+     *
+     * <p>供 mall-order 下单时校验地址是否属于当前用户，防止越权下单。
+     * 见设计文档 {@code 07_mall-api契约层设计.md} §3.1。</p>
+     *
+     * <p><b>待实现方补齐</b>：mall-user 的 {@code RemoteUserInnerController}
+     * 尚未提供 {@code /inner/user/addresses/validate} 端点，未补齐前调用会 404。</p>
+     *
+     * @param userId    用户 ID
+     * @param addressId 收货地址 ID
+     * @return 地址存在且属于该用户返回 true
+     */
+    @GetMapping("/inner/user/addresses/validate")
+    boolean validateAddress(@RequestParam("userId") String userId,
+                            @RequestParam("addressId") Long addressId);
 
     /**
      * 注册请求
