@@ -18,3 +18,15 @@ spring:
     import:
       - nacos:application-${spring.profiles.active}.${spring.config.file-extension}
       - nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}
+
+# RocketMQ 客户端配置
+#
+# rocketmq-spring-boot-starter 的自动配置以 rocketmq.name-server 与
+# rocketmq.producer.group 为生效条件，二者缺一则不创建任何 RocketMQ Bean，
+# 导致 OutboxScheduler 注入 RocketMQTemplate 失败、服务无法启动。
+#
+# 此处仅作本地兜底；生产/联调环境同名配置可在 Nacos mall-order-{profile}.yml 覆盖。
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: mall-order-producer
