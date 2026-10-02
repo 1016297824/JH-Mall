@@ -121,7 +121,12 @@ public class IndexServiceImpl implements IndexService {
             }
 
             log.info("全量重建索引完成");
-        } catch (IOException e) {
+        } catch (BusinessException e) {
+            // 业务异常原样透传，避免被下方兜底捕获后丢失原始错误码
+            throw e;
+        } catch (Exception e) {
+            // 捕获 Exception 而非 IOException：ES Java Client 在连接失败等场景抛的是
+            // ElasticsearchException（运行时异常），仅捕获 IOException 会让其穿透为未处理异常
             log.error("全量重建索引失败", e);
             if (newIndexName != null) {
                 String indexToDelete = newIndexName;
