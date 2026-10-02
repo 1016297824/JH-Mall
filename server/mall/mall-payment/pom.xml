@@ -89,6 +89,26 @@
             <artifactId>mall-common</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+        <!-- Caffeine 本地缓存（支付渠道配置缓存，设计文档 §3.4） -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <!-- RocketMQ（Outbox 投递 mall:payment:paid / mall:refund:succeeded，与 mall-order 同一版本） -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>2.3.5</version>
+        </dependency>
+
+        <!-- 测试（状态机 / Service 单元测试，纯逻辑无需 Spring 容器） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

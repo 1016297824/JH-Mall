@@ -301,7 +301,7 @@ ChannelBillResult queryBill(String channelPaymentNo, MallPaymentChannel channel)
 
 ```sql
 UPDATE mall_payment
-SET payment_status = 2,  -- PAID
+SET payment_status = 1,  -- PAID
     channel_pay_status = #{channelPayStatus},
     pay_success_time = NOW(),
     version = version + 1

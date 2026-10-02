@@ -180,6 +180,18 @@ public class MqTopicConstants {
          */
         public static final String REFUND_SUCCEEDED = "mall:refund:succeeded";
 
+        /**
+         * 退款失败
+         *
+         * <p>Topic：{@code mall:refund:failed}</p>
+         * <ul>
+         *   <li>生产者：mall-payment（退款回调失败后写 Outbox）</li>
+         *   <li>消费者：mall-order（通知用户退款失败）</li>
+         *   <li>Payload：{@code refundNo, paymentNo, orderNo, afterSaleNo, userId, refundAmount（分）, failReason, channelRefundNo}</li>
+         * </ul>
+         */
+        public static final String REFUND_FAILED = "mall:refund:failed";
+
         private Payment() {
         }
     }

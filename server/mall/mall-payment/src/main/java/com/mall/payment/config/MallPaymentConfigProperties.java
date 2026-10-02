@@ -20,6 +20,12 @@ public class MallPaymentConfigProperties {
     /** 启用的支付渠道列表，逗号分隔（* 需重启） */
     private String channels = "wechat,alipay";
 
+    /** 是否启用模拟支付渠道：true 时所有渠道走 MockPayAdapter，仅本地 / 联调环境使用 */
+    private boolean mockEnabled = false;
+
+    /** 渠道回调基础地址，与 {@code /callback/payment/{channel}} 拼接构成 notify_url；为空则不回填 */
+    private String callbackBaseUrl;
+
     /** 渠道配置本地缓存 TTL（秒） */
     private long channelCacheTtl = 300;
 
@@ -36,6 +42,22 @@ public class MallPaymentConfigProperties {
 
     public void setChannels(String channels) {
         this.channels = channels;
+    }
+
+    public boolean isMockEnabled() {
+        return mockEnabled;
+    }
+
+    public void setMockEnabled(boolean mockEnabled) {
+        this.mockEnabled = mockEnabled;
+    }
+
+    public String getCallbackBaseUrl() {
+        return callbackBaseUrl;
+    }
+
+    public void setCallbackBaseUrl(String callbackBaseUrl) {
+        this.callbackBaseUrl = callbackBaseUrl;
     }
 
     public long getChannelCacheTtl() {
