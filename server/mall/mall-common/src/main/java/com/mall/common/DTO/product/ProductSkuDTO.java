@@ -22,6 +22,13 @@ public class ProductSkuDTO {
     private String skuCode;
     /** SKU 销售名称 */
     private String skuName;
+    /**
+     * 所属 SPU 名称
+     *
+     * <p>下单时 {@code mall_order_item.spu_name} 是 NOT NULL 的快照字段，
+     * 调用方需要它；由 mall-product 批量查询时一并带出，避免调用方再发一次 SPU 查询。</p>
+     */
+    private String spuName;
     /** 销售价（分） */
     private Long price;
     /** SKU 图片 */

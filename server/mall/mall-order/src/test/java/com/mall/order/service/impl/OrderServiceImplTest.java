@@ -1,11 +1,17 @@
 package com.mall.order.service.impl;
 
+import com.mall.api.feign.RemoteMarketingService.CalculationResp;
+import com.mall.common.DTO.product.ProductSkuDTO;
 import com.mall.common.constant.MqTopicConstants;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.enums.order.OrderStatusEnum;
 import com.mall.common.exception.BusinessException;
+import com.mall.order.DO.MallCartDO;
+import com.mall.order.DO.MallOrderAmountDO;
 import com.mall.order.DO.MallOrderDO;
+import com.mall.order.DO.MallOrderItemDO;
 import com.mall.order.config.MallOrderConfigProperties;
+import com.mall.order.dto.request.CreateOrderRequest;
 import com.mall.order.infrastructure.feign.RemoteMarketingAdapter;
 import com.mall.order.infrastructure.feign.RemoteProductAdapter;
 import com.mall.order.infrastructure.feign.RemoteUserAdapter;
@@ -26,9 +32,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -205,5 +213,67 @@ class OrderServiceImplTest {
         assertThat(captor.getValue())
                 .containsEntry("orderAmount", 10000L)
                 .containsEntry("points", 100L);
+    }
+
+    @Test
+    @DisplayName("下单：订单项与金额快照的 NOT NULL 字段必须写全（缺任一项都会让下单失败）")
+    void createOrderShouldPersistCompleteSnapshots() {
+        Long userId = 12345L;
+        MallCartDO cart = new MallCartDO();
+        cart.setSkuId(101L);
+        cart.setSpuId(1L);
+        cart.setSkuCode("IP15PM-256-BLUE");
+        cart.setSkuName("256GB 蓝色");
+        cart.setMainImage("http://img/1.png");
+        cart.setPrice(899900L);
+        cart.setQuantity(2);
+
+        ValueOperations<String, Object> valueOps = mock(ValueOperations.class);
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOps);
+        when(cartMapper.selectSelectedByUserId(userId)).thenReturn(List.of(cart));
+        when(userAdapter.validateAddress(userId, 1L)).thenReturn(true);
+
+        ProductSkuDTO sku = new ProductSkuDTO();
+        sku.setSkuId(101L);
+        sku.setSpuId(1L);
+        sku.setSkuName("256GB 蓝色");
+        sku.setSpuName("iPhone 15 Pro Max");
+        sku.setPrice(899900L);
+        sku.setIsOnSale(true);
+        sku.setAvailableQty(500);
+        when(productAdapter.batchGetSkuSafely(List.of(101L))).thenReturn(Map.of(101L, sku));
+
+        CalculationResp calculation = new CalculationResp();
+        calculation.setOriginalAmount(1799800L);
+        calculation.setCouponDiscount(0L);
+        calculation.setPromotionDiscount(0L);
+        calculation.setFinalAmount(1799800L);
+        when(marketingAdapter.calculate(eq(userId), anyList(), isNull())).thenReturn(calculation);
+        when(productAdapter.reserveStock(anyString(), anyList())).thenReturn(true);
+        when(config.getPayExpireMinutes()).thenReturn(30);
+        // insert 后 MyBatis 会回填自增主键，订单项依赖它，测试里手动补上
+        doAnswer(invocation -> {
+            ((MallOrderDO) invocation.getArgument(0)).setId(9001L);
+            return 1;
+        }).when(orderMapper).insert(any(MallOrderDO.class));
+
+        CreateOrderRequest req = new CreateOrderRequest();
+        req.setAddressId(1L);
+        String orderNo = orderService.createOrder(userId, "key-1", req);
+
+        assertThat(orderNo).isNotBlank();
+        ArgumentCaptor<List<MallOrderItemDO>> captor = ArgumentCaptor.forClass(List.class);
+        verify(orderItemMapper).batchInsert(captor.capture());
+        assertThat(captor.getValue()).hasSize(1);
+        assertThat(captor.getValue().get(0).getSpuName()).isEqualTo("iPhone 15 Pro Max");
+
+        ArgumentCaptor<MallOrderAmountDO> amountCaptor = ArgumentCaptor.forClass(MallOrderAmountDO.class);
+        verify(orderAmountMapper).insert(amountCaptor.capture());
+        // items_json 是 NOT NULL 列，设计文档约定其内容为售后退款计算所需的明细
+        assertThat(amountCaptor.getValue().getItemsJson())
+                .isNotBlank()
+                .contains("\"skuCode\":\"IP15PM-256-BLUE\"")
+                .contains("\"quantity\":2")
+                .contains("\"totalPrice\":1799800");
     }
 }

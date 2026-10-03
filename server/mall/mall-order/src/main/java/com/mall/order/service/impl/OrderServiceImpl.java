@@ -1,6 +1,8 @@
 package com.mall.order.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.api.feign.RemoteMarketingService.CalculationReq.CalculationItem;
 import com.mall.api.feign.RemoteMarketingService.CalculationResp;
 import com.mall.api.feign.RemoteProductService.ReserveStockItemRequest;
@@ -68,6 +70,9 @@ public class OrderServiceImpl implements OrderService {
 
     /** 幂等键 TTL，与设计文档 §5.2 的 SETNX EX 1800 一致 */
     private static final long IDEMPOTENT_TTL_MINUTES = 30L;
+
+    /** 商品明细快照序列化器（无状态、线程安全，按项目约定静态复用） */
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /** 运费暂固定 0：设计文档未给出运费规则，见 §5.6 说明 */
     private static final long FREIGHT_AMOUNT = 0L;
@@ -198,8 +203,11 @@ public class OrderServiceImpl implements OrderService {
             order.setUpdateTime(LocalDateTime.now());
             orderMapper.insert(order);
 
-            orderItemMapper.batchInsert(buildOrderItems(order.getId(), cartList, skuMap));
-            orderAmountMapper.insert(buildAmountSnapshot(order.getId(), calculation));
+            // 订单项只构建一次：金额快照的 items_json 必须与落库的订单项完全一致，
+            // 分别构建两份一旦逻辑分叉就会出现「快照与明细对不上」
+            List<MallOrderItemDO> orderItems = buildOrderItems(order.getId(), cartList, skuMap);
+            orderItemMapper.batchInsert(orderItems);
+            orderAmountMapper.insert(buildAmountSnapshot(order.getId(), calculation, orderItems));
 
             // Outbox：下单成功事件 + 支付超时延迟消息
             Map<String, Object> createdEvent = new LinkedHashMap<>();
@@ -301,8 +309,14 @@ public class OrderServiceImpl implements OrderService {
             item.setSkuId(cart.getSkuId());
             item.setSkuCode(cart.getSkuCode());
             item.setSkuName(cart.getSkuName());
-            // ProductSkuDTO 不含 SPU 名称，此处留空，由后续 SPU 查询补齐
-            item.setSpuName(null);
+            // SPU 名称取实时数据；SPU 已被删除时回退购物车冗余的 SKU 名称。
+            // mall_order_item.spu_name 是 NOT NULL 列，留空会让整笔下单以 SQL 约束异常失败
+            if (sku == null || sku.getSpuName() == null) {
+                log.warn("SKU 所属 SPU 名称缺失，订单项回退使用 SKU 名称: skuId={}", cart.getSkuId());
+                item.setSpuName(cart.getSkuName());
+            } else {
+                item.setSpuName(sku.getSpuName());
+            }
             item.setMainImage(cart.getMainImage());
             // 销售属性 JSON 未从 mall-product 获取（SKU DTO 不含该字段），留空
             item.setAttrsJson(null);
@@ -315,9 +329,11 @@ public class OrderServiceImpl implements OrderService {
         return items;
     }
 
-    private MallOrderAmountDO buildAmountSnapshot(Long orderId, CalculationResp calculation) {
+    private MallOrderAmountDO buildAmountSnapshot(Long orderId, CalculationResp calculation,
+                                                  List<MallOrderItemDO> orderItems) {
         MallOrderAmountDO amount = new MallOrderAmountDO();
         amount.setOrderId(orderId);
+        amount.setItemsJson(buildItemsJson(orderItems));
         amount.setTotalAmount(calculation.getOriginalAmount());
         amount.setDiscountAmount(
                 nvl(calculation.getCouponDiscount()) + nvl(calculation.getPromotionDiscount()));
@@ -326,6 +342,38 @@ public class OrderServiceImpl implements OrderService {
         amount.setPointsDiscount(0L);
         amount.setIsDeleted(0);
         return amount;
+    }
+
+    /**
+     * 序列化订单项为金额快照的商品明细 JSON
+     *
+     * <p>{@code mall_order_amount.items_json} 是 NOT NULL 列，设计文档约定其内容为
+     * 「每项的 SKU 编码、名称、单价、数量、小计」，供售后退款计算使用。
+     * 这里显式挑字段而非直接序列化 DO —— DO 带有 {@code isDeleted}、主键等库内细节，
+     * 直接序列化会把存储实现固化成快照契约，后续加字段就会污染历史快照。</p>
+     *
+     * @param orderItems 已构建的订单项
+     * @return JSON 数组字符串
+     */
+    private String buildItemsJson(List<MallOrderItemDO> orderItems) {
+        List<Map<String, Object>> snapshot = new ArrayList<>(orderItems.size());
+        for (MallOrderItemDO item : orderItems) {
+            Map<String, Object> row = new LinkedHashMap<>(8);
+            row.put("skuId", item.getSkuId());
+            row.put("skuCode", item.getSkuCode());
+            row.put("skuName", item.getSkuName());
+            row.put("price", item.getPrice());
+            row.put("quantity", item.getQuantity());
+            row.put("totalPrice", item.getTotalPrice());
+            snapshot.add(row);
+        }
+        try {
+            return OBJECT_MAPPER.writeValueAsString(snapshot);
+        } catch (JsonProcessingException e) {
+            // 快照写不进去就不能落库（列 NOT NULL），按系统错误中止本次下单
+            log.error("订单商品明细快照序列化失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
     }
 
     /**
