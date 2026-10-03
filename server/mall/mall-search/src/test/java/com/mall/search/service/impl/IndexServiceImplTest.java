@@ -8,6 +8,11 @@ import co.elastic.clients.elasticsearch.indices.GetAliasRequest;
 import co.elastic.clients.elasticsearch.indices.GetAliasResponse;
 import co.elastic.clients.elasticsearch.indices.UpdateAliasesResponse;
 import co.elastic.clients.elasticsearch.indices.get_alias.IndexAliases;
+import co.elastic.clients.elasticsearch.nodes.ElasticsearchNodesClient;
+import co.elastic.clients.elasticsearch.nodes.FileSystem;
+import co.elastic.clients.elasticsearch.nodes.FileSystemTotal;
+import co.elastic.clients.elasticsearch.nodes.NodesStatsResponse;
+import co.elastic.clients.elasticsearch.nodes.Stats;
 import co.elastic.clients.util.ObjectBuilder;
 import com.mall.common.DTO.PageResult;
 import com.mall.common.enums.ErrorCode;
@@ -64,6 +69,9 @@ class IndexServiceImplTest {
     private ElasticsearchIndicesClient indicesClient;
 
     @Mock
+    private ElasticsearchNodesClient nodesClient;
+
+    @Mock
     private CreateIndexResponse createIndexResponse;
 
     @Mock
@@ -103,10 +111,14 @@ class IndexServiceImplTest {
         when(esConfig.getReplicas()).thenReturn(0);
         when(configProperties.getRebuild()).thenReturn(rebuildConfig);
         when(configProperties.getEs()).thenReturn(esConfig);
+        MallSearchConfigProperties.Disk diskConfig = mock(MallSearchConfigProperties.Disk.class);
+        when(diskConfig.getWarningThreshold()).thenReturn(20);
+        when(configProperties.getDisk()).thenReturn(diskConfig);
 
         // ES 客户端 mock 链：indices() 未 stub 时返回 null，
         // 会令 rebuildIndex / rollback 在调用 create/getAlias 时抛 NPE 而非预期异常
         when(elasticsearchClient.indices()).thenReturn(indicesClient);
+        when(elasticsearchClient.nodes()).thenReturn(nodesClient);
         when(indicesClient.create(any(Function.class))).thenReturn(createIndexResponse);
         when(indicesClient.updateAliases(any(Function.class))).thenReturn(updateAliasesResponse);
         when(indicesClient.delete(any(Function.class))).thenReturn(deleteIndexResponse);
@@ -202,6 +214,77 @@ class IndexServiceImplTest {
 
         assertThat(ex).isNotNull();
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND.getCode());
+    }
+
+    @Test
+    void rebuildIndex_shouldRejectWhenNodeDiskBelowWatermark() throws IOException {
+        when(valueOperations.setIfAbsent(eq("mall:search:index:rebuild_lock"),
+                any(), eq(3600L), eq(TimeUnit.SECONDS)))
+                .thenReturn(true);
+        when(valueOperations.get("mall:search:index:rebuild_lock")).thenReturn(null);
+        stubNodeDiskFreePercent(5);
+
+        BusinessException ex = catchThrowableOfType(
+                () -> indexService.rebuildIndex(), BusinessException.class);
+
+        assertThat(ex).isNotNull();
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.SYSTEM_CAPACITY.getCode());
+        // 必须在删旧索引 / 建新索引之前拦住——写一半的索引连回滚都没得退
+        verify(indicesClient, never()).create(any(Function.class));
+    }
+
+    @Test
+    void rebuildIndex_shouldProceedWhenNodeDiskAboveWatermark() throws IOException {
+        when(valueOperations.setIfAbsent(eq("mall:search:index:rebuild_lock"),
+                any(), eq(3600L), eq(TimeUnit.SECONDS)))
+                .thenReturn(true);
+        when(valueOperations.get("mall:search:index:rebuild_lock")).thenReturn(null);
+        stubNodeDiskFreePercent(60);
+        GetAliasResponse emptyAlias = aliasResponse();
+        when(indicesClient.getAlias(any(Function.class))).thenReturn(emptyAlias);
+        when(remoteProductAdapter.fetchAllSpusForSearch(anyInt(), anyInt()))
+                .thenReturn(PageResult.of(1, 500, 0L, List.of()));
+
+        assertDoesNotThrow(indexService::rebuildIndex);
+
+        verify(indicesClient).create(any(Function.class));
+    }
+
+    @Test
+    void rebuildIndex_shouldProceedWhenDiskStatsUnavailable() throws IOException {
+        when(valueOperations.setIfAbsent(eq("mall:search:index:rebuild_lock"),
+                any(), eq(3600L), eq(TimeUnit.SECONDS)))
+                .thenReturn(true);
+        when(valueOperations.get("mall:search:index:rebuild_lock")).thenReturn(null);
+        // 取不到磁盘信息时只告警不阻断：ES 不可达会在后续步骤报出真实原因，
+        // 在这里误判拦截只会让「想重建」变成「必须先去查监控」
+        when(nodesClient.stats()).thenThrow(new IOException("stats unavailable"));
+        GetAliasResponse emptyAlias = aliasResponse();
+        when(indicesClient.getAlias(any(Function.class))).thenReturn(emptyAlias);
+        when(remoteProductAdapter.fetchAllSpusForSearch(anyInt(), anyInt()))
+                .thenReturn(PageResult.of(1, 500, 0L, List.of()));
+
+        assertDoesNotThrow(indexService::rebuildIndex);
+
+        verify(indicesClient).create(any(Function.class));
+    }
+
+    /**
+     * 打桩单节点磁盘指标
+     *
+     * @param freePercent 期望的可用空间占比（%）
+     */
+    private void stubNodeDiskFreePercent(int freePercent) throws IOException {
+        FileSystemTotal total = mock(FileSystemTotal.class);
+        when(total.totalInBytes()).thenReturn(1000L);
+        when(total.availableInBytes()).thenReturn(1000L * freePercent / 100);
+        FileSystem fs = mock(FileSystem.class);
+        when(fs.total()).thenReturn(total);
+        Stats node = mock(Stats.class);
+        when(node.fs()).thenReturn(fs);
+        NodesStatsResponse response = mock(NodesStatsResponse.class);
+        when(response.nodes()).thenReturn(Map.of("node-1", node));
+        when(nodesClient.stats()).thenReturn(response);
     }
 
     /**

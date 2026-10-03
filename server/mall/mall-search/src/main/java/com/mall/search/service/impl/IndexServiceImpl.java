@@ -1,6 +1,9 @@
 package com.mall.search.service.impl;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.nodes.FileSystemTotal;
+import co.elastic.clients.elasticsearch.nodes.NodesStatsResponse;
+import co.elastic.clients.elasticsearch.nodes.Stats;
 import com.mall.common.DTO.PageResult;
 import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.common.constant.CacheConstants;
@@ -67,8 +70,9 @@ public class IndexServiceImpl implements IndexService {
         String newIndexName = null;
         String oldIndexName = null;
         try {
-            // TODO: (JH-Mall, 2026/06/19) ES 9.x Java client 获取磁盘信息的 API 需后续确认，
-            //       在 doRebuild 前调用 /_nodes/stats 检查各节点磁盘使用率，超过水位线时抛 BusinessException(ErrorCode.SYSTEM_CAPACITY)
+            // 动手前先看磁盘：重建会删光全部 mall_product* 索引再灌全量，
+            // 磁盘写满会让新索引只写一半，连回滚都没得退
+            checkDiskWatermark();
             log.info("全量重建索引开始");
 
             // ① 清理所有 mall_product* 旧索引（含 Spring Data ES 自动创建的 + 上次失败的版本化索引）
@@ -179,6 +183,64 @@ public class IndexServiceImpl implements IndexService {
     }
 
     // ======================== 私有辅助方法 ========================
+
+    /**
+     * 校验各 ES 节点磁盘可用率，低于水位线时拒绝全量重建
+     *
+     * <p>调用 {@code /_nodes/stats} 取各节点的 {@code fs.total}，按
+     * {@code mall.search.disk.warning-threshold}（默认 20）判定：该值语义为
+     * <b>可用空间占比下限</b>，低于它即视为磁盘将满。</p>
+     *
+     * <p><b>取不到磁盘信息时只告警不阻断</b>：ES 不可达本身会让重建在后续步骤失败并报出真实原因，
+     * 而在这里误判拦截会把「运维想重建」变成「必须先去看监控」。</p>
+     */
+    private void checkDiskWatermark() {
+        int threshold = configProperties.getDisk() == null
+                ? 0 : configProperties.getDisk().getWarningThreshold();
+        if (threshold <= 0) {
+            return;
+        }
+        try {
+            NodesStatsResponse stats = elasticsearchClient.nodes().stats();
+            if (stats == null || stats.nodes() == null) {
+                return;
+            }
+            for (Map.Entry<String, Stats> entry : stats.nodes().entrySet()) {
+                FileSystemTotal total = diskTotalOf(entry.getValue());
+                if (total == null || total.totalInBytes() == null || total.availableInBytes() == null) {
+                    continue;
+                }
+                long totalBytes = total.totalInBytes();
+                if (totalBytes <= 0) {
+                    continue;
+                }
+                long freePercent = total.availableInBytes() * 100 / totalBytes;
+                if (freePercent < threshold) {
+                    log.error("ES 节点磁盘可用率低于水位线，拒绝全量重建: node={}, available={}%, threshold={}%",
+                            entry.getKey(), freePercent, threshold);
+                    throw new BusinessException(ErrorCode.SYSTEM_CAPACITY);
+                }
+            }
+        } catch (BusinessException e) {
+            // 业务异常原样透传，避免被下方兜底吞成「跳过校验」
+            throw e;
+        } catch (Exception e) {
+            log.warn("获取 ES 节点磁盘信息失败，跳过水位校验继续重建: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 取节点磁盘统计中的 total 段
+     *
+     * @param node 节点统计，可为 null
+     * @return total 段，节点未上报文件系统信息时返回 null
+     */
+    private FileSystemTotal diskTotalOf(Stats node) {
+        if (node == null || node.fs() == null) {
+            return null;
+        }
+        return node.fs().total();
+    }
 
     /**
      * 清理所有 mall_product 相关索引（版本化 + 同名索引）
