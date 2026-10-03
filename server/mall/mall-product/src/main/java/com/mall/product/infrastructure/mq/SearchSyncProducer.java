@@ -55,6 +55,36 @@ public class SearchSyncProducer {
     }
 
     /**
+     * 补偿重投搜索索引（不写 Outbox）
+     *
+     * <p>与 {@link #syncProduct} 的关键区别：失败时<b>不再</b>写 Outbox。
+     * 补偿任务本身就是在消费 Outbox 记录，若失败时又写一条新记录，
+     * 表会随每轮重试无限增长；正确做法是由调用方保留原记录、下轮重试。</p>
+     *
+     * <p><b>当前为 RED 阶段的空壳</b>：方法体待最小实现填充。</p>
+     *
+     * @param spuId     SPU ID
+     * @param operation 操作类型
+     * @return 投递成功返回 true
+     */
+    public boolean resync(Long spuId, SyncOperationEnum operation) {
+        SearchSyncRequest request = new SearchSyncRequest();
+        request.setSpuId(spuId);
+        request.setOperation(operation.getCode());
+        request.setTimestamp(System.currentTimeMillis());
+        try {
+            remoteSearchAdapter.syncProduct(request);
+            log.info("搜索索引补偿投递成功: spuId={}, operation={}", spuId, operation);
+            return true;
+        } catch (Exception e) {
+            // 故意不写 Outbox：调用方（补偿任务）会保留原记录下轮重试，
+            // 此处若再写一条会导致 Outbox 表随每轮重试无限增长
+            log.warn("搜索索引补偿投递失败，保留原记录待下轮重试: spuId={}, operation={}", spuId, operation, e);
+            return false;
+        }
+    }
+
+    /**
      * 写入 Outbox 表（可靠消息持久化）
      *
      * <p>记录消息 ID、主题、事件类型、聚合信息、payload 和初始状态 NEW，

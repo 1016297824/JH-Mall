@@ -129,7 +129,7 @@ public class RemoteProductInnerController {
      * <p>扫描 Outbox 表中状态为 NEW 的搜索同步消息，逐条补偿投递。
      * 搜索引擎不可用导致实时同步失败时，由此定时任务兜底。</p>
      *
-     * @return 本次处理的消息数量
+     * @return 本次<b>成功补偿</b>的消息数量（跳过与投递失败的都不计入）
      */
     @PostMapping("/outbox/compensate")
     int compensateOutbox() {
