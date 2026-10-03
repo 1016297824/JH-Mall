@@ -12,6 +12,7 @@ import com.mall.user.mapper.MallPointsAccountMapper;
 import com.mall.user.mapper.MallUserPointsLogMapper;
 import com.mall.user.VO.PointsRecordVO;
 import com.mall.user.VO.PointsVO;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -141,6 +142,33 @@ class PointsServiceImplTest {
         pointsService.addPoints(1L, 100, BizTypeEnum.ORDER, "ORD001");
 
         verify(mallPointsAccountMapper, times(2)).addPoints(eq(1L), eq(100), eq(0));
+        verify(mallUserPointsLogMapper).insert(any(MallUserPointsLogDO.class));
+    }
+
+    @Test
+    @DisplayName("幂等：同一业务单已有流水时直接返回，不重复加分")
+    void addPointsShouldSkipWhenBizNoAlreadyLogged() {
+        // 该 bizNo 已有流水（MQ 重投场景）
+        when(mallUserPointsLogMapper.selectCount(any())).thenReturn(1L);
+
+        pointsService.addPoints(1L, 100, BizTypeEnum.ORDER, "ORD001");
+
+        // 不得再动账户与流水
+        verify(mallPointsAccountMapper, never()).addPoints(any(), anyInt(), anyInt());
+        verify(mallUserPointsLogMapper, never()).insert(any(MallUserPointsLogDO.class));
+    }
+
+    @Test
+    @DisplayName("首次发放：无流水时正常加分")
+    void addPointsShouldProceedWhenNoExistingLog() {
+        when(mallUserPointsLogMapper.selectCount(any())).thenReturn(0L);
+        when(mallPointsAccountMapper.selectOne(any())).thenReturn(buildAccount());
+        when(mallPointsAccountMapper.addPoints(eq(1L), eq(100), eq(0))).thenReturn(1);
+        when(mallUserPointsLogMapper.insert(any(MallUserPointsLogDO.class))).thenReturn(1);
+
+        pointsService.addPoints(1L, 100, BizTypeEnum.ORDER, "ORD001");
+
+        verify(mallPointsAccountMapper).addPoints(eq(1L), eq(100), eq(0));
         verify(mallUserPointsLogMapper).insert(any(MallUserPointsLogDO.class));
     }
 }

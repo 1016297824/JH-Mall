@@ -101,6 +101,12 @@ public class PointsServiceImpl implements IPointsService {
      */
     @Override
     public void addPoints(Long userId, int points, BizTypeEnum bizType, String bizNo) {
+        // 幂等：同一业务单只发一次（MQ 重投会重复进入本方法，无此校验会重复加分）
+        if (bizNo != null && pointsLogExists(userId, bizType, bizNo)) {
+            log.info("积分已发放过，跳过重复处理: userId={}, bizType={}, bizNo={}",
+                    userId, bizType.getCode(), bizNo);
+            return;
+        }
         // 乐观锁重试，最多 MAX_RETRY 次，防止并发冲突
         for (int i = 0; i < MAX_RETRY; i++) {
             LambdaQueryWrapper<MallPointsAccountDO> wrapper = new LambdaQueryWrapper<>();
@@ -136,5 +142,23 @@ public class PointsServiceImpl implements IPointsService {
         }
         log.error("积分增加失败, 乐观锁重试{}次均失败, userId={}", MAX_RETRY, userId);
         throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+    }
+
+    /**
+     * 该业务单是否已有积分流水
+     *
+     * <p>幂等判据：MQ 重投时同一 {@code bizNo} 会再次进入 {@code addPoints}。</p>
+     *
+     * @param userId  用户 ID
+     * @param bizType 业务类型
+     * @param bizNo   业务流水号
+     * @return 已有流水返回 true
+     */
+    private boolean pointsLogExists(Long userId, BizTypeEnum bizType, String bizNo) {
+        Long count = mallUserPointsLogMapper.selectCount(new LambdaQueryWrapper<MallUserPointsLogDO>()
+                .eq(MallUserPointsLogDO::getUserId, userId)
+                .eq(MallUserPointsLogDO::getBizType, bizType.getCode())
+                .eq(MallUserPointsLogDO::getBizNo, bizNo));
+        return count != null && count > 0;
     }
 }
