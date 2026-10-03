@@ -393,7 +393,26 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void confirmReceipt(Long userId, String orderNo) {
         MallOrderDO order = requireOwnedOrder(userId, orderNo);
-        transitionOrder(order, OrderEventEnum.CONFIRM_RECEIPT, MqTopicConstants.Order.COMPLETED, "OrderCompleted");
+        transitionOrder(order, OrderEventEnum.CONFIRM_RECEIPT, MqTopicConstants.Order.COMPLETED,
+                "OrderCompleted", buildRewardPayload(order));
+    }
+
+    /**
+     * 订单完成事件的积分 / 成长值字段
+     *
+     * <p>mall-user 的 {@code UserOrderCompletedConsumer} 要求 payload 带 {@code points} 与
+     * {@code orderAmount}，缺失则静默不发（订单完成却拿不到积分）。规则对齐消费端既有实现：
+     * 1 元 = 1 积分/成长值，即实付金额（单位分）除以 100。</p>
+     *
+     * @param order 订单
+     * @return 追加到事件 payload 的字段
+     */
+    private Map<String, Object> buildRewardPayload(MallOrderDO order) {
+        long payAmount = order.getPayAmount() == null ? 0L : order.getPayAmount();
+        Map<String, Object> extra = new LinkedHashMap<>();
+        extra.put("orderAmount", payAmount);
+        extra.put("points", payAmount / 100);
+        return extra;
     }
 
     @Override
@@ -482,10 +501,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 通用状态推进：状态机校验 → 乐观锁落库 → 写 Outbox
+     * 通用状态推进（不带额外事件字段）
      */
     private void transitionOrder(MallOrderDO order, OrderEventEnum event,
                                  String outboxTopic, String eventType) {
+        transitionOrder(order, event, outboxTopic, eventType, null);
+    }
+
+    /**
+     * 通用状态推进：状态机校验 → 乐观锁落库 → 写 Outbox
+     *
+     * @param extraPayload 追加到事件 payload 的字段（订单完成需带 orderAmount/points），无则传 null
+     */
+    private void transitionOrder(MallOrderDO order, OrderEventEnum event,
+                                 String outboxTopic, String eventType,
+                                 Map<String, Object> extraPayload) {
         Integer originStatus = order.getOrderStatus();
         Integer version = order.getVersion();
 
@@ -504,6 +534,9 @@ public class OrderServiceImpl implements OrderService {
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("orderNo", order.getOrderNo());
             payload.put("userId", order.getUserId());
+            if (extraPayload != null) {
+                payload.putAll(extraPayload);
+            }
             outboxPublisher.publish(outboxTopic, eventType, order.getOrderNo(), payload);
         });
     }
