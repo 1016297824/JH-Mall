@@ -58,6 +58,17 @@ public interface ISpuService {
     PageResult<SpuSearchDTO> pageForSearchRebuild(int page, int size);
 
     /**
+     * 按 spuId 查询单条搜索索引 DTO（增量同步专用）
+     *
+     * <p>替代 {@code pageForSearchRebuild} 的全表分页扫描：增量同步只需一条商品，
+     * 原先要逐页拉全量来比对，数据量大时单次同步 O(N)。</p>
+     *
+     * @param spuId SPU ID
+     * @return SpuSearchDTO；商品不存在返回 null
+     */
+    SpuSearchDTO getForSearchRebuild(Long spuId);
+
+    /**
      * 获取热点商品列表
      *
      * @param limit 返回条数（最大 50）
