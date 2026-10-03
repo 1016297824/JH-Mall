@@ -106,6 +106,21 @@ public interface RemoteProductService {
     void refreshHotRank();
 
     /**
+     * 触发搜索索引同步（管理端改价 / 上下架 / 删除商品后调用）
+     *
+     * <p>这是「商品变更 → ES 索引」目前唯一的触发入口：在此之前
+     * {@code SearchSyncProducer.syncProduct} 全仓无调用方，改价后 ES 永不更新。
+     * 同步失败由 mall-product 内部写 Outbox 兜底，调用方按"尽力而为"处理，
+     * 不应因 ES 故障阻断管理端的商品维护。</p>
+     *
+     * @param spuId     SPU ID
+     * @param operation 操作类型：{@code UPSERT}（新增/更新）或 {@code DELETE}
+     */
+    @PostMapping("/inner/product/spus/sync-search")
+    void syncSearchIndex(@RequestParam("spuId") Long spuId,
+                         @RequestParam("operation") String operation);
+
+    /**
      * 搜索降级兜底（ES 不可用时通过 DB Like 查询）
      *
      * @param keyword 搜索关键词
