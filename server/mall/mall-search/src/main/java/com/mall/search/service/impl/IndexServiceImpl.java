@@ -147,12 +147,8 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void syncProduct(Long spuId, String operation) {
-        String dedupKey = CacheConstants.Search.DEDUP + spuId + ":" + operation;
-        Boolean acquired = stringRedisTemplate.opsForValue()
-                .setIfAbsent(dedupKey, "1", 1, TimeUnit.HOURS);
-        if (Boolean.FALSE.equals(acquired)) {
-            return;
-        }
+        // 不做时间窗去重：ES 的 upsert/delete 本身幂等，而"1 小时内只同步一次"
+        // 会让同一商品的第二次变更被静默丢弃（索引停在旧值，直到手工全量重建）。
         if ("DELETE".equals(operation)) {
             productIndexRepository.deleteById(spuId);
         } else if ("UPSERT".equals(operation)) {
@@ -344,7 +340,10 @@ public class IndexServiceImpl implements IndexService {
             }
             log.warn("增量同步 UPSERT 未找到商品: spuId={}", spuId);
         } catch (Exception e) {
-            log.error("增量同步 UPSERT 失败: spuId={}", spuId, e);
+            // 必须上抛：调用方 SearchSyncProducer 只在本方法抛异常时才写 Outbox 兜底，
+            // 吞掉异常会让接口对 Feign 返回 200，索引与库的差异再无人修正
+            log.error("增量同步 UPSERT 失败，交由调用方写 Outbox 兜底: spuId={}", spuId, e);
+            throw e;
         }
     }
 
