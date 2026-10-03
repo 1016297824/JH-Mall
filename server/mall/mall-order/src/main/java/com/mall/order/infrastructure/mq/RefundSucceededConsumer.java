@@ -57,10 +57,23 @@ public class RefundSucceededConsumer implements RocketMQListener<MessageExt> {
             return;
         }
 
-        Object refundAmount = payload.get("refundAmount");
-        afterSaleService.refundCallback(
-                String.valueOf(afterSaleNo),
-                refundAmount == null ? null : Long.valueOf(String.valueOf(refundAmount)));
-        log.info("退款成功消费完成: afterSaleNo={}", afterSaleNo);
+        try {
+            Object refundAmount = payload.get("refundAmount");
+            afterSaleService.refundCallback(
+                    String.valueOf(afterSaleNo),
+                    refundAmount == null ? null : Long.valueOf(String.valueOf(refundAmount)));
+            log.info("退款成功消费完成: afterSaleNo={}", afterSaleNo);
+        } catch (RuntimeException e) {
+            // 先记原始异常，再尽力释放去重标记：否则 MQ 重投会被去重拦截，
+            // 售后单永远停在退款中、退货退款的库存也不回补
+            log.error("退款成功消费失败，交由 MQ 重试: afterSaleNo={}", afterSaleNo, e);
+            try {
+                dedupGuard.release(message.getMsgId(), CONSUMER_GROUP);
+            } catch (RuntimeException releaseError) {
+                log.error("【需人工介入】释放去重标记失败，重投将被去重拦截: msgId={}",
+                        message.getMsgId(), releaseError);
+            }
+            throw e;
+        }
     }
 }

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,5 +81,18 @@ class OrderCancelledConsumerTest {
                 .hasMessageContaining("解析失败");
 
         verify(couponClaimService, never()).releaseCoupon(any());
+    }
+
+    @Test
+    @DisplayName("券释放失败：释放去重标记并抛异常，交由 MQ 重投")
+    void shouldReleaseDedupWhenReleaseCouponFails() {
+        when(dedupGuard.tryDedup(MSG_ID, "mall-marketing-order-cancelled")).thenReturn(true);
+        doThrow(new RuntimeException("DB 不可用")).when(couponClaimService).releaseCoupon(ORDER_NO);
+
+        assertThatThrownBy(() -> consumer.onMessage(message("{\"orderNo\":\"" + ORDER_NO + "\"}")))
+                .isInstanceOf(RuntimeException.class);
+
+        // 不释放标记的话，重投会被去重拦截 → 券永久锁死、库存被白占
+        verify(dedupGuard).release(MSG_ID, "mall-marketing-order-cancelled");
     }
 }

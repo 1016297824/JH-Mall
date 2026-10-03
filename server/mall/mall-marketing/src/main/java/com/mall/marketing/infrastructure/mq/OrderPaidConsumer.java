@@ -66,7 +66,19 @@ public class OrderPaidConsumer implements RocketMQListener<MessageExt> {
             return;
         }
 
-        couponClaimService.useCoupon(String.valueOf(orderNo));
-        log.info("支付成功券核销处理完成: orderNo={}", orderNo);
+        try {
+            couponClaimService.useCoupon(String.valueOf(orderNo));
+            log.info("支付成功券核销处理完成: orderNo={}", orderNo);
+        } catch (RuntimeException e) {
+            // 先记原始异常，再尽力释放去重标记：否则 MQ 重投会被去重拦截，券永远停在已锁定
+            log.error("支付成功券核销失败，交由 MQ 重试: orderNo={}", orderNo, e);
+            try {
+                dedupGuard.release(message.getMsgId(), DEDUP_GROUP);
+            } catch (RuntimeException releaseError) {
+                log.error("【需人工介入】释放去重标记失败，重投将被去重拦截: msgId={}",
+                        message.getMsgId(), releaseError);
+            }
+            throw e;
+        }
     }
 }
