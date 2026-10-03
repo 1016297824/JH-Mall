@@ -143,6 +143,19 @@ public class OrderStateMachine {
     }
 
     /**
+     * 是否满足强制取消条件（设计文档 {@code 03_04_系统详细设计-状态机详细设计.md}）
+     *
+     * <p>强制取消只面向<b>已支付未发货且实付金额为 0</b> 的异常订单（如支付通道测试单）。
+     * 有金额的订单必须走 {@code PAID -> REFUNDING} 退款流程——强制取消不会调渠道原路退款，
+     * 放行有金额的订单会让钱凭空消失。</p>
+     */
+    private boolean forceCancelAllowed(MallOrderDO order) {
+        return order.getDeliveryTime() == null
+                && order.getPayAmount() != null
+                && order.getPayAmount() == 0L;
+    }
+
+    /**
      * 物流信息是否已填写（发货前置条件）
      */
     private boolean logisticsFilled(MallOrderDO order) {
@@ -202,7 +215,10 @@ public class OrderStateMachine {
                         this::logisticsFilled,
                         order -> { }));
         put(OrderStatusEnum.PAID, OrderEventEnum.FORCE_CANCEL,
-                OrderTransition.to(OrderStatusEnum.CANCELLED));
+                new OrderTransition(
+                        order -> OrderStatusEnum.CANCELLED,
+                        this::forceCancelAllowed,
+                        order -> { }));
         // 前置「订单未发货」；进入退款中时记录退款前状态
         put(OrderStatusEnum.PAID, OrderEventEnum.REFUND_ONLY,
                 new OrderTransition(

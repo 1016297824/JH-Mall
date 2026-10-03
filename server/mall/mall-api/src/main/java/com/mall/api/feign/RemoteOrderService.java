@@ -51,6 +51,19 @@ public interface RemoteOrderService {
     void logisticsPick(@RequestParam("orderNo") String orderNo);
 
     /**
+     * 强制取消订单（管理端客服操作，推进 PAID → CANCELLED）
+     *
+     * <p>仅适用于已支付、未发货且实付金额为 0 的异常订单；有金额的订单会被
+     * mall-order 状态机拒绝（A0703），须改走退款流程。</p>
+     *
+     * @param orderNo      订单号
+     * @param cancelReason 客服填写的取消原因，可空
+     */
+    @PostMapping("/inner/order/force-cancel")
+    void forceCancel(@RequestParam("orderNo") String orderNo,
+                     @RequestParam(value = "cancelReason", required = false) String cancelReason);
+
+    /**
      * 订单快照
      *
      * <p>{@code status} 为订单状态码，取值见 {@code mall-common} 的 {@code OrderStatusEnum}。

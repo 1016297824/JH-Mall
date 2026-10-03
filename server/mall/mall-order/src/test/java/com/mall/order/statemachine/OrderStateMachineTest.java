@@ -141,9 +141,26 @@ class OrderStateMachineTest {
         }
 
         @Test
-        @DisplayName("FORCE_CANCEL → CANCELLED")
+        @DisplayName("FORCE_CANCEL 金额为 0 且未发货 → CANCELLED")
         void forceCancel() {
-            assertTransit(order(OrderStatusEnum.PAID), OrderEventEnum.FORCE_CANCEL, OrderStatusEnum.CANCELLED);
+            MallOrderDO o = order(OrderStatusEnum.PAID);
+            o.setPayAmount(0L);
+            assertTransit(o, OrderEventEnum.FORCE_CANCEL, OrderStatusEnum.CANCELLED);
+        }
+
+        @Test
+        @DisplayName("FORCE_CANCEL 订单有实付金额 → A0703（正常订单必须走 PAID→REFUNDING 退款流程）")
+        void forceCancelWithAmount() {
+            assertDenied(order(OrderStatusEnum.PAID), OrderEventEnum.FORCE_CANCEL, "A0703");
+        }
+
+        @Test
+        @DisplayName("FORCE_CANCEL 已发货 → A0703（货已出库不能再强制取消）")
+        void forceCancelAfterDelivered() {
+            MallOrderDO o = order(OrderStatusEnum.PAID);
+            o.setPayAmount(0L);
+            o.setDeliveryTime(LocalDateTime.now().minusHours(1));
+            assertDenied(o, OrderEventEnum.FORCE_CANCEL, "A0703");
         }
 
         @Test

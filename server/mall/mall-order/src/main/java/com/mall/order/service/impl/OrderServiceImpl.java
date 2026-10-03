@@ -436,7 +436,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void cancelOrder(Long userId, String orderNo) {
         MallOrderDO order = requireOwnedOrder(userId, orderNo);
-        transitionOrder(order, OrderEventEnum.USER_CANCEL, MqTopicConstants.Order.CANCELLED, "OrderCancelled");
+        transitionOrder(order, OrderEventEnum.USER_CANCEL, MqTopicConstants.Order.CANCELLED,
+                "OrderCancelled", cancelReasonPayload(OrderEventEnum.USER_CANCEL));
     }
 
     @Override
@@ -481,6 +482,16 @@ public class OrderServiceImpl implements OrderService {
             }
             throw e;
         }
+    }
+
+    @Override
+    public void forceCancel(String orderNo, String cancelReason) {
+        MallOrderDO order = requireOrder(orderNo);
+        // 原因随 DO 传递：markEventTime 在状态落库后据它写 cancel_reason
+        order.setCancelReason(cancelReason);
+        // 事件里的 cancelReason 是取消来源枚举（与 OrderEventEnum 同名），与 DB 的自由文本原因不是一回事
+        transitionOrder(order, OrderEventEnum.FORCE_CANCEL, MqTopicConstants.Order.CANCELLED,
+                "OrderCancelled", cancelReasonPayload(OrderEventEnum.FORCE_CANCEL));
     }
 
     @Override
@@ -576,7 +587,7 @@ public class OrderServiceImpl implements OrderService {
             if (affected == 0) {
                 throw new BusinessException(ErrorCode.ORDER_STATUS_ERROR);
             }
-            markEventTime(order.getOrderNo(), event);
+            markEventTime(order, event);
             // 无下游消费者的流转（如物流揽收）不产生领域事件，避免 Outbox 堆积无人消费的消息
             if (outboxTopic == null) {
                 return;
@@ -592,6 +603,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 构造「订单取消」事件的 cancelReason 字段
+     *
+     * <p>设计文档要求 payload 带取消来源（{@code USER_CANCEL} / {@code PAY_TIMEOUT} /
+     * {@code FORCE_CANCEL}），取值与 {@code OrderEventEnum} 同名，故直接用事件名，
+     * 避免再散落一份字面量。</p>
+     *
+     * @param event 触发取消的事件
+     * @return 追加到事件 payload 的字段
+     */
+    private Map<String, Object> cancelReasonPayload(OrderEventEnum event) {
+        Map<String, Object> extra = new LinkedHashMap<>(2);
+        extra.put("cancelReason", event.name());
+        return extra;
+    }
+
+    /**
      * 按事件补写订单时间线字段
      *
      * <p>{@code updateStatusCas} 只推进状态，{@code pay_time} / {@code complete_time} /
@@ -602,17 +629,18 @@ public class OrderServiceImpl implements OrderService {
      * <p>发货时间由 {@code updateLogistics} 负责，超时关单由 {@code closeByTimeout} 负责，
      * 此处不重复处理。</p>
      *
-     * @param orderNo 订单号
-     * @param event   触发本次流转的事件
+     * @param order 订单（已带本次流转需要落库的字段，如客服填写的取消原因）
+     * @param event 触发本次流转的事件
      */
-    private void markEventTime(String orderNo, OrderEventEnum event) {
+    private void markEventTime(MallOrderDO order, OrderEventEnum event) {
+        String orderNo = order.getOrderNo();
         switch (event) {
             case PAY_SUCCESS -> orderMapper.markPayTime(orderNo);
             case CONFIRM_RECEIPT -> orderMapper.markCompleteTime(orderNo);
             case USER_CANCEL ->
-                    orderMapper.markCancelTime(orderNo, CancelTypeEnum.USER_CANCEL.getCode());
-            case FORCE_CANCEL ->
-                    orderMapper.markCancelTime(orderNo, CancelTypeEnum.ADMIN_CANCEL.getCode());
+                    orderMapper.markCancelTime(orderNo, CancelTypeEnum.USER_CANCEL.getCode(), null);
+            case FORCE_CANCEL -> orderMapper.markCancelTime(orderNo,
+                    CancelTypeEnum.ADMIN_CANCEL.getCode(), order.getCancelReason());
             default -> {
                 // 其余流转没有对应的时间线列
             }

@@ -71,4 +71,25 @@ public interface IMallOrderService
      * @param logisticsNo      物流单号
      */
     public void deliverOrder(String orderNo, String logisticsCompany, String logisticsNo);
+
+    /**
+     * 物流揽收：调 mall-order 状态机推进 WAIT_DELIVER → WAIT_RECEIVE
+     *
+     * <p>真实场景由快递公司回调触发，当前未对接任何快递平台，故提供管理端手工入口；
+     * 将来接平台时把回调适配到同一个内部端点即可。</p>
+     *
+     * @param orderNo 订单号
+     */
+    public void logisticsPickOrder(String orderNo);
+
+    /**
+     * 强制取消：调 mall-order 状态机推进 PAID → CANCELLED
+     *
+     * <p>仅适用于已支付、未发货且实付金额为 0 的异常订单；有金额的订单会被
+     * mall-order 状态机拒绝（A0703），必须走退款流程。</p>
+     *
+     * @param orderNo      订单号
+     * @param cancelReason 客服填写的取消原因
+     */
+    public void forceCancelOrder(String orderNo, String cancelReason);
 }

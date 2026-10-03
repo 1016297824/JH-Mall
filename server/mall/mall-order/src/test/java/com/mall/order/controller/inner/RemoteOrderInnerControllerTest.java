@@ -73,4 +73,15 @@ class RemoteOrderInnerControllerTest {
 
         verify(orderService).logisticsPick("ORD001");
     }
+
+    @Test
+    @DisplayName("强制取消端点：绑定 orderNo 与客服填写的 cancelReason 并透传 Service")
+    void forceCancelShouldBindParams() throws Exception {
+        mockMvc.perform(post("/inner/order/force-cancel")
+                        .param("orderNo", "ORD001")
+                        .param("cancelReason", "支付通道测试单"))
+                .andExpect(status().isOk());
+
+        verify(orderService).forceCancel("ORD001", "支付通道测试单");
+    }
 }

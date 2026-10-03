@@ -148,8 +148,43 @@ class OrderServiceImplTest {
 
         orderService.cancelOrder(12345L, ORDER_NO);
 
-        // 取消类型取 CancelTypeEnum 的码值，避免与超时关单各写一套词汇
-        verify(orderMapper).markCancelTime(ORDER_NO, CancelTypeEnum.USER_CANCEL.getCode());
+        // 取消类型取 CancelTypeEnum 的码值，避免与超时关单各写一套词汇；C 端取消没有自由文本原因
+        verify(orderMapper).markCancelTime(ORDER_NO, CancelTypeEnum.USER_CANCEL.getCode(), null);
+    }
+
+    @Test
+    @DisplayName("强制取消：零金额未发货订单记为 admin_cancel，并带上客服填写的原因")
+    void forceCancelShouldMarkAdminCancelWithReason() {
+        MallOrderDO order = paidOrder();
+        order.setPayAmount(0L);
+        when(orderMapper.selectByOrderNo(ORDER_NO)).thenReturn(order);
+        when(orderMapper.updateStatusCas(any(), any(), any(), any(), any())).thenReturn(1);
+
+        orderService.forceCancel(ORDER_NO, "支付通道测试单");
+
+        verify(orderMapper).markCancelTime(ORDER_NO, CancelTypeEnum.ADMIN_CANCEL.getCode(),
+                "支付通道测试单");
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(outboxPublisher).publish(eq(MqTopicConstants.Order.CANCELLED), eq("OrderCancelled"),
+                eq(ORDER_NO), captor.capture());
+        // 下游据 cancelReason 区分取消来源
+        assertThat(captor.getValue()).containsEntry("cancelReason", "FORCE_CANCEL");
+    }
+
+    @Test
+    @DisplayName("强制取消：有实付金额的订单被状态机拒绝，不落库也不投递释放库存的事件")
+    void forceCancelShouldRejectOrderWithAmount() {
+        MallOrderDO order = paidOrder();
+        order.setPayAmount(10000L);
+        when(orderMapper.selectByOrderNo(ORDER_NO)).thenReturn(order);
+
+        assertThatThrownBy(() -> orderService.forceCancel(ORDER_NO, "想直接取消"))
+                .isInstanceOf(BusinessException.class)
+                .extracting(e -> ((BusinessException) e).getErrorCode())
+                .isEqualTo(ErrorCode.ORDER_ACTION_DENIED.getCode());
+
+        verify(orderMapper, never()).markCancelTime(any(), any(), any());
+        verify(outboxPublisher, never()).publish(any(), any(), any(), any());
     }
 
     @Test

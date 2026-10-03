@@ -154,6 +154,8 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button v-if="Number(scope.row.orderStatus) === 1" link type="primary" icon="Van" @click="handleDeliver(scope.row)" v-hasPermi="['mall-admin:order:edit']">发货</el-button>
+          <el-button v-if="Number(scope.row.orderStatus) === 2" link type="primary" icon="Position" @click="handlePick(scope.row)" v-hasPermi="['mall-admin:order:edit']">揽收</el-button>
+          <el-button v-if="Number(scope.row.orderStatus) === 1" link type="danger" icon="CircleClose" @click="handleForceCancel(scope.row)" v-hasPermi="['mall-admin:order:edit']">强制取消</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:order:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:order:remove']">删除</el-button>
         </template>
@@ -324,12 +326,44 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 强制取消对话框：仅零金额未发货的异常订单，有金额的订单会被状态机拒绝 -->
+    <el-dialog title="强制取消订单" v-model="forceCancelOpen" width="500px" append-to-body>
+      <el-alert
+        type="warning"
+        :closable="false"
+        title="仅限已支付、未发货且实付金额为 0 的异常订单"
+        description="有实付金额的订单会被状态机拒绝，请改用退款流程。"
+        style="margin-bottom: 12px"
+      />
+      <el-form :model="forceCancelForm" label-width="100px">
+        <el-form-item label="订单号">
+          <el-input v-model="forceCancelForm.orderNo" disabled />
+        </el-form-item>
+        <el-form-item label="取消原因" required>
+          <el-input
+            v-model="forceCancelForm.cancelReason"
+            type="textarea"
+            :rows="2"
+            maxlength="200"
+            show-word-limit
+            placeholder="请填写取消原因，将记入订单 cancel_reason"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="danger" @click="submitForceCancel">确认取消</el-button>
+          <el-button @click="forceCancelOpen = false">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts" name="Order">
 import type { MallOrder, MallOrderItem, OrderQueryParams } from "@/types/api/mall-order/order"
-import { listOrder, getOrder, delOrder, addOrder, updateOrder, deliverOrder } from "@/api/mall-order/order"
+import { listOrder, getOrder, delOrder, addOrder, updateOrder, deliverOrder, logisticsPickOrder, forceCancelOrder } from "@/api/mall-order/order"
 
 const { proxy } = getCurrentInstance()
 
@@ -348,6 +382,9 @@ const title = ref<string>("")
 // 发货弹窗独立于编辑弹窗：复用会让"保存"语义混乱，且发货只写物流三项
 const deliverOpen = ref<boolean>(false)
 const deliverForm = ref({ orderNo: "", logisticsCompany: "", logisticsNo: "" })
+// 强制取消弹窗同样独立于编辑弹窗：它只写取消原因，且语义是不可撤销的
+const forceCancelOpen = ref<boolean>(false)
+const forceCancelForm = ref({ orderNo: "", cancelReason: "" })
 
 const data = reactive({
   form: {} as MallOrder,
@@ -531,6 +568,35 @@ function submitDeliver() {
   deliverOrder(deliverForm.value.orderNo, deliverForm.value.logisticsCompany, deliverForm.value.logisticsNo).then(() => {
     proxy.$modal.msgSuccess("发货成功")
     deliverOpen.value = false
+    getList()
+  })
+}
+
+/** 揽收按钮操作：快递平台回调未对接，先由管理端确认已取件 */
+function handlePick(row: MallOrder) {
+  proxy.$modal.confirm('确认快递已揽收？订单将推进为"待收货"。').then(() => {
+    return logisticsPickOrder(row.orderNo as string)
+  }).then(() => {
+    proxy.$modal.msgSuccess("已确认揽收")
+    getList()
+  }).catch(() => {})
+}
+
+/** 强制取消按钮操作：打开弹窗并预填订单号 */
+function handleForceCancel(row: MallOrder) {
+  forceCancelForm.value = { orderNo: row.orderNo as string, cancelReason: "" }
+  forceCancelOpen.value = true
+}
+
+/** 提交强制取消：状态机只放行零金额未发货的订单，其余由后端报错 */
+function submitForceCancel() {
+  if (!forceCancelForm.value.cancelReason) {
+    proxy.$modal.msgError("请填写取消原因")
+    return
+  }
+  forceCancelOrder(forceCancelForm.value.orderNo, forceCancelForm.value.cancelReason).then(() => {
+    proxy.$modal.msgSuccess("已强制取消")
+    forceCancelOpen.value = false
     getList()
   })
 }

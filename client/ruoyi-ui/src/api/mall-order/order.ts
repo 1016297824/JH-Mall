@@ -53,4 +53,22 @@ export function deliverOrder(orderNo: string, logisticsCompany: string, logistic
   })
 }
 
+// 揽收：确认快递已取件，推进 WAIT_DELIVER → WAIT_RECEIVE（快递平台回调未对接前的手工入口）
+export function logisticsPickOrder(orderNo: string): Promise<AjaxResult> {
+  return request({
+    url: '/mall-admin/order/logistics-pick',
+    method: 'put',
+    params: { orderNo }
+  })
+}
+
+// 强制取消：仅零金额未发货的异常订单可取消，推进 PAID → CANCELLED
+export function forceCancelOrder(orderNo: string, cancelReason?: string): Promise<AjaxResult> {
+  return request({
+    url: '/mall-admin/order/force-cancel',
+    method: 'put',
+    params: { orderNo, cancelReason }
+  })
+}
+
 

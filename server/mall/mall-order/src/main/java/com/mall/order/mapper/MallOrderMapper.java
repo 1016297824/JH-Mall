@@ -172,16 +172,20 @@ public interface MallOrderMapper extends BaseMapper<MallOrderDO> {
     int markCompleteTime(@Param("orderNo") String orderNo);
 
     /**
-     * 记录取消时间与取消类型
+     * 记录取消时间、取消类型与取消原因
      *
-     * <p>{@code cancelType} 取值见 {@code CancelTypeEnum}。</p>
+     * <p>{@code cancelType} 取值见 {@code CancelTypeEnum}；{@code cancelReason} 为客服填写的
+     * 自由文本（C 端主动取消无此信息，传 null 即可，该列保持 NULL）。</p>
      *
-     * @param orderNo    订单号
-     * @param cancelType 取消类型码
+     * @param orderNo      订单号
+     * @param cancelType   取消类型码
+     * @param cancelReason 取消原因，可为 null
      * @return 影响行数
      */
     @Update("UPDATE mall_order SET cancel_time = NOW(), cancel_type = #{cancelType}, "
-            + "update_time = NOW() WHERE order_no = #{orderNo} AND is_deleted = 0")
+            + "cancel_reason = #{cancelReason}, update_time = NOW() "
+            + "WHERE order_no = #{orderNo} AND is_deleted = 0")
     int markCancelTime(@Param("orderNo") String orderNo,
-                       @Param("cancelType") String cancelType);
+                       @Param("cancelType") String cancelType,
+                       @Param("cancelReason") String cancelReason);
 }

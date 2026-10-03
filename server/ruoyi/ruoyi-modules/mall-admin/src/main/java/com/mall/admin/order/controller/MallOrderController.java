@@ -119,4 +119,33 @@ public class MallOrderController extends BaseController
         mallOrderService.deliverOrder(orderNo, logisticsCompany, logisticsNo);
         return success();
     }
+
+    /**
+     * 物流揽收：确认快递已揽收（WAIT_DELIVER → WAIT_RECEIVE）
+     *
+     * <p>快递平台回调未对接前的管理端手工入口，权限同发货。</p>
+     */
+    @RequiresPermissions("mall-order:order:edit")
+    @Log(title = "订单管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/logistics-pick")
+    public AjaxResult logisticsPick(@RequestParam("orderNo") String orderNo)
+    {
+        mallOrderService.logisticsPickOrder(orderNo);
+        return success();
+    }
+
+    /**
+     * 强制取消：仅零金额未发货的异常订单可取消（PAID → CANCELLED）
+     *
+     * <p>有实付金额的订单会被 mall-order 状态机拒绝，须走退款流程。</p>
+     */
+    @RequiresPermissions("mall-order:order:edit")
+    @Log(title = "订单管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/force-cancel")
+    public AjaxResult forceCancel(@RequestParam("orderNo") String orderNo,
+                                  @RequestParam(value = "cancelReason", required = false) String cancelReason)
+    {
+        mallOrderService.forceCancelOrder(orderNo, cancelReason);
+        return success();
+    }
 }

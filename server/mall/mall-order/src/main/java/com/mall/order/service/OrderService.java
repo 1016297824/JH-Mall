@@ -68,6 +68,21 @@ public interface OrderService {
     void confirmReceipt(Long userId, String orderNo);
 
     /**
+     * 强制取消订单（管理端客服操作）
+     *
+     * <p>仅适用于<b>已支付、未发货且实付金额为 0</b> 的异常订单（设计文档
+     * {@code 03_04_系统详细设计-状态机详细设计.md}）。有金额的订单会被状态机拒绝（A0703），
+     * 必须走 {@code PAID -> REFUNDING} 退款流程——本方法不调渠道原路退款。</p>
+     *
+     * <p>取消后发布 {@code mall_order_cancelled}，由 mall-product / mall-marketing
+     * 释放预扣库存与锁定优惠券。</p>
+     *
+     * @param orderNo      订单号
+     * @param cancelReason 客服填写的取消原因，可为 null
+     */
+    void forceCancel(String orderNo, String cancelReason);
+
+    /**
      * 支付成功回调（由 MQ 消费者调用，非用户触发）
      *
      * <p>幂等：重复投递时状态机报 A0702 或乐观锁拦截，不会重复推进。</p>

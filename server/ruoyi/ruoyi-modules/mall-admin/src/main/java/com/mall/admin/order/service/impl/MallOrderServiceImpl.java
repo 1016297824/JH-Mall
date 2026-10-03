@@ -149,4 +149,27 @@ public class MallOrderServiceImpl implements IMallOrderService
     {
         remoteOrderService.deliver(orderNo, logisticsCompany, logisticsNo);
     }
+
+    /**
+     * 物流揽收：委托 mall-order 的状态机推进（WAIT_DELIVER → WAIT_RECEIVE）
+     *
+     * @param orderNo 订单号
+     */
+    @Override
+    public void logisticsPickOrder(String orderNo)
+    {
+        remoteOrderService.logisticsPick(orderNo);
+    }
+
+    /**
+     * 强制取消：委托 mall-order 的状态机推进（PAID → CANCELLED）
+     *
+     * @param orderNo      订单号
+     * @param cancelReason 客服填写的取消原因
+     */
+    @Override
+    public void forceCancelOrder(String orderNo, String cancelReason)
+    {
+        remoteOrderService.forceCancel(orderNo, cancelReason);
+    }
 }

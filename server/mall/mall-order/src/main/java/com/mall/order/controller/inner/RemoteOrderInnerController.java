@@ -79,4 +79,16 @@ public class RemoteOrderInnerController {
     public void logisticsPick(@RequestParam("orderNo") String orderNo) {
         orderService.logisticsPick(orderNo);
     }
+
+    /**
+     * 强制取消订单（管理端客服操作）
+     *
+     * @param orderNo      订单号
+     * @param cancelReason 客服填写的取消原因，可省略
+     */
+    @PostMapping("/force-cancel")
+    public void forceCancel(@RequestParam("orderNo") String orderNo,
+                            @RequestParam(value = "cancelReason", required = false) String cancelReason) {
+        orderService.forceCancel(orderNo, cancelReason);
+    }
 }
