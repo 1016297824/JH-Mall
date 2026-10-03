@@ -117,21 +117,18 @@ class IndexServiceImplTest {
 
     @Test
     void syncProduct_delete_shouldCallDeleteById() {
-        // RED/GREEN: 幂等去重未命中时执行删除
-        when(valueOperations.setIfAbsent(contains("dedup"), eq("1"), eq(1L), eq(TimeUnit.HOURS)))
-                .thenReturn(true);
         indexService.syncProduct(1L, "DELETE");
         verify(productIndexRepository).deleteById(1L);
     }
 
     @Test
-    void syncProduct_duplicate_shouldSkip() {
-        // 幂等去重命中，跳过
-        when(valueOperations.setIfAbsent(contains("dedup"), eq("1"), eq(1L), eq(TimeUnit.HOURS)))
-                .thenReturn(false);
-        indexService.syncProduct(1L, "UPSERT");
-        verify(productIndexRepository, never()).deleteById(any());
-        verify(productIndexRepository, never()).save(any());
+    void syncProduct_shouldNotDedupByTimeWindow() {
+        // 同一商品连续两次同步都必须执行：ES 的 delete 本身幂等，
+        // 而"1 小时内只同步一次"会让第二次变更被静默丢弃（索引停在旧值）
+        indexService.syncProduct(1L, "DELETE");
+        indexService.syncProduct(1L, "DELETE");
+
+        verify(productIndexRepository, org.mockito.Mockito.times(2)).deleteById(1L);
     }
 
     @Test
