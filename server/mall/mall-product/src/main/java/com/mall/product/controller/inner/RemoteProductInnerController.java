@@ -169,6 +169,17 @@ public class RemoteProductInnerController {
     }
 
     /**
+     * 按 spuId 查询单条搜索索引 DTO（供 mall-search 增量同步，避免全表扫描）
+     *
+     * @param spuId SPU ID
+     * @return SpuSearchDTO；商品不存在返回 null
+     */
+    @GetMapping("/spus/{spuId}/for-search")
+    SpuSearchDTO getSpuForSearch(@PathVariable("spuId") Long spuId) {
+        return spuService.getForSearchRebuild(spuId);
+    }
+
+    /**
      * 操作码 → 同步操作枚举
      *
      * <p>无法识别的操作码按 UPSERT 处理：宁可按更新投递，也不要静默不同步。</p>

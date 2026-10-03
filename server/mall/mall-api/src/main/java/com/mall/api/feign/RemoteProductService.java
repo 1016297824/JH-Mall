@@ -121,6 +121,17 @@ public interface RemoteProductService {
                          @RequestParam("operation") String operation);
 
     /**
+     * 按 spuId 查询单条搜索索引 DTO（搜索增量同步专用）
+     *
+     * <p>增量同步只需一条商品，用它替代全表分页扫描（原先单次同步 O(N)）。</p>
+     *
+     * @param spuId SPU ID
+     * @return SpuSearchDTO；商品不存在返回 null
+     */
+    @GetMapping("/inner/product/spus/{spuId}/for-search")
+    SpuSearchDTO getSpuForSearch(@PathVariable("spuId") Long spuId);
+
+    /**
      * 搜索降级兜底（ES 不可用时通过 DB Like 查询）
      *
      * @param keyword 搜索关键词
