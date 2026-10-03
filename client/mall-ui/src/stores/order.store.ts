@@ -50,38 +50,56 @@ export const useOrderStore = defineStore('order', () => {
     }
   }
 
-  /** 改数量 */
-  async function updateQuantity(id: string, quantity: number) {
-    await putCartItemQuantity(id, quantity)
+  /**
+   * 执行一次写操作，并让本地状态回到与后端一致
+   *
+   * <p>失败时也要刷新：写请求可能已在服务端生效（如并发改量），
+   * 只回滚本地状态反而会显示错误数据。异常统一上抛，由 API 层拦截器提示用户。</p>
+   *
+   * @param write 写操作
+   */
+  async function runAndRefresh(write: () => Promise<unknown>): Promise<void> {
+    try {
+      await write()
+    } catch (error) {
+      await fetchCart().catch(() => undefined)
+      throw error
+    }
     await fetchCart()
+  }
+
+  /** 改数量 */
+  async function updateQuantity(id: string, quantity: number): Promise<void> {
+    await runAndRefresh(() => putCartItemQuantity(id, quantity))
   }
 
   /** 勾选 / 取消勾选单项 */
-  async function toggleSelected(id: string, isSelected: boolean) {
-    await putCartItemSelected(id, isSelected)
-    await fetchCart()
+  async function toggleSelected(id: string, isSelected: boolean): Promise<void> {
+    await runAndRefresh(() => putCartItemSelected(id, isSelected))
   }
 
   /** 全选 / 全不选（后端无批量接口，逐项提交） */
-  async function toggleAll(isSelected: boolean) {
-    await Promise.all(
-      cartItems.value
-        .filter((item) => item.purchasable)
-        .map((item) => putCartItemSelected(item.id, isSelected)),
+  async function toggleAll(isSelected: boolean): Promise<void> {
+    await runAndRefresh(() =>
+      Promise.all(
+        cartItems.value
+          .filter((item) => item.purchasable)
+          .map((item) => putCartItemSelected(item.id, isSelected)),
+      ),
     )
-    await fetchCart()
   }
 
   /** 删除单项 */
-  async function removeItem(id: string) {
-    await deleteCartItem(id)
-    await fetchCart()
+  async function removeItem(id: string): Promise<void> {
+    await runAndRefresh(() => deleteCartItem(id))
   }
 
   /** 清空购物车 */
-  async function clearCart() {
-    await deleteCartItems()
-    cartItems.value = []
+  async function clearCart(): Promise<void> {
+    await runAndRefresh(async () => {
+      await deleteCartItems()
+      cartItems.value = []
+    })
   }
 
   return {
