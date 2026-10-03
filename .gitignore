@@ -63,3 +63,6 @@ client/ruoyi-ui/auto-imports.d.ts
 
 # Agent 工作数据（会话记忆、本地状态）
 /.workbuddy/
+
+# 本地运行产物（服务日志、E2E 联调脚本、响应式诊断脚本与截图、JWT 令牌等，禁止入库）
+/.run/
