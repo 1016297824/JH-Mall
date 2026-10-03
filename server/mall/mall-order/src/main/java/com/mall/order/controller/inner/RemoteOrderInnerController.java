@@ -3,6 +3,7 @@ package com.mall.order.controller.inner;
 import com.mall.api.feign.RemoteOrderService;
 import com.mall.order.DO.MallOrderDO;
 import com.mall.order.mapper.MallOrderMapper;
+import com.mall.order.service.AfterSaleService;
 import com.mall.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,8 @@ public class RemoteOrderInnerController {
     private final MallOrderMapper orderMapper;
 
     private final OrderService orderService;
+
+    private final AfterSaleService afterSaleService;
 
     /**
      * 查询订单快照
@@ -90,5 +93,29 @@ public class RemoteOrderInnerController {
     public void forceCancel(@RequestParam("orderNo") String orderNo,
                             @RequestParam(value = "cancelReason", required = false) String cancelReason) {
         orderService.forceCancel(orderNo, cancelReason);
+    }
+
+    /**
+     * 售后审核通过（管理端客服操作，触发退款）
+     *
+     * @param afterSaleId 售后单 ID
+     * @param remark      审核意见
+     */
+    @PostMapping("/after-sale/approve")
+    public void approveAfterSale(@RequestParam("afterSaleId") Long afterSaleId,
+                                 @RequestParam(value = "remark", required = false) String remark) {
+        afterSaleService.approve(afterSaleId, remark);
+    }
+
+    /**
+     * 售后审核驳回
+     *
+     * @param afterSaleId 售后单 ID
+     * @param remark      驳回原因
+     */
+    @PostMapping("/after-sale/reject")
+    public void rejectAfterSale(@RequestParam("afterSaleId") Long afterSaleId,
+                                @RequestParam(value = "remark", required = false) String remark) {
+        afterSaleService.reject(afterSaleId, remark);
     }
 }

@@ -58,4 +58,23 @@ public interface IMallOrderAfterSaleService
      * @return 结果
      */
     public int deleteMallOrderAfterSaleById(String id);
+
+    /**
+     * 审核通过：调 mall-order 发起退款
+     *
+     * <p><b>必须走 Feign 而非本模块 Mapper 直改状态</b>：售后单状态机与退款发起都在 mall-order，
+     * 直改库会绕过状态校验且不会触发退款。</p>
+     *
+     * @param id     售后单主键
+     * @param remark 审核意见
+     */
+    public void approveAfterSale(String id, String remark);
+
+    /**
+     * 审核驳回
+     *
+     * @param id     售后单主键
+     * @param remark 驳回原因
+     */
+    public void rejectAfterSale(String id, String remark);
 }

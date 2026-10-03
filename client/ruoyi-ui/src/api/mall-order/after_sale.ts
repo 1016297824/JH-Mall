@@ -44,4 +44,22 @@ export function delAfter_sale(id: number | number[]): Promise<AjaxResult> {
   })
 }
 
+// 审核通过：由 mall-order 校验状态并发起退款，本接口只做透传
+export function approveAfterSale(id: string, remark?: string): Promise<AjaxResult> {
+  return request({
+    url: '/mall-admin/after_sale/approve',
+    method: 'put',
+    params: { id, remark }
+  })
+}
+
+// 审核驳回
+export function rejectAfterSale(id: string, remark?: string): Promise<AjaxResult> {
+  return request({
+    url: '/mall-admin/after_sale/reject',
+    method: 'put',
+    params: { id, remark }
+  })
+}
+
 

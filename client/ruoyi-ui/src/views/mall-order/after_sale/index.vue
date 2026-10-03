@@ -143,6 +143,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <el-button v-if="Number(scope.row.afterSaleStatus) === 0" link type="success" icon="Select" @click="handleAudit(scope.row, true)" v-hasPermi="['mall-admin:after_sale:edit']">通过</el-button>
+          <el-button v-if="Number(scope.row.afterSaleStatus) === 0" link type="danger" icon="CloseBold" @click="handleAudit(scope.row, false)" v-hasPermi="['mall-admin:after_sale:edit']">驳回</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:after_sale:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:after_sale:remove']">删除</el-button>
         </template>
@@ -225,17 +227,55 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 售后审核：通过=发起退款，驳回=终结该售后单，两者都写审核意见 -->
+    <el-dialog :title="auditTitle" v-model="auditOpen" width="500px" append-to-body>
+      <el-alert
+        :type="auditApprove ? 'warning' : 'info'"
+        :closable="false"
+        :title="auditApprove ? '通过后将立即发起退款，退款结果由支付渠道回调推进' : '驳回后该售后单将终结，用户需重新申请'"
+        style="margin-bottom: 12px"
+      />
+      <el-form :model="auditForm" label-width="90px">
+        <el-form-item label="售后单号">
+          <el-input v-model="auditForm.afterSaleNo" disabled />
+        </el-form-item>
+        <el-form-item label="审核意见" :required="!auditApprove">
+          <el-input
+            v-model="auditForm.remark"
+            type="textarea"
+            :rows="2"
+            maxlength="200"
+            show-word-limit
+            :placeholder="auditApprove ? '选填，如：同意退款' : '请填写驳回原因'"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button :type="auditApprove ? 'primary' : 'danger'" @click="submitAudit">
+            {{ auditApprove ? '确认通过' : '确认驳回' }}
+          </el-button>
+          <el-button @click="auditOpen = false">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts" name="After_sale">
 import type { MallOrderAfterSale, After_saleQueryParams } from "@/types/api/mall-order/after_sale"
-import { listAfter_sale, getAfter_sale, delAfter_sale, addAfter_sale, updateAfter_sale } from "@/api/mall-order/after_sale"
+import { listAfter_sale, getAfter_sale, delAfter_sale, addAfter_sale, updateAfter_sale, approveAfterSale, rejectAfterSale } from "@/api/mall-order/after_sale"
 
 const { proxy } = getCurrentInstance()
 
 const after_saleList = ref<MallOrderAfterSale[]>([])
 const open = ref<boolean>(false)
+// 审核弹窗独立于编辑弹窗：它只写审核意见并触发退款/驳回，语义与「修改」完全不同
+const auditOpen = ref<boolean>(false)
+const auditApprove = ref<boolean>(true)
+const auditTitle = ref<string>("售后审核")
+const auditForm = ref({ id: "", afterSaleNo: "", remark: "" })
 const loading = ref<boolean>(true)
 const showSearch = ref<boolean>(true)
 const ids = ref<number[]>([])
@@ -370,6 +410,30 @@ function handleUpdate(row: MallOrderAfterSale) {
     form.value = response.data
     open.value = true
     title.value = "修改售后管理"
+  })
+}
+
+/** 审核按钮操作：approve=true 通过并发起退款，false 驳回 */
+function handleAudit(row: MallOrderAfterSale, approve: boolean) {
+  auditApprove.value = approve
+  auditTitle.value = approve ? "审核通过并发起退款" : "驳回售后申请"
+  auditForm.value = { id: String(row.id), afterSaleNo: String(row.afterSaleNo ?? ""), remark: "" }
+  auditOpen.value = true
+}
+
+/** 提交审核：状态校验与退款发起都在 mall-order，失败原因由后端返回 */
+function submitAudit() {
+  if (!auditApprove.value && !auditForm.value.remark) {
+    proxy.$modal.msgError("请填写驳回原因")
+    return
+  }
+  const action = auditApprove.value
+    ? approveAfterSale(auditForm.value.id, auditForm.value.remark)
+    : rejectAfterSale(auditForm.value.id, auditForm.value.remark)
+  action.then(() => {
+    proxy.$modal.msgSuccess(auditApprove.value ? "已通过并发起退款" : "已驳回")
+    auditOpen.value = false
+    getList()
   })
 }
 

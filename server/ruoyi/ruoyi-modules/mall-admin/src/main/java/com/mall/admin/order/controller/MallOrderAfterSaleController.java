@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
@@ -100,5 +101,33 @@ public class MallOrderAfterSaleController extends BaseController
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallOrderAfterSaleService.deleteMallOrderAfterSaleByIds(ids));
+    }
+
+    /**
+     * 审核通过：发起退款（售后单 PENDING → 退款中）
+     *
+     * <p>状态校验与退款发起都在 mall-order，本端点只做透传，权限复用 edit。</p>
+     */
+    @RequiresPermissions("mall-order:after_sale:edit")
+    @Log(title = "售后管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/approve")
+    public AjaxResult approve(@RequestParam("id") String id,
+                              @RequestParam(value = "remark", required = false) String remark)
+    {
+        mallOrderAfterSaleService.approveAfterSale(id, remark);
+        return success();
+    }
+
+    /**
+     * 审核驳回（售后单 PENDING → 已驳回）
+     */
+    @RequiresPermissions("mall-order:after_sale:edit")
+    @Log(title = "售后管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/reject")
+    public AjaxResult reject(@RequestParam("id") String id,
+                             @RequestParam(value = "remark", required = false) String remark)
+    {
+        mallOrderAfterSaleService.rejectAfterSale(id, remark);
+        return success();
     }
 }

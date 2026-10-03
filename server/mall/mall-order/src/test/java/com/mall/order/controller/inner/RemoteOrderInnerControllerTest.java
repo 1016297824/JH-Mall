@@ -1,6 +1,7 @@
 package com.mall.order.controller.inner;
 
 import com.mall.order.mapper.MallOrderMapper;
+import com.mall.order.service.AfterSaleService;
 import com.mall.order.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +33,8 @@ class RemoteOrderInnerControllerTest {
     @Mock private MallOrderMapper orderMapper;
 
     @Mock private OrderService orderService;
+
+    @Mock private AfterSaleService afterSaleService;
 
     @InjectMocks private RemoteOrderInnerController controller;
 
@@ -83,5 +86,27 @@ class RemoteOrderInnerControllerTest {
                 .andExpect(status().isOk());
 
         verify(orderService).forceCancel("ORD001", "支付通道测试单");
+    }
+
+    @Test
+    @DisplayName("售后审核通过端点：绑定 afterSaleId/remark 并透传 Service")
+    void approveAfterSaleShouldBindParams() throws Exception {
+        mockMvc.perform(post("/inner/order/after-sale/approve")
+                        .param("afterSaleId", "77")
+                        .param("remark", "同意退款"))
+                .andExpect(status().isOk());
+
+        verify(afterSaleService).approve(77L, "同意退款");
+    }
+
+    @Test
+    @DisplayName("售后驳回端点：绑定 afterSaleId/remark 并透传 Service")
+    void rejectAfterSaleShouldBindParams() throws Exception {
+        mockMvc.perform(post("/inner/order/after-sale/reject")
+                        .param("afterSaleId", "77")
+                        .param("remark", "不符合退款条件"))
+                .andExpect(status().isOk());
+
+        verify(afterSaleService).reject(77L, "不符合退款条件");
     }
 }

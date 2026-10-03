@@ -1,6 +1,7 @@
 package com.mall.admin.order.service.impl;
 
 import java.util.List;
+import com.mall.api.feign.RemoteOrderService;
 import com.ruoyi.common.core.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class MallOrderAfterSaleServiceImpl implements IMallOrderAfterSaleService
 {
     @Autowired
     private MallOrderAfterSaleMapper mallOrderAfterSaleMapper;
+
+    @Autowired
+    private RemoteOrderService remoteOrderService;
 
     /**
      * 查询售后管理
@@ -92,5 +96,29 @@ public class MallOrderAfterSaleServiceImpl implements IMallOrderAfterSaleService
     public int deleteMallOrderAfterSaleById(String id)
     {
         return mallOrderAfterSaleMapper.deleteMallOrderAfterSaleById(id);
+    }
+
+    /**
+     * 审核通过：委托 mall-order 发起退款
+     *
+     * @param id     售后单主键
+     * @param remark 审核意见
+     */
+    @Override
+    public void approveAfterSale(String id, String remark)
+    {
+        remoteOrderService.approveAfterSale(Long.valueOf(id), remark);
+    }
+
+    /**
+     * 审核驳回：委托 mall-order 推进售后单状态
+     *
+     * @param id     售后单主键
+     * @param remark 驳回原因
+     */
+    @Override
+    public void rejectAfterSale(String id, String remark)
+    {
+        remoteOrderService.rejectAfterSale(Long.valueOf(id), remark);
     }
 }

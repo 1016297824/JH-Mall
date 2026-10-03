@@ -64,6 +64,28 @@ public interface RemoteOrderService {
                      @RequestParam(value = "cancelReason", required = false) String cancelReason);
 
     /**
+     * 售后审核通过（管理端客服操作）
+     *
+     * <p>mall-order 校验售后单状态后发起退款；退款结果经 MQ 回调推进售后单与订单状态。</p>
+     *
+     * @param afterSaleId 售后单 ID
+     * @param remark      审核意见
+     */
+    @PostMapping("/inner/order/after-sale/approve")
+    void approveAfterSale(@RequestParam("afterSaleId") Long afterSaleId,
+                          @RequestParam(value = "remark", required = false) String remark);
+
+    /**
+     * 售后审核驳回（管理端客服操作）
+     *
+     * @param afterSaleId 售后单 ID
+     * @param remark      驳回原因
+     */
+    @PostMapping("/inner/order/after-sale/reject")
+    void rejectAfterSale(@RequestParam("afterSaleId") Long afterSaleId,
+                         @RequestParam(value = "remark", required = false) String remark);
+
+    /**
      * 订单快照
      *
      * <p>{@code status} 为订单状态码，取值见 {@code mall-common} 的 {@code OrderStatusEnum}。
