@@ -96,7 +96,7 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
-        <!-- RocketMQ（Outbox 投递 mall:coupon:used + 订单事件消费，与 mall-order 保持同一版本） -->
+        <!-- RocketMQ（Outbox 投递 mall_coupon_used + 订单事件消费，与 mall-order 保持同一版本） -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-spring-boot-starter</artifactId>

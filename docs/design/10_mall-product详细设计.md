@@ -16,7 +16,7 @@
 | SKU 管理      | `mall_product_sku`       | 销售规格，含售价/市场价/成本价/重量                                           |
 | 库存管理      | `mall_product_sku_stock` | 四段库存（可用/锁定/已售/冻结），乐观锁防超卖                                 |
 | 搜索同步      | Outbox                     | 商品变更后实时+异步双通道同步到 ES                                            |
-| RocketMQ 事件 | Outbox                     | 生产 `mall:search:sync`，消费 `mall:order:cancelled`、`mall:order:paid` |
+| RocketMQ 事件 | Outbox                     | 生产 `mall_search_sync`，消费 `mall_order_cancelled`、`mall_order_paid` |
 
 ### 1.2 依赖关系
 
@@ -24,8 +24,8 @@
 mall-product (9303端口)
   ├── MySQL：自有表（见表系统设计第 1.2 节）
   ├── Redis：SKU 缓存、类目树缓存、搜索降级锁
-  ├── RocketMQ (Producer)：写 Outbox → 投递 mall:search:sync
-  ├── RocketMQ (Consumer)：消费 mall:order:cancelled → 释放库存；消费 mall:order:paid → 更新热度排行
+  ├── RocketMQ (Producer)：写 Outbox → 投递 mall_search_sync
+  ├── RocketMQ (Consumer)：消费 mall_order_cancelled → 释放库存；消费 mall_order_paid → 更新热度排行
   ├── mall-api (Feign)：RemoteProductService 供 mall-order 调用
   │   方法：batchGetSku / reserveStock / releaseStock / restock
   └── mall-search (Feign Caller)：调 RemoteSearchService.syncProduct 直推索引
@@ -87,9 +87,9 @@ server/mall/mall-product/
     │   └── MallSkuStockMapper.java
     ├── infrastructure/
     │   ├── mq/
-    │   │   ├── SearchSyncProducer.java       # Outbox 生产 mall:search:sync
-    │   │   ├── OrderCancelledConsumer.java   # 消费 mall:order:cancelled 释放库存
-    │   │   └── OrderPaidConsumer.java        # 消费 mall:order:paid 更新热度排行
+    │   │   ├── SearchSyncProducer.java       # Outbox 生产 mall_search_sync
+    │   │   ├── OrderCancelledConsumer.java   # 消费 mall_order_cancelled 释放库存
+    │   │   └── OrderPaidConsumer.java        # 消费 mall_order_paid 更新热度排行
     │   └── feign/
     │       └── RemoteSearchAdapter.java      # 调 mall-search 实时同步索引
     ├── convert/
@@ -199,7 +199,7 @@ server/mall/mall-product/
 - 乐观锁防超卖：`available_stock>=qty` + `version` 双重保护
 - 影响 0 行 → 库存不足 `A0521`
 
-**releaseStock(orderNo)**：取消订单释放库存（消费 `mall:order:cancelled`）
+**releaseStock(orderNo)**：取消订单释放库存（消费 `mall_order_cancelled`）
 
 - 根据 `orderNo` 查订单项，逐 SKU 回退：`UPDATE ... SET available_stock=available_stock+#{qty}, locked_stock=locked_stock-#{qty} WHERE sku_id=? AND version=?`
 - 幂等去重：`orderNo + skuId` Redis key，防重复释放
@@ -276,7 +276,7 @@ WHERE sku_id = #{skuId}
 
 | 场景                 | 补偿                                                   |
 | -------------------- | ------------------------------------------------------ |
-| 下单后 30 分钟未支付 | 消费 `mall:order:cancelled` → 释放库存              |
+| 下单后 30 分钟未支付 | 消费 `mall_order_cancelled` → 释放库存              |
 | 订单取消             | 同上                                                   |
 | Outbox 投递失败      | Outbox 重试 3 次，最终投递到死信 → 人工或补偿任务扫描 |
 | 补偿重复执行         | `orderNo + skuId` Redis 幂等去重（24h TTL）          |
@@ -307,7 +307,7 @@ WHERE sku_id = #{skuId}
 | 通道 | 方式                                                                  | 特点                     |
 | ---- | --------------------------------------------------------------------- | ------------------------ |
 | 实时 | Feign 直调 `RemoteSearchService.syncProduct(productIndex)`          | 同步调用，即时生效       |
-| 异步 | 写 Outbox `mall:search:sync`，定时投递 RocketMQ → mall-search 消费 | 实时通道失败时降级兜底   |
+| 异步 | 写 Outbox `mall_search_sync`，定时投递 RocketMQ → mall-search 消费 | 实时通道失败时降级兜底   |
 | 补偿 | ruoyi-job 定时扫描 Outbox 未投递记录                                  | 兜底通道失败时的最后保障 |
 
 ### 5.1.1 全量重建数据供给
@@ -336,7 +336,7 @@ WHERE sku_id = #{skuId}
 ```
 SpuServiceImpl.updateStatus(spuId, publishStatus):
   ① 更新 publish_status
-  ② 同一事务写 Outbox mall:search:sync
+  ② 同一事务写 Outbox mall_search_sync
   ③ 事务提交后 → 异步调 RemoteSearchAdapter.syncProduct(productIndex)
      ├─ 成功 → 更新 Outbox status=SENT
      └─ 失败 → 不阻塞，Outbox 定时投递兜底
@@ -368,14 +368,14 @@ ES 不可用时，mall-search 自动降级到 mall-product 的 DB 查询：
 
 | Topic                | Payload 字段                                             | 发布时机       |
 | -------------------- | -------------------------------------------------------- | -------------- |
-| `mall:search:sync` | `spuId`、`operation`（UPSERT/DELETE）、`timestamp` | 商品信息变更后 |
+| `mall_search_sync` | `spuId`、`operation`（UPSERT/DELETE）、`timestamp` | 商品信息变更后 |
 
 ### 7.2 消费的事件
 
 | Topic                    | 消费者类                   | 处理流程                                                                                                           |
 | ------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `mall:order:cancelled` | `OrderCancelledConsumer` | ①幂等去重 ②查订单项 SKU 列表 ③逐 SKU 释放库存 `releaseStock(skuId, qty)` ④幂等 key：`orderNo + skuId`      |
-| `mall:order:paid`      | `OrderPaidConsumer`      | ①幂等去重 ②查订单项 SKU 列表 ③逐 SKU → 查所属 SPU ④`HotProductService.hotRank(spuId, qty)` 更新 ZSet 热度分 |
+| `mall_order_cancelled` | `OrderCancelledConsumer` | ①幂等去重 ②查订单项 SKU 列表 ③逐 SKU 释放库存 `releaseStock(skuId, qty)` ④幂等 key：`orderNo + skuId`      |
+| `mall_order_paid`      | `OrderPaidConsumer`      | ①幂等去重 ②查订单项 SKU 列表 ③逐 SKU → 查所属 SPU ④`HotProductService.hotRank(spuId, qty)` 更新 ZSet 热度分 |
 
 ### 7.3 重试策略
 
@@ -435,7 +435,7 @@ ES 不可用时，mall-search 自动降级到 mall-product 的 DB 查询：
 - 使用 Redis HyperLogLog 按天分片：`PFADD mall:product:uv:{spuId}:{yyyyMMdd} {userId}` 去重统计
 - 日键设 TTL = uvWindowDays + 2，到期自动过期，无需手动清理
 
-**hotRank(skuId, quantity)**：下单成功后更新热度（消费 `mall:order:paid`）
+**hotRank(skuId, quantity)**：下单成功后更新热度（消费 `mall_order_paid`）
 
 - `ZINCRBY mall:product:hot:rank {quantity * 10} {spuId}`（销量权重）
 

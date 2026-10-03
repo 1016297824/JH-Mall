@@ -410,9 +410,9 @@ mall-auth 生产 **1 个** topic，消费 **0 个**：
 
 | Topic                    | Payload 字段                                                                 | 发布时机         |
 | ------------------------ | ---------------------------------------------------------------------------- | ---------------- |
-| `mall:user:registered` | `userId`、`phone`（脱敏）、`registerTime`、`channel`（PHONE/WECHAT） | 新用户注册成功后 |
+| `mall_user_registered` | `userId`、`phone`（脱敏）、`registerTime`、`channel`（PHONE/WECHAT） | 新用户注册成功后 |
 
-> topic `mall:user:registered` 由 mall-user 消费，用于初始化积分账户、成长值等。
+> topic `mall_user_registered` 由 mall-user 消费，用于初始化积分账户、成长值等。
 
 与 mall-order/mall-payment 不同：mall-auth **本地不维护 Outbox 表**（无 MySQL），事件由 `AuthServiceImpl` 调 `RocketMQTemplate` 直接同步发送。发送失败时记录日志 + 告警，不阻塞注册流程。
 

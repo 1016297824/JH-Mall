@@ -23,7 +23,7 @@ mall-search (9307端口)
   ├── MySQL：无（不操作关系数据库）
   ├── Elasticsearch：索引 storage + 搜索查询
   ├── Redis：分布式锁（全量重建防并发）、搜索结果缓存（热点词 1min）
-  ├── RocketMQ (Consumer)：消费 mall:search:sync → 增量同步索引
+  ├── RocketMQ (Consumer)：消费 mall_search_sync → 增量同步索引
   ├── mall-product (Feign Caller)：调 RemoteProductService 取全量/增量商品数据（专用 SpuSearchDTO）
   └── mall-product (被调)：提供 RemoteSearchService.syncProduct 供商品服务直推索引
 ```
@@ -68,7 +68,7 @@ server/mall/mall-search/
     │   ├── schedule/
     │   │   └── IndexRebuildTask.java         # 定时全量重建，ruoyi-job 定时调度
     │   ├── mq/
-    │   │   └── SearchSyncConsumer.java      # 消费 mall:search:sync 增量同步
+    │   │   └── SearchSyncConsumer.java      # 消费 mall_search_sync 增量同步
     │   └── feign/
     │       └── RemoteProductAdapter.java     # 调 mall-product 取商品数据
     └── convert/
@@ -228,7 +228,7 @@ ruoyi-job (9204端口)
 - **cron 表达式在 ruoyi-job 控制台配置**（建议每天凌晨 3 点 `0 0 3 * * ?`），不在 Nacos 也不在代码中
 - 重建内部已有 Redis 分布式锁 `mall:search:index:rebuild_lock`（3600s），定时与手动触发互不冲突
 
-> **频率建议**：全量重建为重操作（拉全量商品 → 建新索引 → 灌数据 → 切别名），日常增量靠 MQ `mall:search:sync` + Outbox 补偿，定时全量重建作为数据一致性的最终兜底，每天一次即可。
+> **频率建议**：全量重建为重操作（拉全量商品 → 建新索引 → 灌数据 → 切别名），日常增量靠 MQ `mall_search_sync` + Outbox 补偿，定时全量重建作为数据一致性的最终兜底，每天一次即可。
 
 ### 3.7 RemoteSearchInnerController
 
@@ -293,7 +293,7 @@ POST /_aliases
 
 | Topic                | 消费者类               | 处理流程                                                                                                   |
 | -------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `mall:search:sync` | `SearchSyncConsumer` | ①幂等去重 `mall:search:dedup:{productId}:{operation}` ②调 `IndexService.syncProduct()` ③增量写入 ES |
+| `mall_search_sync` | `SearchSyncConsumer` | ①幂等去重 `mall:search:dedup:{productId}:{operation}` ②调 `IndexService.syncProduct()` ③增量写入 ES |
 
 ### 5.2 幂等
 

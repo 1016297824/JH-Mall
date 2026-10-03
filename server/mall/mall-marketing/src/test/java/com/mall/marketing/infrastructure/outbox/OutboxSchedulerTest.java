@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OutboxSchedulerTest {
 
-    private static final String TOPIC = "mall:coupon:used";
+    private static final String TOPIC = "mall_coupon_used";
     private static final Long MESSAGE_PK = 1L;
 
     @Mock private MallOutboxMapper outboxMapper;

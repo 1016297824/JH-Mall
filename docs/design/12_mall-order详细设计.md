@@ -13,7 +13,7 @@
 | 购物车 | `mall_order_cart` | 用户临时存放待购商品，登录态持久化 |
 | 订单 | `mall_order` + `mall_order_item` + `mall_order_amount` | 核心编排，含价格快照和状态机 |
 | 售后 | `mall_order_after_sale` | 退款/退货申请与审核 |
-| RocketMQ | 消费 `mall:payment:paid` 等、生产 `mall:order:created` 等 | 异步推进订单、发布事件 |
+| RocketMQ | 消费 `mall_payment_paid` 等、生产 `mall_order_created` 等 | 异步推进订单、发布事件 |
 
 ### 1.2 依赖关系
 
@@ -25,8 +25,8 @@ mall-order
   → mall-user (Feign)：校验地址归属
   → mall-auth (Feign)：解密手机号
   → MySQL：自有表（见表系统设计第 1.3 节）
-  → Outbox：生产 mall:order:created/paid/cancelled/delivered/completed/refunded
-  → RocketMQ Consumer：消费 mall:payment:paid、mall:refund:succeeded
+  → Outbox：生产 mall_order_created/paid/cancelled/delivered/completed/refunded
+  → RocketMQ Consumer：消费 mall_payment_paid、mall_refund_succeeded
   → Redis：幂等键去重
 ```
 
@@ -158,7 +158,7 @@ mall-order/src/main/java/com/mall/order/
 - 依赖：`OrderStateMachine`、`MallOrderMapper`、`MallOrderItemMapper`、`MallOrderAmountMapper`、`OutboxMapper`、`RemoteProductAdapter`、`RemoteMarketingAdapter`、`RemotePaymentAdapter`、`RemoteUserAdapter`、`Redis`（幂等键）
 - `createOrder(req)`：幂等校验 → 参数校验 → 锁库存 → 锁优惠 → 创建订单+写 Outbox（同一事务）
 - `payCallback(orderNo)`：调 `stateMachine.transition()`，WAIT_PAY → PAID
-- `cancelOrder(orderNo)`：调 `stateMachine.transition()` → 写 `mall:order:cancelled` Outbox
+- `cancelOrder(orderNo)`：调 `stateMachine.transition()` → 写 `mall_order_cancelled` Outbox
 - `confirmReceipt(orderNo)`：调 `stateMachine.transition()`，WAIT_RECEIVE → COMPLETED
 
 ### 3.3 CartServiceImpl
@@ -178,7 +178,7 @@ mall-order/src/main/java/com/mall/order/
 - `submit(req)`：校验订单状态 → 创建售后单（PENDING）
 - `approve(afterSaleId)`：管理端审核通过 → 调 mall-payment 发起退款
 - `reject(afterSaleId)`：管理端拒绝，通知用户
-- `refundCallback()`：消费 `mall:refund:succeeded` → 推进售后状态
+- `refundCallback()`：消费 `mall_refund_succeeded` → 推进售后状态
 
 ---
 
@@ -279,7 +279,7 @@ mall-order/src/main/java/com/mall/order/
 2. **INSERT mall_order**：`order_no`, `user_id`, `status='WAIT_PAY'`, `total_amount`, `discount_amount`, `freight_amount`, `pay_amount`, `pay_expire_time=NOW()+30min`
 3. **批量 INSERT mall_order_item**：每条含 `sku_id`, `price_snapshot`（下单时价）, `quantity`, `total_price`
 4. **INSERT mall_order_amount**：含 `total_amount`, `discount_amount`, `pay_amount`
-5. **INSERT outbox**：`topic='mall:order:created'`, `payload={orderNo, userId, payAmount, payExpireTime}`, `status='NEW'`
+5. **INSERT outbox**：`topic='mall_order_created'`, `payload={orderNo, userId, payAmount, payExpireTime}`, `status='NEW'`
 6. 若使用优惠券，记录 `coupon_snapshot`
 
 ### 5.7 补偿规则
@@ -322,7 +322,7 @@ WHERE order_no = ? AND status = 'WAIT_PAY'
 
 - 支付回调先到 → status 已变为 PAID → `WHERE status='WAIT_PAY'` 影响 0 行 → MQ Consumer 和兜底任务跳过
 - MQ 先到 → status 已变为 CLOSED → 支付回调时状态机报 `A0702` → 回调记录日志后返回 200（不推进已关闭订单）
-- 支付成功时同步取消待投递的延迟消息：`UPDATE outbox SET status='CANCELLED' WHERE aggregate_id=orderNo AND topic='mall:order:timeout' AND status='NEW'`
+- 支付成功时同步取消待投递的延迟消息：`UPDATE outbox SET status='CANCELLED' WHERE aggregate_id=orderNo AND topic='mall_order_timeout' AND status='NEW'`
 
 ### 5.10 自动确认收货
 
@@ -331,7 +331,7 @@ WHERE order_no = ? AND status = 'WAIT_PAY'
 1. ruoyi-job 每天扫描：`WHERE status='WAIT_RECEIVE' AND delivery_time < NOW() - INTERVAL 15 DAY`
 2. 逐条调 `OrderServiceImpl.autoConfirmReceipt(orderNo)`：
    - `stateMachine.transition(order, CONFIRM_RECEIPT)` → COMPLETED
-   - 写 Outbox `mall:order:completed`
+   - 写 Outbox `mall_order_completed`
 3. 乐观锁防护：`WHERE status='WAIT_RECEIVE'`，已手动确认的订单影响 0 行则跳过
 4. 配置项：`mall.order.auto-receive-days=15`（Nacos 下发，`@RefreshScope`）
 
@@ -374,17 +374,17 @@ WHERE order_no = ? AND status = 'WAIT_PAY'
 
 | 当前状态 | 事件 | 目标状态 | 前置条件 | 后置动作 |
 |---------|------|---------|---------|---------|
-| WAIT_PAY | PAY_SUCCESS | PAID | 支付金额 ≥ 应付金额，订单未过期 | ①写 Outbox `mall:order:paid` ②通知商家 |
-| WAIT_PAY | USER_CANCEL | CANCELLED | — | ①写 Outbox `mall:order:cancelled`（由 mall-product/mall-marketing 消费释放资源） |
+| WAIT_PAY | PAY_SUCCESS | PAID | 支付金额 ≥ 应付金额，订单未过期 | ①写 Outbox `mall_order_paid` ②通知商家 |
+| WAIT_PAY | USER_CANCEL | CANCELLED | — | ①写 Outbox `mall_order_cancelled`（由 mall-product/mall-marketing 消费释放资源） |
 | WAIT_PAY | PAY_TIMEOUT | CLOSED | `pay_expire_time < NOW()` | 同 USER_CANCEL |
-| PAID | SELLER_DELIVER | WAIT_DELIVER | 物流单号 + 公司已填写 | ①写 Outbox `mall:order:delivered` ②记录物流信息 |
+| PAID | SELLER_DELIVER | WAIT_DELIVER | 物流单号 + 公司已填写 | ①写 Outbox `mall_order_delivered` ②记录物流信息 |
 | WAIT_DELIVER | LOGISTICS_PICK | WAIT_RECEIVE | 快递已揽收 | ①更新物流状态 ②通知用户（**通知能力未实现**：`MqTopicConstants.Order` 无对应 topic，当前不发领域事件，见 `OrderServiceImpl#logisticsPick`） |
 | PAID | FORCE_CANCEL | CANCELLED | 客服审核通过 | ①调 mall-payment 原路退款 ②释放库存+优惠券 |
 | PAID | REFUND_ONLY | REFUNDING | 售后审核通过，订单未发货 | ①调 mall-payment 创建退款单 |
-| WAIT_RECEIVE | CONFIRM_RECEIPT | COMPLETED | — | ①写 Outbox `mall:order:completed` ②赠送积分 |
+| WAIT_RECEIVE | CONFIRM_RECEIPT | COMPLETED | — | ①写 Outbox `mall_order_completed` ②赠送积分 |
 | WAIT_RECEIVE | RETURN_REFUND | REFUNDING | 售后审核通过 | 同 REFUND_ONLY |
 | COMPLETED | AFTER_SALE | REFUNDING | 收货后 7 天内 | 同 REFUND_ONLY |
-| REFUNDING | REFUND_SUCCESS | REFUNDED | 渠道退款完成 | ①写 Outbox `mall:order:refunded` ②退货退款则调 mall-product 回补库存 |
+| REFUNDING | REFUND_SUCCESS | REFUNDED | 渠道退款完成 | ①写 Outbox `mall_order_refunded` ②退货退款则调 mall-product 回补库存 |
 | REFUNDING | REFUND_FAIL | PAID | 渠道退款失败（原状态 PAID） | ①通知用户 ②标记人工介入 |
 | REFUNDING | REFUND_FAIL | WAIT_DELIVER | 渠道退款失败（原状态 WAIT_DELIVER） | 同 PAID |
 | REFUNDING | REFUND_FAIL | WAIT_RECEIVE | 渠道退款失败（原状态 WAIT_RECEIVE） | 同 PAID |
@@ -445,25 +445,25 @@ OrderServiceImpl.payCallback(orderNo):
 
 | Topic | 触发场景 | 消费者 | 备注 |
 |-------|---------|--------|------|
-| `mall:order:created` | 下单成功 | 暂无 | 预留通知 |
-| `mall:order:paid` | WAIT_PAY→PAID | 暂无 | 预留商家通知 |
-| `mall:order:cancelled` | 取消/超时关闭 | mall-product、mall-marketing | 释放库存+优惠券；超时关闭时 cancelReason=PAY_TIMEOUT |
-| `mall:order:delivered` | 商家发货 | 暂无 | 预留物流通知 |
-| `mall:order:completed` | 确认收货 | 暂无 | 预留积分发放 |
-| `mall:order:refunded` | 退款完成 | 暂无 | 预留通知 |
-| `mall:order:timeout` | 下单成功（延迟触发） | `OrderTimeoutConsumer`（mall-order） | `scheduled_time=NOW+30min`，到期投递后消费 |
+| `mall_order_created` | 下单成功 | 暂无 | 预留通知 |
+| `mall_order_paid` | WAIT_PAY→PAID | 暂无 | 预留商家通知 |
+| `mall_order_cancelled` | 取消/超时关闭 | mall-product、mall-marketing | 释放库存+优惠券；超时关闭时 cancelReason=PAY_TIMEOUT |
+| `mall_order_delivered` | 商家发货 | 暂无 | 预留物流通知 |
+| `mall_order_completed` | 确认收货 | 暂无 | 预留积分发放 |
+| `mall_order_refunded` | 退款完成 | 暂无 | 预留通知 |
+| `mall_order_timeout` | 下单成功（延迟触发） | `OrderTimeoutConsumer`（mall-order） | `scheduled_time=NOW+30min`，到期投递后消费 |
 
 **Payload 字段规范：**
 
 | Topic | Payload 字段 |
 |-------|-------------|
-| `mall:order:created` | `orderNo`, `userId`, `payAmount`, `payExpireTime` |
-| `mall:order:paid` | `orderNo`, `userId`, `paidTime` |
-| `mall:order:cancelled` | `orderNo`, `userId`, `cancelReason` (USER_CANCEL / PAY_TIMEOUT / FORCE_CANCEL) |
-| `mall:order:delivered` | `orderNo`, `logisticsCompany`, `logisticsNo` |
-| `mall:order:completed` | `orderNo`, `userId` |
-| `mall:order:refunded` | `orderNo`, `userId`, `refundAmount` |
-| `mall:order:timeout` | `orderNo` |
+| `mall_order_created` | `orderNo`, `userId`, `payAmount`, `payExpireTime` |
+| `mall_order_paid` | `orderNo`, `userId`, `paidTime` |
+| `mall_order_cancelled` | `orderNo`, `userId`, `cancelReason` (USER_CANCEL / PAY_TIMEOUT / FORCE_CANCEL) |
+| `mall_order_delivered` | `orderNo`, `logisticsCompany`, `logisticsNo` |
+| `mall_order_completed` | `orderNo`, `userId` |
+| `mall_order_refunded` | `orderNo`, `userId`, `refundAmount` |
+| `mall_order_timeout` | `orderNo` |
 
 **Payload 约束：**
 
@@ -494,9 +494,9 @@ Outbox 投递失败后的指数退避：
 
 | Topic | 消费者类 | 处理流程 |
 |-------|---------|---------|
-| `mall:payment:paid` | `PaymentPaidConsumer` | ①幂等去重 ②调 `OrderServiceImpl.payCallback(orderNo)` ③状态机 WAIT_PAY→PAID ④Service 层写 Outbox `mall:order:paid` ⑤同步 UPDATE `mall_outbox` 取消 `mall:order:timeout` 延迟消息 |
-| `mall:refund:succeeded` | `RefundSucceededConsumer` | ①幂等去重 ②调 `AfterSaleServiceImpl.refundCallback()` ③如为退货退款，调 `RemoteProductService.restock(skuId, qty, afterSaleNo)` 回补库存（`afterSaleNo` 为幂等键，防重投重复回补） |
-| `mall:order:timeout` | `OrderTimeoutConsumer` | ①幂等去重 ②查订单 `orderMapper.selectByOrderNo(orderNo)` ③校验 `status=WAIT_PAY AND pay_expire_time<=NOW()` ④乐观锁关单 `UPDATE mall_order SET status='CLOSED' WHERE status='WAIT_PAY'` ⑤影响 1 行则写 Outbox `mall:order:cancelled`（释放库存+优惠券） |
+| `mall_payment_paid` | `PaymentPaidConsumer` | ①幂等去重 ②调 `OrderServiceImpl.payCallback(orderNo)` ③状态机 WAIT_PAY→PAID ④Service 层写 Outbox `mall_order_paid` ⑤同步 UPDATE `mall_outbox` 取消 `mall_order_timeout` 延迟消息 |
+| `mall_refund_succeeded` | `RefundSucceededConsumer` | ①幂等去重 ②调 `AfterSaleServiceImpl.refundCallback()` ③如为退货退款，调 `RemoteProductService.restock(skuId, qty, afterSaleNo)` 回补库存（`afterSaleNo` 为幂等键，防重投重复回补） |
+| `mall_order_timeout` | `OrderTimeoutConsumer` | ①幂等去重 ②查订单 `orderMapper.selectByOrderNo(orderNo)` ③校验 `status=WAIT_PAY AND pay_expire_time<=NOW()` ④乐观锁关单 `UPDATE mall_order SET status='CLOSED' WHERE status='WAIT_PAY'` ⑤影响 1 行则写 Outbox `mall_order_cancelled`（释放库存+优惠券） |
 
 ### 7.4 消费幂等
 
@@ -505,7 +505,7 @@ Outbox 投递失败后的指数退避：
 | Topic | 幂等 Key |
 |-------|---------|
 | 所有 topic | `mall:mq:dedup:{messageId}:mall-order` |
-| `mall:order:timeout` 额外校验 | 消费端查 `order.status` + `pay_expire_time` 双重校验，非 WAIT_PAY 或未到期直接 ACK 跳过 |
+| `mall_order_timeout` 额外校验 | 消费端查 `order.status` + `pay_expire_time` 双重校验，非 WAIT_PAY 或未到期直接 ACK 跳过 |
 
 - 操作：消费前 Redis SETNX，命中 → 直接 ACK 跳过
 - TTL：24h（超过消息最长存活时间）
@@ -542,7 +542,7 @@ Outbox 投递失败后的指数退避：
 
 ### 8.4 回调处理
 
-1. `RefundSucceededConsumer` 消费 `mall:refund:succeeded`
+1. `RefundSucceededConsumer` 消费 `mall_refund_succeeded`
 2. `AfterSaleServiceImpl.refundCallback()`：
    - `afterSaleMapper.updateStatus(id, SUCCESS)`，`completed_time=NOW()`
    - UPDATE `mall_order.refunded_amount += 退款金额`
@@ -603,7 +603,7 @@ springdoc:
 mall:
   order:
     pay-expire-minutes: 30
-    timeout-topic: mall:order:timeout
+    timeout-topic: mall_order_timeout
     timeout-fallback-cron: 0 0 2 * * ?
     refund-days: 7
     auto-receive-days: 15
@@ -656,7 +656,7 @@ spring:
 | 配置项 | 默认值 | 单位 | 说明 |
 |--------|:---:|------|------|
 | `mall.order.pay-expire-minutes` | 30 | 分钟 | 下单后未支付自动关闭 |
-| `mall.order.timeout-topic` | `mall:order:timeout` | — | 超时关单延迟消息 topic |
+| `mall.order.timeout-topic` | `mall_order_timeout` | — | 超时关单延迟消息 topic |
 | `mall.order.timeout-fallback-cron` | `0 0 2 * * ?` | — | ruoyi-job 兜底日扫 cron 表达式 |
 | `mall.order.refund-days` | 7 | 天 | 收货后可申请售后 |
 | `mall.order.auto-receive-days` | 15 | 天 | 发货后自动确认收货 |

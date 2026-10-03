@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OutboxPublisherTest {
 
-    private static final String TOPIC = "mall:coupon:used";
+    private static final String TOPIC = "mall_coupon_used";
     private static final String EVENT_TYPE = "CouponUsed";
     private static final String AGGREGATE_ID = "500";
 

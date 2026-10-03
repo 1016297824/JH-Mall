@@ -15,7 +15,7 @@
 | 活动管理 | `mall_marketing_promotion` | 满减/满折/包邮/秒杀活动，含时间段和 Banner 图 |
 | 促销规则 | `mall_marketing_promotion_rule` | 活动下多条规则（门槛+优惠+互斥/叠加+优先级） |
 | 优惠试算 | — | 下单前算最优优惠组合（不锁定），返回扣减明细 |
-| RocketMQ 事件 | Outbox | 生产 `mall:coupon:used`，消费 `mall:order:cancelled` |
+| RocketMQ 事件 | Outbox | 生产 `mall_coupon_used`，消费 `mall_order_cancelled` |
 
 ### 1.2 依赖关系
 
@@ -23,8 +23,8 @@
 mall-marketing (9306端口)
   ├── MySQL：自有表（见表系统设计第 1.5 节）
   ├── Redis：领券防并发锁、秒杀活动库存缓存
-  ├── RocketMQ (Producer)：写 Outbox → 投递 mall:coupon:used
-  ├── RocketMQ (Consumer)：消费 mall:order:cancelled → 释放优惠券
+  ├── RocketMQ (Producer)：写 Outbox → 投递 mall_coupon_used
+  ├── RocketMQ (Consumer)：消费 mall_order_cancelled → 释放优惠券
   ├── mall-api (Feign)：RemoteMarketingService 供 mall-order 调用试算/锁定/释放
   └── mall-order (Feign Caller)：调营销服务锁定/释放优惠券、优惠试算
 ```
@@ -76,8 +76,8 @@ server/mall/mall-marketing/
     │   └── CouponStateMachine.java          # 优惠券记录状态机
     ├── infrastructure/
     │   ├── mq/
-    │   │   ├── CouponUsedProducer.java       # Outbox 生产 mall:coupon:used
-    │   │   └── OrderCancelledConsumer.java   # 消费 mall:order:cancelled 释放券
+    │   │   ├── CouponUsedProducer.java       # Outbox 生产 mall_coupon_used
+    │   │   └── OrderCancelledConsumer.java   # 消费 mall_order_cancelled 释放券
     │   └── feign/
     │       └── RemoteOrderAdapter.java       # 调 mall-order 查询订单状态
     └── convert/
@@ -156,15 +156,15 @@ server/mall/mall-marketing/
 - ①查记录归属 → non userId `A0501`
 - ②状态机校验：`AVAILABLE → LOCKED`
 - ③UPDATE：`SET record_status=2, order_no=?, lock_time=NOW() WHERE id=? AND record_status=1`
-- ④同一本地事务写 Outbox `mall:coupon:used`（仅标记、不投递，等订单支付成功后才真正核销）
+- ④同一本地事务写 Outbox `mall_coupon_used`（仅标记、不投递，等订单支付成功后才真正核销）
 - ⑤失败返回 `A0612`（不满足条件）
 
-**useCoupon(orderNo)**：支付成功核销（消费 `mall:order:paid` 事件触发）
+**useCoupon(orderNo)**：支付成功核销（消费 `mall_order_paid` 事件触发）
 - ①查 `WHERE order_no=? AND record_status=2` →
 - ②状态机：`LOCKED → USED`，记录 `use_time=NOW()`
-- ③写 Outbox `mall:coupon:used` → 发布核销事件
+- ③写 Outbox `mall_coupon_used` → 发布核销事件
 
-**releaseCoupon(orderNo)**：订单取消释放（消费 `mall:order:cancelled` 事件触发）
+**releaseCoupon(orderNo)**：订单取消释放（消费 `mall_order_cancelled` 事件触发）
 - ①查 `WHERE order_no=? AND record_status=2` →
 - ②状态机：`LOCKED → RELEASED`，清除 `order_no`，记录 `release_time`
 - ③回补优惠券库存：`UPDATE mall_marketing_coupon SET remain_count=remain_count+1 WHERE id=?`
@@ -190,7 +190,7 @@ server/mall/mall-marketing/
 | 当前状态 | 触发事件 | 事件源 | 目标状态 | 后置动作 |
 |---------|---------|:-----:|---------|---------|
 | AVAILABLE | 下单锁定 | mall-order | LOCKED | ①记录 order_no+lock_time |
-| LOCKED | 订单支付成功 | RocketMQ | USED | ①记录 use_time ②写 Outbox `mall:coupon:used` |
+| LOCKED | 订单支付成功 | RocketMQ | USED | ①记录 use_time ②写 Outbox `mall_coupon_used` |
 | LOCKED | 订单取消 | RocketMQ | RELEASED | ①清除 order_no ②回补 remain_count |
 | AVAILABLE | 超时过期 | 定时任务 | EXPIRED | — |
 | RELEASED | 超时过期 | 定时任务 | EXPIRED | — |
@@ -280,13 +280,13 @@ CouponClaimServiceImpl.lockCoupon(couponClaimId, orderNo):
 
 ### 5.2 支付核销
 
-消费 `mall:order:paid` → `CouponClaimServiceImpl.useCoupon(orderNo)`：
+消费 `mall_order_paid` → `CouponClaimServiceImpl.useCoupon(orderNo)`：
 - 查 `WHERE order_no=? AND record_status=2` → 逐条 `LOCKED → USED`
-- 写 Outbox `mall:coupon:used` → 记录核销事实
+- 写 Outbox `mall_coupon_used` → 记录核销事实
 
 ### 5.3 取消释放
 
-消费 `mall:order:cancelled` → `CouponClaimServiceImpl.releaseCoupon(orderNo)`：
+消费 `mall_order_cancelled` → `CouponClaimServiceImpl.releaseCoupon(orderNo)`：
 - 查 `WHERE order_no=? AND record_status=2` → 逐条 `LOCKED → RELEASED`
 - 清除 `order_no`，记录 `release_time`
 - 回补 `remain_count`：`UPDATE mall_marketing_coupon SET remain_count=remain_count+1 WHERE id=?`
@@ -315,13 +315,13 @@ CouponClaimServiceImpl.lockCoupon(couponClaimId, orderNo):
 
 | Topic | Payload 字段 | 发布时机 |
 |-------|-------------|---------|
-| `mall:coupon:used` | `couponRecordId`、`couponId`、`userId`、`orderNo`、`faceValue`（分）、`useTime` | 订单支付成功核销时 |
+| `mall_coupon_used` | `couponRecordId`、`couponId`、`userId`、`orderNo`、`faceValue`（分）、`useTime` | 订单支付成功核销时 |
 
 ### 7.2 消费的事件
 
 | Topic | 消费者类 | 处理流程 |
 |-------|---------|---------|
-| `mall:order:cancelled` | `OrderCancelledConsumer` | ①幂等去重 `mall:mq:dedup:{messageId}:mall-marketing` ②查 `WHERE order_no=? AND record_status=2` ③逐条释放优惠券 ④回补库存 |
+| `mall_order_cancelled` | `OrderCancelledConsumer` | ①幂等去重 `mall:mq:dedup:{messageId}:mall-marketing` ②查 `WHERE order_no=? AND record_status=2` ③逐条释放优惠券 ④回补库存 |
 
 ### 7.3 重试策略
 

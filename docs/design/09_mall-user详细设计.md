@@ -98,7 +98,7 @@ server/mall/mall-user/
     ├── infrastructure/
     │   ├── mq/
     │   │   └── consumer/
-    │   │       └── UserOrderCompletedConsumer.java  # 消费 mall:order:completed
+    │   │       └── UserOrderCompletedConsumer.java  # 消费 mall_order_completed
     │   ├── schedule/
     │   │   └── PointsExpireTask.java              # 积分清零（ruoyi-job 调度）
     │   └── feign/
@@ -237,7 +237,7 @@ mallUserAddressMapper.updateById(addressDO);
 
 **getMembership(userId)**：查 `mall_user_member` + `mall_user_member_level`，返回当前等级、权益、到下一级的进度
 
-**addGrowth(userId, growth, bizType, bizNo)**（Feign 接口，消费 `mall:user:registered` 事件时调用）：
+**addGrowth(userId, growth, bizType, bizNo)**（Feign 接口，消费 `mall_user_registered` 事件时调用）：
 
 - `UPDATE mall_user_member SET growth=growth+#{growth}, total_growth=total_growth+#{growth}`
 - 判断是否升级：查当前等级 `max_growth`，超则升到下一级

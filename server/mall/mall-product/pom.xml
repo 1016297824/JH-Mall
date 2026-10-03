@@ -96,7 +96,7 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
-        <!-- RocketMQ（OrderCancelledConsumer 消费 mall:order:cancelled 释放预扣库存，
+        <!-- RocketMQ（OrderCancelledConsumer 消费 mall_order_cancelled 释放预扣库存，
              与 mall-order / mall-marketing 同一版本） -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>

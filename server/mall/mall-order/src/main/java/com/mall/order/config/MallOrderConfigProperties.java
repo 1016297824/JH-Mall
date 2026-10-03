@@ -20,8 +20,8 @@ public class MallOrderConfigProperties {
     /** 下单后未支付自动关闭时间（分钟） */
     private int payExpireMinutes = 30;
 
-    /** 超时关单延迟消息 topic */
-    private String timeoutTopic = "mall:order:timeout";
+    /** 超时关单延迟消息 topic；RocketMQ 不允许 topic 名含冒号，故用下划线 */
+    private String timeoutTopic = "mall_order_timeout";
 
     /** ruoyi-job 兜底日扫 cron 表达式 */
     private String timeoutFallbackCron = "0 0 2 * * ?";

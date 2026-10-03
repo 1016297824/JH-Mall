@@ -177,46 +177,46 @@ public class MqTopicConstants {
 
     /** 订单域 — 7 个 Topic */
     public static final class Order {
-        public static final String CREATED   = "mall:order:created";
-        public static final String PAID      = "mall:order:paid";
-        public static final String CANCELLED = "mall:order:cancelled";
-        public static final String DELIVERED = "mall:order:delivered";
-        public static final String COMPLETED = "mall:order:completed";
-        public static final String REFUNDED  = "mall:order:refunded";
-        public static final String TIMEOUT   = "mall:order:timeout";
+        public static final String CREATED   = "mall_order_created";
+        public static final String PAID      = "mall_order_paid";
+        public static final String CANCELLED = "mall_order_cancelled";
+        public static final String DELIVERED = "mall_order_delivered";
+        public static final String COMPLETED = "mall_order_completed";
+        public static final String REFUNDED  = "mall_order_refunded";
+        public static final String TIMEOUT   = "mall_order_timeout";
     }
 
     /** 支付/退款域 — 5 个 Topic */
     public static final class Payment {
-        public static final String CREATED          = "mall:payment:created";
-        public static final String PAID             = "mall:payment:paid";
-        public static final String FAILED           = "mall:payment:failed";
-        public static final String REFUND_CREATED   = "mall:refund:created";
-        public static final String REFUND_SUCCEEDED = "mall:refund:succeeded";
+        public static final String CREATED          = "mall_payment_created";
+        public static final String PAID             = "mall_payment_paid";
+        public static final String FAILED           = "mall_payment_failed";
+        public static final String REFUND_CREATED   = "mall_refund_created";
+        public static final String REFUND_SUCCEEDED = "mall_refund_succeeded";
     }
 
     /** 用户域 — 1 个 Topic */
     public static final class User {
-        public static final String REGISTERED = "mall:user:registered";
+        public static final String REGISTERED = "mall_user_registered";
     }
 
     /** 库存域 — 2 个 Topic */
     public static final class Stock {
-        public static final String RESERVED = "mall:stock:reserved";
-        public static final String RELEASED = "mall:stock:released";
+        public static final String RESERVED = "mall_stock_reserved";
+        public static final String RELEASED = "mall_stock_released";
     }
 
     /** 营销域 — 3 个 Topic */
     public static final class Coupon {
-        public static final String LOCKED   = "mall:coupon:locked";
-        public static final String USED     = "mall:coupon:used";
-        public static final String RELEASED = "mall:coupon:released";
+        public static final String LOCKED   = "mall_coupon_locked";
+        public static final String USED     = "mall_coupon_used";
+        public static final String RELEASED = "mall_coupon_released";
     }
 
     /** 搜索域 — 2 个 Topic */
     public static final class Search {
-        public static final String SYNC    = "mall:search:sync";
-        public static final String REBUILD = "mall:search:rebuild";
+        public static final String SYNC    = "mall_search_sync";
+        public static final String REBUILD = "mall_search_rebuild";
     }
 }
 ```

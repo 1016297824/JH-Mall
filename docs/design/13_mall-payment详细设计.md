@@ -14,7 +14,7 @@
 | 退款单管理 | `mall_payment_refund` | 创建退款单、调支付渠道退款、状态推进、退款单查询 |
 | 支付渠道配置 | `mall_payment_channel` | 多渠道（微信/支付宝）Enable/Disable、API Key 加密存储 |
 | 回调处理 | `mall_payment_callback_log` | 支付回调验签、退款回调验签、nonce 防重放、回调日志记录 |
-| RocketMQ 事件 | Outbox（无独立实体） | 生产 `mall:payment:paid` / `mall:refund:succeeded` / `mall:refund:failed` |
+| RocketMQ 事件 | Outbox（无独立实体） | 生产 `mall_payment_paid` / `mall_refund_succeeded` / `mall_refund_failed` |
 
 ### 1.2 依赖关系
 
@@ -22,7 +22,7 @@
 mall-payment (9305端口)
   ├── MySQL：自有表（见表系统设计第 1.4 节）
   ├── Redis：回调幂等去重 (mall:payment:callback:* / mall:payment:refund_callback:*)
-  ├── RocketMQ (Producer)：写 Outbox → 投递 mall:payment:paid / mall:refund:succeeded / mall:refund:failed
+  ├── RocketMQ (Producer)：写 Outbox → 投递 mall_payment_paid / mall_refund_succeeded / mall_refund_failed
   ├── RocketMQ (Consumer)：无（支付服务不消费其他服务事件）
   ├── mall-api (Feign)：RemotePaymentService 供 mall-order 调用退款
   ├── mall-order (Feign Caller)：发起支付时校验订单状态和金额
@@ -214,7 +214,7 @@ server/mall/mall-payment/
   - ③验签失败：标记 → 返回 `400` 给平台
   - ④提取交易号（channelPaymentNo），Redis `SETNX mall:payment:callback:{channel}:{tradeNo}` 去重 → 命中则直接返回 200
   - ⑤根据 `channelPaymentNo` 查 `mall_payment` → `UPDATE SET payment_status=PAID WHERE payment_status=UNPAID`
-  - ⑥`payment_status` 推进后在同一本地事务写 Outbox `mall:payment:paid`
+  - ⑥`payment_status` 推进后在同一本地事务写 Outbox `mall_payment_paid`
   - ⑦返回支付平台要求的成功应答（微信: XML `<return_code>SUCCESS</return_code>`，支付宝: `success`）
 
 - `processRefundCallback(channel, rawBody)`：同支付回调结构，`channelRefundNo` 去重，更新退款单终态后写 Outbox
@@ -317,7 +317,7 @@ WHERE payment_no = #{paymentNo}
 支付单状态变为 PAID 后，同一事务写入 Outbox：
 
 ```
-topic: mall:payment:paid
+topic: mall_payment_paid
 payload: { "paymentNo": "PAY...", "orderNo": "ORD...", "payAmount": 89900, "payTime": "2026-05-17T10:30:00", "channelPaymentNo": "4200001234..." }
 ```
 
@@ -327,7 +327,7 @@ mall-order 消费后推进订单 `WAIT_PAY → PAID`（由订单状态机保证�
 
 | 场景 | 补偿机制 |
 |------|---------|
-| 支付单已 PAID 但订单仍是 WAIT_PAY | ruoyi-job 每 60s 扫描 `payment.status=PAID AND order.status=WAIT_PAY` 不一致记录，重放 `mall:payment:paid` |
+| 支付单已 PAID 但订单仍是 WAIT_PAY | ruoyi-job 每 60s 扫描 `payment.status=PAID AND order.status=WAIT_PAY` 不一致记录，重放 `mall_payment_paid` |
 | 支付平台回调未收到（网络中断） | 定时任务扫描 `UNPAID + 创建超 30min` 的支付单，主动调支付平台 `queryOrder` API 查交易状态 |
 
 ---
@@ -352,14 +352,14 @@ mall-order 审核售后通过后，调 Feign `RemotePaymentService.createRefund(
 
 - `payment_no` → `refund_no`，`tradeNo` → `channelRefundNo`
 - 幂等键 `mall:payment:refund_callback:{channel}:{refundNo}`，Redis SETNX TTL 24h
-- 成功后写 Outbox：`mall:refund:succeeded` / `mall:refund:failed`
+- 成功后写 Outbox：`mall_refund_succeeded` / `mall_refund_failed`
 
 ### 6.3 退款失败处理
 
 退款回调返回 FAILED 时：
 
 ① `refund_status` 不推进 → 维持 PROCESSING（等待后续处理）
-② 写 Outbox `mall:refund:failed` → mall-order 消费后通知用户退款失败
+② 写 Outbox `mall_refund_failed` → mall-order 消费后通知用户退款失败
 ③ 操作员可重试退款（调 `retryRefund(refundNo)` → 重新调 `channelAdapter.invokeRefund`）
 
 ---
@@ -394,12 +394,12 @@ mall-order 审核售后通过后，调 Feign `RemotePaymentService.createRefund(
 | 当前状态 | 触发事件 | 事件源 | 目标状态 | 前置条件 | 后置动作 |
 |---------|---------|:-----:|---------|---------|---------|
 | UNPAID | 发起支付 | 用户 | UNPAID | 订单 WAIT_PAY、金额>0、未过期 | ①调支付平台获取 `prepay_id` ②更新 `channel_payment_no` |
-| UNPAID | 支付成功回调 | 回调 | PAID | 渠道验签通过、金额匹配、订单一致 | ①更新 `pay_success_time` ②同一事务写 Outbox `mall:payment:paid` |
+| UNPAID | 支付成功回调 | 回调 | PAID | 渠道验签通过、金额匹配、订单一致 | ①更新 `pay_success_time` ②同一事务写 Outbox `mall_payment_paid` |
 | UNPAID | 支付失败回调 | 回调 | FAILED | 渠道返回明确失败 | ①记录失败原因到 `channel_pay_status` |
 | UNPAID | 支付超时/关闭 | 系统/用户 | CLOSED | 超时或用户主动关闭 | ①调渠道关单 API |
 | PAID | 发起退款 | 系统 | REFUNDING | mall-order 审核通过 | ①创建退款单 ②调渠道退款 API |
-| REFUNDING | 退款成功回调 | 回调 | REFUNDED | 渠道验签通过 | ①更新 `refund_success_time` ②同一事务写 Outbox `mall:refund:succeeded` |
-| REFUNDING | 退款失败回调 | 回调 | PAID | 渠道返回明确失败 | ①记录失败原因 ②写 Outbox `mall:refund:failed` |
+| REFUNDING | 退款成功回调 | 回调 | REFUNDED | 渠道验签通过 | ①更新 `refund_success_time` ②同一事务写 Outbox `mall_refund_succeeded` |
+| REFUNDING | 退款失败回调 | 回调 | PAID | 渠道返回明确失败 | ①记录失败原因 ②写 Outbox `mall_refund_failed` |
 | REFUNDING | 全额退款完成 | 回调 | REFUNDED | 所有退款成功 | — |
 
 #### 7.2.2 退款单转移
@@ -435,9 +435,9 @@ refundTransition(refundNo, RefundEvent event)
 
 | Topic | Payload 字段 | 发布时机 |
 |-------|-------------|---------|
-| `mall:payment:paid` | `paymentNo`、`orderNo`、`userId`、`payAmount`（分）、`payTime`、`channelPaymentNo`、`channelCode` | 支付回调处理成功后 |
-| `mall:refund:succeeded` | `refundNo`、`paymentNo`、`orderNo`、`afterSaleNo`、`userId`、`refundAmount`（分）、`refundTime`、`channelRefundNo` | 退款回调成功 |
-| `mall:refund:failed` | `refundNo`、`paymentNo`、`orderNo`、`afterSaleNo`、`userId`、`refundAmount`（分）、`failReason`、`channelRefundNo` | 退款回调失败 |
+| `mall_payment_paid` | `paymentNo`、`orderNo`、`userId`、`payAmount`（分）、`payTime`、`channelPaymentNo`、`channelCode` | 支付回调处理成功后 |
+| `mall_refund_succeeded` | `refundNo`、`paymentNo`、`orderNo`、`afterSaleNo`、`userId`、`refundAmount`（分）、`refundTime`、`channelRefundNo` | 退款回调成功 |
+| `mall_refund_failed` | `refundNo`、`paymentNo`、`orderNo`、`afterSaleNo`、`userId`、`refundAmount`（分）、`failReason`、`channelRefundNo` | 退款回调失败 |
 
 > Payload 使用稳定 DTO，不直接序列化 MallPayment/MallRefund。字段命名 lowerCamelCase。
 
