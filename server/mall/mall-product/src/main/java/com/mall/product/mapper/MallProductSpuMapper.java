@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.product.DO.MallProductSpuDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.time.LocalDateTime;
+
 /**
  * SPU Mapper
  *
@@ -53,6 +55,24 @@ public interface MallProductSpuMapper extends BaseMapper<MallProductSpuDO> {
     default Page<MallProductSpuDO> selectAllPage(Page<MallProductSpuDO> page) {
         LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
                 .eq(MallProductSpuDO::getIsDeleted, 0);
+        return selectPage(page, wrapper);
+    }
+
+    /**
+     * 分页查询指定时刻之后有变更的 SPU（搜索索引增量回补用）
+     *
+     * <p>边界用 {@code >=}：同一秒内发生的变更不会被漏掉，代价只是边界那条可能被重复处理一次，
+     * 而 ES 的 upsert 本身幂等，重复覆盖无副作用。</p>
+     *
+     * @param page  分页参数
+     * @param since 起始时刻
+     * @return SPU 分页结果
+     */
+    default Page<MallProductSpuDO> selectUpdatedSince(Page<MallProductSpuDO> page, LocalDateTime since) {
+        LambdaQueryWrapper<MallProductSpuDO> wrapper = new LambdaQueryWrapper<MallProductSpuDO>()
+                .eq(MallProductSpuDO::getIsDeleted, 0)
+                .ge(MallProductSpuDO::getUpdateTime, since)
+                .orderByAsc(MallProductSpuDO::getUpdateTime);
         return selectPage(page, wrapper);
     }
 }

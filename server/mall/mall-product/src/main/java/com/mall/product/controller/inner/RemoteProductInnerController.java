@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -129,6 +130,21 @@ public class RemoteProductInnerController {
     PageResult<SpuSearchDTO> fetchAllSpusForSearch(@RequestParam("page") int page,
                                                     @RequestParam("size") int size) {
         return spuService.pageForSearchRebuild(page, size);
+    }
+
+    /**
+     * 分页查询指定时刻之后有变更的 SPU（搜索索引重建的增量回补专用）
+     *
+     * @param since 起始时刻，ISO-8601 字符串
+     * @param page  页码（从 1 开始）
+     * @param size  每页条数
+     * @return SpuSearchDTO 分页
+     */
+    @GetMapping("/spus/updated-since")
+    PageResult<SpuSearchDTO> fetchSpusUpdatedSince(@RequestParam("since") String since,
+                                                    @RequestParam("page") int page,
+                                                    @RequestParam("size") int size) {
+        return spuService.pageForSearchRebuildSince(LocalDateTime.parse(since), page, size);
     }
 
     /**

@@ -69,6 +69,8 @@ public class IndexServiceImpl implements IndexService {
         }
         String newIndexName = null;
         String oldIndexName = null;
+        // 重建开始时刻：灌数期间发生的变更可能被随后到达的旧快照覆盖，结束时按此重扫补齐
+        LocalDateTime rebuildStart = LocalDateTime.now();
         try {
             // 动手前先看磁盘：重建会删光全部 mall_product* 索引再灌全量，
             // 磁盘写满会让新索引只写一半，连回滚都没得退
@@ -116,8 +118,9 @@ public class IndexServiceImpl implements IndexService {
             }
             log.info("全量灌入完成，共索引 {} 条", totalIndexed);
 
-            // ⑤ 增量回补（简化实现：T1 后变更需 mall-product 提供时间窗口查询，待后续补充）
-            // TODO: (JH-Mall, 2026/06/19) 增量回补 — 重建开始后至切别名前的变更扫描 + Outbox 回放
+            // ⑤ 增量回补：补齐灌数期间被旧快照覆盖的变更（见 backfillChangesSince 的说明）
+            int backfilled = backfillChangesSince(rebuildStart, batchSize);
+            log.info("增量回补完成，共重写 {} 条", backfilled);
 
             // ⑥ 保留上一版本供回滚，30min 后清理
             if (oldIndexName != null) {
@@ -183,6 +186,50 @@ public class IndexServiceImpl implements IndexService {
     }
 
     // ======================== 私有辅助方法 ========================
+
+    /**
+     * 回补重建期间的增量变更
+     *
+     * <p><b>为什么必须回补</b>：重建是「先切别名 → 再分批灌全量」，于是存在这个竞态——
+     * 第 N 页被读出（商品 X = 旧值）→ X 改价，实时同步把新值写进新索引 →
+     * {@code saveAll(第 N 页)} 又把 X 覆盖回旧值。此后这次变更已被实时同步消费掉，
+     * 没有任何机制会再修正它，索引就永久停在旧值。</p>
+     *
+     * <p>做法是按 {@code update_time >= rebuildStart} 重扫一遍逐条重写。
+     * 边界取 {@code >=}：同秒内的变更不会被漏，代价只是边界那条重复处理一次，
+     * 而 ES 的 upsert 本身幂等。回补期间新增的变更会由实时同步通道自行处理，
+     * 故只需扫到「拉取时不再返回新页」为止。</p>
+     *
+     * @param since     重建开始时刻
+     * @param batchSize 单批条数
+     * @return 实际重写的条数
+     */
+    private int backfillChangesSince(LocalDateTime since, int batchSize) {
+        int page = 1;
+        int backfilled = 0;
+        while (true) {
+            PageResult<SpuSearchDTO> pageResult =
+                    remoteProductAdapter.fetchSpusUpdatedSince(since.toString(), page, batchSize);
+            List<SpuSearchDTO> rows = pageResult == null ? null : pageResult.getRows();
+            if (rows == null || rows.isEmpty()) {
+                break;
+            }
+            List<ProductIndexDO> batch = new ArrayList<>(rows.size());
+            for (SpuSearchDTO dto : rows) {
+                ProductIndexDO indexDO = SpuSearchConvert.toProductIndex(dto);
+                if (indexDO != null) {
+                    batch.add(indexDO);
+                }
+            }
+            productIndexRepository.saveAll(batch);
+            backfilled += batch.size();
+            if ((long) page * batchSize >= pageResult.getTotal()) {
+                break;
+            }
+            page++;
+        }
+        return backfilled;
+    }
 
     /**
      * 校验各 ES 节点磁盘可用率，低于水位线时拒绝全量重建

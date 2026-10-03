@@ -15,6 +15,7 @@ import co.elastic.clients.elasticsearch.nodes.NodesStatsResponse;
 import co.elastic.clients.elasticsearch.nodes.Stats;
 import co.elastic.clients.util.ObjectBuilder;
 import com.mall.common.DTO.PageResult;
+import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.common.enums.ErrorCode;
 import com.mall.common.exception.BusinessException;
 import com.mall.search.config.MallSearchConfigProperties;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -267,6 +269,45 @@ class IndexServiceImplTest {
         assertDoesNotThrow(indexService::rebuildIndex);
 
         verify(indicesClient).create(any(Function.class));
+    }
+
+    @Test
+    void rebuildIndex_shouldBackfillChangesDuringRebuild() throws IOException {
+        when(valueOperations.setIfAbsent(eq("mall:search:index:rebuild_lock"),
+                any(), eq(3600L), eq(TimeUnit.SECONDS)))
+                .thenReturn(true);
+        when(valueOperations.get("mall:search:index:rebuild_lock")).thenReturn(null);
+        stubNodeDiskFreePercent(60);
+        GetAliasResponse emptyAlias = aliasResponse();
+        when(indicesClient.getAlias(any(Function.class))).thenReturn(emptyAlias);
+        // 全量灌入一页即结束
+        when(remoteProductAdapter.fetchAllSpusForSearch(anyInt(), anyInt()))
+                .thenReturn(PageResult.of(1, 500, 1L, List.of(spuDto(1L, "灌数时的旧值"))));
+        // 灌数期间改过价的商品：回补必须把它重写一遍
+        when(remoteProductAdapter.fetchSpusUpdatedSince(anyString(), anyInt(), anyInt()))
+                .thenReturn(PageResult.of(1, 500, 1L, List.of(spuDto(2L, "灌数期间改的新值"))));
+
+        indexService.rebuildIndex();
+
+        // 按重建开始时刻为界扫描变更
+        verify(remoteProductAdapter).fetchSpusUpdatedSince(anyString(), eq(1), anyInt());
+        // 全量 1 条 + 回补 1 条 = 两次写入
+        verify(productIndexRepository, org.mockito.Mockito.times(2)).saveAll(any());
+    }
+
+    /**
+     * 构造搜索用 SPU DTO
+     *
+     * @param spuId   SPU ID
+     * @param spuName 商品名
+     * @return DTO
+     */
+    private SpuSearchDTO spuDto(Long spuId, String spuName) {
+        SpuSearchDTO dto = new SpuSearchDTO();
+        dto.setSpuId(spuId);
+        dto.setSpuName(spuName);
+        dto.setPublishStatus(1);
+        return dto;
     }
 
     /**

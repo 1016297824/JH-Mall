@@ -46,4 +46,17 @@ public class RemoteProductAdapter {
         log.debug("拉取单条 SPU（搜索专用）: spuId={}", spuId);
         return remoteProductService.getSpuForSearch(spuId);
     }
+
+    /**
+     * 分页拉取指定时刻之后有变更的 SPU（重建增量回补专用）
+     *
+     * @param since 起始时刻，ISO-8601 字符串
+     * @param page  页码（从 1 开始）
+     * @param size  每页条数
+     * @return 搜索结果专用 SPU 分页
+     */
+    public PageResult<SpuSearchDTO> fetchSpusUpdatedSince(String since, int page, int size) {
+        log.debug("拉取增量变更 SPU（搜索专用）: since={}, page={}", since, page);
+        return remoteProductService.fetchSpusUpdatedSince(since, page, size);
+    }
 }

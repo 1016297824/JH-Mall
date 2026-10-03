@@ -90,6 +90,23 @@ public interface RemoteProductService {
                                                     @RequestParam("size") int size);
 
     /**
+     * 分页拉取指定时刻之后有变更的 SPU（搜索索引重建的增量回补专用）
+     *
+     * <p>重建是「先切别名再分批灌数」，灌数期间的变更可能被随后到达的旧快照覆盖，
+     * 故灌完后按 {@code updateTime >= since} 重扫一遍补齐。边界用 {@code >=}：
+     * 同秒内的变更不会被漏，代价只是边界那条重复处理一次（ES upsert 幂等）。</p>
+     *
+     * @param since 起始时刻，ISO-8601 字符串（如 2026-10-03T16:20:00）
+     * @param page  页码（从 1 开始）
+     * @param size  每页条数
+     * @return 富 DTO 分页
+     */
+    @GetMapping("/inner/product/spus/updated-since")
+    PageResult<SpuSearchDTO> fetchSpusUpdatedSince(@RequestParam("since") String since,
+                                                    @RequestParam("page") int page,
+                                                    @RequestParam("size") int size);
+
+    /**
      * 补偿 Outbox 消息（ruoyi-job 调度）
      *
      * <p>扫描并投递待发送的搜索同步 Outbox 消息</p>

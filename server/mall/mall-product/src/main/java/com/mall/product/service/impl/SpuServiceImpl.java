@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,27 @@ public class SpuServiceImpl implements ISpuService {
         // 分页查询全部未删除 SPU
         Page<MallProductSpuDO> pageParam = new Page<>(page, size);
         Page<MallProductSpuDO> result = mallProductSpuMapper.selectAllPage(pageParam);
+        return toSearchPageResult(page, size, result);
+    }
+
+    @Override
+    public PageResult<SpuSearchDTO> pageForSearchRebuildSince(LocalDateTime since, int page, int size) {
+        Page<MallProductSpuDO> pageParam = new Page<>(page, size);
+        Page<MallProductSpuDO> result = mallProductSpuMapper.selectUpdatedSince(pageParam, since);
+        return toSearchPageResult(page, size, result);
+    }
+
+    /**
+     * 把 SPU 分页结果装配成搜索用富 DTO 分页结果
+     *
+     * <p>与全量重建共用同一套装配，避免两条路径的字段出现分叉。</p>
+     *
+     * @param page   页码
+     * @param size   每页条数
+     * @param result SPU 分页结果
+     * @return SpuSearchDTO 分页结果
+     */
+    private PageResult<SpuSearchDTO> toSearchPageResult(int page, int size, Page<MallProductSpuDO> result) {
         List<MallProductSpuDO> spuDOList = result.getRecords();
         if (spuDOList.isEmpty()) {
             return PageResult.of(page, size, 0, List.of());

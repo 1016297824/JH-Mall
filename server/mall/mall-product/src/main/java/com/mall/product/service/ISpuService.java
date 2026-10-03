@@ -6,6 +6,7 @@ import com.mall.common.DTO.product.SpuSearchDTO;
 import com.mall.product.VO.SpuDetailVO;
 import com.mall.product.VO.SpuVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -56,6 +57,20 @@ public interface ISpuService {
      * @return SpuSearchDTO 分页结果
      */
     PageResult<SpuSearchDTO> pageForSearchRebuild(int page, int size);
+
+    /**
+     * 分页查询指定时刻之后有变更的 SPU（搜索索引重建的增量回补专用）
+     *
+     * <p>全量重建是「先切别名再分批灌数」，灌数期间发生的商品变更可能被随后到达的
+     * 旧快照批量覆盖（读第 N 页 → 商品改价 → 写第 N 页），且该变更已被实时同步消费掉，
+     * 无人会再修正。故全量灌完后按 {@code update_time >= since} 重扫一遍补齐。</p>
+     *
+     * @param since 重建开始时刻
+     * @param page  页码（从 1 开始）
+     * @param size  每页条数
+     * @return SpuSearchDTO 分页结果
+     */
+    PageResult<SpuSearchDTO> pageForSearchRebuildSince(LocalDateTime since, int page, int size);
 
     /**
      * 按 spuId 查询单条搜索索引 DTO（增量同步专用）
