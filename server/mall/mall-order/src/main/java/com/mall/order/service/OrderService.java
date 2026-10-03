@@ -75,4 +75,26 @@ public interface OrderService {
      * @param orderNo 订单号
      */
     void payCallback(String orderNo);
+
+    /**
+     * 卖家发货（管理端填写物流信息并确认发货，推进 PAID → WAIT_DELIVER）
+     *
+     * <p>先落物流信息再走状态机：{@code SELLER_DELIVER} 的前置条件是
+     * 「物流公司 + 单号已填写」（见 {@code OrderStateMachine#logisticsFilled}），
+     * 顺序颠倒会因物流缺失抛 A0703。</p>
+     *
+     * @param orderNo          订单号
+     * @param logisticsCompany 物流公司
+     * @param logisticsNo      物流单号
+     */
+    void deliver(String orderNo, String logisticsCompany, String logisticsNo);
+
+    /**
+     * 物流揽收（推进 WAIT_DELIVER → WAIT_RECEIVE）
+     *
+     * <p>由快递公司揽收回调触发。该流转不产生下游领域事件，故不发 Outbox 消息。</p>
+     *
+     * @param orderNo 订单号
+     */
+    void logisticsPick(String orderNo);
 }

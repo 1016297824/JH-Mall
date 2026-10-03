@@ -378,7 +378,7 @@ WHERE order_no = ? AND status = 'WAIT_PAY'
 | WAIT_PAY | USER_CANCEL | CANCELLED | — | ①写 Outbox `mall:order:cancelled`（由 mall-product/mall-marketing 消费释放资源） |
 | WAIT_PAY | PAY_TIMEOUT | CLOSED | `pay_expire_time < NOW()` | 同 USER_CANCEL |
 | PAID | SELLER_DELIVER | WAIT_DELIVER | 物流单号 + 公司已填写 | ①写 Outbox `mall:order:delivered` ②记录物流信息 |
-| WAIT_DELIVER | LOGISTICS_PICK | WAIT_RECEIVE | 快递已揽收 | ①更新物流状态 ②通知用户 |
+| WAIT_DELIVER | LOGISTICS_PICK | WAIT_RECEIVE | 快递已揽收 | ①更新物流状态 ②通知用户（**通知能力未实现**：`MqTopicConstants.Order` 无对应 topic，当前不发领域事件，见 `OrderServiceImpl#logisticsPick`） |
 | PAID | FORCE_CANCEL | CANCELLED | 客服审核通过 | ①调 mall-payment 原路退款 ②释放库存+优惠券 |
 | PAID | REFUND_ONLY | REFUNDING | 售后审核通过，订单未发货 | ①调 mall-payment 创建退款单 |
 | WAIT_RECEIVE | CONFIRM_RECEIPT | COMPLETED | — | ①写 Outbox `mall:order:completed` ②赠送积分 |

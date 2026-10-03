@@ -415,6 +415,72 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    public void deliver(String orderNo, String logisticsCompany, String logisticsNo) {
+        MallOrderDO order = requireOrder(orderNo);
+
+        // 先写入内存对象再过状态机：物流缺失或状态非 PAID 会在此直接拒绝，
+        // 不会留下「填了单号却没推进状态」的中间态
+        order.setLogisticsCompany(logisticsCompany);
+        order.setLogisticsNo(logisticsNo);
+        Integer originStatus = order.getOrderStatus();
+        Integer version = order.getVersion();
+        stateMachine.transition(order, OrderEventEnum.SELLER_DELIVER);
+
+        transactionTemplate.executeWithoutResult(txStatus -> {
+            // 物流与状态在同一事务落库
+            int logisticsAffected = orderMapper.updateLogistics(orderNo, logisticsCompany, logisticsNo);
+            if (logisticsAffected == 0) {
+                // CAS 的 WHERE 是本语句 WHERE 的超集，此处 0 行说明订单已不在 PAID（并发发货等）
+                throw new BusinessException(ErrorCode.ORDER_STATUS_ERROR);
+            }
+            int affected = orderMapper.updateStatusCas(orderNo, order.getOrderStatus(),
+                    originStatus, version, order.getPreRefundStatus());
+            if (affected == 0) {
+                throw new BusinessException(ErrorCode.ORDER_STATUS_ERROR);
+            }
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("orderNo", order.getOrderNo());
+            payload.put("userId", order.getUserId());
+            payload.put("logisticsCompany", logisticsCompany);
+            payload.put("logisticsNo", logisticsNo);
+            outboxPublisher.publish(MqTopicConstants.Order.DELIVERED, "OrderDelivered",
+                    order.getOrderNo(), payload);
+        });
+    }
+
+    @Override
+    public void logisticsPick(String orderNo) {
+        // 揽收无下游消费者，不发领域事件
+        transitionOrder(requireOrder(orderNo), OrderEventEnum.LOGISTICS_PICK);
+    }
+
+    /**
+     * 按订单号取订单，不存在则抛业务异常
+     *
+     * <p>管理端 / 内部调用入口，不做用户归属校验（C 端用 {@code requireOwnedOrder}）。</p>
+     *
+     * @param orderNo 订单号
+     * @return 订单 DO
+     */
+    private MallOrderDO requireOrder(String orderNo) {
+        MallOrderDO order = orderMapper.selectByOrderNo(orderNo);
+        if (order == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        return order;
+    }
+
+    /**
+     * 状态推进（不产生领域事件）
+     *
+     * <p>与四参重载区分开，让「本流转无下游消费者」成为显式意图，
+     * 而不是靠传 {@code null} topic 表达。</p>
+     */
+    private void transitionOrder(MallOrderDO order, OrderEventEnum event) {
+        transitionOrder(order, event, null, null);
+    }
+
     /**
      * 通用状态推进：状态机校验 → 乐观锁落库 → 写 Outbox
      */
@@ -430,6 +496,10 @@ public class OrderServiceImpl implements OrderService {
                     originStatus, version, order.getPreRefundStatus());
             if (affected == 0) {
                 throw new BusinessException(ErrorCode.ORDER_STATUS_ERROR);
+            }
+            // 无下游消费者的流转（如物流揽收）不产生领域事件，避免 Outbox 堆积无人消费的消息
+            if (outboxTopic == null) {
+                return;
             }
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("orderNo", order.getOrderNo());

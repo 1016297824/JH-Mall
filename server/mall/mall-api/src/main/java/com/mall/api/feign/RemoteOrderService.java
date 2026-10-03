@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -28,6 +29,26 @@ public interface RemoteOrderService {
      */
     @GetMapping("/inner/order/query")
     OrderDTO queryOrder(@RequestParam("orderNo") String orderNo);
+
+    /**
+     * 卖家发货（管理端填写物流信息并确认发货，推进 PAID → WAIT_DELIVER）
+     *
+     * @param orderNo          订单号
+     * @param logisticsCompany 物流公司
+     * @param logisticsNo      物流单号
+     */
+    @PostMapping("/inner/order/deliver")
+    void deliver(@RequestParam("orderNo") String orderNo,
+                 @RequestParam("logisticsCompany") String logisticsCompany,
+                 @RequestParam("logisticsNo") String logisticsNo);
+
+    /**
+     * 物流揽收（推进 WAIT_DELIVER → WAIT_RECEIVE）
+     *
+     * @param orderNo 订单号
+     */
+    @PostMapping("/inner/order/logistics-pick")
+    void logisticsPick(@RequestParam("orderNo") String orderNo);
 
     /**
      * 订单快照
