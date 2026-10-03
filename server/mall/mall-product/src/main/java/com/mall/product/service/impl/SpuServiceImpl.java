@@ -130,6 +130,27 @@ public class SpuServiceImpl implements ISpuService {
         return PageResult.of(page, size, result.getTotal(), dtoList);
     }
 
+    /**
+     * 按 spuId 查询单条搜索索引 DTO
+     *
+     * <p>复用分页版本的三个批量预取方法（传单元素列表），避免重复组装逻辑。</p>
+     *
+     * @param spuId SPU ID
+     * @return SpuSearchDTO；商品不存在返回 null
+     */
+    @Override
+    public SpuSearchDTO getForSearchRebuild(Long spuId) {
+        MallProductSpuDO spuDO = mallProductSpuMapper.selectById(spuId);
+        if (spuDO == null) {
+            return null;
+        }
+        List<MallProductSpuDO> single = List.of(spuDO);
+        return toSpuSearchDTO(spuDO,
+                buildCategoryNameMap(single),
+                buildBrandNameMap(single),
+                buildSkuMapBySpuIds(single));
+    }
+
     @Override
     public List<SpuVO> hotList(int limit) {
         List<SpuVO> hotList = hotProductService.hotList(limit);
