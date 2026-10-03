@@ -95,9 +95,7 @@ function goShopping(): void {
 }
 
 function goCheckout(): void {
-  // CheckoutPage 尚未实现（pages/order/CheckoutPage 目前只有 .gitkeep），
-  // 直接 push('/checkout') 会落到未匹配路由（空白页）；实现后改回跳转即可
-  ElMessage.info('结算页开发中，敬请期待')
+  void router.push({ path: '/checkout' })
 }
 </script>
 
