@@ -33,4 +33,17 @@ public class RemoteProductAdapter {
         log.debug("拉取全量 SPU（搜索专用）: page={}, size={}", page, size);
         return remoteProductService.fetchAllSpusForSearch(page, size);
     }
+
+    /**
+     * 按 spuId 拉取单条 SPU（搜索增量同步专用）
+     *
+     * <p>替代全表分页扫描：增量同步只需一条，无需逐页拉全量比对。</p>
+     *
+     * @param spuId SPU ID
+     * @return 搜索结果专用 SPU；商品不存在返回 null
+     */
+    public SpuSearchDTO fetchSpuForSearch(Long spuId) {
+        log.debug("拉取单条 SPU（搜索专用）: spuId={}", spuId);
+        return remoteProductService.getSpuForSearch(spuId);
+    }
 }

@@ -315,30 +315,17 @@ public class IndexServiceImpl implements IndexService {
      * @param spuId 商品 SPU ID
      */
     private void upsertProduct(Long spuId) {
-        int page = 1;
-        int batchSize = configProperties.getRebuild().getBatchSize();
         try {
-            while (true) {
-                PageResult<SpuSearchDTO> pageResult = remoteProductAdapter.fetchAllSpusForSearch(page, batchSize);
-                List<SpuSearchDTO> rows = pageResult.getRows();
-                if (rows == null || rows.isEmpty()) {
-                    break;
-                }
-                for (SpuSearchDTO dto : rows) {
-                    if (spuId.equals(dto.getSpuId())) {
-                        ProductIndexDO indexDO = SpuSearchConvert.toProductIndex(dto);
-                        if (indexDO != null) {
-                            productIndexRepository.save(indexDO);
-                        }
-                        return;
-                    }
-                }
-                if ((long) page * batchSize >= pageResult.getTotal()) {
-                    break;
-                }
-                page++;
+            // 单条查询：原先逐页拉全量比对来定位这一条，数据量大时单次同步 O(N)
+            SpuSearchDTO dto = remoteProductAdapter.fetchSpuForSearch(spuId);
+            if (dto == null) {
+                log.warn("增量同步 UPSERT 未找到商品（可能已删除）: spuId={}", spuId);
+                return;
             }
-            log.warn("增量同步 UPSERT 未找到商品: spuId={}", spuId);
+            ProductIndexDO indexDO = SpuSearchConvert.toProductIndex(dto);
+            if (indexDO != null) {
+                productIndexRepository.save(indexDO);
+            }
         } catch (Exception e) {
             // 必须上抛：调用方 SearchSyncProducer 只在本方法抛异常时才写 Outbox 兜底，
             // 吞掉异常会让接口对 Feign 返回 200，索引与库的差异再无人修正
