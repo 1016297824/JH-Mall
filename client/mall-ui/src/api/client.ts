@@ -3,6 +3,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
+import { ElMessage } from 'element-plus'
 
 import { LOGIN_PATH, SUCCESS_CODE, UNAUTHORIZED_CODE } from '@/utils/constants'
 
@@ -70,6 +71,19 @@ function redirectToLogin(): void {
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
   window.location.href = LOGIN_PATH
+}
+
+/**
+ * 统一弹出接口错误提示
+ *
+ * <p>规范要求「接口错误统一在响应拦截器中处理」，各页面与 store 因此只需
+ * 上抛异常、无需重复写提示。`grouping` 让并发失败产生的相同文案合并为一条，
+ * 避免一次性刷屏。</p>
+ *
+ * @param message 展示给用户的文案
+ */
+function toastError(message: string): void {
+  ElMessage.error({ message, grouping: true })
 }
 
 /** 进行中的刷新请求：refreshToken 为一次性轮换，并发 401 必须共享同一次刷新 */
@@ -145,10 +159,14 @@ request.interceptors.response.use(
     }
     // 网关其他错误体（如 {code:500,msg:"服务未找到"}）：放行会让调用方拿到 undefined 并静默渲染空数据
     if (body?.code !== undefined) {
-      return Promise.reject(new Error(resolveErrorMessage(body, '请求失败')))
+      const message = resolveErrorMessage(body, '请求失败')
+      toastError(message)
+      return Promise.reject(new Error(message))
     }
     if (body?.errorCode !== undefined && body.errorCode !== SUCCESS_CODE) {
-      return Promise.reject(new Error(resolveErrorMessage(body, '请求失败')))
+      const message = resolveErrorMessage(body, '请求失败')
+      toastError(message)
+      return Promise.reject(new Error(message))
     }
     return response
   },
@@ -161,8 +179,11 @@ request.interceptors.response.use(
     }
     // 业务错误：后端以 HTTP 400 返回 MallResult，需取 userTip/errorMessage 而非 axios 文案
     if (body && (body.errorCode !== undefined || body.errorMessage || body.userTip)) {
+      toastError(message)
       return Promise.reject(new Error(message))
     }
+    // 网络层错误（超时、断网、服务未启动），axios 文案已是唯一线索
+    toastError(message)
     return Promise.reject(error)
   },
 )
