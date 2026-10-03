@@ -65,7 +65,7 @@ services:
       sh -c "
       nohup sh mqnamesrv > /tmp/namesrv.log 2>&1 &
       sleep 5
-      sh mqbroker -n localhost:9876 --enable-proxy
+      sh mqbroker -n localhost:9876 -c /home/rocketmq/broker.conf --enable-proxy
       "
     ports:
       - "9876:9876"    # NameServer
@@ -74,6 +74,9 @@ services:
     environment:
       JAVA_OPT_EXT: "-Xms128m -Xmx256m"
     volumes:
+      # brokerIP1=127.0.0.1：宿主机上的服务必须能连上 broker，
+      # 用容器内网 IP 注册会让生产者 send 超时（详见 broker.conf 注释）
+      - ./broker.conf:/home/rocketmq/broker.conf:ro
       - ./data/rocketmq/logs:/home/rocketmq/logs
       - ./data/rocketmq/store:/home/rocketmq/store
     restart: unless-stopped
