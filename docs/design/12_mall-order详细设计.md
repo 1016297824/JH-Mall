@@ -495,7 +495,7 @@ Outbox 投递失败后的指数退避：
 | Topic | 消费者类 | 处理流程 |
 |-------|---------|---------|
 | `mall:payment:paid` | `PaymentPaidConsumer` | ①幂等去重 ②调 `OrderServiceImpl.payCallback(orderNo)` ③状态机 WAIT_PAY→PAID ④Service 层写 Outbox `mall:order:paid` ⑤同步 UPDATE `mall_outbox` 取消 `mall:order:timeout` 延迟消息 |
-| `mall:refund:succeeded` | `RefundSucceededConsumer` | ①幂等去重 ②调 `AfterSaleServiceImpl.refundCallback()` ③如为退货退款，调 `RemoteProductService.restock(skuId, qty)` 回补库存 |
+| `mall:refund:succeeded` | `RefundSucceededConsumer` | ①幂等去重 ②调 `AfterSaleServiceImpl.refundCallback()` ③如为退货退款，调 `RemoteProductService.restock(skuId, qty, afterSaleNo)` 回补库存（`afterSaleNo` 为幂等键，防重投重复回补） |
 | `mall:order:timeout` | `OrderTimeoutConsumer` | ①幂等去重 ②查订单 `orderMapper.selectByOrderNo(orderNo)` ③校验 `status=WAIT_PAY AND pay_expire_time<=NOW()` ④乐观锁关单 `UPDATE mall_order SET status='CLOSED' WHERE status='WAIT_PAY'` ⑤影响 1 行则写 Outbox `mall:order:cancelled`（释放库存+优惠券） |
 
 ### 7.4 消费幂等
@@ -520,7 +520,7 @@ Outbox 投递失败后的指数退避：
 | 类型 | 条件 | 库存处理 |
 |------|------|---------|
 | 仅退款 | 未发货（WAIT_PAY / PAID） | 不回补库存 |
-| 退货退款 | 已发货（WAIT_RECEIVE / COMPLETED） | 收到退货后调 `RemoteProductService.restock(skuId, qty)` 回补 |
+| 退货退款 | 已发货（WAIT_RECEIVE / COMPLETED） | 收到退货后调 `RemoteProductService.restock(skuId, qty, afterSaleNo)` 回补 |
 
 ### 8.2 申请流程
 
@@ -546,7 +546,7 @@ Outbox 投递失败后的指数退避：
 2. `AfterSaleServiceImpl.refundCallback()`：
    - `afterSaleMapper.updateStatus(id, SUCCESS)`，`completed_time=NOW()`
    - UPDATE `mall_order.refunded_amount += 退款金额`
-   - 若退货退款 → 调 `RemoteProductService.restock(skuId, qty)` 回补库存
+   - 若退货退款 → 调 `RemoteProductService.restock(skuId, qty, afterSaleNo)` 回补库存
 3. 退款失败 → `afterSaleMapper.updateStatus(id, FAILED)`，标记人工介入
 
 ---

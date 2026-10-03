@@ -292,12 +292,24 @@ public class CacheConstants {
          *
          * <p>Key 模式：{@code mall:product:stock:reserve:{orderNo}:{skuId}}</p>
          * <ul>
-         *   <li>TTL：1800s（30min）</li>
+         *   <li>TTL：86400s（24h，见 {@code StockServiceImpl.RESERVE_KEY_TTL_HOURS}）</li>
          *   <li>数据结构：String（SETNX），value 存预留数量</li>
          *   <li>防止同一订单重复扣减库存</li>
          * </ul>
          */
         public static final String STOCK_RESERVE = "mall:product:stock:reserve:";
+
+        /**
+         * 库存回补幂等键
+         *
+         * <p>Key 模式：{@code mall:product:stock:restock:{bizNo}:{skuId}}</p>
+         * <ul>
+         *   <li>TTL：86400s（24h）</li>
+         *   <li>数据结构：String（SETNX），value 存回补数量</li>
+         *   <li>防止同一业务单（如售后单）重复回补库存</li>
+         * </ul>
+         */
+        public static final String STOCK_RESTOCK = "mall:product:stock:restock:";
 
         /**
          * Outbox 消息幂等键

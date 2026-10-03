@@ -56,12 +56,16 @@ public interface RemoteProductService {
     /**
      * 回补库存（退货入库）
      *
+     * <p>以 {@code bizNo}（如售后单号）幂等，同一业务单重复调用只回补一次</p>
+     *
      * @param skuId SKU ID
      * @param qty   回补数量
+     * @param bizNo 业务单号（幂等键）
      */
     @PostMapping("/inner/product/stock/restock")
     void restock(@RequestParam("skuId") Long skuId,
-                 @RequestParam("qty") Integer qty);
+                 @RequestParam("qty") Integer qty,
+                 @RequestParam("bizNo") String bizNo);
 
     /**
      * 分页拉取全量 SPU（搜索索引重建用）

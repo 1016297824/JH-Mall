@@ -75,4 +75,32 @@ class RemoteProductInnerControllerTest {
 
         verify(hotRankRefreshTask).execute();
     }
+
+    /**
+     * POST /inner/product/stock/restock 应绑全 skuId/qty/bizNo 并透传给 Service
+     *
+     * <p>{@code bizNo} 是新增的必填幂等键，Feign 侧靠参数名字符串对齐，
+     * 写错只会在运行时 400——必须由本用例锁住绑定。</p>
+     */
+    @Test
+    void restockShouldBindAllParams() throws Exception {
+        mockMvc.perform(post("/inner/product/stock/restock")
+                        .param("skuId", "101")
+                        .param("qty", "5")
+                        .param("bizNo", "AS001"))
+                .andExpect(status().isOk());
+
+        verify(stockService).restock(101L, 5, "AS001");
+    }
+
+    /**
+     * 缺少 bizNo 时必须在参数绑定层直接 400，而不是静默执行非幂等回补
+     */
+    @Test
+    void restockShouldRejectMissingBizNo() throws Exception {
+        mockMvc.perform(post("/inner/product/stock/restock")
+                        .param("skuId", "101")
+                        .param("qty", "5"))
+                .andExpect(status().isBadRequest());
+    }
 }

@@ -204,9 +204,10 @@ server/mall/mall-product/
 - 根据 `orderNo` 查订单项，逐 SKU 回退：`UPDATE ... SET available_stock=available_stock+#{qty}, locked_stock=locked_stock-#{qty} WHERE sku_id=? AND version=?`
 - 幂等去重：`orderNo + skuId` Redis key，防重复释放
 
-**restock(skuId, qty)**：售后退货回补（Feign 由 mall-order 调用）
+**restock(skuId, qty, bizNo)**：售后退货回补（Feign 由 mall-order 调用）
 
 - 仅退货退款回补：`UPDATE ... SET available_stock=available_stock+#{qty}, frozen_stock=frozen_stock-#{qty}`
+- 幂等：`bizNo`（售后单号）+ `skuId` 组成 Redis key（TTL 24h），防 MQ 重投重复回补；乐观锁影响 0 行则释放幂等键并上抛
 
 **adjust(skuId, delta)**：管理端调整库存
 

@@ -106,13 +106,14 @@ public class RemoteProductAdapter {
     /**
      * 回补库存（售后退货退款，§8.4）
      *
-     * <p>同为写操作，不降级。</p>
+     * <p>同为写操作，不降级。以 {@code bizNo}（售后单号）幂等，防止 MQ 重投重复回补。</p>
      *
      * @param skuId SKU ID
      * @param qty   回补数量
+     * @param bizNo 业务单号（幂等键）
      */
-    public void restock(Long skuId, Integer qty) {
-        remoteProductService.restock(skuId, qty);
-        log.info("restock 已调用, skuId={}, qty={}", skuId, qty);
+    public void restock(Long skuId, Integer qty, String bizNo) {
+        remoteProductService.restock(skuId, qty, bizNo);
+        log.info("restock 已调用, skuId={}, qty={}, bizNo={}", skuId, qty, bizNo);
     }
 }
