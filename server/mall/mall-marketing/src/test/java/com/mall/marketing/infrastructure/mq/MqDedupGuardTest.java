@@ -13,7 +13,9 @@ import org.springframework.data.redis.core.ValueOperations;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,5 +73,21 @@ class MqDedupGuardTest {
 
         verify(valueOperations).setIfAbsent(CacheConstants.MQ.DEDUP + MESSAGE_ID + ":" + CONSUMER_GROUP,
                 "1", 24L, TimeUnit.HOURS);
+    }
+
+    @Test
+    @DisplayName("release：删除与 tryDedup 完全相同的 key（拼法不一致会导致重投仍被拦截）")
+    void releaseShouldDeleteTheSameKey() {
+        dedupGuard.release(MESSAGE_ID, CONSUMER_GROUP);
+
+        verify(redisTemplate).delete(CacheConstants.MQ.DEDUP + MESSAGE_ID + ":" + CONSUMER_GROUP);
+    }
+
+    @Test
+    @DisplayName("release 缺少 messageId：不触碰 Redis")
+    void releaseShouldDoNothingWhenMessageIdMissing() {
+        dedupGuard.release(null, CONSUMER_GROUP);
+
+        verify(redisTemplate, never()).delete(anyString());
     }
 }

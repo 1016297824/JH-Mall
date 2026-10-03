@@ -66,12 +66,25 @@ public class PaymentPaidConsumer implements RocketMQListener<MessageExt> {
             return;
         }
 
-        // 推进订单状态；内部已处理重复回调
-        orderService.payCallback(String.valueOf(orderNo));
+        try {
+            // 推进订单状态；内部已处理重复回调
+            orderService.payCallback(String.valueOf(orderNo));
 
-        // 支付成功，取消尚未投递的支付超时延迟消息（设计文档 §5.9）
-        int cancelled = outboxMapper.cancelPending(AGGREGATE_ORDER, String.valueOf(orderNo),
-                MqTopicConstants.Order.TIMEOUT);
-        log.info("支付成功处理完成: orderNo={}, 取消超时消息={} 条", orderNo, cancelled);
+            // 支付成功，取消尚未投递的支付超时延迟消息（设计文档 §5.9）
+            int cancelled = outboxMapper.cancelPending(AGGREGATE_ORDER, String.valueOf(orderNo),
+                    MqTopicConstants.Order.TIMEOUT);
+            log.info("支付成功处理完成: orderNo={}, 取消超时消息={} 条", orderNo, cancelled);
+        } catch (RuntimeException e) {
+            // 先记原始异常，再尽力释放去重标记：否则 MQ 重投会被去重拦截，
+            // 用户已付款但订单永远停在待支付
+            log.error("支付成功处理失败，交由 MQ 重试: orderNo={}", orderNo, e);
+            try {
+                dedupGuard.release(message.getMsgId(), CONSUMER_GROUP);
+            } catch (RuntimeException releaseError) {
+                log.error("【需人工介入】释放去重标记失败，重投将被去重拦截: msgId={}",
+                        message.getMsgId(), releaseError);
+            }
+            throw e;
+        }
     }
 }

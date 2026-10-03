@@ -12,6 +12,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -49,7 +50,12 @@ public class OrderTimeoutConsumer implements RocketMQListener<MessageExt> {
     private final OutboxPublisher outboxPublisher;
     private final MqDedupGuard dedupGuard;
 
+    // 事务边界必须落在 onMessage（外部入口，经代理调用）：closeTimedOutOrder 是 self-invocation，
+    // 给它加 @Transactional 不会经过代理、事务不生效。关单与 Outbox 落库必须同事务，
+    // 否则 closeByTimeout 已提交而 publish 失败时，重投会因订单已是 CLOSED 直接跳过，
+    // order:cancelled 永不投递、库存与券永不回补。
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void onMessage(MessageExt message) {
         String body = new String(message.getBody(), java.nio.charset.StandardCharsets.UTF_8);
         Map<String, Object> payload;
@@ -69,7 +75,21 @@ public class OrderTimeoutConsumer implements RocketMQListener<MessageExt> {
         if (!dedupGuard.tryDedup(message.getMsgId(), CONSUMER_GROUP)) {
             return;
         }
-        closeTimedOutOrder(String.valueOf(orderNo));
+
+        try {
+            closeTimedOutOrder(String.valueOf(orderNo));
+        } catch (RuntimeException e) {
+            // 先记原始异常，再尽力释放去重标记：否则 MQ 重投会被去重拦截，
+            // 订单永远停在待支付且不会超时关闭（库存与券也不释放）
+            log.error("超时关单失败，交由 MQ 重试: orderNo={}", orderNo, e);
+            try {
+                dedupGuard.release(message.getMsgId(), CONSUMER_GROUP);
+            } catch (RuntimeException releaseError) {
+                log.error("【需人工介入】释放去重标记失败，重投将被去重拦截: msgId={}",
+                        message.getMsgId(), releaseError);
+            }
+            throw e;
+        }
     }
 
     /**
