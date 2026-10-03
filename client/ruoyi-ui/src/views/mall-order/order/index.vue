@@ -153,6 +153,7 @@
       <el-table-column label="幂等键" align="center" prop="idempotentKey" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <el-button v-if="Number(scope.row.orderStatus) === 1" link type="primary" icon="Van" @click="handleDeliver(scope.row)" v-hasPermi="['mall-admin:order:edit']">发货</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['mall-admin:order:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['mall-admin:order:remove']">删除</el-button>
         </template>
@@ -302,12 +303,33 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 发货对话框：只填物流公司与单号，状态推进交由 mall-order 状态机 -->
+    <el-dialog title="订单发货" v-model="deliverOpen" width="500px" append-to-body>
+      <el-form :model="deliverForm" label-width="100px">
+        <el-form-item label="订单号">
+          <el-input v-model="deliverForm.orderNo" disabled />
+        </el-form-item>
+        <el-form-item label="物流公司" required>
+          <el-input v-model="deliverForm.logisticsCompany" placeholder="请输入物流公司，如：顺丰速运" />
+        </el-form-item>
+        <el-form-item label="物流单号" required>
+          <el-input v-model="deliverForm.logisticsNo" placeholder="请输入物流单号" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="submitDeliver">确认发货</el-button>
+          <el-button @click="deliverOpen = false">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts" name="Order">
 import type { MallOrder, MallOrderItem, OrderQueryParams } from "@/types/api/mall-order/order"
-import { listOrder, getOrder, delOrder, addOrder, updateOrder } from "@/api/mall-order/order"
+import { listOrder, getOrder, delOrder, addOrder, updateOrder, deliverOrder } from "@/api/mall-order/order"
 
 const { proxy } = getCurrentInstance()
 
@@ -322,6 +344,10 @@ const single = ref<boolean>(true)
 const multiple = ref<boolean>(true)
 const total = ref<number>(0)
 const title = ref<string>("")
+
+// 发货弹窗独立于编辑弹窗：复用会让"保存"语义混乱，且发货只写物流三项
+const deliverOpen = ref<boolean>(false)
+const deliverForm = ref({ orderNo: "", logisticsCompany: "", logisticsNo: "" })
 
 const data = reactive({
   form: {} as MallOrder,
@@ -488,6 +514,25 @@ function handleDelete(row: MallOrder) {
     getList()
     proxy.$modal.msgSuccess("删除成功")
   }).catch(() => {})
+}
+
+/** 发货按钮操作：打开弹窗并预填订单号 */
+function handleDeliver(row: MallOrder) {
+  deliverForm.value = { orderNo: row.orderNo as string, logisticsCompany: "", logisticsNo: "" }
+  deliverOpen.value = true
+}
+
+/** 提交发货：经 mall-order 状态机推进，失败信息由后端返回 */
+function submitDeliver() {
+  if (!deliverForm.value.logisticsCompany || !deliverForm.value.logisticsNo) {
+    proxy.$modal.msgError("请填写物流公司与物流单号")
+    return
+  }
+  deliverOrder(deliverForm.value.orderNo, deliverForm.value.logisticsCompany, deliverForm.value.logisticsNo).then(() => {
+    proxy.$modal.msgSuccess("发货成功")
+    deliverOpen.value = false
+    getList()
+  })
 }
 
 let _orderItemRowKey = 0

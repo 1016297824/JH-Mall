@@ -44,4 +44,13 @@ export function delOrder(id: number | number[]): Promise<AjaxResult> {
   })
 }
 
+// 发货：填物流信息并推进 PAID → WAIT_DELIVER（经 mall-order 状态机，不直改状态）
+export function deliverOrder(orderNo: string, logisticsCompany: string, logisticsNo: string): Promise<AjaxResult> {
+  return request({
+    url: '/mall-admin/order/deliver',
+    method: 'put',
+    params: { orderNo, logisticsCompany, logisticsNo }
+  })
+}
+
 

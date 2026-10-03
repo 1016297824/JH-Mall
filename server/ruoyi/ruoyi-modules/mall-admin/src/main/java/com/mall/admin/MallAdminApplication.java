@@ -13,7 +13,7 @@ import com.ruoyi.common.security.annotation.EnableRyFeignClients;
  * @date 2026/05/27
  */
 @EnableCustomConfig
-@EnableRyFeignClients
+@EnableRyFeignClients(basePackages = {"com.ruoyi", "com.mall.api"})
 @MapperScan("com.mall.admin.**.mapper")
 @SpringBootApplication
 public class MallAdminApplication

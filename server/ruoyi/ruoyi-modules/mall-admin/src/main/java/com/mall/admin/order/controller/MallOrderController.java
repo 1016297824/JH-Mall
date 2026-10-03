@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
@@ -100,5 +101,22 @@ public class MallOrderController extends BaseController
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(mallOrderService.deleteMallOrderByIds(ids));
+    }
+
+    /**
+     * 发货：填写物流信息并确认发货（PAID → WAIT_DELIVER）
+     *
+     * <p>权限复用 {@code edit}——发货属订单编辑行为，避免为单个动作新增菜单权限数据
+     * （新增权限码需要同步 {@code sys_menu} 种子数据）。</p>
+     */
+    @RequiresPermissions("mall-order:order:edit")
+    @Log(title = "订单管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/deliver")
+    public AjaxResult deliver(@RequestParam("orderNo") String orderNo,
+                              @RequestParam("logisticsCompany") String logisticsCompany,
+                              @RequestParam("logisticsNo") String logisticsNo)
+    {
+        mallOrderService.deliverOrder(orderNo, logisticsCompany, logisticsNo);
+        return success();
     }
 }
