@@ -1,5 +1,7 @@
 package com.mall.product.controller.inner;
 
+import com.mall.common.enums.product.SyncOperationEnum;
+import com.mall.product.infrastructure.mq.SearchSyncProducer;
 import com.mall.product.infrastructure.schedule.SearchSyncScheduleTask;
 import com.mall.product.infrastructure.schedule.HotRankRefreshTask;
 import com.mall.product.service.ISkuService;
@@ -43,6 +45,9 @@ class RemoteProductInnerControllerTest {
 
     @Mock
     private SearchSyncScheduleTask searchSyncScheduleTask;
+
+    @Mock
+    private SearchSyncProducer searchSyncProducer;
 
     @InjectMocks
     private RemoteProductInnerController controller;
@@ -102,5 +107,40 @@ class RemoteProductInnerControllerTest {
                         .param("skuId", "101")
                         .param("qty", "5"))
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * POST /inner/product/spus/sync-search：UPSERT 走同步、DELETE 走删除
+     *
+     * <p>这是「商品变更 → ES」的唯一触发入口，参数名靠字符串与 Feign 对齐。</p>
+     */
+    @Test
+    void syncSearchIndexShouldDelegateWithResolvedOperation() throws Exception {
+        mockMvc.perform(post("/inner/product/spus/sync-search")
+                        .param("spuId", "1001")
+                        .param("operation", "UPSERT"))
+                .andExpect(status().isOk());
+
+        verify(searchSyncProducer).syncProduct(1001L, SyncOperationEnum.UPSERT);
+
+        mockMvc.perform(post("/inner/product/spus/sync-search")
+                        .param("spuId", "1002")
+                        .param("operation", "DELETE"))
+                .andExpect(status().isOk());
+
+        verify(searchSyncProducer).syncProduct(1002L, SyncOperationEnum.DELETE);
+    }
+
+    /**
+     * 无法识别的操作码按 UPSERT 处理：宁可按更新投递，也不要静默不同步
+     */
+    @Test
+    void syncSearchIndexShouldFallbackToUpsert() throws Exception {
+        mockMvc.perform(post("/inner/product/spus/sync-search")
+                        .param("spuId", "1003")
+                        .param("operation", "WHATEVER"))
+                .andExpect(status().isOk());
+
+        verify(searchSyncProducer).syncProduct(1003L, SyncOperationEnum.UPSERT);
     }
 }

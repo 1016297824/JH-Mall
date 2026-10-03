@@ -11,6 +11,8 @@ import com.mall.admin.product.domain.MallProductSku;
 import com.mall.admin.product.mapper.MallProductSpuMapper;
 import com.mall.admin.product.domain.MallProductSpu;
 import com.mall.admin.product.service.IMallProductSpuService;
+import com.mall.api.feign.RemoteProductService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * SPU 管理Service业务层处理
@@ -18,11 +20,16 @@ import com.mall.admin.product.service.IMallProductSpuService;
  * @author ruoyi
  * @date 2026-05-19
  */
+@Slf4j
 @Service
 public class MallProductSpuServiceImpl implements IMallProductSpuService
 {
     @Autowired
     private MallProductSpuMapper mallProductSpuMapper;
+
+    /** mall-product 内部契约：商品变更后触发搜索索引同步 */
+    @Autowired
+    private RemoteProductService remoteProductService;
 
     /**
      * 查询SPU 管理
@@ -61,6 +68,7 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
         mallProductSpu.setCreateTime(DateUtils.getNowDate());
         int rows = mallProductSpuMapper.insertMallProductSpu(mallProductSpu);
         insertMallProductSku(mallProductSpu);
+        syncSearchIndex(mallProductSpu.getId(), "UPSERT");
         return rows;
     }
 
@@ -77,7 +85,9 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
         mallProductSpu.setUpdateTime(DateUtils.getNowDate());
         mallProductSpuMapper.deleteMallProductSkuBySpuId(mallProductSpu.getId());
         insertMallProductSku(mallProductSpu);
-        return mallProductSpuMapper.updateMallProductSpu(mallProductSpu);
+        int rows = mallProductSpuMapper.updateMallProductSpu(mallProductSpu);
+        syncSearchIndex(mallProductSpu.getId(), "UPSERT");
+        return rows;
     }
 
     /**
@@ -91,7 +101,12 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
     public int deleteMallProductSpuByIds(String[] ids)
     {
         mallProductSpuMapper.deleteMallProductSkuBySpuIds(ids);
-        return mallProductSpuMapper.deleteMallProductSpuByIds(ids);
+        int rows = mallProductSpuMapper.deleteMallProductSpuByIds(ids);
+        for (String id : ids)
+        {
+            syncSearchIndex(id, "DELETE");
+        }
+        return rows;
     }
 
     /**
@@ -105,7 +120,35 @@ public class MallProductSpuServiceImpl implements IMallProductSpuService
     public int deleteMallProductSpuById(String id)
     {
         mallProductSpuMapper.deleteMallProductSkuBySpuId(id);
-        return mallProductSpuMapper.deleteMallProductSpuById(id);
+        int rows = mallProductSpuMapper.deleteMallProductSpuById(id);
+        syncSearchIndex(id, "DELETE");
+        return rows;
+    }
+
+    /**
+     * 触发搜索索引同步（尽力而为）
+     *
+     * <p>ES 故障不能阻断管理端的商品维护：失败只记日志——mall-product 的实时同步
+     * 在 Feign 失败时会写 Outbox，由补偿任务兜底。</p>
+     *
+     * @param spuId     SPU ID
+     * @param operation UPSERT（新增/更新）或 DELETE
+     */
+    private void syncSearchIndex(String spuId, String operation)
+    {
+        if (StringUtils.isEmpty(spuId))
+        {
+            return;
+        }
+        try
+        {
+            remoteProductService.syncSearchIndex(Long.valueOf(spuId), operation);
+        }
+        catch (Exception e)
+        {
+            log.error("触发搜索索引同步失败，将由 Outbox 补偿兜底: spuId={}, operation={}",
+                    spuId, operation, e);
+        }
     }
 
     /**

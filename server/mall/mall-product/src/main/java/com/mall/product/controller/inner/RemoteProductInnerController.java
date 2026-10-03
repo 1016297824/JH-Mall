@@ -9,6 +9,8 @@ import com.mall.product.service.IHotProductService;
 import com.mall.product.service.ISkuService;
 import com.mall.product.service.ISpuService;
 import com.mall.product.service.IStockService;
+import com.mall.common.enums.product.SyncOperationEnum;
+import com.mall.product.infrastructure.mq.SearchSyncProducer;
 import com.mall.product.infrastructure.schedule.SearchSyncScheduleTask;
 import com.mall.product.infrastructure.schedule.HotRankRefreshTask;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,8 @@ public class RemoteProductInnerController {
     private final ISpuService spuService;
     private final SearchSyncScheduleTask searchSyncScheduleTask;
     private final HotRankRefreshTask hotRankRefreshTask;
+
+    private final SearchSyncProducer searchSyncProducer;
 
     /**
      * 批量查询 SKU（Feign 内部调用）
@@ -150,5 +154,30 @@ public class RemoteProductInnerController {
     @PostMapping("/hot/refresh")
     void refreshHotRank() {
         hotRankRefreshTask.execute();
+    }
+
+    /**
+     * 触发搜索索引同步（管理端改价 / 上下架 / 删除商品后调用）
+     *
+     * @param spuId     SPU ID
+     * @param operation 操作类型：UPSERT（新增/更新）或 DELETE
+     */
+    @PostMapping("/spus/sync-search")
+    void syncSearchIndex(@RequestParam("spuId") Long spuId,
+                         @RequestParam("operation") String operation) {
+        searchSyncProducer.syncProduct(spuId, resolveOperation(operation));
+    }
+
+    /**
+     * 操作码 → 同步操作枚举
+     *
+     * <p>无法识别的操作码按 UPSERT 处理：宁可按更新投递，也不要静默不同步。</p>
+     *
+     * @param code 操作码
+     * @return 匹配的枚举
+     */
+    private static SyncOperationEnum resolveOperation(String code) {
+        return SyncOperationEnum.DELETE.getCode().equals(code)
+                ? SyncOperationEnum.DELETE : SyncOperationEnum.UPSERT;
     }
 }
