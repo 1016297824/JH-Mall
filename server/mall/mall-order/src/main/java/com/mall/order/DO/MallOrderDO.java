@@ -71,7 +71,7 @@ public class MallOrderDO {
     @TableField("cancel_time")
     private LocalDateTime cancelTime;
 
-    /** 取消类型：USER_CANCEL / PAY_TIMEOUT / FORCE_CANCEL */
+    /** 取消类型，取值见 {@code CancelTypeEnum}（user_cancel / timeout_cancel / admin_cancel） */
     @TableField("cancel_type")
     private String cancelType;
 

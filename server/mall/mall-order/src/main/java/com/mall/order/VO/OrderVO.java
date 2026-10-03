@@ -44,7 +44,7 @@ public class OrderVO {
     /** 支付过期时间；已过该时间仍为待支付则订单会被自动关闭 */
     private LocalDateTime payExpireTime;
 
-    /** 取消类型：USER_CANCEL / PAY_TIMEOUT / FORCE_CANCEL */
+    /** 取消类型，取值见 {@code CancelTypeEnum}（user_cancel / timeout_cancel / admin_cancel） */
     private String cancelType;
 
     /** 取消原因 */

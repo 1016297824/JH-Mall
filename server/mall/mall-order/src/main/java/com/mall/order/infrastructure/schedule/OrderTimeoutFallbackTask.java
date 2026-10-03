@@ -116,6 +116,8 @@ public class OrderTimeoutFallbackTask {
             log.info("自动确认收货影响 0 行，订单已被用户确认: orderNo={}", order.getOrderNo());
             return false;
         }
+        // 与用户手动确认收货一样需要落完成时间，否则该列在自动完成路径上永远为空
+        orderMapper.markCompleteTime(order.getOrderNo());
 
         Map<String, Object> completedEvent = new LinkedHashMap<>();
         completedEvent.put("orderNo", order.getOrderNo());

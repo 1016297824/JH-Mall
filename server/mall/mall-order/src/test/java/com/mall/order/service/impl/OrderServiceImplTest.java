@@ -4,6 +4,7 @@ import com.mall.api.feign.RemoteMarketingService.CalculationResp;
 import com.mall.common.DTO.product.ProductSkuDTO;
 import com.mall.common.constant.MqTopicConstants;
 import com.mall.common.enums.ErrorCode;
+import com.mall.common.enums.order.CancelTypeEnum;
 import com.mall.common.enums.order.OrderStatusEnum;
 import com.mall.common.exception.BusinessException;
 import com.mall.order.DO.MallCartDO;
@@ -36,6 +37,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -110,6 +112,58 @@ class OrderServiceImplTest {
         order.setVersion(1);
         order.setIsDeleted(0);
         return order;
+    }
+
+    /** 待支付且未过期的订单 */
+    private MallOrderDO waitPayOrder() {
+        MallOrderDO order = new MallOrderDO();
+        order.setOrderNo(ORDER_NO);
+        order.setUserId(12345L);
+        order.setOrderStatus(OrderStatusEnum.WAIT_PAY.getCode());
+        order.setVersion(1);
+        order.setIsDeleted(0);
+        order.setPayAmount(10000L);
+        order.setPayExpireTime(LocalDateTime.now().plusMinutes(30));
+        return order;
+    }
+
+    @Test
+    @DisplayName("支付回调：必须在同一事务补写 pay_time（对账扫描与订单详情都依赖该列）")
+    void payCallbackShouldMarkPayTime() {
+        when(orderMapper.selectByOrderNo(ORDER_NO)).thenReturn(waitPayOrder());
+        when(orderMapper.updateStatusCas(eq(ORDER_NO), eq(OrderStatusEnum.PAID.getCode()),
+                eq(OrderStatusEnum.WAIT_PAY.getCode()), eq(1), isNull())).thenReturn(1);
+
+        orderService.payCallback(ORDER_NO);
+
+        // updateStatusCas 只推进状态，时间线字段必须单独补齐，否则 pay_time 永远是 NULL
+        verify(orderMapper).markPayTime(ORDER_NO);
+    }
+
+    @Test
+    @DisplayName("用户取消：必须补写 cancel_time 与 cancel_type")
+    void cancelOrderShouldMarkCancelTime() {
+        when(orderMapper.selectByOrderNo(ORDER_NO)).thenReturn(waitPayOrder());
+        when(orderMapper.updateStatusCas(any(), any(), any(), any(), any())).thenReturn(1);
+
+        orderService.cancelOrder(12345L, ORDER_NO);
+
+        // 取消类型取 CancelTypeEnum 的码值，避免与超时关单各写一套词汇
+        verify(orderMapper).markCancelTime(ORDER_NO, CancelTypeEnum.USER_CANCEL.getCode());
+    }
+
+    @Test
+    @DisplayName("确认收货：必须补写 complete_time")
+    void confirmReceiptShouldMarkCompleteTime() {
+        MallOrderDO order = paidOrder();
+        order.setOrderStatus(OrderStatusEnum.WAIT_RECEIVE.getCode());
+        order.setPayAmount(10000L);
+        when(orderMapper.selectByOrderNo(ORDER_NO)).thenReturn(order);
+        when(orderMapper.updateStatusCas(any(), any(), any(), any(), any())).thenReturn(1);
+
+        orderService.confirmReceipt(12345L, ORDER_NO);
+
+        verify(orderMapper).markCompleteTime(ORDER_NO);
     }
 
     @Test

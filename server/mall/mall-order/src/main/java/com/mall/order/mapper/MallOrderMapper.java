@@ -47,7 +47,8 @@ public interface MallOrderMapper extends BaseMapper<MallOrderDO> {
     /**
      * 超时关单（乐观锁）
      *
-     * <p>SQL 中的状态码对应 {@code OrderStatusEnum}：0 = WAIT_PAY，6 = CLOSED。
+     * <p>SQL 中的状态码对应 {@code OrderStatusEnum}：0 = WAIT_PAY，6 = CLOSED；
+     * {@code cancel_type} 取值对应 {@code CancelTypeEnum.TIMEOUT_CANCEL}（{@code timeout_cancel}）。
      * {@code WHERE order_status = 0} 是竞态防护核心：</p>
      * <ul>
      *   <li>支付回调先到 → 状态已变 1（PAID），本方法影响 0 行，MQ 消费与兜底任务据此跳过</li>
@@ -57,7 +58,7 @@ public interface MallOrderMapper extends BaseMapper<MallOrderDO> {
      * @param orderNo 订单号
      * @return 影响行数，1=关单成功；0=已支付或已关闭
      */
-    @Update("UPDATE mall_order SET order_status = 6, cancel_type = 'PAY_TIMEOUT', "
+    @Update("UPDATE mall_order SET order_status = 6, cancel_type = 'timeout_cancel', "
             + "cancel_time = NOW(), update_time = NOW(), version = version + 1 "
             + "WHERE order_no = #{orderNo} AND order_status = 0 AND is_deleted = 0")
     int closeByTimeout(@Param("orderNo") String orderNo);
@@ -146,4 +147,41 @@ public interface MallOrderMapper extends BaseMapper<MallOrderDO> {
     int updateLogistics(@Param("orderNo") String orderNo,
                         @Param("logisticsCompany") String logisticsCompany,
                         @Param("logisticsNo") String logisticsNo);
+
+    /**
+     * 记录支付时间
+     *
+     * <p>{@link #updateStatusCas} 只推进状态、不写时间线字段，故由调用方在同一事务内单独补齐。
+     * 不加状态前置条件：CAS 已经保证只有合法流转才会走到这里。</p>
+     *
+     * @param orderNo 订单号
+     * @return 影响行数
+     */
+    @Update("UPDATE mall_order SET pay_time = NOW(), update_time = NOW() "
+            + "WHERE order_no = #{orderNo} AND is_deleted = 0")
+    int markPayTime(@Param("orderNo") String orderNo);
+
+    /**
+     * 记录订单完成时间
+     *
+     * @param orderNo 订单号
+     * @return 影响行数
+     */
+    @Update("UPDATE mall_order SET complete_time = NOW(), update_time = NOW() "
+            + "WHERE order_no = #{orderNo} AND is_deleted = 0")
+    int markCompleteTime(@Param("orderNo") String orderNo);
+
+    /**
+     * 记录取消时间与取消类型
+     *
+     * <p>{@code cancelType} 取值见 {@code CancelTypeEnum}。</p>
+     *
+     * @param orderNo    订单号
+     * @param cancelType 取消类型码
+     * @return 影响行数
+     */
+    @Update("UPDATE mall_order SET cancel_time = NOW(), cancel_type = #{cancelType}, "
+            + "update_time = NOW() WHERE order_no = #{orderNo} AND is_deleted = 0")
+    int markCancelTime(@Param("orderNo") String orderNo,
+                       @Param("cancelType") String cancelType);
 }

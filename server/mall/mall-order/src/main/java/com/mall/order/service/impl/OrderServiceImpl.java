@@ -10,6 +10,7 @@ import com.mall.common.DTO.product.ProductSkuDTO;
 import com.mall.common.constant.CacheConstants;
 import com.mall.common.constant.MqTopicConstants;
 import com.mall.common.enums.ErrorCode;
+import com.mall.common.enums.order.CancelTypeEnum;
 import com.mall.common.enums.order.OrderStatusEnum;
 import com.mall.common.exception.BusinessException;
 import com.mall.order.DO.MallCartDO;
@@ -575,6 +576,7 @@ public class OrderServiceImpl implements OrderService {
             if (affected == 0) {
                 throw new BusinessException(ErrorCode.ORDER_STATUS_ERROR);
             }
+            markEventTime(order.getOrderNo(), event);
             // 无下游消费者的流转（如物流揽收）不产生领域事件，避免 Outbox 堆积无人消费的消息
             if (outboxTopic == null) {
                 return;
@@ -587,5 +589,33 @@ public class OrderServiceImpl implements OrderService {
             }
             outboxPublisher.publish(outboxTopic, eventType, order.getOrderNo(), payload);
         });
+    }
+
+    /**
+     * 按事件补写订单时间线字段
+     *
+     * <p>{@code updateStatusCas} 只推进状态，{@code pay_time} / {@code complete_time} /
+     * {@code cancel_time} 不会随之写入——缺了它们，订单详情没有时间可展示，
+     * 「发货后 N 天自动完成」与对账扫描等依赖时间列的查询也全部失真。
+     * 故在状态落库后、同一事务内按事件补齐，避免留下「状态已变、时间没记」的中间态。</p>
+     *
+     * <p>发货时间由 {@code updateLogistics} 负责，超时关单由 {@code closeByTimeout} 负责，
+     * 此处不重复处理。</p>
+     *
+     * @param orderNo 订单号
+     * @param event   触发本次流转的事件
+     */
+    private void markEventTime(String orderNo, OrderEventEnum event) {
+        switch (event) {
+            case PAY_SUCCESS -> orderMapper.markPayTime(orderNo);
+            case CONFIRM_RECEIPT -> orderMapper.markCompleteTime(orderNo);
+            case USER_CANCEL ->
+                    orderMapper.markCancelTime(orderNo, CancelTypeEnum.USER_CANCEL.getCode());
+            case FORCE_CANCEL ->
+                    orderMapper.markCancelTime(orderNo, CancelTypeEnum.ADMIN_CANCEL.getCode());
+            default -> {
+                // 其余流转没有对应的时间线列
+            }
+        }
     }
 }
