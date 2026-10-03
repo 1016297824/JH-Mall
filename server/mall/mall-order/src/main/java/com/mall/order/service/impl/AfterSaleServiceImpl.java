@@ -197,7 +197,8 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                 && afterSale.getOrderItemId() != null) {
             MallOrderItemDO item = orderItemMapper.selectById(afterSale.getOrderItemId());
             if (item != null && item.getSkuId() != null && item.getQuantity() != null) {
-                productAdapter.restock(item.getSkuId(), item.getQuantity());
+                // 传 afterSaleNo 作幂等键：restock 成功后本地事务若回滚，MQ 重投不会重复回补
+                productAdapter.restock(item.getSkuId(), item.getQuantity(), afterSaleNo);
                 log.info("退货退款已回补库存: afterSaleNo={}, skuId={}, qty={}",
                         afterSaleNo, item.getSkuId(), item.getQuantity());
             } else {

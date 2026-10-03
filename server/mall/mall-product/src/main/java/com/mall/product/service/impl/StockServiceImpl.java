@@ -35,6 +35,9 @@ public class StockServiceImpl implements IStockService {
     /** 预扣记录在 Redis 中的存活时间，与 reserveStock 写入保持一致（24h） */
     private static final long RESERVE_KEY_TTL_HOURS = 24L;
 
+    /** 回补幂等键在 Redis 中的存活时间（24h） */
+    private static final long RESTOCK_KEY_TTL_HOURS = 24L;
+
     /** 库存释放遇乐观锁冲突时的最大重试次数 */
     private static final int RELEASE_MAX_RETRY = 3;
 
@@ -164,12 +167,37 @@ public class StockServiceImpl implements IStockService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void restock(Long skuId, Integer qty) {
-        MallSkuStockDO stock = mallSkuStockMapper.selectBySkuId(skuId);
-        if (stock == null) {
-            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
+    public void restock(Long skuId, Integer qty, String bizNo) {
+        // 幂等：同一业务单 + SKU 只回补一次。调用方是跨服务（Feign）且可被 MQ 重投——
+        // 无幂等键时「restock 成功但本地事务回滚」会导致重投重复回补
+        String idempotentKey = CacheConstants.Product.STOCK_RESTOCK + bizNo + ":" + skuId;
+        Boolean first = redisTemplate.opsForValue()
+                .setIfAbsent(idempotentKey, String.valueOf(qty), RESTOCK_KEY_TTL_HOURS, TimeUnit.HOURS);
+        if (!Boolean.TRUE.equals(first)) {
+            log.info("restock 幂等命中，跳过重复回补: bizNo={}, skuId={}", bizNo, skuId);
+            return;
         }
-        // 乐观锁增加可用库存
-        mallSkuStockMapper.restock(skuId, qty, stock.getVersion());
+
+        try {
+            MallSkuStockDO stock = mallSkuStockMapper.selectBySkuId(skuId);
+            if (stock == null) {
+                throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
+            }
+            // 乐观锁增加可用库存：影响 0 行即版本冲突（并发改动同一行，热销 SKU 上是常态），
+            // 必须上抛以释放幂等键并交由上层重试——否则幂等键留存会造成静默未回补、日志谎报成功
+            if (mallSkuStockMapper.restock(skuId, qty, stock.getVersion()) == 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            }
+        } catch (RuntimeException e) {
+            // 回补失败必须释放幂等标记，否则重试会被幂等拦截、库存永不回补
+            log.error("restock 回补失败，释放幂等标记待重试: bizNo={}, skuId={}", bizNo, skuId, e);
+            try {
+                redisTemplate.delete(idempotentKey);
+            } catch (RuntimeException releaseError) {
+                log.error("【需人工介入】释放 restock 幂等标记失败: bizNo={}, skuId={}",
+                        bizNo, skuId, releaseError);
+            }
+            throw e;
+        }
     }
 }

@@ -80,17 +80,20 @@ public class RemoteProductInnerController {
     }
 
     /**
-     * 补货（增加可用库存）
+     * 回补库存（增加可用库存）
      *
-     * <p>供 mall-admin 管理端或售后流程调用，乐观锁增加 available_stock</p>
+     * <p>供售后流程调用，乐观锁增加 available_stock。以 {@code bizNo}（售后单号）幂等，
+     * 同一业务单重复调用只回补一次。</p>
      *
      * @param skuId SKU ID
-     * @param qty   补货数量
+     * @param qty   回补数量
+     * @param bizNo 业务单号（幂等键）
      */
     @PostMapping("/stock/restock")
     void restock(@RequestParam("skuId") Long skuId,
-                 @RequestParam("qty") Integer qty) {
-        stockService.restock(skuId, qty);
+                 @RequestParam("qty") Integer qty,
+                 @RequestParam("bizNo") String bizNo) {
+        stockService.restock(skuId, qty, bizNo);
     }
 
     /**

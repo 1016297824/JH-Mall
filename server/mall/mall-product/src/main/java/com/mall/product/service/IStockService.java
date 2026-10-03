@@ -37,10 +37,15 @@ public interface IStockService {
     boolean releaseStock(String orderNo);
 
     /**
-     * 补货（增加可用库存）
+     * 回补库存（增加可用库存）
+     *
+     * <p><b>幂等</b>：以 {@code bizNo} 为幂等键，同一业务单重复调用只回补一次。
+     * 调用方（mall-order 的售后退款回调）是跨服务调用——restock 成功后本地事务若回滚，
+     * MQ 重投会再次进入这里，无幂等键会造成重复回补。</p>
      *
      * @param skuId SKU ID
-     * @param qty   补货数量
+     * @param qty   回补数量
+     * @param bizNo 业务单号（幂等键，如售后单号）
      */
-    void restock(Long skuId, Integer qty);
+    void restock(Long skuId, Integer qty, String bizNo);
 }
