@@ -11,6 +11,7 @@ import com.mall.admin.order.domain.MallOrderItem;
 import com.mall.admin.order.mapper.MallOrderMapper;
 import com.mall.admin.order.domain.MallOrder;
 import com.mall.admin.order.service.IMallOrderService;
+import com.mall.api.feign.RemoteOrderService;
 
 /**
  * 订单管理Service业务层处理
@@ -23,6 +24,10 @@ public class MallOrderServiceImpl implements IMallOrderService
 {
     @Autowired
     private MallOrderMapper mallOrderMapper;
+
+    /** mall-order 内部契约：发货必须经其状态机，不能直改本模块的订单表 */
+    @Autowired
+    private RemoteOrderService remoteOrderService;
 
     /**
      * 查询订单管理
@@ -130,5 +135,18 @@ public class MallOrderServiceImpl implements IMallOrderService
                 mallOrderMapper.batchMallOrderItem(list);
             }
         }
+    }
+
+    /**
+     * 发货：委托 mall-order 的状态机推进（PAID → WAIT_DELIVER）
+     *
+     * @param orderNo          订单号
+     * @param logisticsCompany 物流公司
+     * @param logisticsNo      物流单号
+     */
+    @Override
+    public void deliverOrder(String orderNo, String logisticsCompany, String logisticsNo)
+    {
+        remoteOrderService.deliver(orderNo, logisticsCompany, logisticsNo);
     }
 }
