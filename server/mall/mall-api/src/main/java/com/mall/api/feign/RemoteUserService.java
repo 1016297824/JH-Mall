@@ -111,12 +111,13 @@ public interface RemoteUserService {
      * <p>供 mall-order 下单时校验地址是否属于当前用户，防止越权下单。
      * 见设计文档 {@code 07_mall-api契约层设计.md} §3.1。</p>
      *
-     * <p><b>待实现方补齐</b>：mall-user 的 {@code RemoteUserInnerController}
-     * 尚未提供 {@code /inner/user/addresses/validate} 端点，未补齐前调用会 404。</p>
+     * <p>实现方：mall-user 的 {@code RemoteUserInnerController#validateAddress}。
+     * 地址不存在 / 已删除 / 不属于该用户一律返回 {@code false}（业务判定不抛异常）；
+     * 参数缺失或基础设施故障仍以异常冒泡，调用方须按「调用失败 ≠ 校验通过」处理。</p>
      *
      * @param userId    用户 ID
      * @param addressId 收货地址 ID
-     * @return 地址存在且属于该用户返回 true
+     * @return 地址存在、未删除且属于该用户返回 true
      */
     @GetMapping("/inner/user/addresses/validate")
     boolean validateAddress(@RequestParam("userId") String userId,

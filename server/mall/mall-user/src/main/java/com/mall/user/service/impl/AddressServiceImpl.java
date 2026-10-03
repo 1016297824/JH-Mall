@@ -158,6 +158,29 @@ public class AddressServiceImpl implements IAddressService {
     }
 
     /**
+     * 校验收货地址归属（供 mall-order 下单前校验，防越权使用他人地址）
+     *
+     * <p>不抛异常：地址不存在 / 已删除 / 不属于该用户一律返回 {@code false}，
+     * 让 Feign 端按 boolean 消费而非处理异常。</p>
+     *
+     * @param userId    用户 ID
+     * @param addressId 地址 ID
+     * @return 地址存在、未删除且属于该用户返回 true
+     */
+    @Override
+    public boolean validateAddressOwnership(Long userId, Long addressId) {
+        if (userId == null || addressId == null) {
+            return false;
+        }
+        MallUserAddressDO addressDO = mallUserAddressMapper.selectById(addressId);
+        // 用 equals 而非 == 1：DDL 的 is_deleted 可空，Integer 拆箱遇 NULL 会 NPE
+        if (addressDO == null || Integer.valueOf(1).equals(addressDO.getIsDeleted())) {
+            return false;
+        }
+        return userId.equals(addressDO.getUserId());
+    }
+
+    /**
      * 根据地址 ID 查询地址
      *
      * @param addressId 地址 ID

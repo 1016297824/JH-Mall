@@ -3,6 +3,7 @@ package com.mall.user.controller.inner;
 import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.api.feign.RemoteUserService;
 import com.mall.user.DO.MallUserDO;
+import com.mall.user.service.IAddressService;
 import com.mall.user.service.IMallUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,9 @@ class RemoteUserInnerControllerTest {
 
     @Mock
     private IMallUserService mallUserService;
+
+    @Mock
+    private IAddressService addressService;
 
     @InjectMocks
     private RemoteUserInnerController controller;
@@ -188,5 +192,43 @@ class RemoteUserInnerControllerTest {
                 .andExpect(content().string(""));
 
         verifyNoInteractions(mallUserService);
+    }
+
+    @Test
+    void testValidateAddress_ShouldReturnTrueWhenOwned() throws Exception {
+        when(addressService.validateAddressOwnership(12345L, 100L)).thenReturn(true);
+
+        mockMvc.perform(get("/inner/user/addresses/validate")
+                        .param("userId", "12345")
+                        .param("addressId", "100"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        verify(addressService).validateAddressOwnership(12345L, 100L);
+    }
+
+    @Test
+    void testValidateAddress_ShouldReturnFalseWhenNotOwned() throws Exception {
+        when(addressService.validateAddressOwnership(12345L, 999L)).thenReturn(false);
+
+        mockMvc.perform(get("/inner/user/addresses/validate")
+                        .param("userId", "12345")
+                        .param("addressId", "999"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"));
+
+        verify(addressService).validateAddressOwnership(12345L, 999L);
+    }
+
+    @Test
+    void testValidateAddress_ShouldReturnFalseWhenUserIdInvalid() throws Exception {
+        // 非法 userId 不能抛 500：mall-order 会把它当"校验不通过"处理
+        mockMvc.perform(get("/inner/user/addresses/validate")
+                        .param("userId", "abc")
+                        .param("addressId", "100"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"));
+
+        verifyNoInteractions(addressService);
     }
 }

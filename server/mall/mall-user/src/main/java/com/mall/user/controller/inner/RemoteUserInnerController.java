@@ -8,6 +8,7 @@ import com.mall.common.enums.user.UserStatusEnum;
 import com.mall.common.exception.BusinessException;
 import com.mall.user.DO.MallUserDO;
 import com.mall.user.infrastructure.schedule.PointsExpireTask;
+import com.mall.user.service.IAddressService;
 import com.mall.user.service.IMallUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -40,6 +42,9 @@ public class RemoteUserInnerController {
 
     /** 积分过期定时任务 */
     private final PointsExpireTask pointsExpireTask;
+
+    /** 收货地址服务 */
+    private final IAddressService addressService;
 
     /**
      * 根据手机号查询用户
@@ -169,6 +174,27 @@ public class RemoteUserInnerController {
     @GetMapping("/{userId}/token-version")
     public Integer getTokenVersion(@PathVariable String userId) {
         return mallUserService.getTokenVersion(Long.parseLong(userId));
+    }
+
+    /**
+     * 校验收货地址归属（供 mall-order 下单前校验，防越权使用他人地址）
+     *
+     * @param userId    用户 ID
+     * @param addressId 收货地址 ID
+     * @return 地址存在、未删除且属于该用户返回 true；userId 不可解析或地址不匹配返回 false
+     *         （参数缺失/类型不匹配仍为 400，DB 故障仍为 500——这两类在 Feign 侧按"调用失败"处理）
+     */
+    @GetMapping("/addresses/validate")
+    public boolean validateAddress(@RequestParam("userId") String userId,
+                                   @RequestParam("addressId") Long addressId) {
+        long uid;
+        try {
+            uid = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            // 非法 userId 按"校验不通过"处理，避免抛出 500
+            return false;
+        }
+        return addressService.validateAddressOwnership(uid, addressId);
     }
 
     private MallUserDTO toDTO(MallUserDO user) {

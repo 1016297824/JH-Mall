@@ -169,4 +169,46 @@ class AddressServiceImplTest {
         assertTrue(method.isAnnotationPresent(org.springframework.transaction.annotation.Transactional.class),
                 "setDefault 方法缺少 @Transactional 注解");
     }
+
+    // ========== validateAddressOwnership：供 mall-order 下单前校验，必须不抛异常 ==========
+
+    @Test
+    void validateAddressOwnershipShouldReturnTrueWhenOwned() {
+        when(mallUserAddressMapper.selectById(100L)).thenReturn(buildAddressDO(100L, 12345L));
+
+        assertTrue(addressService.validateAddressOwnership(12345L, 100L));
+    }
+
+    @Test
+    void validateAddressOwnershipShouldReturnFalseWhenNotOwned() {
+        // 越权场景：地址存在但属于他人，必须返回 false 而非 true
+        when(mallUserAddressMapper.selectById(100L)).thenReturn(buildAddressDO(100L, 99999L));
+
+        assertFalse(addressService.validateAddressOwnership(12345L, 100L));
+    }
+
+    @Test
+    void validateAddressOwnershipShouldReturnFalseWhenDeleted() {
+        MallUserAddressDO deleted = buildAddressDO(100L, 12345L);
+        deleted.setIsDeleted(1);
+        when(mallUserAddressMapper.selectById(100L)).thenReturn(deleted);
+
+        assertFalse(addressService.validateAddressOwnership(12345L, 100L));
+    }
+
+    @Test
+    void validateAddressOwnershipShouldReturnFalseWhenAddressMissing() {
+        when(mallUserAddressMapper.selectById(100L)).thenReturn(null);
+
+        assertFalse(addressService.validateAddressOwnership(12345L, 100L));
+    }
+
+    @Test
+    void validateAddressOwnershipShouldReturnFalseWhenArgsNull() {
+        // 不查库、不抛异常——Feign 端按 boolean 消费
+        assertFalse(addressService.validateAddressOwnership(null, 100L));
+        assertFalse(addressService.validateAddressOwnership(12345L, null));
+
+        verifyNoInteractions(mallUserAddressMapper);
+    }
 }
