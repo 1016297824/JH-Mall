@@ -34,6 +34,7 @@
             实付：<em>{{ formatPrice(order.payAmount) }}</em>
           </span>
           <el-button link type="primary" @click="goDetail(order.orderNo)">查看详情</el-button>
+          <el-button v-if="order.waitPay" type="primary" @click="goPay(order.orderNo)">去支付</el-button>
           <el-button v-if="order.canCancel" @click="onCancel(order)">取消订单</el-button>
           <el-button v-if="order.canConfirm" type="primary" @click="onConfirm(order)">
             确认收货
@@ -136,6 +137,10 @@ function onTabChange(): void {
 
 function goDetail(orderNo: string): void {
   void router.push({ path: `/orders/${orderNo}` })
+}
+
+function goPay(orderNo: string): void {
+  void router.push({ path: `/payment/${orderNo}` })
 }
 
 function goShopping(): void {

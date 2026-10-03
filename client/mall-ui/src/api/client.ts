@@ -42,14 +42,23 @@ request.interceptors.request.use((config) => {
 /**
  * 提取面向用户的错误文案
  *
- * <p>优先 userTip（后端面向用户的提示），其次 errorMessage 与网关 msg。</p>
+ * <p>优先 userTip（后端面向用户的提示），其次 errorMessage 与网关 msg。
+ * 支付回调等接口以 text/plain 返回失败原因（应答方是支付平台，不包装
+ * {@code MallResult}），此时响应体本身就是要展示的文案。</p>
  *
  * @param body 响应体
  * @param fallback 兜底文案
  * @returns 展示给用户的错误文案
  */
-function resolveErrorMessage(body: BackendBody | undefined, fallback: string): string {
-  const candidates = [body?.userTip, body?.errorMessage, body?.msg]
+function resolveErrorMessage(body: unknown, fallback: string): string {
+  if (typeof body === 'string') {
+    return body.trim() === '' ? fallback : body
+  }
+  if (body === null || typeof body !== 'object') {
+    return fallback
+  }
+  const payload = body as BackendBody
+  const candidates = [payload.userTip, payload.errorMessage, payload.msg]
   return candidates.find((item) => item != null && item !== '') ?? fallback
 }
 
@@ -177,8 +186,12 @@ request.interceptors.response.use(
     if (config && !config._retry && isUnauthorized(body, error.response?.status)) {
       return refreshAndRetry(config, message)
     }
-    // 业务错误：后端以 HTTP 400 返回 MallResult，需取 userTip/errorMessage 而非 axios 文案
-    if (body && (body.errorCode !== undefined || body.errorMessage || body.userTip)) {
+    // 业务错误：后端以 HTTP 400 返回 MallResult，需取 userTip/errorMessage 而非 axios 文案；
+    // 支付回调等接口以纯文本返回失败原因，同样按业务错误处理
+    if (
+      typeof body === 'string' ||
+      (body && (body.errorCode !== undefined || body.errorMessage || body.userTip))
+    ) {
       toastError(message)
       return Promise.reject(new Error(message))
     }

@@ -66,6 +66,7 @@
 
       <div class="detail-footer">
         <el-button @click="goList">返回列表</el-button>
+        <el-button v-if="order.waitPay" type="primary" @click="goPay">去支付</el-button>
         <el-button v-if="order.actions.includes(USER_CANCEL)" @click="onCancel">取消订单</el-button>
         <el-button
           v-if="order.actions.includes(CONFIRM_RECEIPT)"
@@ -123,6 +124,10 @@ async function load(): Promise<void> {
 
 function goList(): void {
   void router.push({ path: '/orders' })
+}
+
+function goPay(): void {
+  void router.push({ path: `/payment/${orderNo.value}` })
 }
 
 async function onCancel(): Promise<void> {

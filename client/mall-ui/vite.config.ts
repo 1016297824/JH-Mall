@@ -24,6 +24,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      // 支付渠道回调挂在根路径 /callback/**（网关 StripPrefix=0），
+      // 本地联调触发模拟回调时需要同样的代理
+      '/callback': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
 })
