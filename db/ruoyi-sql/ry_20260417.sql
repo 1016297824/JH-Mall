@@ -604,6 +604,11 @@ insert into sys_job values(1, '系统默认（无参）', 'DEFAULT', 'ryTask.ryN
 insert into sys_job values(2, '系统默认（有参）', 'DEFAULT', 'ryTask.ryParams(\'ry\')',  '0/15 * * * * ?', '3', '1', '1', 'admin', sysdate(), '', null, '');
 insert into sys_job values(3, '系统默认（多参）', 'DEFAULT', 'ryTask.ryMultipleParams(\'ry\', true, 2000L, 316.50D, 100)',  '0/20 * * * * ?', '3', '1', '1', 'admin', sysdate(), '', null, '');
 
+-- 商城任务：ruoyi-job 通过 Feign 调 mall-product /inner/product/**
+-- 缺这两条时搜索索引补偿与热点排行刷新永不执行（mall-product 自身无 @Scheduled）
+insert into sys_job values(4, '商城搜索索引补偿', 'DEFAULT', 'mallProductTask.compensateOutbox', '0 0/5 * * * * ?', '3', '1', '1', 'admin', sysdate(), '', null, '每 5 分钟补偿投递搜索同步 Outbox');
+insert into sys_job values(5, '商城热点排行刷新', 'DEFAULT', 'mallProductTask.refreshHotRank', '0 0/10 * * * * ?', '3', '1', '1', 'admin', sysdate(), '', null, '每 10 分钟重算热点 ZSet');
+
 
 -- ----------------------------
 -- 16、定时任务调度日志表
