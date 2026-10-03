@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <router-link :to="`/products/${product.spuId}`" class="product-card-link">
-    <el-card class="product-card" shadow="hover" :body-style="{ padding: '12px' }">
+    <el-card class="product-card" shadow="hover">
       <div class="product-card__image">
         <img
           :src="product.mainImage"
@@ -70,11 +70,15 @@ defineProps<{
     font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
+    color: var(--el-text-color-primary);
     margin-bottom: v.$spacing-sm;
+    // 固定占两行高度，保证同排卡片价格行对齐
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 2.8em;
+    word-break: break-all;
   }
 
   &__price {
@@ -94,11 +98,44 @@ defineProps<{
     font-weight: 700;
     font-family: v.$font-heading;
     color: v.$color-primary;
+    line-height: 1.1;
   }
 
   &__sales {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
+    font-size: 13px;
+    // 弱化：销售数据用次级色，不与价格争夺注意力
+    color: var(--el-text-color-placeholder);
+    line-height: 1.2;
+  }
+
+  @media (max-width: 768px) {
+    :deep(.el-card__body) {
+      // 卡片内边距适当加大，缓解拥挤
+      padding: v.$spacing-md;
+    }
+
+    &__image {
+      margin-bottom: v.$spacing-md;
+    }
+
+    &__name {
+      font-size: 14px;
+      margin-bottom: v.$spacing-sm;
+    }
+
+    &__price-symbol {
+      font-size: 13px;
+    }
+
+    &__price-value {
+      // 价格比商品名更突出，小屏也不低于 18px
+      font-size: 19px;
+    }
+
+    &:hover &__image img {
+      // 触屏无 hover，避免误触放大
+      transform: none;
+    }
   }
 }
 </style>

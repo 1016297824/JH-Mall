@@ -76,10 +76,13 @@ function isActive(path: string): boolean {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  height: 56px;
+  // 基础高度 + 刘海屏底部安全区，避免被 Home Indicator 遮挡
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
   background: #FFF;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+  // 内边距把内容顶到安全区之上
   padding-bottom: env(safe-area-inset-bottom, 0);
+  box-sizing: border-box;
   z-index: 100;
 }
 
@@ -89,11 +92,15 @@ function isActive(path: string): boolean {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  flex: 1;
-  height: 100%;
+  flex: 1 1 0;
+  // 5 个入口等宽、不换行；min-width:0 防止长文案把 flex 项撑开
+  min-width: 0;
+  height: 56px;
   text-decoration: none;
   color: var(--el-text-color-secondary);
   transition: color $duration-fast $ease-default;
+  // 触摸热区足够大
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tab-item.active {
@@ -103,10 +110,12 @@ function isActive(path: string): boolean {
 .tab-icon {
   width: 22px;
   height: 22px;
+  flex-shrink: 0;
 }
 
 .tab-label {
-  font-size: 10px;
-  line-height: 1;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 </style>

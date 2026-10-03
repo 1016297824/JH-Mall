@@ -75,7 +75,7 @@ async function onLogout(): Promise<void> {
       </div>
 
       <div class="nav-actions">
-        <el-button link @click="goPath('/coupons')">领券中心</el-button>
+        <el-button class="nav-actions__coupon" link @click="goPath('/coupons')">领券中心</el-button>
         <el-badge :value="totalCount" :max="99" :hidden="totalCount === 0" class="cart-badge">
           <el-button circle :icon="ShoppingCartFull" aria-label="购物车" @click="goCart" />
         </el-badge>
@@ -88,6 +88,7 @@ async function onLogout(): Promise<void> {
           <el-button round :icon="User">我的</el-button>
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item @click="goPath('/coupons')">领券中心</el-dropdown-item>
               <el-dropdown-item @click="goPath('/profile')">个人中心</el-dropdown-item>
               <el-dropdown-item @click="goPath('/orders')">我的订单</el-dropdown-item>
               <el-dropdown-item @click="goPath('/after-sales')">退款/售后</el-dropdown-item>
@@ -136,6 +137,8 @@ async function onLogout(): Promise<void> {
 
 .search-bar {
   flex: 1;
+  /* 关键：flex 子项默认 min-width:auto，输入框的 min-content 宽度会把导航栏撑超出视口 */
+  min-width: 0;
   max-width: 480px;
 }
 
@@ -168,16 +171,38 @@ async function onLogout(): Promise<void> {
 }
 
 @media (max-width: 768px) {
+  .navbar {
+    padding: 0 12px;
+  }
+
   .navbar-inner {
-    height: 56px;
-    gap: 12px;
+    /* 移动端两行：第一行 logo + 操作，第二行整宽搜索框。
+       单行放不下 logo/搜索/领券中心/购物车/我的五项，会把整页 min-content 宽度撑超视口 */
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 0;
+    gap: 8px;
   }
 
   .logo {
     font-size: 18px;
+    order: 1;
+  }
+
+  .nav-actions {
+    order: 2;
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  /* 领券中心收进「我的」下拉，避免挤占单行空间 */
+  .nav-actions__coupon {
+    display: none;
   }
 
   .search-bar {
+    order: 3;
+    flex: 1 1 100%;
     max-width: none;
   }
 }

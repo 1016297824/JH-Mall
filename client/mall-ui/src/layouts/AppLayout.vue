@@ -18,7 +18,8 @@ import { BaseNavBar, BaseTabBar, BaseFooter } from '@/components/base'
 
 .app-layout {
   min-height: 100vh;
-  padding-bottom: 56px;
+  // 底部预留 tab bar 高度 + 刘海屏安全区，避免内容被遮挡
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
 
   @media (min-width: 769px) {
     padding-bottom: 0;

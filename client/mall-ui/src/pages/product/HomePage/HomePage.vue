@@ -105,7 +105,8 @@ onUnmounted(() => {
     padding: v.$spacing-lg v.$spacing-lg v.$spacing-3xl;
 
     @media (max-width: 768px) {
-      padding: 12px 12px 40px;
+      // 移动端统一横向留白与墨迹线，底部预留 tab bar 之上的呼吸空间
+      padding: v.$spacing-md v.$spacing-md v.$spacing-2xl;
     }
   }
 

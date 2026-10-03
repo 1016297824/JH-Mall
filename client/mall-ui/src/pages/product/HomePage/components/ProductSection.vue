@@ -55,10 +55,19 @@ function goSearch() {
 .product-section {
   margin-bottom: v.$spacing-xl;
 
+  @media (max-width: 768px) {
+    // 与 CategoryGrid 的区块间距统一
+    margin-bottom: v.$spacing-lg;
+  }
+
   &__title {
     font-size: 22px;
     font-weight: 600;
     margin-bottom: v.$spacing-md;
+
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
   }
 
   &__grid {
@@ -137,6 +146,12 @@ function goSearch() {
     &__grid,
     &__skeleton-grid {
       grid-template-columns: repeat(2, 1fr);
+      // 移动端 2 列：列间距收紧但保留呼吸感
+      gap: v.$spacing-md;
+    }
+
+    &__skeleton-card {
+      padding: v.$spacing-md;
     }
   }
 }
