@@ -31,13 +31,13 @@ public class RemotePaymentAdapter {
      *
      * @param orderNo      订单号
      * @param refundAmount 退款金额（单位：分）
-     * @param afterSaleId  售后单 ID
+     * @param afterSaleNo  售后单业务单号（非主键 id）
      * @return 退款结果（含退款单号）
      */
-    public RefundResultDTO refundByOrderNo(String orderNo, Long refundAmount, Long afterSaleId) {
-        RefundResultDTO result = remotePaymentService.refundByOrderNo(orderNo, refundAmount, afterSaleId);
-        log.info("发起退款: orderNo={}, refundAmount={}, afterSaleId={}, refundNo={}",
-                orderNo, refundAmount, afterSaleId, result == null ? null : result.getRefundNo());
+    public RefundResultDTO refundByOrderNo(String orderNo, Long refundAmount, String afterSaleNo) {
+        RefundResultDTO result = remotePaymentService.refundByOrderNo(orderNo, refundAmount, afterSaleNo);
+        log.info("发起退款: orderNo={}, refundAmount={}, afterSaleNo={}, refundNo={}",
+                orderNo, refundAmount, afterSaleNo, result == null ? null : result.getRefundNo());
         return result;
     }
 

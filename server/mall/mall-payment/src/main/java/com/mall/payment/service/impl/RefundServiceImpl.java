@@ -108,13 +108,13 @@ public class RefundServiceImpl implements RefundService {
      *
      * @param orderNo      订单号
      * @param refundAmount 退款金额（单位：分）
-     * @param afterSaleId  售后单 ID
+     * @param afterSaleNo  售后单业务单号（非主键 id）
      * @return 退款结果（含退款单号与退款状态）
      * @throws BusinessException 订单下无已支付单（A0501）、金额非法（A0602）、
      *                           支付单状态不允许（A0702）、渠道请求未送达（C0211）
      */
     @Override
-    public RefundResultDTO refundByOrderNo(String orderNo, Long refundAmount, Long afterSaleId) {
+    public RefundResultDTO refundByOrderNo(String orderNo, Long refundAmount, String afterSaleNo) {
         // ① 解析订单下「实际支付成功」的支付单
         MallPaymentDO payment = paymentMapper.selectPaidByOrderNo(orderNo);
         if (payment == null) {
@@ -122,8 +122,8 @@ public class RefundServiceImpl implements RefundService {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
 
-        // ② 复用主流程：幂等键由 afterSaleId 字符串化后参与构成
-        String afterSaleNo = String.valueOf(afterSaleId);
+        // ② 复用主流程：幂等键与退款单的 after_sale_no 都直接用业务售后单号，
+        // 这样退款成功回调带回的 afterSaleNo 才能被 mall-order 按业务单号查回售后单
         String channelCode = payment.getChannelCode();
 
         String idempotentKey = buildIdempotentKey(afterSaleNo, channelCode);

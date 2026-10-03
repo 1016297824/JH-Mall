@@ -46,13 +46,14 @@ public interface RemotePaymentService {
      *
      * @param orderNo      订单号
      * @param refundAmount 退款金额（单位：分）
-     * @param afterSaleId  售后单 ID
+     * @param afterSaleNo  售后单<b>业务单号</b>（非主键 id）——回调会原样带回，
+     *                     mall-order 需据此按业务单号查回售后单
      * @return 退款结果（含退款单号）
      */
     @PostMapping("/inner/payment/refunds/by-after-sale")
     RefundResultDTO refundByOrderNo(@RequestParam("orderNo") String orderNo,
                                     @RequestParam("refundAmount") Long refundAmount,
-                                    @RequestParam("afterSaleId") Long afterSaleId);
+                                    @RequestParam("afterSaleNo") String afterSaleNo);
 
     /**
      * 查询支付单当前状态
