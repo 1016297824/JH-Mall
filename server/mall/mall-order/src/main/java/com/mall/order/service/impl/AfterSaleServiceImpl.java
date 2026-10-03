@@ -205,7 +205,40 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                 log.error("【需人工介入】退货退款但订单项缺失，无法回补库存: afterSaleNo={}", afterSaleNo);
             }
         }
+        // 售后单完成 → 订单同步推进到 REFUNDED（此前只改售后单，订单永久停在 REFUNDING）
+        advanceOrderToRefunded(afterSale);
+
         log.info("退款回调处理完成: afterSaleNo={}, refundAmount={}", afterSaleNo, refundAmount);
+    }
+
+    /**
+     * 售后完成后推进订单到 REFUNDED（状态机 {@code REFUNDING --REFUND_SUCCESS--> REFUNDED}）
+     *
+     * <p>订单不在 REFUNDING（重复回调、已被其他流程处理）时只记 warn 不抛异常——
+     * 售后单已置 COMPLETED 是既成事实，不能因此回滚。</p>
+     *
+     * @param afterSale 售后单
+     */
+    private void advanceOrderToRefunded(MallAfterSaleDO afterSale) {
+        MallOrderDO order = orderMapper.selectById(afterSale.getOrderId());
+        if (order == null) {
+            log.error("【需人工介入】售后完成但订单不存在: afterSaleNo={}, orderId={}",
+                    afterSale.getAfterSaleNo(), afterSale.getOrderId());
+            return;
+        }
+        try {
+            Integer originStatus = order.getOrderStatus();
+            Integer version = order.getVersion();
+            stateMachine.transition(order, OrderEventEnum.REFUND_SUCCESS);
+            int affected = orderMapper.updateStatusCas(order.getOrderNo(), order.getOrderStatus(),
+                    originStatus, version, order.getPreRefundStatus());
+            if (affected == 0) {
+                log.error("【需人工介入】退款完成推进订单状态影响 0 行: orderNo={}", order.getOrderNo());
+            }
+        } catch (BusinessException e) {
+            log.warn("售后完成但订单状态未推进（可能已被其他流程处理）: orderNo={}, status={}",
+                    order.getOrderNo(), order.getOrderStatus());
+        }
     }
 
     @Override
