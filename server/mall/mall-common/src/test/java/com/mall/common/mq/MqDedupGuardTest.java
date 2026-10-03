@@ -1,4 +1,4 @@
-package com.mall.product.infrastructure.mq;
+package com.mall.common.mq;
 
 import com.mall.common.constant.CacheConstants;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +33,7 @@ class MqDedupGuardTest {
 
     private static final String MSG_ID = "MSG_20261003000001";
 
-    private static final String GROUP = "mall-product-order-cancelled";
+    private static final String GROUP = "mall-order-payment-paid";
 
     /** 期望的 key 拼法：前缀 + messageId + ":" + consumerGroup */
     private static final String KEY = CacheConstants.MQ.DEDUP + MSG_ID + ":" + GROUP;

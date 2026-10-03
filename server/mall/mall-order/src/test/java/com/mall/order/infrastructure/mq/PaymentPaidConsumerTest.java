@@ -1,5 +1,6 @@
 package com.mall.order.infrastructure.mq;
 
+import com.mall.common.mq.MqDedupGuard;
 import com.mall.order.mapper.MallOutboxMapper;
 import com.mall.order.service.OrderService;
 import org.apache.rocketmq.common.message.MessageExt;

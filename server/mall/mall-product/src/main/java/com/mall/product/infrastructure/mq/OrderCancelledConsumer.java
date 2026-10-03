@@ -2,6 +2,7 @@ package com.mall.product.infrastructure.mq;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.common.constant.MqTopicConstants;
+import com.mall.common.mq.MqDedupGuard;
 import com.mall.product.service.IStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -22,6 +22,7 @@ import com.mall.user.convert.response.MemberConvert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -115,30 +116,111 @@ public class MemberServiceImpl implements IMemberService {
      */
     @Override
     public void addGrowth(Long userId, int growth, BizTypeEnum bizType, String bizNo) {
+        // 快速路径：同一业务单已发过（串行重投走这里，省一次插入尝试）
+        if (bizNo != null && growthLogExists(userId, bizType, bizNo)) {
+            log.info("成长值已发放过，跳过重复处理: userId={}, bizType={}, bizNo={}",
+                    userId, bizType.getCode(), bizNo);
+            return;
+        }
+
+        // 幂等锚点：改成长值之前先插流水占位，由 (user_id, biz_type, biz_no) 唯一键裁决并发。
+        // 原先「先查后写」挡不住并发投递——实测同一订单被发放 3 次，两条流水的 before_growth 都是 0。
+        MallUserGrowthLogDO claim = buildPendingLog(userId, growth, bizType, bizNo);
+        try {
+            mallUserGrowthLogMapper.insert(claim);
+        } catch (DuplicateKeyException e) {
+            log.info("成长值已发放过（并发重复，唯一键拦截）: userId={}, bizType={}, bizNo={}",
+                    userId, bizType.getCode(), bizNo);
+            return;
+        }
+
+        try {
+            applyGrowth(userId, growth, bizType, bizNo, claim.getId());
+        } catch (RuntimeException e) {
+            // 占位行必须硬删除：软删除仍占用唯一键，会让该业务单永远无法重试补发
+            releaseClaim(claim.getId());
+            throw e;
+        }
+    }
+
+    /**
+     * 执行成长值变更、回填流水快照并检测升级
+     *
+     * @param userId   用户 ID
+     * @param growth   增加的成长值
+     * @param bizType  业务类型
+     * @param bizNo    业务单号
+     * @param claimId  已占位的流水 ID
+     */
+    private void applyGrowth(Long userId, int growth, BizTypeEnum bizType, String bizNo, Long claimId) {
         MallUserMemberDO member = getMemberByUserId(userId);
         int beforeGrowth = member.getGrowth();
         // 原子增加成长值
         mallUserMemberMapper.addGrowth(userId, growth);
+        mallUserGrowthLogMapper.updateSnapshot(claimId, beforeGrowth, beforeGrowth + growth);
 
-        // 记录成长值变更流水日志
+        // 检测当前成长值是否已达到升级条件
+        List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
+        checkUpgrade(userId, beforeGrowth + growth, levels);
+        log.info("成长值增加成功, userId={}, growth={}, bizType={}, bizNo={}", userId, growth, bizType.getCode(), bizNo);
+    }
+
+    /**
+     * 构造待回填余额快照的流水行（before/after 待成长值变更成功后再补）
+     *
+     * @param userId  用户 ID
+     * @param growth  增加的成长值
+     * @param bizType 业务类型
+     * @param bizNo   业务单号
+     * @return 流水实体
+     */
+    private MallUserGrowthLogDO buildPendingLog(Long userId, int growth, BizTypeEnum bizType, String bizNo) {
         MallUserGrowthLogDO logDO = new MallUserGrowthLogDO();
         logDO.setUserId(userId);
         logDO.setBizType(bizType.getCode());
         logDO.setBizNo(bizNo);
         logDO.setChangeType(GrowthChangeTypeEnum.INCREASE.getCode());
         logDO.setGrowth(growth);
-        logDO.setBeforeGrowth(beforeGrowth);
-        logDO.setAfterGrowth(beforeGrowth + growth);
         logDO.setRemark(bizType.getName());
         logDO.setIsDeleted(0);
         logDO.setCreateTime(LocalDateTime.now());
         logDO.setUpdateTime(LocalDateTime.now());
-        mallUserGrowthLogMapper.insert(logDO);
+        return logDO;
+    }
 
-        // 检测当前成长值是否已达到升级条件
-        List<MallUserMemberLevelDO> levels = mallUserMemberLevelMapper.selectList(null);
-        checkUpgrade(userId, beforeGrowth + growth, levels);
-        log.info("成长值增加成功, userId={}, growth={}, bizType={}, bizNo={}", userId, growth, bizType.getCode(), bizNo);
+    /**
+     * 释放占位流水（成长值变更失败时的补偿）
+     *
+     * @param claimId 占位流水 ID
+     */
+    private void releaseClaim(Long claimId) {
+        if (claimId == null) {
+            return;
+        }
+        try {
+            mallUserGrowthLogMapper.deleteById(claimId);
+        } catch (RuntimeException e) {
+            log.error("【需人工介入】释放成长值占位流水失败，该业务单将无法重试补发: logId={}", claimId, e);
+        }
+    }
+
+    /**
+     * 该业务单是否已有成长值流水
+     *
+     * <p>幂等判据：MQ 重投时同一 {@code bizNo} 会再次进入 {@code addGrowth}。
+     * 与 {@code PointsServiceImpl#pointsLogExists} 保持同一套判据。</p>
+     *
+     * @param userId  用户 ID
+     * @param bizType 业务类型
+     * @param bizNo   业务流水号
+     * @return 已有流水返回 true
+     */
+    private boolean growthLogExists(Long userId, BizTypeEnum bizType, String bizNo) {
+        Long count = mallUserGrowthLogMapper.selectCount(new LambdaQueryWrapper<MallUserGrowthLogDO>()
+                .eq(MallUserGrowthLogDO::getUserId, userId)
+                .eq(MallUserGrowthLogDO::getBizType, bizType.getCode())
+                .eq(MallUserGrowthLogDO::getBizNo, bizNo));
+        return count != null && count > 0;
     }
 
     /**

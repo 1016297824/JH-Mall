@@ -17,6 +17,7 @@ import com.mall.user.VO.PointsVO;
 import com.mall.user.convert.response.PointsConvert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -101,12 +102,43 @@ public class PointsServiceImpl implements IPointsService {
      */
     @Override
     public void addPoints(Long userId, int points, BizTypeEnum bizType, String bizNo) {
-        // 幂等：同一业务单只发一次（MQ 重投会重复进入本方法，无此校验会重复加分）
+        // 快速路径：同一业务单已发过（串行重投走这里，省一次插入尝试）
         if (bizNo != null && pointsLogExists(userId, bizType, bizNo)) {
             log.info("积分已发放过，跳过重复处理: userId={}, bizType={}, bizNo={}",
                     userId, bizType.getCode(), bizNo);
             return;
         }
+
+        // 幂等锚点：改余额之前先插流水占位，由 (user_id, biz_type, biz_no) 唯一键裁决并发。
+        // 原先「先查后写」挡不住并发投递——实测同一订单被发放 3 次积分，三条流水同秒写入。
+        MallUserPointsLogDO claim = buildPendingLog(userId, points, bizType, bizNo);
+        try {
+            mallUserPointsLogMapper.insert(claim);
+        } catch (DuplicateKeyException e) {
+            log.info("积分已发放过（并发重复，唯一键拦截）: userId={}, bizType={}, bizNo={}",
+                    userId, bizType.getCode(), bizNo);
+            return;
+        }
+
+        try {
+            applyPoints(userId, points, bizType, bizNo, claim.getId());
+        } catch (RuntimeException e) {
+            // 占位行必须硬删除：软删除仍占用唯一键，会让该业务单永远无法重试补发
+            releaseClaim(claim.getId());
+            throw e;
+        }
+    }
+
+    /**
+     * 执行余额变更并回填流水快照
+     *
+     * @param userId   用户 ID
+     * @param points   增加的积分
+     * @param bizType  业务类型
+     * @param bizNo    业务单号
+     * @param claimId  已占位的流水 ID
+     */
+    private void applyPoints(Long userId, int points, BizTypeEnum bizType, String bizNo, Long claimId) {
         // 乐观锁重试，最多 MAX_RETRY 次，防止并发冲突
         for (int i = 0; i < MAX_RETRY; i++) {
             LambdaQueryWrapper<MallPointsAccountDO> wrapper = new LambdaQueryWrapper<>();
@@ -121,20 +153,7 @@ public class PointsServiceImpl implements IPointsService {
             // 乐观锁更新：version 匹配才更新成功，否则重试
             int rows = mallPointsAccountMapper.addPoints(userId, points, currentVersion);
             if (rows > 0) {
-                // 乐观锁成功，写入积分流水日志
-                MallUserPointsLogDO logDO = new MallUserPointsLogDO();
-                logDO.setUserId(userId);
-                logDO.setBizType(bizType.getCode());
-                logDO.setBizNo(bizNo);
-                logDO.setChangeType(GrowthChangeTypeEnum.INCREASE.getCode());
-                logDO.setPoints(points);
-                logDO.setBeforePoints(beforePoints);
-                logDO.setAfterPoints(beforePoints + points);
-                logDO.setRemark(bizType.getName());
-                logDO.setIsDeleted(0);
-                logDO.setCreateTime(LocalDateTime.now());
-                logDO.setUpdateTime(LocalDateTime.now());
-                mallUserPointsLogMapper.insert(logDO);
+                mallUserPointsLogMapper.updateSnapshot(claimId, beforePoints, beforePoints + points);
                 log.info("积分增加成功, userId={}, points={}, bizType={}, bizNo={}", userId, points, bizType.getCode(), bizNo);
                 return;
             }
@@ -142,6 +161,45 @@ public class PointsServiceImpl implements IPointsService {
         }
         log.error("积分增加失败, 乐观锁重试{}次均失败, userId={}", MAX_RETRY, userId);
         throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+    }
+
+    /**
+     * 构造待回填余额快照的流水行（before/after 待余额变更成功后再补）
+     *
+     * @param userId  用户 ID
+     * @param points  增加的积分
+     * @param bizType 业务类型
+     * @param bizNo   业务单号
+     * @return 流水实体
+     */
+    private MallUserPointsLogDO buildPendingLog(Long userId, int points, BizTypeEnum bizType, String bizNo) {
+        MallUserPointsLogDO logDO = new MallUserPointsLogDO();
+        logDO.setUserId(userId);
+        logDO.setBizType(bizType.getCode());
+        logDO.setBizNo(bizNo);
+        logDO.setChangeType(GrowthChangeTypeEnum.INCREASE.getCode());
+        logDO.setPoints(points);
+        logDO.setRemark(bizType.getName());
+        logDO.setIsDeleted(0);
+        logDO.setCreateTime(LocalDateTime.now());
+        logDO.setUpdateTime(LocalDateTime.now());
+        return logDO;
+    }
+
+    /**
+     * 释放占位流水（余额变更失败时的补偿）
+     *
+     * @param claimId 占位流水 ID
+     */
+    private void releaseClaim(Long claimId) {
+        if (claimId == null) {
+            return;
+        }
+        try {
+            mallUserPointsLogMapper.deleteById(claimId);
+        } catch (RuntimeException e) {
+            log.error("【需人工介入】释放积分占位流水失败，该业务单将无法重试补发: logId={}", claimId, e);
+        }
     }
 
     /**

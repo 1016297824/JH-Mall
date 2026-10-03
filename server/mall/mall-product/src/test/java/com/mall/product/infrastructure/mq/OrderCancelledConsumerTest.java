@@ -1,5 +1,6 @@
 package com.mall.product.infrastructure.mq;
 
+import com.mall.common.mq.MqDedupGuard;
 import com.mall.product.service.IStockService;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.junit.jupiter.api.DisplayName;

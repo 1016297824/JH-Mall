@@ -1,5 +1,6 @@
 package com.mall.marketing.infrastructure.mq;
 
+import com.mall.common.mq.MqDedupGuard;
 import com.mall.marketing.service.CouponClaimService;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.junit.jupiter.api.DisplayName;

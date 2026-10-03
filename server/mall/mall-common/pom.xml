@@ -32,6 +32,12 @@
             <artifactId>feign-core</artifactId>
         </dependency>
 
+        <!-- Spring Data Redis（MqDedupGuard 需要 RedisTemplate；各模块本就通过 ruoyi-common-redis 引入运行时实现）-->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

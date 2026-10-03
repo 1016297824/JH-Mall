@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -134,6 +135,28 @@ class MemberServiceImplTest {
 
         verify(mallUserMemberMapper).addGrowth(eq(1L), eq(50));
         verify(mallUserGrowthLogMapper).insert(any(MallUserGrowthLogDO.class));
+    }
+
+    @Test
+    void addGrowthShouldSkipWhenSameBizNoAlreadyGranted() {
+        // 同一业务单已发过：MQ 重投会再次进入本方法，无幂等校验就会重复加成长值
+        when(mallUserGrowthLogMapper.selectCount(any())).thenReturn(1L);
+
+        memberService.addGrowth(1L, 50, BizTypeEnum.ORDER, "ORD001");
+
+        verify(mallUserMemberMapper, never()).addGrowth(anyLong(), anyInt());
+        verify(mallUserGrowthLogMapper, never()).insert(any(MallUserGrowthLogDO.class));
+    }
+
+    @Test
+    void addGrowthShouldSkipWhenClaimHitsUniqueKey() {
+        // 并发投递：另一笔已抢先插流水占位，本次必须直接跳过且不碰成长值
+        when(mallUserGrowthLogMapper.insert(any(MallUserGrowthLogDO.class)))
+                .thenThrow(new DuplicateKeyException("uk_user_biz"));
+
+        assertDoesNotThrow(() -> memberService.addGrowth(1L, 50, BizTypeEnum.ORDER, "ORD001"));
+
+        verify(mallUserMemberMapper, never()).addGrowth(anyLong(), anyInt());
     }
 
     @Test

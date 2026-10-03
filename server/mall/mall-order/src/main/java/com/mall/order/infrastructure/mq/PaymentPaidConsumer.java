@@ -2,6 +2,7 @@ package com.mall.order.infrastructure.mq;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.common.constant.MqTopicConstants;
+import com.mall.common.mq.MqDedupGuard;
 import com.mall.order.mapper.MallOutboxMapper;
 import com.mall.order.service.OrderService;
 import lombok.RequiredArgsConstructor;

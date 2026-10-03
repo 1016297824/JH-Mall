@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -130,6 +131,17 @@ class PointsServiceImplTest {
         when(mallPointsAccountMapper.selectOne(any())).thenReturn(null);
 
         assertThrows(BusinessException.class, () -> pointsService.addPoints(999L, 100, BizTypeEnum.ORDER, "ORD001"));
+    }
+
+    @Test
+    void addPointsShouldSkipWhenClaimHitsUniqueKey() {
+        // 并发投递：另一笔已抢先插流水占位，本次必须直接跳过且不碰余额
+        when(mallUserPointsLogMapper.insert(any(MallUserPointsLogDO.class)))
+                .thenThrow(new DuplicateKeyException("uk_user_biz"));
+
+        assertDoesNotThrow(() -> pointsService.addPoints(1L, 100, BizTypeEnum.ORDER, "ORD001"));
+
+        verify(mallPointsAccountMapper, never()).addPoints(any(), anyInt(), anyInt());
     }
 
     @Test

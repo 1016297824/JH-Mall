@@ -3,6 +3,7 @@ package com.mall.order.infrastructure.mq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.common.constant.MqTopicConstants;
 import com.mall.common.enums.order.OrderStatusEnum;
+import com.mall.common.mq.MqDedupGuard;
 import com.mall.order.DO.MallOrderDO;
 import com.mall.order.infrastructure.outbox.OutboxPublisher;
 import com.mall.order.mapper.MallOrderMapper;
