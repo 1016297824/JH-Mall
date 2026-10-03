@@ -95,10 +95,12 @@ public class RemoteProductAdapter {
      * 释放已锁库存（取消订单 / 下单失败补偿）
      *
      * @param orderNo 订单号
+     * @return true=全部释放成功；false=存在未成功释放的项，调用方需重试或人工核对
      */
-    public void releaseStock(String orderNo) {
-        remoteProductService.releaseStock(orderNo);
-        log.info("releaseStock 已调用, orderNo={}", orderNo);
+    public boolean releaseStock(String orderNo) {
+        boolean released = remoteProductService.releaseStock(orderNo);
+        log.info("releaseStock 已调用, orderNo={}, 全部成功={}", orderNo, released);
+        return released;
     }
 
     /**

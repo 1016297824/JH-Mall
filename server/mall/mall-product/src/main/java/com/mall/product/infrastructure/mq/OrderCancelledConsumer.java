@@ -40,7 +40,7 @@ public class OrderCancelledConsumer implements RocketMQListener<MessageExt> {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    /** 去重维度：与 consumerGroup 保持一致，便于按业务语义检索 */
+    /** Redis 去重维度：与 {@code consumerGroup}（带 {@code -consumer} 后缀）不同，仅用于拼去重 key */
     private static final String DEDUP_GROUP = "mall-product-order-cancelled";
 
     private final IStockService stockService;
@@ -70,7 +70,23 @@ public class OrderCancelledConsumer implements RocketMQListener<MessageExt> {
             return;
         }
 
-        stockService.releaseStock(String.valueOf(orderNo));
-        log.info("订单取消库存释放处理完成: orderNo={}", orderNo);
+        try {
+            if (!stockService.releaseStock(String.valueOf(orderNo))) {
+                throw new IllegalStateException("库存释放未全部成功: orderNo=" + orderNo);
+            }
+            log.info("订单取消库存释放处理完成: orderNo={}", orderNo);
+        } catch (RuntimeException e) {
+            // 先记录原始异常，再尽力释放去重标记：
+            // 若 release 自身抛异常顶掉原始错误，就失去了唯一的诊断线索
+            log.error("订单取消库存释放失败，交由 MQ 重试: orderNo={}", orderNo, e);
+            try {
+                dedupGuard.release(message.getMsgId(), DEDUP_GROUP);
+            } catch (RuntimeException releaseError) {
+                // 不可自愈：标记没删掉 → 重投会被去重拦截 → 库存可能永不回补，需人工介入
+                log.error("【需人工介入】释放去重标记失败，重投将被去重拦截、库存可能永不回补: msgId={}",
+                        message.getMsgId(), releaseError);
+            }
+            throw e;
+        }
     }
 }

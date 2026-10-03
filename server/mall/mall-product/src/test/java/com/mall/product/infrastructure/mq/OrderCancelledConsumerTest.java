@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,7 +34,7 @@ class OrderCancelledConsumerTest {
 
     private static final String MSG_ID = "MSG_20261003000001";
 
-    /** 与消费者注解中的 consumerGroup 保持一致 */
+    /** 去重维度值（与注解中的 consumerGroup 差一个 -consumer 后缀，仅用于拼去重 key） */
     private static final String DEDUP_GROUP = "mall-product-order-cancelled";
 
     @Mock
@@ -49,10 +50,13 @@ class OrderCancelledConsumerTest {
     @DisplayName("正常消费：释放该订单预扣的库存")
     void shouldReleaseStock() {
         when(dedupGuard.tryDedup(MSG_ID, DEDUP_GROUP)).thenReturn(true);
+        when(stockService.releaseStock(ORDER_NO)).thenReturn(true);
 
         consumer.onMessage(message("{\"orderNo\":\"" + ORDER_NO + "\",\"userId\":100}"));
 
         verify(stockService).releaseStock(ORDER_NO);
+        // 成功路径不应释放去重标记（否则重复投递会被重复处理）
+        verify(dedupGuard, never()).release(anyString(), anyString());
     }
 
     @Test
@@ -80,6 +84,43 @@ class OrderCancelledConsumerTest {
         consumer.onMessage(message("{\"userId\":100}"));
 
         verify(stockService, never()).releaseStock(anyString());
+    }
+
+    @Test
+    @DisplayName("释放未全部成功：释放去重标记并抛异常，交由 MQ 重投")
+    void shouldThrowAndReleaseDedupWhenReleaseFails() {
+        when(dedupGuard.tryDedup(MSG_ID, DEDUP_GROUP)).thenReturn(true);
+        when(stockService.releaseStock(ORDER_NO)).thenReturn(false);
+
+        assertThatThrownBy(() -> consumer.onMessage(message("{\"orderNo\":\"" + ORDER_NO + "\"}")))
+                .isInstanceOf(IllegalStateException.class);
+
+        // 不释放标记的话，重投会被去重拦截 → 库存永不回补
+        verify(dedupGuard).release(MSG_ID, DEDUP_GROUP);
+    }
+
+    @Test
+    @DisplayName("释放抛异常：同样释放去重标记并向上抛出")
+    void shouldReleaseDedupWhenReleaseThrows() {
+        when(dedupGuard.tryDedup(MSG_ID, DEDUP_GROUP)).thenReturn(true);
+        when(stockService.releaseStock(ORDER_NO)).thenThrow(new RuntimeException("DB 不可用"));
+
+        assertThatThrownBy(() -> consumer.onMessage(message("{\"orderNo\":\"" + ORDER_NO + "\"}")))
+                .isInstanceOf(RuntimeException.class);
+
+        verify(dedupGuard).release(MSG_ID, DEDUP_GROUP);
+    }
+
+    @Test
+    @DisplayName("释放标记本身失败：原始异常仍须上抛，不能被 release 的异常顶掉")
+    void shouldKeepOriginalExceptionWhenDedupReleaseFails() {
+        when(dedupGuard.tryDedup(MSG_ID, DEDUP_GROUP)).thenReturn(true);
+        when(stockService.releaseStock(ORDER_NO)).thenReturn(false);
+        doThrow(new RuntimeException("Redis 不可用")).when(dedupGuard).release(MSG_ID, DEDUP_GROUP);
+
+        assertThatThrownBy(() -> consumer.onMessage(message("{\"orderNo\":\"" + ORDER_NO + "\"}")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("库存释放未全部成功");
     }
 
     /**

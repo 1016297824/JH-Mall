@@ -14,8 +14,9 @@ import java.util.concurrent.TimeUnit;
  * <p>Redis SETNX 实现，key 模式 {@code mall:mq:dedup:{messageId}:{consumerGroup}}，
  * TTL 24h（设计文档 §7.4）。</p>
  *
- * <p>去重标记消费成功后<b>不主动删除</b>，等 TTL 自然过期——
- * 避免「处理失败后标记已删 → 重投被当新消息重复处理」的窗口。</p>
+ * <p>去重标记默认保留至 TTL 自然过期；仅在<b>消费失败</b>时由调用方显式调用
+ * {@link #release(String, String)} 删除，否则 MQ 重投会被去重拦截、消息被永久放弃
+ * （例如库存永不回补）。</p>
  *
  * <p>本模块虽只有「订单取消释放库存」一个消费者，去重仍必要：RocketMQ 在
  * 消费失败时会重投，而 {@code releaseStock} 内部以「预扣记录是否存在」做天然幂等，
@@ -55,5 +56,22 @@ public class MqDedupGuard {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 释放去重标记，允许 MQ 重投时重新处理
+     *
+     * <p>仅在处理失败时调用。若不释放，重投会被 {@link #tryDedup} 拦截，
+     * 等于永久放弃该消息——例如库存将永不回补。</p>
+     *
+     * @param messageId     消息全局唯一 ID
+     * @param consumerGroup 消费组
+     */
+    public void release(String messageId, String consumerGroup) {
+        if (messageId == null || messageId.isBlank()) {
+            return;
+        }
+        redisTemplate.delete(CacheConstants.MQ.DEDUP + messageId + ":" + consumerGroup);
+        log.warn("去重标记已释放，允许重投: messageId={}, group={}", messageId, consumerGroup);
     }
 }
