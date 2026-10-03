@@ -229,6 +229,7 @@ mallUserAddressMapper.updateById(addressDO);
 - `update(userId, addressId, req)`：校验地址归属
 - `delete(userId, addressId)`：若删除的是默认地址，前端提示用户重新设置默认
 - `setDefault(userId, addressId)`：原子操作，先取消旧默认再设新默认（同一事务）
+- `validateAddressOwnership(userId, addressId)`：供 mall-order 下单前校验地址归属，防越权使用他人地址。**不抛异常**——地址不存在/已删除/不属于该用户一律返回 `false`（参数缺失或 DB 故障仍以异常冒泡，调用方按"调用失败 ≠ 校验通过"处理）
 
 ### 3.3 MemberServiceImpl
 

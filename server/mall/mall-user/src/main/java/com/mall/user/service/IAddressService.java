@@ -54,4 +54,16 @@ public interface IAddressService {
      * @param addressId 地址ID
      */
     void setDefault(Long userId, Long addressId);
+
+    /**
+     * 校验收货地址归属（供 mall-order 下单前校验，防越权使用他人地址）
+     *
+     * <p>与增删改不同，本方法<b>不抛异常</b>：Feign 端按 {@code boolean} 消费，
+     * 地址不存在 / 已删除 / 不属于该用户一律返回 {@code false}。</p>
+     *
+     * @param userId    用户 ID
+     * @param addressId 地址 ID
+     * @return 地址存在、未删除且属于该用户返回 true
+     */
+    boolean validateAddressOwnership(Long userId, Long addressId);
 }
