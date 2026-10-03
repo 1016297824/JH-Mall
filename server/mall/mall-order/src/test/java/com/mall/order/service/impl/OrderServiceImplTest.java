@@ -186,4 +186,24 @@ class OrderServiceImplTest {
 
         verify(orderMapper, never()).updateStatusCas(any(), any(), any(), any(), any());
     }
+
+    @Test
+    @DisplayName("确认收货：完成事件必须带 orderAmount 与 points，否则 mall-user 静默不发积分")
+    void confirmReceiptShouldIncludeRewardFields() {
+        MallOrderDO order = paidOrder();
+        order.setOrderStatus(OrderStatusEnum.WAIT_RECEIVE.getCode());
+        order.setPayAmount(10000L);
+        when(orderMapper.selectByOrderNo(ORDER_NO)).thenReturn(order);
+        when(orderMapper.updateStatusCas(any(), any(), any(), any(), any())).thenReturn(1);
+
+        orderService.confirmReceipt(12345L, ORDER_NO);
+
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(outboxPublisher).publish(eq(MqTopicConstants.Order.COMPLETED), eq("OrderCompleted"),
+                eq(ORDER_NO), captor.capture());
+        // 1 元 = 1 积分/成长值：10000 分 = 100 元 → 100
+        assertThat(captor.getValue())
+                .containsEntry("orderAmount", 10000L)
+                .containsEntry("points", 100L);
+    }
 }

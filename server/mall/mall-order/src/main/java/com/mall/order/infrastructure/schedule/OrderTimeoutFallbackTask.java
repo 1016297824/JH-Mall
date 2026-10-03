@@ -121,6 +121,10 @@ public class OrderTimeoutFallbackTask {
         completedEvent.put("orderNo", order.getOrderNo());
         completedEvent.put("userId", order.getUserId());
         completedEvent.put("autoConfirmed", true);
+        // 与用户手动确认收货保持同一套积分/成长值字段（缺失时 mall-user 会静默不发积分）
+        long payAmount = order.getPayAmount() == null ? 0L : order.getPayAmount();
+        completedEvent.put("orderAmount", payAmount);
+        completedEvent.put("points", payAmount / 100);
         outboxPublisher.publish(MqTopicConstants.Order.COMPLETED, "OrderCompleted",
                 order.getOrderNo(), completedEvent);
         return true;
