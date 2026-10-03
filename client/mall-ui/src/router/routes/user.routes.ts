@@ -13,6 +13,18 @@ const userRoutes: RouteRecordRaw[] = [
     component: () => import('@/pages/user/AddressListPage/AddressListPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: 'points',
+    name: 'points',
+    component: () => import('@/pages/user/PointsPage/PointsPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: 'membership',
+    name: 'membership',
+    component: () => import('@/pages/user/MembershipPage/MembershipPage.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 export default userRoutes

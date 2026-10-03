@@ -25,6 +25,12 @@ const orderRoutes: RouteRecordRaw[] = [
     component: () => import('@/pages/order/OrderDetailPage/OrderDetailPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: 'after-sales',
+    name: 'afterSale',
+    component: () => import('@/pages/order/AfterSalePage/AfterSalePage.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 export default orderRoutes

@@ -1,18 +1,54 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Search, ShoppingCartFull } from '@element-plus/icons-vue'
+import { Search, ShoppingCartFull, User } from '@element-plus/icons-vue'
+import { storeToRefs } from 'pinia'
+import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/auth.store'
+import { useOrderStore } from '@/stores/order.store'
+import { LOGIN_PATH } from '@/utils/constants'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
+const orderStore = useOrderStore()
+// 角标只读地取用 store 状态；购物车内容由 CartPage / CheckoutPage 负责拉取
+const { totalCount } = storeToRefs(orderStore)
+
 const keyword = ref('')
 
 const isSearchPage = computed(() => route.path === '/search')
+const isLoggedIn = computed(() => authStore.isLoggedIn)
+
+onMounted(() => {
+  // 未登录时不请求购物车：接口会返回 401，拦截器随即把用户弹到登录页
+  if (authStore.isLoggedIn) {
+    void orderStore.fetchCart().catch(() => undefined)
+  }
+})
 
 function handleSearch() {
   if (keyword.value.trim()) {
     router.push(`/search?keyword=${encodeURIComponent(keyword.value.trim())}`)
   }
+}
+
+function goLogin(): void {
+  void router.push({ path: LOGIN_PATH })
+}
+
+function goCart(): void {
+  void router.push({ path: '/cart' })
+}
+
+function goPath(path: string): void {
+  void router.push({ path })
+}
+
+async function onLogout(): Promise<void> {
+  await authStore.logout()
+  ElMessage.success('已退出登录')
+  void router.push({ path: '/' })
 }
 </script>
 
@@ -39,10 +75,30 @@ function handleSearch() {
       </div>
 
       <div class="nav-actions">
-        <el-badge :value="0" :max="99" class="cart-badge">
-          <el-button circle :icon="ShoppingCartFull" aria-label="购物车" />
+        <el-button link @click="goPath('/coupons')">领券中心</el-button>
+        <el-badge :value="totalCount" :max="99" :hidden="totalCount === 0" class="cart-badge">
+          <el-button circle :icon="ShoppingCartFull" aria-label="购物车" @click="goCart" />
         </el-badge>
-        <el-button type="primary" size="default" round>登录</el-button>
+
+        <el-button v-if="!isLoggedIn" type="primary" size="default" round @click="goLogin">
+          登录 / 注册
+        </el-button>
+
+        <el-dropdown v-else>
+          <el-button round :icon="User">我的</el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="goPath('/profile')">个人中心</el-dropdown-item>
+              <el-dropdown-item @click="goPath('/orders')">我的订单</el-dropdown-item>
+              <el-dropdown-item @click="goPath('/after-sales')">退款/售后</el-dropdown-item>
+              <el-dropdown-item @click="goPath('/coupons/mine')">我的优惠券</el-dropdown-item>
+              <el-dropdown-item @click="goPath('/points')">我的积分</el-dropdown-item>
+              <el-dropdown-item @click="goPath('/membership')">会员中心</el-dropdown-item>
+              <el-dropdown-item @click="goPath('/address')">收货地址</el-dropdown-item>
+              <el-dropdown-item divided @click="onLogout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
   </header>

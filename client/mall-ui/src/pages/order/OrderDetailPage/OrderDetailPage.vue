@@ -66,6 +66,7 @@
 
       <div class="detail-footer">
         <el-button @click="goList">返回列表</el-button>
+        <el-button v-if="canApplyAfterSale" @click="goAfterSale">申请售后</el-button>
         <el-button v-if="order.waitPay" type="primary" @click="goPay">去支付</el-button>
         <el-button v-if="order.actions.includes(USER_CANCEL)" @click="onCancel">取消订单</el-button>
         <el-button
@@ -85,7 +86,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { cancelOrder, confirmReceipt, getOrderDetail, type Order } from '@/api/order'
-import { ORDER_ACTION, ORDER_STATUS_TEXT } from '@/utils/constants'
+import { ORDER_ACTION, ORDER_STATUS, ORDER_STATUS_TEXT } from '@/utils/constants'
 import { formatDateTime, formatPrice } from '@/utils/common/format'
 
 const route = useRoute()
@@ -128,6 +129,27 @@ function goList(): void {
 
 function goPay(): void {
   void router.push({ path: `/payment/${orderNo.value}` })
+}
+
+/**
+ * 是否展示售后入口
+ *
+ * <p>已支付未发货（仅退款）、待收货/已完成（退货退款）可申请；
+ * 具体是否受理由后端按订单状态与售后时限校验。</p>
+ */
+const canApplyAfterSale = computed(() => {
+  if (!order.value) {
+    return false
+  }
+  return (
+    order.value.orderStatus === ORDER_STATUS.PAID ||
+    order.value.orderStatus === ORDER_STATUS.WAIT_RECEIVE ||
+    order.value.orderStatus === ORDER_STATUS.COMPLETED
+  )
+})
+
+function goAfterSale(): void {
+  void router.push({ path: '/after-sales', query: { orderNo: orderNo.value } })
 }
 
 async function onCancel(): Promise<void> {

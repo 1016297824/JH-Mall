@@ -172,3 +172,53 @@ export function cancelOrder(orderNo: string): Promise<void> {
 export function confirmReceipt(orderNo: string): Promise<void> {
   return request.put(`/order/orders/${orderNo}/receipt`).then((res) => res.data.data)
 }
+
+/** 售后单 */
+export interface AfterSale {
+  id: string
+  afterSaleNo: string
+  orderNo: string
+  orderItemId: string
+  afterSaleTypeDesc: string
+  afterSaleStatusDesc: string
+  reason: string
+  /** 退款金额（分） */
+  amount: number
+  applyTime: string
+  approveTime: string | null
+  approveRemark: string | null
+  returnExpressCompany: string | null
+  returnExpressNo: string | null
+}
+
+/** 提交售后申请参数 */
+export interface SubmitAfterSaleParams {
+  orderNo: string
+  /** 关联订单项 ID；整单退款可不传 */
+  orderItemId?: string
+  /** 1=仅退款 2=退货退款 */
+  afterSaleType: number
+  reason: string
+  /** 申请退款金额（分）；不传则按订单实付全额退 */
+  amount?: number
+}
+
+/**
+ * 提交售后申请
+ *
+ * @param params 申请参数
+ * @returns 售后单号
+ */
+export function postAfterSale(params: SubmitAfterSaleParams): Promise<string> {
+  return request.post('/order/after_sales', params).then((res) => res.data.data)
+}
+
+/**
+ * 查询售后列表
+ *
+ * @param orderNo 订单号，不传为全部
+ * @returns 售后单列表
+ */
+export function getAfterSales(orderNo?: string): Promise<AfterSale[]> {
+  return request.get('/order/after_sales', { params: { orderNo } }).then((res) => res.data.data)
+}

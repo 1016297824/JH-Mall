@@ -51,3 +51,86 @@ export function deleteAddress(addressId: string): Promise<void> {
 export function putDefaultAddress(addressId: string): Promise<void> {
   return request.put(`/user/addresses/${addressId}/default`).then((res) => res.data.data)
 }
+
+/** 积分账户余额 */
+export interface PointsAccount {
+  /** 累计积分 */
+  totalPoints: number
+  /** 可用积分 */
+  availablePoints: number
+  /** 已使用积分 */
+  usedPoints: number
+  /** 已过期积分 */
+  expiredPoints: number
+}
+
+/** 积分流水条目 */
+export interface PointsRecord {
+  id: string
+  bizType: string
+  bizTypeName: string
+  /** 1=收入 2=支出，见 POINTS_CHANGE_TYPE */
+  changeType: number
+  points: number
+  beforePoints: number
+  afterPoints: number
+  remark: string
+  createTime: string
+}
+
+/** 分页结果（MyBatis-Plus IPage 的 JSON 形态） */
+export interface PointsRecordPage {
+  records: PointsRecord[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+
+/** 查询积分余额 */
+export function getPoints(): Promise<PointsAccount> {
+  return request.get('/user/points').then((res) => res.data.data)
+}
+
+/**
+ * 分页查询积分流水
+ *
+ * @param page 页码，从 1 开始
+ * @param size 每页条数
+ * @param bizType 业务类型过滤，不传为全部
+ * @returns 分页结果
+ */
+export function getPointsRecords(
+  page = 1,
+  size = 20,
+  bizType?: string,
+): Promise<PointsRecordPage> {
+  return request
+    .get('/user/points/records', { params: { page, size, bizType } })
+    .then((res) => res.data.data)
+}
+
+/** 会员等级 */
+export interface MemberLevel {
+  levelName: string
+  icon: string
+  levelValue: number
+}
+
+/** 会员信息 */
+export interface Membership {
+  currentLevel: MemberLevel | null
+  /** 当前成长值 */
+  growth: number
+  /** 累计成长值 */
+  totalGrowth: number
+  /** 下一级等级，已是最高级时为 null */
+  nextLevel: MemberLevel | null
+  /** 权益文案列表 */
+  benefits: string[]
+}
+
+/** 查询会员信息 */
+export function getMembership(): Promise<Membership> {
+  return request.get('/user/membership').then((res) => res.data.data)
+}
