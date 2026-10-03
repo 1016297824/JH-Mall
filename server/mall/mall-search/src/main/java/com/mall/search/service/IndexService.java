@@ -20,12 +20,17 @@ public interface IndexService {
     /**
      * 单商品索引同步（增量）
      *
-     * <p>幂等去重：同一 spuId + operation 1h 内仅处理一次。</p>
+     * <p><b>不做时间窗去重</b>：曾经实现的「同一 spuId + operation 1h 内只处理一次」
+     * 会让同一商品的第二次变更被静默丢弃（索引停在旧值直到手工全量重建），已移除。
+     * ES 的 upsert / delete 本身幂等，重复同步无副作用。</p>
      *
-     * @param spuId     SPU ID
-     * @param operation 操作类型（UPSERT / DELETE）
+     * <p>乱序保护由 {@code sourceTimestamp} 承担：只接受比上一次已生效的同步更新的消息。</p>
+     *
+     * @param spuId           SPU ID
+     * @param operation       操作类型（UPSERT / DELETE）
+     * @param sourceTimestamp 生产端写入的时间戳（epoch 毫秒），越小表示变更越早
      */
-    void syncProduct(Long spuId, String operation);
+    void syncProduct(Long spuId, String operation, long sourceTimestamp);
 
     /**
      * 回滚到上一个版本索引

@@ -131,7 +131,7 @@ class IndexServiceImplTest {
 
     @Test
     void syncProduct_delete_shouldCallDeleteById() {
-        indexService.syncProduct(1L, "DELETE");
+        indexService.syncProduct(1L, "DELETE", 1791010000000L);
         verify(productIndexRepository).deleteById(1L);
     }
 
@@ -139,10 +139,30 @@ class IndexServiceImplTest {
     void syncProduct_shouldNotDedupByTimeWindow() {
         // 同一商品连续两次同步都必须执行：ES 的 delete 本身幂等，
         // 而"1 小时内只同步一次"会让第二次变更被静默丢弃（索引停在旧值）
-        indexService.syncProduct(1L, "DELETE");
-        indexService.syncProduct(1L, "DELETE");
+        indexService.syncProduct(1L, "DELETE", 1791010000000L);
+        indexService.syncProduct(1L, "DELETE", 1791010000001L);
 
         verify(productIndexRepository, org.mockito.Mockito.times(2)).deleteById(1L);
+    }
+
+    @Test
+    void syncProduct_shouldSkipStaleMessage() {
+        // 已生效过 ts=2000，再来一条 ts=1000 的陈旧消息：不能让早已删除的商品复活
+        when(valueOperations.get("mall:search:sync_ts:1")).thenReturn("2000");
+
+        indexService.syncProduct(1L, "UPSERT", 1000L);
+
+        verify(productIndexRepository, never()).save(any());
+    }
+
+    @Test
+    void syncProduct_shouldApplyNewerMessage() {
+        when(valueOperations.get("mall:search:sync_ts:1")).thenReturn("1000");
+
+        indexService.syncProduct(1L, "UPSERT", 2000L);
+
+        // 时间戳被推进，后续更旧的消息会被这条边界挡住
+        verify(valueOperations).set(eq("mall:search:sync_ts:1"), eq("2000"), eq(7L), eq(TimeUnit.DAYS));
     }
 
     @Test

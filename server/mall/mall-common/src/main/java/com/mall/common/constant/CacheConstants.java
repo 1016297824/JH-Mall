@@ -488,6 +488,21 @@ public class CacheConstants {
         public static final String DEDUP = "mall:search:dedup:";
 
         /**
+         * 单个商品的最近一次已生效同步时间戳
+         *
+         * <p>Key 模式：{@code mall:search:sync_ts:{spuId}}，Value 为生产端写入的 epoch 毫秒。
+         * 用于「后写覆盖先写」的乱序保护：MQ 重投不保证顺序，
+         * 若把一条更早的 UPSERT 投递在一条 DELETE 之后，已删除的商品会在索引里复活。
+         * 只接受比已记录值更新的消息，其余直接跳过。</p>
+         *
+         * <ul>
+         *   <li>TTL：7 天（远长于 MQ 重投窗口，避免保护失效）</li>
+         *   <li>数据结构：String</li>
+         * </ul>
+         */
+        public static final String SYNC_TS = "mall:search:sync_ts:";
+
+        /**
          * 热门搜索词缓存
          *
          * <p>Key 模式：{@code mall:search:suggestion:hot_keywords}</p>

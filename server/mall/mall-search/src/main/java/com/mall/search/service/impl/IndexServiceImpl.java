@@ -153,13 +153,47 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public void syncProduct(Long spuId, String operation) {
+    public void syncProduct(Long spuId, String operation, long sourceTimestamp) {
+        // 乱序保护：MQ 重投不保证顺序，一条陈旧的 UPSERT 落在 DELETE 之后会让已删除的商品复活。
+        // 只接受比「上一次已生效的同步」更新的消息。
+        if (!acceptNewer(spuId, sourceTimestamp)) {
+            log.info("搜索同步消息早于已生效版本，跳过: spuId={}, operation={}, ts={}",
+                    spuId, operation, sourceTimestamp);
+            return;
+        }
         // 不做时间窗去重：ES 的 upsert/delete 本身幂等，而"1 小时内只同步一次"
         // 会让同一商品的第二次变更被静默丢弃（索引停在旧值，直到手工全量重建）。
         if ("DELETE".equals(operation)) {
             productIndexRepository.deleteById(spuId);
         } else if ("UPSERT".equals(operation)) {
             upsertProduct(spuId);
+        }
+    }
+
+    /**
+     * 判断该同步消息是否比已生效版本更新，是则记录并放行
+     *
+     * <p>用 Redis 记录每个 spuId 最近一次已生效的同步时间戳。读取与写入不是原子操作，
+     * 极端并发下仍可能放过一条稍旧的消息，但相比原先完全没有保护已是实质改善；
+     * 强一致需要把时间戳写进 ES 文档并在写入时比较（代价是每次同步多一次读）。</p>
+     *
+     * @param spuId           SPU ID
+     * @param sourceTimestamp 生产端时间戳（epoch 毫秒）
+     * @return 应处理返回 true
+     */
+    private boolean acceptNewer(Long spuId, long sourceTimestamp) {
+        String key = CacheConstants.Search.SYNC_TS + spuId;
+        try {
+            String last = stringRedisTemplate.opsForValue().get(key);
+            if (last != null && Long.parseLong(last) >= sourceTimestamp) {
+                return false;
+            }
+            stringRedisTemplate.opsForValue().set(key, String.valueOf(sourceTimestamp), 7, TimeUnit.DAYS);
+            return true;
+        } catch (Exception e) {
+            // Redis 故障不应阻断索引同步：宁可失去乱序保护，也不能让索引停更
+            log.warn("读取搜索同步时间戳失败，跳过乱序保护: spuId={}", spuId, e);
+            return true;
         }
     }
 
