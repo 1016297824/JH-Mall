@@ -36,10 +36,10 @@ public interface RefundService {
      *
      * @param orderNo      订单号
      * @param refundAmount 退款金额（单位：分）
-     * @param afterSaleId  售后单 ID
+     * @param afterSaleNo  售后单业务单号（非主键 id）
      * @return 退款结果（含退款单号与退款状态）
      */
-    RefundResultDTO refundByOrderNo(String orderNo, Long refundAmount, Long afterSaleId);
+    RefundResultDTO refundByOrderNo(String orderNo, Long refundAmount, String afterSaleNo);
 
     /**
      * 查询支付单的可退款状态快照

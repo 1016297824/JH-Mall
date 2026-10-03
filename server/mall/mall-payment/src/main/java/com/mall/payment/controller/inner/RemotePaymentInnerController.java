@@ -55,14 +55,14 @@ public class RemotePaymentInnerController {
      *
      * @param orderNo      订单号
      * @param refundAmount 退款金额（单位：分）
-     * @param afterSaleId  售后单 ID
+     * @param afterSaleNo  售后单业务单号（非主键 id）
      * @return 退款结果（含退款单号）
      */
     @PostMapping("/refunds/by-after-sale")
     public RefundResultDTO refundByOrderNo(@RequestParam("orderNo") String orderNo,
                                            @RequestParam("refundAmount") Long refundAmount,
-                                           @RequestParam("afterSaleId") Long afterSaleId) {
-        return refundService.refundByOrderNo(orderNo, refundAmount, afterSaleId);
+                                           @RequestParam("afterSaleNo") String afterSaleNo) {
+        return refundService.refundByOrderNo(orderNo, refundAmount, afterSaleNo);
     }
 
     /**

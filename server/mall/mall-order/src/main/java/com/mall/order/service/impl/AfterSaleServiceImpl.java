@@ -233,7 +233,7 @@ public class AfterSaleServiceImpl implements AfterSaleService {
     private void invokeRefund(MallOrderDO order, MallAfterSaleDO afterSale) {
         try {
             RefundResultDTO result = paymentAdapter.refundByOrderNo(
-                    order.getOrderNo(), afterSale.getAmount(), afterSale.getId());
+                    order.getOrderNo(), afterSale.getAmount(), afterSale.getAfterSaleNo());
             if (result == null) {
                 log.error("【需人工介入】退款调用返回空: afterSaleNo={}", afterSale.getAfterSaleNo());
             }

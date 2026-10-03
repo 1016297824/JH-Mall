@@ -269,11 +269,10 @@ class RefundServiceImplTest {
             when(channelFactory.getAdapter(CHANNEL_CODE)).thenReturn(channelAdapter);
             when(channelAdapter.invokeRefund(any(), any(), any())).thenReturn(processingResult());
 
-            RefundResultDTO result = refundService.refundByOrderNo(ORDER_NO, REFUND_AMOUNT,
-                    Long.valueOf(AFTER_SALE_NO));
+            RefundResultDTO result = refundService.refundByOrderNo(ORDER_NO, REFUND_AMOUNT, AFTER_SALE_NO);
 
             assertThat(result.getRefundNo()).isNotBlank();
-            // 幂等键由 afterSaleId 经字符串化后参与构成
+            // 幂等键直接用业务售后单号构成——回调带回的也是它，mall-order 才能按业务单号查回售后单
             verify(refundMapper).selectByIdempotentKey(AFTER_SALE_NO + "_" + CHANNEL_CODE);
         }
 
@@ -283,7 +282,7 @@ class RefundServiceImplTest {
             when(paymentMapper.selectPaidByOrderNo(ORDER_NO)).thenReturn(null);
 
             assertErrorCode(ErrorCode.RESOURCE_NOT_FOUND.getCode(),
-                    () -> refundService.refundByOrderNo(ORDER_NO, REFUND_AMOUNT, 12345L));
+                    () -> refundService.refundByOrderNo(ORDER_NO, REFUND_AMOUNT, AFTER_SALE_NO));
         }
     }
 

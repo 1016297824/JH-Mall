@@ -76,17 +76,17 @@ class RemotePaymentInnerControllerTest {
     @DisplayName("POST /inner/payment/refunds/by-after-sale：传 orderNo 而非 paymentNo")
     void refundByOrderNoUsesOrderNo() throws Exception {
         RefundResultDTO dto = new RefundResultDTO("REF20261003002", 0, null);
-        when(refundService.refundByOrderNo(ORDER_NO, 1000L, 66L)).thenReturn(dto);
+        when(refundService.refundByOrderNo(ORDER_NO, 1000L, "AS20261003000001")).thenReturn(dto);
 
         mockMvc.perform(post("/inner/payment/refunds/by-after-sale")
                         .param("orderNo", ORDER_NO)
                         .param("refundAmount", "1000")
-                        .param("afterSaleId", "66"))
+                        .param("afterSaleNo", "AS20261003000001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.refundNo").value("REF20261003002"))
                 .andExpect(jsonPath("$.code").doesNotExist());
 
-        verify(refundService).refundByOrderNo(ORDER_NO, 1000L, 66L);
+        verify(refundService).refundByOrderNo(ORDER_NO, 1000L, "AS20261003000001");
     }
 
     @Test
