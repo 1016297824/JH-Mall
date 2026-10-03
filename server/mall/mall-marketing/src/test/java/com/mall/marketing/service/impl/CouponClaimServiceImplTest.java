@@ -361,7 +361,9 @@ class CouponClaimServiceImplTest {
                     .containsEntry("userId", USER_ID)
                     .containsEntry("orderNo", ORDER_NO)
                     .containsEntry("faceValue", 1000L);
-            assertThat(payload.get("useTime")).isNotNull();
+            // useTime 必须是字符串：Outbox 用裸 ObjectMapper 序列化 payload，
+            // 放 LocalDateTime 会直接抛 InvalidDefinitionException，整条 Outbox 写入失败
+            assertThat(payload.get("useTime")).isInstanceOf(String.class);
         }
 
         @Test

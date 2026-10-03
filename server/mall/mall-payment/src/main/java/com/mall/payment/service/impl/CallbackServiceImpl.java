@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -320,8 +321,11 @@ public class CallbackServiceImpl implements CallbackService {
      * @param payment 支付单（已推进 PAID）
      */
     private void publishPaymentPaid(MallPaymentDO payment) {
+        // payTime 用 ISO-8601 字符串：设计文档 §8.3 的报文样例即字符串，
+        // 且 Outbox 的裸 ObjectMapper 无法序列化 LocalDateTime
         PaymentPaidEvent event = new PaymentPaidEvent(payment.getPaymentNo(), payment.getOrderNo(),
-                payment.getUserId(), payment.getPayAmount(), payment.getPaySuccessTime(),
+                payment.getUserId(), payment.getPayAmount(),
+                Objects.toString(payment.getPaySuccessTime(), null),
                 payment.getChannelPaymentNo(), payment.getChannelCode());
         outboxPublisher.publish(MqTopicConstants.Payment.PAID, EVENT_PAYMENT_PAID,
                 OutboxPublisher.AGGREGATE_PAYMENT, payment.getPaymentNo(), event);
@@ -336,7 +340,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void publishRefundSucceeded(MallRefundDO refund, MallPaymentDO payment) {
         RefundSucceededEvent event = new RefundSucceededEvent(refund.getRefundNo(),
                 payment.getPaymentNo(), refund.getOrderNo(), refund.getAfterSaleNo(),
-                payment.getUserId(), refund.getRefundAmount(), LocalDateTime.now(),
+                payment.getUserId(), refund.getRefundAmount(), LocalDateTime.now().toString(),
                 refund.getChannelRefundNo());
         outboxPublisher.publish(MqTopicConstants.Payment.REFUND_SUCCEEDED, EVENT_REFUND_SUCCEEDED,
                 OutboxPublisher.AGGREGATE_REFUND, refund.getRefundNo(), event);

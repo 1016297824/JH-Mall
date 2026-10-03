@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -96,8 +97,11 @@ public class PaymentReconcileServiceImpl implements PaymentReconcileService {
         }
 
         // ⑥ 与状态推进同一本地事务补发支付成功事件（设计 §5.4 / §8.3）
+        // payTime 用 ISO-8601 字符串：设计文档 §8.3 的报文样例即字符串，
+        // 且 Outbox 的裸 ObjectMapper 无法序列化 LocalDateTime
         PaymentPaidEvent event = new PaymentPaidEvent(payment.getPaymentNo(), payment.getOrderNo(),
-                payment.getUserId(), payment.getPayAmount(), payment.getPaySuccessTime(),
+                payment.getUserId(), payment.getPayAmount(),
+                Objects.toString(payment.getPaySuccessTime(), null),
                 channelPaymentNo, payment.getChannelCode());
         outboxPublisher.publish(MqTopicConstants.Payment.PAID, EVENT_PAYMENT_PAID,
                 OutboxPublisher.AGGREGATE_PAYMENT, payment.getPaymentNo(), event);

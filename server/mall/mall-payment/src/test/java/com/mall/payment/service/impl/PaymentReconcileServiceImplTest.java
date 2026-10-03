@@ -160,7 +160,9 @@ class PaymentReconcileServiceImplTest {
             assertThat(event.getPayAmount()).isEqualTo(PAY_AMOUNT);
             assertThat(event.getChannelPaymentNo()).isEqualTo(CHANNEL_PAYMENT_NO);
             assertThat(event.getChannelCode()).isEqualTo(CHANNEL_CODE);
-            assertThat(event.getPayTime()).isNotNull();
+            // 事件契约要求 ISO-8601 字符串（设计文档 §8.3）：
+            // Outbox 的裸 ObjectMapper 序列化 LocalDateTime 会直接抛异常，整条对账补发失败
+            assertThat(LocalDateTime.parse(event.getPayTime())).isNotNull();
         }
     }
 

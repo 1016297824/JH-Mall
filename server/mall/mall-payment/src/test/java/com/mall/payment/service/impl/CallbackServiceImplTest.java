@@ -35,6 +35,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -259,6 +260,9 @@ class CallbackServiceImplTest {
             assertThat(event.getUserId()).isEqualTo(USER_ID);
             assertThat(event.getPayAmount()).isEqualTo(PAY_AMOUNT);
             assertThat(event.getChannelCode()).isEqualTo(CHANNEL_CODE);
+            // 事件契约要求 ISO-8601 字符串（设计文档 §8.3）：
+            // Outbox 的裸 ObjectMapper 序列化 LocalDateTime 会直接抛异常，整条回调都会失败
+            assertThat(LocalDateTime.parse(event.getPayTime())).isNotNull();
         }
 
         @Test

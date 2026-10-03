@@ -166,7 +166,9 @@ public class CouponClaimServiceImpl implements CouponClaimService {
         payload.put("userId", record.getUserId());
         payload.put("orderNo", orderNo);
         payload.put("faceValue", record.getFaceValue());
-        payload.put("useTime", LocalDateTime.now());
+        // 时间统一写 ISO-8601 字符串：Outbox 用裸 ObjectMapper 序列化 payload，
+        // 直接放 LocalDateTime 会抛 InvalidDefinitionException 导致整条 Outbox 写入失败
+        payload.put("useTime", LocalDateTime.now().toString());
         outboxPublisher.publish(MqTopicConstants.Coupon.USED, "CouponUsed",
                 String.valueOf(record.getId()), payload);
     }
