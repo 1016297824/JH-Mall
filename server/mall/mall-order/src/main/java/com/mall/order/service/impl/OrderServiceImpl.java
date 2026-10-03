@@ -232,7 +232,9 @@ public class OrderServiceImpl implements OrderService {
         }
         if (stockLocked) {
             try {
-                productAdapter.releaseStock(orderNo);
+                if (!productAdapter.releaseStock(orderNo)) {
+                    log.error("【需人工介入】补偿释放库存未全部成功（预扣记录已保留待核对）, orderNo={}", orderNo);
+                }
             } catch (Exception e) {
                 log.error("【需人工介入】补偿释放库存失败, orderNo={}", orderNo, e);
             }

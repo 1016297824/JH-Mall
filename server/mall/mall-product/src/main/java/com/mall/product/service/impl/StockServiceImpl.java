@@ -72,19 +72,21 @@ public class StockServiceImpl implements IStockService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void releaseStock(String orderNo) {
+    public boolean releaseStock(String orderNo) {
         String keyPrefix = CacheConstants.Product.STOCK_RESERVE + orderNo + ":";
         List<String> reserveKeys = scanReserveKeys(keyPrefix);
         if (reserveKeys.isEmpty()) {
             log.warn("releaseStock 未找到预扣记录, orderNo={}", orderNo);
-            return;
+            return true;
         }
 
         int released = 0;
+        int failed = 0;
         for (String reserveKey : reserveKeys) {
             Object qtyObj = redisTemplate.opsForValue().get(reserveKey);
             if (qtyObj == null) {
-                // 记录已过期或已被并发消费，跳过
+                // 记录已过期或已被并发消费：视为「已无需释放」的幂等成功，不计入 failed。
+                // 若计入 failed 会触发 MQ 重投，而这些记录不会回来，只会耗尽重试次数进死信
                 continue;
             }
 
@@ -95,6 +97,7 @@ public class StockServiceImpl implements IStockService {
                 qty = Integer.parseInt(String.valueOf(qtyObj));
             } catch (NumberFormatException e) {
                 log.error("releaseStock 预扣记录格式非法, key={}, value={}", reserveKey, qtyObj, e);
+                failed++;
                 continue;
             }
 
@@ -118,11 +121,15 @@ public class StockServiceImpl implements IStockService {
                 redisTemplate.delete(reserveKey);
                 released++;
             } else {
+                failed++;
                 log.error("releaseStock 释放失败，保留预扣记录待重试, orderNo={}, skuId={}, qty={}",
                         orderNo, skuId, qty);
             }
         }
-        log.info("releaseStock 完成, orderNo={}, 预扣项={}, 成功释放={}", orderNo, reserveKeys.size(), released);
+        log.info("releaseStock 完成, orderNo={}, 预扣项={}, 成功释放={}, 失败={}",
+                orderNo, reserveKeys.size(), released, failed);
+        // 有失败项时返回 false，由调用方决定是否重试；单个预扣项失败不抛异常（见接口 Javadoc）
+        return failed == 0;
     }
 
     /**
@@ -133,6 +140,7 @@ public class StockServiceImpl implements IStockService {
      *
      * @param keyPrefix key 前缀（含订单号）
      * @return 命中的 key 列表
+     * @throws BusinessException 扫描失败时抛出——不能返回空列表让调用方误判为「无预扣记录」
      */
     private List<String> scanReserveKeys(String keyPrefix) {
         List<String> keys = new ArrayList<>();
@@ -145,7 +153,11 @@ public class StockServiceImpl implements IStockService {
                 keys.add(cursor.next());
             }
         } catch (Exception e) {
+            // 返回空列表会让 releaseStock 走「无预扣记录」分支并返回 true，
+            // 调用方据此 ACK，而实际一条预扣记录都没释放 → 库存永久占用。
+            // 此处尚未产生任何 DB/Redis 副作用，上抛是安全的。
             log.error("releaseStock 扫描预扣记录失败, keyPrefix={}", keyPrefix, e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
         return keys;
     }

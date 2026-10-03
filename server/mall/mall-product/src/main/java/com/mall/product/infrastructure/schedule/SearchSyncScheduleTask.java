@@ -61,11 +61,26 @@ public class SearchSyncScheduleTask {
                     outboxMessageMapper.updateStatus(outbox.getId(), OutboxStatusEnum.FAILED.getCode());
                     continue;
                 }
-                if (searchSyncProducer.resync(Long.valueOf(outbox.getAggregateId()), operation)) {
+                long spuId;
+                try {
+                    spuId = Long.parseLong(outbox.getAggregateId());
+                } catch (NumberFormatException e) {
+                    // 与操作码非法同类：若保留 NEW 会每轮重试失败并长期占据队首，阻塞整批补偿
+                    log.error("搜索同步 Outbox aggregateId 非法，置 FAILED: messageId={}, aggregateId={}",
+                            outbox.getMessageId(), outbox.getAggregateId());
+                    outboxMessageMapper.updateStatus(outbox.getId(), OutboxStatusEnum.FAILED.getCode());
+                    continue;
+                }
+                if (searchSyncProducer.resync(spuId, operation)) {
                     outboxMessageMapper.updateStatus(outbox.getId(), OutboxStatusEnum.SENT.getCode());
                     compensated++;
+                } else {
+                    // 投递失败：保持 NEW 下轮重试。
+                    // 不打印 retryCount：它只在 updateStatus 中自增，而失败路径刻意不更新状态，
+                    // 打印出来恒为 0 反而误导
+                    log.warn("搜索同步补偿投递失败，保留 NEW 待下轮重试: messageId={}, spuId={}",
+                            outbox.getMessageId(), spuId);
                 }
-                // 投递失败：保持 NEW，下轮重试
             } catch (Exception e) {
                 // 单条异常不中断整批，且不置 SENT
                 log.error("搜索同步补偿异常，保留待下轮重试: messageId={}", outbox.getMessageId(), e);

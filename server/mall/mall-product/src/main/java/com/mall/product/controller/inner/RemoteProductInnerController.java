@@ -72,10 +72,11 @@ public class RemoteProductInnerController {
      * <p>供 mall-order 订单取消时释放已锁库存，locked → available</p>
      *
      * @param orderNo 订单号
+     * @return true=全部释放成功；false=存在未成功释放的项，调用方需重试
      */
     @PostMapping("/stock/release")
-    void releaseStock(@RequestParam("orderNo") String orderNo) {
-        stockService.releaseStock(orderNo);
+    boolean releaseStock(@RequestParam("orderNo") String orderNo) {
+        return stockService.releaseStock(orderNo);
     }
 
     /**

@@ -48,9 +48,10 @@ public interface RemoteProductService {
      * 释放库存（取消订单 / 超时取消）
      *
      * @param orderNo 订单号
+     * @return true=全部释放成功（含无预扣记录）；false=存在未成功释放的项，调用方应重试
      */
     @PostMapping("/inner/product/stock/release")
-    void releaseStock(@RequestParam("orderNo") String orderNo);
+    boolean releaseStock(@RequestParam("orderNo") String orderNo);
 
     /**
      * 回补库存（退货入库）

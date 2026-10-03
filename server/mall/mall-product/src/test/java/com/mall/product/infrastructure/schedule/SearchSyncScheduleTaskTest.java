@@ -120,6 +120,20 @@ class SearchSyncScheduleTaskTest {
         verify(outboxMessageMapper).updateStatus(OUTBOX_ID, OutboxStatusEnum.FAILED.getCode());
     }
 
+    @Test
+    @DisplayName("aggregateId 非法：同样置 FAILED，否则会每轮重试并长期占据队首阻塞补偿")
+    void marksFailedWhenAggregateIdInvalid() {
+        OutboxMessageDO bad = outbox("UPSERT");
+        bad.setAggregateId("not-a-number");
+        when(outboxMessageMapper.selectPending(eq(MqTopicConstants.Product.SEARCH_SYNC), anyInt()))
+                .thenReturn(List.of(bad));
+
+        searchSyncScheduleTask.execute();
+
+        verify(searchSyncProducer, never()).resync(anyLong(), any());
+        verify(outboxMessageMapper).updateStatus(OUTBOX_ID, OutboxStatusEnum.FAILED.getCode());
+    }
+
     /**
      * 构造 Outbox 待补偿记录夹具
      *

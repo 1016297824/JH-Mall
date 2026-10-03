@@ -61,8 +61,6 @@ public class SearchSyncProducer {
      * 补偿任务本身就是在消费 Outbox 记录，若失败时又写一条新记录，
      * 表会随每轮重试无限增长；正确做法是由调用方保留原记录、下轮重试。</p>
      *
-     * <p><b>当前为 RED 阶段的空壳</b>：方法体待最小实现填充。</p>
-     *
      * @param spuId     SPU ID
      * @param operation 操作类型
      * @return 投递成功返回 true
